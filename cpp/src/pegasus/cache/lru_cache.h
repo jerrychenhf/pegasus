@@ -87,7 +87,7 @@ class LRUCache {
     void EvictedEntry(Slice key, Slice val) override {
       // VLOG(2) << strings::Substitute("EvictedEntry callback for key '$0'",
       //                                key.ToString());
-      auto* entry_ptr = reinterpret_cast<LRUCache::CacheKey*>(val.mutable_data());
+      auto* entry_ptr = reinterpret_cast<LRUCache::CacheKey*>(key.mutable_data());
       const std::string& dataset_path = entry_ptr->dataset_path_;
       const std::string& partition_path = entry_ptr->partition_path_;
       int column_id = entry_ptr->column_id_;

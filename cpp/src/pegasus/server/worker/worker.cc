@@ -44,13 +44,10 @@ Worker::~Worker() {
 Status Worker::Init() {
   worker_heartbeat_ =
     std::unique_ptr<WorkerHeartbeat>(new WorkerHeartbeat());
-  dataset_cache_manager_ =
-    std::unique_ptr<DatasetCacheManager>(new DatasetCacheManager());
   worker_table_api_service_ =
-    std::unique_ptr<WorkerTableAPIService>(new WorkerTableAPIService(dataset_cache_manager_));
+    std::unique_ptr<WorkerTableAPIService>(new WorkerTableAPIService(exec_env_->GetDatasetCacheManager()));
   
   RETURN_IF_ERROR(worker_heartbeat_->Init());
-  RETURN_IF_ERROR(dataset_cache_manager_->Init());
   RETURN_IF_ERROR(worker_table_api_service_->Init());
   
   return Status::OK();

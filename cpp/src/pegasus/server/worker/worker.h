@@ -42,7 +42,6 @@ class Worker {
  private:
   WorkerExecEnv* exec_env_;
   std::shared_ptr<WorkerTableAPIService> worker_table_api_service_;
-  std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
   std::shared_ptr<WorkerHeartbeat> worker_heartbeat_;
 };
 
