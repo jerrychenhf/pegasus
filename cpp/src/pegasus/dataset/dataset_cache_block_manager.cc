@@ -26,21 +26,36 @@ DatasetCacheBlockManager::DatasetCacheBlockManager() {
 
 DatasetCacheBlockManager::~DatasetCacheBlockManager() {}
 
-Status DatasetCacheBlockManager::GetCachedRecord(Identity identity, std::shared_ptr<CachedInfo>* cached_dataset) {
-  auto entry = cached_datasets_.find(identity.file_path());
-  if (entry == cached_datasets_.end()) {
-      return Status::KeyError("Could not find the cached info.", identity.file_path());
-  }
+Status DatasetCacheBlockManager::GetCachedDataSet(Identity* identity, std::shared_ptr<CachedDataset>* datasets) {
+  std::string dataset_path = identity->dataset_path();
+  auto entry = cached_datasets_.find(dataset_path);
 
+  if (entry == cached_datasets_.end()) {
+      return Status::KeyError("Could not find the cached dataset.", dataset_path);
+  }
   auto find_cache_info = entry->second;
-  *cached_dataset = std::shared_ptr<CachedInfo>(find_cache_info);
+  *datasets = std::shared_ptr<CachedDataset>(find_cache_info);
   return Status::OK();
 }
 
-Status DatasetCacheBlockManager::InsertCachedRecord(Identity identity) {
-    // insert the column ;
-    // 1. search the dataset of file path, if not create, create and inserte;
-    // 2. If exist, insert the record to the existed dataset.
+
+Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity, std::shared_ptr<std::vector<CachedPartition>>* partitions) {
+  std::string dataset_path = identity->dataset_path();
+  std::shared_ptr<CachedDataset>* dataset;
+  GetCachedDataSet(identity, dataset);
+  std::shared_ptr<std::vector<CachedPartition>> cached_partitions = (*dataset)->partitions();
+  for (auto iter = cached_partitions->begin(); iter != cached_partitions->end(); iter++)
+	{
+		partitions->get()->push_back(*iter);
+	}
+}
+
+Status DatasetCacheBlockManager::InsertPartition(Identity* identity, std::shared_ptr<CachedPartition> new_partition) {
+  std::string dataset_path = identity->dataset_path();
+  std::shared_ptr<CachedDataset>* dataset;
+  GetCachedDataSet(identity, dataset);
+  std::shared_ptr<std::vector<CachedPartition>> partitions = (*dataset)->partitions();
+  partitions->push_back(*new_partition);
 }
 
 } // namespace pegasus
