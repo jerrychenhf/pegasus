@@ -135,7 +135,8 @@ Status CachedDataset::GetCachedPartition(std::shared_ptr<CachedDataset> cached_d
  }
 
 bool CachedPartition::InsertColumn(std::shared_ptr<CachedPartition> cached_partition,
-   int column_id, std::shared_ptr<CachedColumn> new_column) {
+   int column_id, std::shared_ptr<CachedColumn> new_column,
+    std::shared_ptr<CachedColumn>* cached_column) {
   {
     boost::lock_guard<boost::mutex> l(cached_columns_lock_); 
     auto entry = cached_partition->cached_columns_.find(column_id);
@@ -143,10 +144,12 @@ bool CachedPartition::InsertColumn(std::shared_ptr<CachedPartition> cached_parti
       // insert new column
       LOG(WARNING) << "The column does not exist and insert new column";
       cached_partition->cached_columns_[column_id] = std::move(new_column);
+      *cached_column = nullptr;
       return true;
     } else {
       // the column is already existed.
       LOG(WARNING) << "The column already exists and will not insert this column";
+      *cached_column = entry->second;
       return false;
     }
   }

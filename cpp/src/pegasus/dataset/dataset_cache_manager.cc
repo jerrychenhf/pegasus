@@ -76,13 +76,9 @@ Status DatasetCacheManager::GetPartition(RequestIdentity* request_identity,
 }
 
 Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
+ unordered_map<int, std::shared_ptr<CachedColumn>> request_columns,
   std::unique_ptr<rpc::FlightDataStream>* data_stream) {
   LOG(WARNING) << "Wrap the dataset into flight data stream";
-  std::shared_ptr<CachedPartition> new_partition;
-  GetPartition(request_identity, &new_partition);
-  unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns;
-  RETURN_IF_ERROR(new_partition->GetCachedColumns(new_partition,
-   request_identity->column_indices(), &cached_columns));
 
   // std::shared_ptr<Table> table;
   std::vector<std::shared_ptr<ChunkedArray>> chunked_arrays;
@@ -90,8 +86,8 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
 
   std::vector<int> col_ids = request_identity->column_indices();
   for(int index : col_ids) {
-    auto iter = cached_columns.find(index);
-    if (iter != cached_columns.end()) {
+    auto iter = request_columns.find(index);
+    if (iter != request_columns.end()) {
       std::shared_ptr<CachedColumn> cache_column = iter->second;
       CacheRegion* cache_region = cache_column->GetCacheRegion();
       std::shared_ptr<ChunkedArray> chunked_array = cache_region->chunked_array();
@@ -118,6 +114,7 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
 
 Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(RequestIdentity* request_identity,
   std::vector<int> col_ids,
+  unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns,
   std::unique_ptr<rpc::FlightDataStream>* data_stream) {
      // Get cache engine.
     std::shared_ptr<CacheEngine> cache_engine;
@@ -126,8 +123,14 @@ Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(RequestIdentity* r
 
     unordered_map<int, std::shared_ptr<CachedColumn>> retrieved_columns;
     RETURN_IF_ERROR(RetrieveColumns(request_identity, col_ids, cache_engine, retrieved_columns));
+
+    for (auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
+      int col_id = iter->first;
+      std::shared_ptr<CachedColumn> cached_column = iter->second;
+      retrieved_columns.insert(std::make_pair(col_id, cached_column));
+    }
     
-    return WrapDatasetStream(request_identity, data_stream);
+    return WrapDatasetStream(request_identity, retrieved_columns, data_stream);
 }
 
 Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
@@ -172,11 +175,16 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       // we do not put the column into the LRU cache.
       // And because this column is shared ptr, so out this for clause , 
       // it will be delete automatically.
-      bool is_inserted = partition->InsertColumn(partition, colId, column);
-      if (is_inserted) {
+      std::shared_ptr<CachedColumn> cached_column;
+      bool is_inserted = partition->InsertColumn(partition, colId, column, &cached_column);
+      if (is_inserted && cached_column == nullptr) {
         LRUCache::CacheKey key(dataset_path, partition_path, colId, column_size);
         LOG(WARNING) << "Put the cached column into cache engine";
         RETURN_IF_ERROR(cache_engine->PutValue(key));
+
+        retrieved_columns.insert(std::make_pair(colId, column));
+      } else {
+        retrieved_columns.insert(std::make_pair(colId, cached_column));
       }
     }
     
@@ -207,15 +215,15 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
   // Check whether the dataset is cached.
   
   std::vector<int> col_ids = request_identity->column_indices();
-  std::unordered_map<string, std::shared_ptr<CachedColumn>> get_columns;
-  
+  unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns;
+
   std::shared_ptr<CachedDataset> dataset;
   cache_block_manager_->GetCachedDataSet(request_identity->dataset_path(), &dataset);
   if (dataset->GetCachedPartitions().size() == 0) {
     LOG(WARNING) << "The dataset "<< request_identity->dataset_path() 
     <<" is new added. We will get all the columns from storage and"
      << " then insert the column into dataset cache block manager";
-    return GetDatasetStreamWithMissedColumns(request_identity, col_ids, data_stream);
+    return GetDatasetStreamWithMissedColumns(request_identity, col_ids, cached_columns, data_stream);
   } else {
     // dataset is cached
     std::shared_ptr<CachedPartition> partition;
@@ -225,21 +233,20 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
       LOG(WARNING) << "The partition "<< request_identity->partition_path() 
       <<" is new added. We will get all the columns from storage and"
        << "then insert the column into dataset cache block manager";
-      return GetDatasetStreamWithMissedColumns(request_identity, col_ids, data_stream);
+      return GetDatasetStreamWithMissedColumns(request_identity, col_ids, cached_columns, data_stream);
     } else {
       // partition is cached.
       // Check which column is cached.
-      unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns;
       partition->GetCachedColumns(partition, request_identity->column_indices(), &cached_columns);
       if (col_ids.size() == cached_columns.size()) {
         LOG(WARNING) << "All the columns are cached. And we will wrap the columns into Flight data stream";
-        return WrapDatasetStream(request_identity, data_stream);
+        return WrapDatasetStream(request_identity, cached_columns, data_stream);
       } else {
         // Not all columns cached.
         // Get the not cached col_ids.
         std::vector<int> missed_col_ids = GetMissedColumnsIds(col_ids, cached_columns);
         LOG(WARNING) << "Partial columns is cached and we will get the missed columns from storage";
-        return GetDatasetStreamWithMissedColumns(request_identity, missed_col_ids, data_stream);
+        return GetDatasetStreamWithMissedColumns(request_identity, missed_col_ids, cached_columns, data_stream);
       }
    }
   }
