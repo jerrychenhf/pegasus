@@ -34,6 +34,7 @@ class DatasetCacheStoreManager {
   DatasetCacheStoreManager();
   ~DatasetCacheStoreManager();
 
+  Status Init();
   Status GetStoreAllocator(Store::StoreType store_type, std::shared_ptr<Store>* store);
   Status GetStoreMemoryPool(Store::StoreType store_type, std::shared_ptr<MemoryPool>* memory_pool);
   Store::StoreType GetStorePolicy();

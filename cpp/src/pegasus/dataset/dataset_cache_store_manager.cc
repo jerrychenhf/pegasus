@@ -27,17 +27,20 @@ namespace pegasus {
 
 // Initialize all the Store Allocator based on the configuration.
 DatasetCacheStoreManager::DatasetCacheStoreManager() {
-  ExecEnv* env =  ExecEnv::GetInstance();
-  std::shared_ptr<StoreFactory> store_factory = env->get_store_factory();
-  std::shared_ptr<Store> store;
-  std::vector<Store::StoreType> store_types = env->GetConfiguredStoreTypes();
-  for(std::vector<Store::StoreType>::iterator it = store_types.begin(); it != store_types.end(); ++it) {
-    store_factory->GetStore(*it, &store);
-    configured_stores_[store->GetStoreName()] = store;
-  }
+
 }
 
 DatasetCacheStoreManager::~DatasetCacheStoreManager() {}
+
+Status DatasetCacheStoreManager::Init() {
+  ExecEnv* env =  ExecEnv::GetInstance();
+  std::shared_ptr<Store> store;
+  std::unordered_map<string, long> store_types = env->GetConfiguredStoreInfo();
+//   for(std::vector<Store::StoreType>::iterator it = store_types.begin(); it != store_types.end(); ++it) {
+//     store_factory->GetStore(*it, &store);
+//     configured_stores_[store->GetStoreName()] = store;
+//   }
+}
 
 // Get the available store allocators(DRAM > DCPMM > SSD)
 Status DatasetCacheStoreManager::GetStoreAllocator(Store::StoreType store_type, std::shared_ptr<Store>* store) {

@@ -17,7 +17,6 @@
 
 #include "pegasus/dataset/cache_engine.h"
 #include "pegasus/runtime/exec_env.h"
-#include "pegasus/cache/store_factory.h"
 
 using namespace std;
 

@@ -16,6 +16,7 @@
 // under the License.
 
 #include <vector>
+
 #include "pegasus/cache/store.h"
 
 namespace pegasus {
@@ -24,7 +25,8 @@ class StoreManager {
  public:
   StoreManager();
   ~StoreManager();
-  Status GetStores();
+
+  Status GetStore(Store::StoreType cache_type, std::shared_ptr<Store>* store);
 
  private:
   std::shared_ptr<std::vector<std::shared_ptr<Store>>> stores_;

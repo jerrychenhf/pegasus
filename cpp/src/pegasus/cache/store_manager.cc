@@ -16,19 +16,34 @@
 // under the License.
 
 #include "pegasus/runtime/exec_env.h"
-#include "pegasus/cache/store_manager.h"
-#include "pegasus/cache/store_factory.h"
+// #include "pegasus/cache/store_manager.h"
 
 namespace pegasus {
 
+StoreManager::~StoreManager(){}
+
 StoreManager::StoreManager() {
   ExecEnv* env =  ExecEnv::GetInstance();
-  std::shared_ptr<StoreFactory> store_factory = env->get_store_factory();
   std::shared_ptr<Store> store;
   std::vector<Store::StoreType> store_types = env->GetStoreTypes();
   for(std::vector<Store::StoreType>::iterator it = store_types.begin(); it != store_types.end(); ++it) {
-    store_factory->GetStore(*it, &store);
+    GetStore(*it, &store);
     stores_->push_back(store);
+  }
+}
+
+Status StoreManager::GetStore(Store::StoreType store_type, std::shared_ptr<Store>* store) {
+  if (store_type == Store::StoreType::MEMORY) {
+    *store = std::shared_ptr<MemoryStore>(new MemoryStore());
+    return Status::OK();
+  } else if (store_type == Store::StoreType::DCPMM) {
+    *store = std::shared_ptr<DCPMMStore>(new DCPMMStore());
+    return Status::OK();
+  } else if (store_type == Store::StoreType::FILE) {
+    *store = std::shared_ptr<FileStore>(new FileStore());
+    return Status::OK();
+  } else {
+    return Status::Invalid("Invalid store type!");
   }
 }
 

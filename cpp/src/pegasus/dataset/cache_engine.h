@@ -82,11 +82,12 @@ class LruCacheEngine : public CacheEngine {
   ~LruCacheEngine();
 
   Status PutValue(std::string partition_path, int column_id, CacheEntryHolder cache_entry_holder) override;
-
+// on evict event; call back
  private:
   LruCache<CacheEntryKey, CacheEntryHolder> cache_;
 };
 
+// 
 class NonLruCacheEngine : public CacheEngine {
  public:
   NonLruCacheEngine();

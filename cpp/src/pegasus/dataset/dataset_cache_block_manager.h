@@ -21,7 +21,6 @@
 #include <unordered_map>
 
 #include "pegasus/dataset/identity.h"
-#include "pegasus/cache/store_manager.h"
 #include "pegasus/dataset/cache_engine.h"
 #include "pegasus/cache/cache_entry_holder.h"
 
@@ -31,30 +30,31 @@ namespace pegasus {
 
 class CachedColumn {
  public:
-  explicit CachedColumn(int column_id, CacheEntryHolder cache_entry_holder) :
-  column_id_(column_id), cache_entry_holder_(cache_entry_holder) {}
+  explicit CachedColumn(string partition_path, int column_id, CacheEntryHolder cache_entry_holder) :
+  partition_path_(partition_path), column_id_(column_id), cache_entry_holder_(cache_entry_holder) {}
 
  private:
+  string partition_path_;
   int column_id_;
   CacheEntryHolder cache_entry_holder_;
 };
 
 class CachedPartition {
  public:
-  explicit CachedPartition(string partition_path) : partition_path_(partition_path){}
+  explicit CachedPartition(string dataset_path, string partition_path) :dataset_path_(dataset_path), partition_path_(partition_path){}
 
+  string dataset_path_;
   string partition_path_;
-  std::vector<CachedColumn> columns_;
+  std::unordered_map<string, std::shared_ptr<CachedColumn>> cached_columns_;
 };
 
 class CachedDataset {
   public:
    explicit CachedDataset(string dataset_path): dataset_path_(dataset_path_) {}
-  std::shared_ptr<std::vector<CachedPartition>> partitions() const { return partitions_; }
 
   public:
    string dataset_path_;
-   std::shared_ptr<std::vector<CachedPartition>> partitions_;
+   std::unordered_map<std::string, std::shared_ptr<CachedPartition>> cached_partitions_;
 };
 
 class DatasetCacheBlockManager {
@@ -62,8 +62,10 @@ class DatasetCacheBlockManager {
   DatasetCacheBlockManager();
   ~DatasetCacheBlockManager();
   Status GetCachedDataSet(Identity* identity, std::shared_ptr<CachedDataset>* dataset);
-  Status GetCachedPartition(Identity* identity, std::shared_ptr<std::vector<CachedPartition>>* partitions);
-  Status InsertPartition(Identity* identity, std::shared_ptr<CachedPartition> new_partition);
+  Status GetCachedPartition(Identity* identity, std::shared_ptr<CachedPartition>* partitios);
+  Status GetCachedColumn(Identity* identity, std::shared_ptr<CachedColumn>* column);
+  // Status InsertPartition(Identity* identity, std::shared_ptr<CachedPartition> new_partition);
+  Status InsertColumn(Identity* identity, std::shared_ptr<CachedColumn> new_column);
  
  private: 
   std::unordered_map<std::string, std::shared_ptr<CachedDataset>> cached_datasets_;

@@ -48,33 +48,41 @@ CacheEngine::CachePolicy DatasetCacheManager::GetCachePolicy(Identity* identity)
 //         2. Call DatasetCacheEngineManager#GetCacheEngine method to get CacheEngine;
 Status DatasetCacheManager::GetDatasetStream(Identity* identity, std::unique_ptr<FlightDataStream>* data_stream) {
   // Check whether the column in file is cached.
-  std::string partition_path = identity->file_path();
+  // Identity# columns
+  std::shared_ptr<CachedColumn> column;
+  dataset_cache_block_manager_->GetCachedColumn(identity, &column);
+  if (column == NULL) {
+    // we need get from HDFS
+    std::string partition_path = identity->file_path();
 
-  // Get the Table from hdfs storage
-  storage_plugin_factory_->GetStoragePlugin(partition_path, &storage_plugin_);
-  std::shared_ptr<HdfsReadableFile> file;
+    // Get the Table from hdfs storage
+    storage_plugin_factory_->GetStoragePlugin(partition_path, &storage_plugin_);
+    std::shared_ptr<HdfsReadableFile> file;
 
-  storage_plugin_->GetReadableFile(partition_path, &file);
-  Store::StoreType store_type = dataset_cache_store_manager_->GetStorePolicy();
+    storage_plugin_->GetReadableFile(partition_path, &file);
+    Store::StoreType store_type = dataset_cache_store_manager_->GetStorePolicy();
 
-  std::shared_ptr<MemoryPool>* memory_pool;
-  dataset_cache_store_manager_->GetStoreMemoryPool(store_type, memory_pool);
-  parquet::ArrowReaderProperties properties(new parquet::ArrowReaderProperties());
+    std::shared_ptr<MemoryPool>* memory_pool;
+    dataset_cache_store_manager_->GetStoreMemoryPool(store_type, memory_pool);
+    parquet::ArrowReaderProperties properties(new parquet::ArrowReaderProperties());
 
-  // std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, memory_pool, properties));
+    // std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, memory_pool, properties));
 
-  //  std::shared_ptr<arrow::Table> table;
-  //  parquet_reader->ReadTable(table); // read all columns.
+    //  std::shared_ptr<arrow::Table> table;
+    //  parquet_reader->ReadTable(table); // read all columns.
 
-  // put the columns into cache engine.
-  std::shared_ptr<CacheEngine> cache_engine;
-  CacheEngine::CachePolicy cache_policy = GetCachePolicy(identity);
-  dataset_cache_engine_manager_->GetCacheEngine(cache_policy, &cache_engine);
-  int column_id = identity->num_rows();
-  CacheEntryHolder cache_entry_holder;
-  cache_engine->PutValue(partition_path, column_id, cache_entry_holder);
+    // put the columns into cache engine.
+    std::shared_ptr<CacheEngine> cache_engine;
+    CacheEngine::CachePolicy cache_policy = GetCachePolicy(identity);
+    dataset_cache_engine_manager_->GetCacheEngine(cache_policy, &cache_engine);
+    int column_id = identity->num_rows();
+    CacheEntryHolder cache_entry_holder;
+    cache_engine->PutValue(partition_path, column_id, cache_entry_holder);
+    std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(new CachedColumn(partition_path, column_id, cache_entry_holder));
+    dataset_cache_block_manager_->InsertColumn(identity, column);
+  }
 
-  //wrap the value to FlighrDataStream
+   //wrap the value to FlighrDataStream
 }
 
 } // namespace pegasus

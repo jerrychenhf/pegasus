@@ -18,11 +18,11 @@
 #ifndef PEGASUS_EXEC_ENV_H
 #define PEGASUS_EXEC_ENV_H
 
-#include "pegasus/cache/store_factory.h"
 #include "pegasus/common/worker_manager.h"
 #include "pegasus/dataset/dataset_store.h"
 #include "pegasus/storage/storage_plugin_factory.h"
 #include "pegasus/dataset/cache_engine.h"
+#include "pegasus/cache/store_manager.h"
 
 using namespace std;
 
@@ -49,8 +49,8 @@ class ExecEnv {
     return storage_plugin_factory_; 
   }
 
-  std::shared_ptr<StoreFactory> get_store_factory() {
-    return store_factory_;
+  std::shared_ptr<StoreManager> get_store_manager() {
+    return store_manager_;
   }
 
   std::string GetPlannerGrpcHost();
@@ -67,7 +67,7 @@ class ExecEnv {
 
   std::vector<CacheEngine::CachePolicy> GetCachePolicies();
 
-  std::vector<Store::StoreType> GetConfiguredStoreTypes();
+  std::unordered_map<string, long>  GetConfiguredStoreInfo();
 
   std::string GetNameNodeHost();
 
@@ -77,7 +77,6 @@ class ExecEnv {
   static ExecEnv* exec_env_;
   std::shared_ptr<WorkerManager> worker_manager_;
   std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
-  std::shared_ptr<StoreFactory> store_factory_;
 
   Location location_;
   std::string planner_grpc_hostname_;
@@ -86,8 +85,9 @@ class ExecEnv {
   int32_t worker_grpc_port_;
   StoragePlugin::StoragePluginType storage_plugin_type_;
   std::vector<Store::StoreType> store_types_;
-  std::vector<Store::StoreType> configured_store_types_;
+  std::unordered_map<string, long> configured_store_size_; // string: store type
   std::vector<CacheEngine::CachePolicy> cache_policies_;
+  std::shared_ptr<StoreManager> store_manager_;
 
   std::string namenode_hostname_;
   int32_t namenode_port_;

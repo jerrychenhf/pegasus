@@ -25,7 +25,6 @@ set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/cache")
 add_library(Store
   store.cc
   store_manager.cc
-  store_factory.cc
 )
 add_dependencies(Store gen-deps)
 
