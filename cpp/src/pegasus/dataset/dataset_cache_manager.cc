@@ -77,6 +77,7 @@ Status DatasetCacheManager::GetPartition(RequestIdentity* request_identity,
 
 Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
   std::unique_ptr<rpc::FlightDataStream>* data_stream) {
+  LOG(WARNING) << "Wrap the dataset into flight data stream";
   std::shared_ptr<CachedPartition> new_partition;
   GetPartition(request_identity, &new_partition);
   unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns;
@@ -133,11 +134,13 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
   const std::vector<int>& col_ids,
   std::shared_ptr<CacheEngine> cache_engine,
   unordered_map<int, std::shared_ptr<CachedColumn>>& retrieved_columns) {
+    LOG(WARNING) << "Retrieve the columns from storage and insert the"
+     << "retrieved columns into dataset block manager and cache engine";
     std::string dataset_path = request_identity->dataset_path();
     std::string partition_path = request_identity->partition_path();
-    std::shared_ptr<StoragePlugin> storage_plugin;
 
     // Get the ReadableFile
+    std::shared_ptr<StoragePlugin> storage_plugin;
     RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(partition_path, &storage_plugin));
     std::shared_ptr<HdfsReadableFile> file;
     RETURN_IF_ERROR(storage_plugin->GetReadableFile(partition_path, &file));
@@ -181,6 +184,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
 
 std::vector<int> DatasetCacheManager::GetMissedColumnsIds(std::vector<int> col_ids,
   unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns) {
+   LOG(WARNING) << "Get the missed column IDs ";
    std::vector<int> missed_col_ids;
     for(auto iter = col_ids.begin(); iter != col_ids.end(); iter ++) {
         auto entry = cached_columns.find(*iter);
@@ -233,6 +237,7 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
         // Not all columns cached.
         // Get the not cached col_ids.
         std::vector<int> missed_col_ids = GetMissedColumnsIds(col_ids, cached_columns);
+        LOG(WARNING) << "Partial columns is cached and we will get the missed columns from storage";
         return GetDatasetStreamWithMissedColumns(request_identity, missed_col_ids, data_stream);
       }
    }

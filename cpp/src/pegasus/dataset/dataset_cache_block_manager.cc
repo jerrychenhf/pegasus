@@ -76,11 +76,12 @@ Status DatasetCacheBlockManager::GetCachedDataSet(const std::string& dataset_pat
     *dataset = new_dataset;
 
     // Insert the dataset
-     cached_datasets_.insert(std::make_pair(dataset_path, new_dataset));
-    LOG(WARNING) << "The dataset does not exist and inserted a new dataset";
+    cached_datasets_.insert(std::make_pair(dataset_path, new_dataset));
+    LOG(WARNING) << "The dataset does not exist and insert a new dataset";
     return Status::OK(); 
     }
 
+   LOG(WARNING) << "The dataset exists and return the cached dataset";
    auto find_cache_info = entry->second;
    *dataset = std::shared_ptr<CachedDataset>(find_cache_info);
   }
@@ -105,10 +106,11 @@ Status CachedDataset::GetCachedPartition(std::shared_ptr<CachedDataset> cached_d
 
       // Insert partition
       cached_dataset->cached_partitions_[partition_path] = new_partition;
-      LOG(WARNING) << "The partition does not exist and inserted a new partition";
+      LOG(WARNING) << "The partition does not exist and insert a new partition";
       return Status::OK(); 
     }
-
+    
+    LOG(WARNING) << "The partition exists and return the cached partition";
     auto find_cache_info = entry->second;
     *partition = std::shared_ptr<CachedPartition>(find_cache_info);
    }
