@@ -34,8 +34,6 @@ class CachedColumn {
   explicit CachedColumn(string partition_path, int column_id, std::shared_ptr<arrow::ChunkedArray> chunked_array) :
   partition_path_(partition_path), column_id_(column_id), chunked_array_(chunked_array) {}
 
-
-
  public:
   string partition_path_;
   int column_id_;
