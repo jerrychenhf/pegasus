@@ -35,7 +35,7 @@
 #include "util/test_util_prod.h"
 
 // Useful in tests that require accurate cache capacity accounting.
-DEFINE_bool(cache_force_single_shard, false,
+DEFINE_bool(cache_force_single_shard, true,
             "Override all cache implementations to use just one shard");
 TAG_FLAG(cache_force_single_shard, hidden);
 
@@ -836,7 +836,8 @@ Cache* NewCache<Cache::EvictionPolicy::FIFO,
 template<>
 Cache* NewCache<Cache::EvictionPolicy::LRU,
                 Cache::MemoryType::DRAM>(size_t capacity, const std::string& id) {
-  return new cache::BlockCache(capacity, id);
+  return new cache::ShardedCache<Cache::EvictionPolicy::LRU>(capacity, id);
+}
 }
 
 std::ostream& operator<<(std::ostream& os, Cache::MemoryType mem_type) {
