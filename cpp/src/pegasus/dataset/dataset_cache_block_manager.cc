@@ -27,50 +27,50 @@ DatasetCacheBlockManager::DatasetCacheBlockManager() {
 DatasetCacheBlockManager::~DatasetCacheBlockManager() {}
 
 Status DatasetCacheBlockManager::GetCachedDataSet(Identity* identity, std::shared_ptr<CachedDataset>* datasets) {
-  // std::string dataset_path = identity->dataset_path();
-  // auto entry = cached_datasets_.find(dataset_path);
+  std::string dataset_path = identity->dataset_path();
+  auto entry = cached_datasets_.find(dataset_path);
 
-  // if (entry == cached_datasets_.end()) {
-  //     // Insert new record
-  //   std::shared_ptr<CachedDataset> new_dataset = std::shared_ptr<CachedDataset>(new CachedDataset(dataset_path));
-  //   cached_datasets_[dataset_path] = std::move(new_dataset);
-  // }
-  // auto find_cache_info = entry->second;
-  // *datasets = std::shared_ptr<CachedDataset>(find_cache_info);
-  // return Status::OK();
+  if (entry == cached_datasets_.end()) {
+      // Insert new record
+    std::shared_ptr<CachedDataset> new_dataset = std::shared_ptr<CachedDataset>(new CachedDataset(dataset_path));
+    cached_datasets_[dataset_path] = std::move(new_dataset);
+  }
+  auto find_cache_info = entry->second;
+  *datasets = std::shared_ptr<CachedDataset>(find_cache_info);
+  return Status::OK();
 }
 
 
 Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity, std::shared_ptr<CachedPartition>* partition) {
-  // std::string dataset_path = identity->dataset_path();
-  // std::string partition_path = identity->file_path();
-  // std::shared_ptr<CachedDataset>* dataset;
-  // GetCachedDataSet(identity, dataset);
-  // auto entry = (*dataset)->cached_partitions_.find(partition_path);
+  std::string dataset_path = identity->dataset_path();
+  std::string partition_path = identity->file_path();
+  std::shared_ptr<CachedDataset>* dataset;
+  GetCachedDataSet(identity, dataset);
+  auto entry = (*dataset)->cached_partitions_.find(partition_path);
 
-  // if (entry == (*dataset)->cached_partitions_.end()) {
-  //    // Insert new record
-  //    std::shared_ptr<CachedPartition> new_partition = std::shared_ptr<CachedPartition>(new CachedPartition(dataset_path, partition_path));
-  //    (*dataset)->cached_partitions_[partition_path] = std::move(new_partition);
-  // }
-  // auto find_cache_info = entry->second;
-  // *partition = std::shared_ptr<CachedPartition>(find_cache_info);
-  // return Status::OK();
+  if (entry == (*dataset)->cached_partitions_.end()) {
+    // Insert new record
+    std::shared_ptr<CachedPartition> new_partition = std::shared_ptr<CachedPartition>(new CachedPartition(dataset_path, partition_path));
+    (*dataset)->cached_partitions_[partition_path] = std::move(new_partition);
+  }
+  auto find_cache_info = entry->second;
+  *partition = std::shared_ptr<CachedPartition>(find_cache_info);
+  return Status::OK();
 }
 
  Status DatasetCacheBlockManager::GetCachedColumn(Identity* identity, std::shared_ptr<CachedColumn>* column) {
-  // std::shared_ptr<CachedPartition>* partition;
-  // GetCachedPartition(identity, partition);
-  // int column_id = identity->num_rows();
-  // auto entry = (*partition)->cached_columns_.find(std::to_string(column_id));
+  std::shared_ptr<CachedPartition>* partition;
+  GetCachedPartition(identity, partition);
+  int column_id = identity->num_rows();
+  auto entry = (*partition)->cached_columns_.find(std::to_string(column_id));
 
-  // if (entry == (*partition)->cached_columns_.end()) {
-  //    // Insert new record
-  //    // return Status::KeyError("Could not find the cached column.", column_id);
-  // }
-  // auto find_cache_info = entry->second;
-  // *partition = std::shared_ptr<CachedColumn>(find_cache_info);
-  // return Status::OK();
+  if (entry == (*partition)->cached_columns_.end()) {
+   // Insert new record
+  // return Status::KeyError("Could not find the cached column.", column_id);
+  }
+  auto find_cache_info = entry->second;
+  *column = std::shared_ptr<CachedColumn>(find_cache_info);
+  return Status::OK();
  }
 
 // Status DatasetCacheBlockManager::InsertPartition(Identity* identity, std::shared_ptr<CachedPartition> new_partition) {
