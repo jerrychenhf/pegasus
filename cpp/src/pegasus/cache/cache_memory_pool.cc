@@ -21,7 +21,7 @@
 namespace pegasus {
     
 CacheMemoryPool::CacheMemoryPool(std::shared_ptr<CacheEngine> cache_engine)
-  : cache_engine_(cache_engine), occupied_size(0) {
+  : cache_engine_(cache_engine), occupied_size_(0) {
 }
 CacheMemoryPool::~CacheMemoryPool() {}
 
@@ -52,7 +52,7 @@ arrow::Status CacheMemoryPool::Allocate(int64_t size, uint8_t** out) {
   }
   
   *out = store_region.address();
-  occupied_size += size;
+  occupied_size_ += size;
   LOG(INFO) << "Allocate memory in cache memory pool and the allocated size is " << size;
   return arrow::Status::OK();
 }
@@ -64,7 +64,7 @@ void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
   StoreRegion storeRegion(buffer, size, size);
   cache_store_->Free(&storeRegion);
   LOG(INFO) << "Free memory in cache memory pool and the free size is " << size;
-  occupied_size -= size;
+  occupied_size_ -= size;
 }
 
 arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
@@ -92,12 +92,12 @@ arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, ui
 
   *ptr = store_region.address();
 
-  occupied_size += (new_size - old_size);
+  occupied_size_ += (new_size - old_size);
   return arrow::Status::OK();
 }
 
 int64_t CacheMemoryPool::bytes_allocated() const  {
-  return occupied_size;
+  return occupied_size_;
 }
   
 int64_t CacheMemoryPool::max_memory() const {

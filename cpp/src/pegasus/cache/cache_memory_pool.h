@@ -18,6 +18,7 @@
 #ifndef PEGASUS_MEMORY_POOL_H
 #define PEGASUS_MEMORY_POOL_H
 
+#include <atomic>
 #include <arrow/status.h>
 #include <arrow/memory_pool.h>
 #include "runtime/worker_exec_env.h"
@@ -53,7 +54,7 @@ public:
   private:
     std::shared_ptr<CacheEngine> cache_engine_;
     CacheStore* cache_store_;
-    int64_t occupied_size;
+    std::atomic<int64_t> occupied_size_;
     
     Status GetCacheRegion(int64_t size, StoreRegion* store_region);
 };
