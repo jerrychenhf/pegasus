@@ -31,9 +31,12 @@ Status MemoryStore::Init(const std::unordered_map<string, string>* properties) {
 Status MemoryStore::Allocate(int64_t size, StoreRegion* store_region) {
   DCHECK(store_region != NULL);
   
-  //TODO
   //check the free size. If no free size available, fail
-  
+  int64_t available_size = capacity_ - used_size_;
+  if (size > available_size) {
+    return Status::Invalid("Request memory size" , size, "is large than available size.");
+  }
+
   uint8_t* address = reinterpret_cast<uint8_t*>(std::malloc(size));
   if (address == NULL) {
     return Status::OutOfMemory("Allocate of size ", size, " failed");

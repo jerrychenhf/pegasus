@@ -158,6 +158,11 @@ Status DCPMMStore::Init(const std::unordered_map<string, string>* properties) {
 }
 
 Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
+  int64_t available_size = capacity_ - used_size_;
+  if (size > available_size) {
+    return Status::Invalid("Request dcpmm size" , size, "is large than available size.");
+  }
+
   if (PREDICT_FALSE(FLAGS_dcpmm_cache_simulate_allocation_failure)) {
     return Status::Invalid("Failed to allocate in DCPMM store");
   }
