@@ -175,6 +175,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       bool is_inserted = partition->InsertColumn(partition, colId, column);
       if (is_inserted) {
         LRUCache::CacheKey key(dataset_path, partition_path, colId, column_size);
+        LOG(WARNING) << "Put the cached column into cache engine";
         RETURN_IF_ERROR(cache_engine->PutValue(key));
       }
     }

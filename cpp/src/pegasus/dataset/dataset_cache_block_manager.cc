@@ -141,10 +141,12 @@ bool CachedPartition::InsertColumn(std::shared_ptr<CachedPartition> cached_parti
     auto entry = cached_partition->cached_columns_.find(column_id);
     if(entry == cached_partition->cached_columns_.end()) {
       // insert new column
+      LOG(WARNING) << "The column does not exist and insert new column";
       cached_partition->cached_columns_[column_id] = std::move(new_column);
       return true;
     } else {
       // the column is already existed.
+      LOG(WARNING) << "The column already exists and will not insert this column";
       return false;
     }
   }
@@ -153,6 +155,7 @@ bool CachedPartition::InsertColumn(std::shared_ptr<CachedPartition> cached_parti
 Status DatasetCacheBlockManager::DeleteDataset(const std::string& dataset_path) {
   {
     boost::lock_guard<boost::mutex> l(cached_datasets_lock_);
+    LOG(WARNING) << "Delete the dataset";
     cached_datasets_.erase(dataset_path);
   }
   return Status::OK();
@@ -162,6 +165,7 @@ Status CachedDataset::DeletePartition(
   std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path){
   {
     boost::lock_guard<boost::mutex> l(cached_partitions_lock_); 
+    LOG(WARNING) << "Delete the partition";
     cached_dataset->cached_partitions_.erase(partition_path);
   }
   return Status::OK();
@@ -170,7 +174,8 @@ Status CachedDataset::DeletePartition(
 Status CachedPartition::DeleteColumn(
   std::shared_ptr<CachedPartition> cached_partition, int column_id) {
   {
-    boost::lock_guard<boost::mutex> l(cached_columns_lock_);   
+    boost::lock_guard<boost::mutex> l(cached_columns_lock_);  
+    LOG(WARNING) << "Delete the column"; 
     cached_partition->cached_columns_.erase(column_id);
   } 
   return Status::OK();
