@@ -61,7 +61,8 @@ Status GetAndInsertColumns(Identity* identity, std::shared_ptr<StoragePluginFact
     for(auto iter = col_ids.begin(); iter != col_ids.end(); iter ++) {
       std::shared_ptr<arrow::ChunkedArray> chunked_out;
       DCHECK(parquet_reader->ReadColumnChunk(*iter, chunked_out).ok());
-      std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(new CachedColumn(partition_path, *iter, chunked_out));
+      std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
+        new CachedColumn(partition_path, *iter, chunked_out));
       get_columns.insert(std::make_pair(std::to_string(*iter), column));
     }
     // Before insert into the column, check whether the dataset is inserted.
@@ -126,7 +127,8 @@ Status WrapDatasetStream(std::unique_ptr<rpc::FlightDataStream>* data_stream,
     std::shared_ptr<arrow::ChunkedArray> chunked_out = cache_column->chunked_array_;
     DCHECK(Table::FromChunkedStructArray(chunked_out, &table).ok());
   }
-  *data_stream = std::unique_ptr<rpc::FlightDataStream>(new rpc::RecordBatchStream(std::shared_ptr<RecordBatchReader>(new TableBatchReader(*table))));
+  *data_stream = std::unique_ptr<rpc::FlightDataStream>(
+    new rpc::RecordBatchStream(std::shared_ptr<RecordBatchReader>(new TableBatchReader(*table))));
 }
 
 Status GetAndInsertAndWrapDataStream(Identity* identity, std::shared_ptr<StoragePluginFactory> storage_plugin_factory,
