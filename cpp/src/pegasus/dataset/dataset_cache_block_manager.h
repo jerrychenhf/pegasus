@@ -24,6 +24,9 @@
 #include "dataset/request_identity.h"
 #include "cache/cache_region.h"
 
+using namespace std;
+using std::string;
+
 namespace pegasus {
 
 struct DatasetKey {
@@ -102,14 +105,14 @@ class CachedDataset {
   Status DeletePartition(std::shared_ptr<CachedDataset> cached_dataset, std::string partition_path);
   
   std::string GetDatasetPath() { return dataset_path_; }
-  std::unordered_map<std::string, std::shared_ptr<CachedPartition>> GetCachedPartitions() {
+  std::unordered_map<string, std::shared_ptr<CachedPartition>> GetCachedPartitions() {
     return cached_partitions_;
   }
 
   private:
    std::string dataset_path_;
    boost::mutex cached_partitions_lock_;
-   std::unordered_map<std::string, std::shared_ptr<CachedPartition>> cached_partitions_;
+   std::unordered_map<string, std::shared_ptr<CachedPartition>> cached_partitions_;
 };
 
 class DatasetCacheBlockManager {
@@ -123,13 +126,13 @@ class DatasetCacheBlockManager {
 
   Status DeleteDataset(std::string dataset_path);
 
-  std::unordered_map<std::string, std::shared_ptr<CachedDataset>> GetCachedDatasets() {
+  std::unordered_map<string, std::shared_ptr<CachedDataset>> GetCachedDatasets() {
     return cached_datasets_;
   }
 
  private: 
   boost::mutex cached_datasets_lock_;
-  std::unordered_map<std::string, std::shared_ptr<CachedDataset>> cached_datasets_;
+  std::unordered_map<string, std::shared_ptr<CachedDataset>> cached_datasets_;
 };
 
 } // namespace pegasus
