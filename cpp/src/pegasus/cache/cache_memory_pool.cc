@@ -93,6 +93,8 @@ arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, ui
   *ptr = store_region.address();
 
   occupied_size_ += (new_size - old_size);
+  LOG(INFO) << "Reallocate memory in cache memory pool and the reallocate new size is "
+   << new_size << " and the old size is " << old_size;
   return arrow::Status::OK();
 }
 
