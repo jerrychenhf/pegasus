@@ -214,7 +214,7 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
   if (dataset->GetCachedPartitions().size() == 0) {
     LOG(WARNING) << "The dataset "<< request_identity->dataset_path() 
     <<" is new added. We will get all the columns from storage and"
-     << "then insert the column into dataset cache block manager";
+     << " then insert the column into dataset cache block manager";
     return GetDatasetStreamWithMissedColumns(request_identity, col_ids, data_stream);
   } else {
     // dataset is cached
