@@ -30,13 +30,13 @@ namespace pegasus {
 
 class CachedColumn {
  public:
-  explicit CachedColumn(string partition_path, int column_id, CacheRegion cache_entry_holder) :
-  partition_path_(partition_path), column_id_(column_id), cache_entry_holder_(cache_entry_holder) {}
+  explicit CachedColumn(string partition_path, int column_id, CacheRegion cache_region) :
+  partition_path_(partition_path), column_id_(column_id), cache_region_(cache_region) {}
 
  private:
   string partition_path_;
   int column_id_;
-  CacheRegion cache_entry_holder_;
+  CacheRegion cache_region_;
 };
 
 class CachedPartition {

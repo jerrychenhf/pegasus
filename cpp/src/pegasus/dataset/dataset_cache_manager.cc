@@ -75,9 +75,9 @@ Status DatasetCacheManager::GetDatasetStream(Identity* identity, std::unique_ptr
     CacheEngine::CachePolicy cache_policy = GetCachePolicy(identity);
     dataset_cache_engine_manager_->GetCacheEngine(cache_policy, &cache_engine);
     int column_id = identity->num_rows();
-    CacheRegion cache_entry_holder;
-    cache_engine->PutValue(partition_path, column_id, cache_entry_holder);
-    std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(new CachedColumn(partition_path, column_id, cache_entry_holder));
+    CacheRegion cache_region;
+    cache_engine->PutValue(partition_path, column_id, cache_region);
+    std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(new CachedColumn(partition_path, column_id, cache_region));
     dataset_cache_block_manager_->InsertColumn(identity, column);
   }
 

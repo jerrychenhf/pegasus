@@ -32,7 +32,7 @@ namespace pegasus {
 
 class CacheEngine {
  public:
- virtual Status PutValue(std::string partition_path, int column_id, CacheRegion cache_entry_holder) = 0;
+ virtual Status PutValue(std::string partition_path, int column_id, CacheRegion cache_region) = 0;
 
   enum CachePolicy {
     LRU,
@@ -82,7 +82,7 @@ class LruCacheEngine : public CacheEngine {
   LruCacheEngine(long capacity);
   ~LruCacheEngine();
 
-  Status PutValue(std::string partition_path, int column_id, CacheRegion cache_entry_holder) override;
+  Status PutValue(std::string partition_path, int column_id, CacheRegion cache_region) override;
 // on evict event; call back
  private:
  std::shared_ptr<CacheStoreManager> cache_store_manager_;
@@ -95,7 +95,7 @@ class NonEvictionCacheEngine : public CacheEngine {
   NonEvictionCacheEngine();
   ~NonEvictionCacheEngine();
 
-  Status PutValue(std::string partition_path, int column_id, CacheRegion cache_entry_holder) override;
+  Status PutValue(std::string partition_path, int column_id, CacheRegion cache_region) override;
 };
 } // namespace pegasus                              
 

@@ -26,7 +26,7 @@ namespace pegasus {
 class Store {
  public:
 
-  virtual Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_entry_holder) = 0;
+  virtual Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) = 0;
   virtual Status GetTotalSize(long& total_size) = 0;
   virtual Status GetUsedSize(long& used_size) = 0;
   virtual std::string GetStoreName() = 0;
@@ -50,7 +50,7 @@ class Store {
 class MemoryStore : public Store {
  public:
   MemoryStore();
-  Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_entry_holder) override;
+  Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) override;
   Status GetTotalSize(long& total_size) override;
   Status GetUsedSize(long& used_size) override;
   std::string GetStoreName() override;
@@ -60,7 +60,7 @@ class MemoryStore : public Store {
 class DCPMMStore : public Store {
  public:
   DCPMMStore();
-  Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_entry_holder) override;
+  Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) override;
   Status GetTotalSize(long& total_size) override;
   Status GetUsedSize(long& used_size) override;
   std::string GetStoreName() override;
