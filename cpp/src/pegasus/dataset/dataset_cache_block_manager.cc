@@ -33,9 +33,6 @@ Status DatasetCacheBlockManager::GetCachedDataSet(Identity* identity, std::share
   if (entry == cached_datasets_.end()) {
     *dataset = NULL;
     return Status::OK(); 
-    //   // Insert new record
-    // std::shared_ptr<CachedDataset> new_dataset = std::shared_ptr<CachedDataset>(new CachedDataset(dataset_path));
-    // cached_datasets_[dataset_path] = std::move(new_dataset);
   }
   auto find_cache_info = entry->second;
   *dataset = std::shared_ptr<CachedDataset>(find_cache_info);
@@ -53,9 +50,6 @@ Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity, std::sha
   if (entry == (*dataset)->cached_partitions_.end()) {
     *partition = NULL;
     return Status::OK(); 
-    // // Insert new record
-    // std::shared_ptr<CachedPartition> new_partition = std::shared_ptr<CachedPartition>(new CachedPartition(dataset_path, partition_path));
-    // (*dataset)->cached_partitions_[partition_path] = std::move(new_partition);
   }
   auto find_cache_info = entry->second;
   *partition = std::shared_ptr<CachedPartition>(find_cache_info);
