@@ -838,7 +838,6 @@ Cache* NewCache<Cache::EvictionPolicy::LRU,
                 Cache::MemoryType::DRAM>(size_t capacity, const std::string& id) {
   return new cache::ShardedCache<Cache::EvictionPolicy::LRU>(capacity, id);
 }
-}
 
 std::ostream& operator<<(std::ostream& os, Cache::MemoryType mem_type) {
   switch (mem_type) {
