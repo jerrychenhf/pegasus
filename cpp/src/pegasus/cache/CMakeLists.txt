@@ -32,6 +32,7 @@ add_library(Cache
   cache_engine.cc
   cache_store.cc
   cache_store_manager.cc
+  memory_store.cc
 )
 add_dependencies(Cache gen-deps)
 

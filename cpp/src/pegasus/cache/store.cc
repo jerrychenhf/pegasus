@@ -119,51 +119,6 @@ void InitMemkindOps() {
   cleanup.cancel();
 }
 
-MemoryStore::MemoryStore(int64_t capacity)
-  : capacity_(capacity),
-    used_size_(0) {
-}
-
-Status MemoryStore::Init(const std::unordered_map<string, string>* properties) {
-  return Status::OK();
-}
-
-Status MemoryStore::Allocate(int64_t size, StoreRegion* store_region) {
-  DCHECK(store_region != NULL);
-  
-  //TODO
-  //check the free size. If no free size available, fail
-  
-  uint8_t* address = reinterpret_cast<uint8_t*>(std::malloc(size));
-  if (address == NULL) {
-    return Status::OutOfMemory("Allocate of size ", size, " failed");
-  }
-  store_region->reset_address(address, size);
-  used_size_ += size;
-  return Status::OK();
-}
-
-Status MemoryStore::Free(StoreRegion* store_region) {
-  DCHECK(store_region != NULL);
-  
-  std::free(store_region->address());
-  
-  used_size_ -= store_region->length();
-  return Status::OK();
-}
-
-int64_t MemoryStore::GetFreeSize() {
-  return capacity_ - used_size_; 
-}
-
-int64_t MemoryStore::GetUsedSize() {
-  return used_size_;
-}
-
-std::string MemoryStore::GetStoreName() {
-    return "MEMORY";
-}
-
 DCPMMStore::DCPMMStore(int64_t capacity)
   : capacity_(capacity),
     used_size_(0),

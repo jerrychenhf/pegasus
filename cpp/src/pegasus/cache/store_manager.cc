@@ -17,6 +17,7 @@
 
 #include "cache/store_manager.h"
 #include "runtime/worker_exec_env.h"
+#include "cache/memory_store.h"
 
 namespace pegasus {
 
