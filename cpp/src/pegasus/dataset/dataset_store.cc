@@ -70,9 +70,37 @@ Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset) {
   return Status::OK();
 }
 
+Status DataSetStore::InvalidateAll() {
+
+  boost::lock_guard<SpinLock> l(l_);
+  for (auto i : planner_metadata_)
+  {
+    i.second->setRefreshFlag();
+  }
+  return Status::OK();
+}
+#if 0
+Status DataSetStore::ReplacePartitions(std::string& datasetpath, std::shared_ptr<std::vector<Partition>> partits) {
+
+  boost::lock_guard<SpinLock> l(l_);
+  (planner_metadata_[datasetpath])->replacePartitions(*partits);
+  return Status::OK();
+}
+#endif
+Status DataSetStore::UpdateDataSet(std::shared_ptr<DataSet> dataset) {
+#if 0
+  std::string key = dataset->dataset_path();
+//  boost::unique_lock<boost::shared_mutex> wrlock(l_);
+//  boost::lock_guard<boost::detail::spinlock> l(l_);
+  boost::lock_guard<SpinLock> l(l_);
+  //TODO: replace the pointer
+  planner_metadata_[key] = std::move(dataset);
+#endif
+  return Status::OK();
+}
+
 Status DataSetStore::RemoveDataSet(std::shared_ptr<DataSet> dataset) {
 
-  // TODO: lock the whole dataset_store first?
   std::string key = dataset->dataset_path();
 //  boost::unique_lock<boost::shared_mutex> wrlock(l_);
 //  boost::lock_guard<boost::detail::spinlock> l(l_);

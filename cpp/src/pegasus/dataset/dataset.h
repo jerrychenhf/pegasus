@@ -104,9 +104,9 @@ class PEGASUS_EXPORT DataSet {
     int64_t total_bytes;
   };
 
-  explicit DataSet(const Data& data) : data_(data) {}
+  explicit DataSet(const Data& data) : data_(data) { needRefresh_ = 0; }
   explicit DataSet(Data&& data)
-      : data_(std::move(data)) {}
+      : data_(std::move(data)) { needRefresh_ = 0; }
 
   /// Get the data_
   const Data& GetData() {return data_;}
@@ -125,11 +125,17 @@ class PEGASUS_EXPORT DataSet {
   /// A list of partitions associated with the dataset.
   const std::vector<Partition>& partitions() const { return data_.partitions; }
 
+  void replacePartitions(std::vector<Partition> partits) { data_.partitions = std::move(partits); }
+
   /// The total number of records (rows) in the dataset. If unknown, set to -1
   int64_t total_records() const { return data_.total_records; }
 
   /// The total number of bytes in the dataset. If unknown, set to -1
   int64_t total_bytes() const { return data_.total_bytes; }
+
+  bool needRefresh() const { return needRefresh_; }
+  void setRefreshFlag() { needRefresh_ = true; }
+  void resetRefreshFlag() { needRefresh_ = false; }
 
   void lockread() { dslock.lockread(); }
   void unlockread() { dslock.unlockread(); }
@@ -140,6 +146,7 @@ class PEGASUS_EXPORT DataSet {
   rwlock dslock;
   Data data_;
   std::shared_ptr<arrow::Schema> schema_;
+  bool needRefresh_;
 };
 
 class PEGASUS_EXPORT ResultDataSet {
