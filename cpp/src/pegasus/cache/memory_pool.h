@@ -23,16 +23,18 @@
 
 using namespace arrow;
 
-namespace pegasus {
+namespace pegasus
+{
 
- class DRAMMemoryPool : public MemoryPool {
- public:
+class DRAMMemoryPool : public MemoryPool
+{
+public:
   DRAMMemoryPool();
   ~DRAMMemoryPool();
-  Status Allocate(int64_t size, uint8_t** out) override;
-  Status Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) override;
+  arrow::Status Allocate(int64_t size, uint8_t **out) override;
+  arrow::Status Reallocate(int64_t old_size, int64_t new_size, uint8_t **ptr) override;
 
-  void Free(uint8_t* buffer, int64_t size) override;
+  void Free(uint8_t *buffer, int64_t size) override;
 
   int64_t bytes_allocated() const override;
 
@@ -42,4 +44,4 @@ namespace pegasus {
 };
 } // namespace pegasus
 
-#endif  // PEGASUS_MEMORY_POOL_H
+#endif // PEGASUS_MEMORY_POOL_H
