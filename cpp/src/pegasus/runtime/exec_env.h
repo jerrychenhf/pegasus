@@ -66,7 +66,7 @@ class ExecEnv {
 
   std::vector<CacheEngine::CachePolicy> GetCachePolicies();
 
-  std::unordered_map<string, long>  GetConfiguredStoreInfo();
+  std::unordered_map<string, long>  GetCacheStoresInfo();
 
   std::string GetNameNodeHost();
 
@@ -84,7 +84,7 @@ class ExecEnv {
   int32_t worker_grpc_port_;
   StoragePlugin::StoragePluginType storage_plugin_type_;
   std::vector<Store::StoreType> store_types_;
-  std::unordered_map<string, long> configured_store_size_; // string: store type
+  std::unordered_map<string, long> cache_stores_info_; // string: store type
   std::vector<CacheEngine::CachePolicy> cache_policies_;
   std::shared_ptr<StoreManager> store_manager_;
 

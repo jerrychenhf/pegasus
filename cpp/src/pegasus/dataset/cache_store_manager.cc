@@ -27,7 +27,7 @@ namespace pegasus {
   Status CacheStoreManager::Init() {
     ExecEnv* env =  ExecEnv::GetInstance();
     std::shared_ptr<Store> store;
-    std::unordered_map<string, long> store_infos = env->GetConfiguredStoreInfo();
+    std::unordered_map<string, long> store_infos = env->GetCacheStoresInfo();
     store_manager_ = env->get_store_manager();
 
     Store::StoreType store_type_;
