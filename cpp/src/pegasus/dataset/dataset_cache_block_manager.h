@@ -63,7 +63,7 @@ class DatasetCacheBlockManager {
   ~DatasetCacheBlockManager();
   Status GetCachedDataSet(Identity* identity, std::shared_ptr<CachedDataset>* dataset);
   Status GetCachedPartition(Identity* identity, std::shared_ptr<CachedPartition>* partitios);
-  Status GetCachedColumn(Identity* identity, std::shared_ptr<CachedColumn>* column);
+  Status GetCachedColumns(Identity* identity, std::unordered_map<string, std::shared_ptr<CachedColumn>>* cached_columns);
   // Status InsertPartition(Identity* identity, std::shared_ptr<CachedPartition> new_partition);
   Status InsertColumn(Identity* identity, std::shared_ptr<CachedColumn> new_column);
  
