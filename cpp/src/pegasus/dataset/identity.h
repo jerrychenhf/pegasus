@@ -28,8 +28,9 @@ namespace pegasus {
 
 class Identity {
 public:
-  Identity(std::string file_path, int64_t row_group_id, int64_t num_rows, int64_t bytes);
+  Identity(std::string dataset_path, std::string file_path, int64_t row_group_id, int64_t num_rows, int64_t bytes);
   
+  std::string dataset_path() const;
   std::string file_path() const;
   int64_t row_group_id() const;
   int64_t num_rows() const;
@@ -57,6 +58,7 @@ public:
   static Status Deserialize(const std::string& serialized, Identity* out);
 
  private:
+  std::string dataset_path_;
   std::string file_path_;
   int64_t partid;
   int64_t row_group_id_;

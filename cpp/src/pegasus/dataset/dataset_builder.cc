@@ -71,7 +71,7 @@ Status DataSetBuilder::BuildDataset(std::string dataset_path, std::shared_ptr<Da
     std::shared_ptr<std::vector<std::string>> file_list;
     storage_plugin_->ListFiles(dataset_path, &file_list);
     for (auto filepath : *file_list) {
-      partitions->push_back(Partition(Identity(filepath, 0, 0, 0)));
+      partitions->push_back(Partition(Identity(dataset_path, filepath, 0, 0, 0)));
     }
   }
   // allocate location for each partition

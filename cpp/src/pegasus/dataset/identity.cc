@@ -21,9 +21,13 @@
 
 namespace pegasus {
 
-Identity::Identity(std::string file_path, int64_t row_group_id, int64_t num_rows, int64_t bytes)
-    : file_path_(file_path), row_group_id_(row_group_id), num_rows_(num_rows), bytes_(bytes) {}
+Identity::Identity(std::string dataset_path, std::string file_path, int64_t row_group_id, int64_t num_rows, int64_t bytes)
+    : dataset_path_(dataset_path), file_path_(file_path), row_group_id_(row_group_id), num_rows_(num_rows), bytes_(bytes) {}
   
+std::string Identity::dataset_path() const {
+    return dataset_path_;
+  }
+
 std::string Identity::file_path() const {
     return file_path_;
   }
