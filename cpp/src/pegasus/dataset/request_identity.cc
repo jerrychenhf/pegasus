@@ -25,15 +25,15 @@ RequestIdentity::RequestIdentity(std::string dataset_path,
  std::string partition_path, std::vector<int> column_indices)
     : dataset_path_(dataset_path), partition_path_(partition_path), column_indices_(column_indices) {}
 
-const std::string& RequestIdentity::dataset_path() {
+std::string RequestIdentity::dataset_path() {
   return dataset_path_;
 }
 
-const std::string& RequestIdentity::partition_path() {
+std::string RequestIdentity::partition_path() {
   return partition_path_;
 }
 
-const std::vector<int>& RequestIdentity::column_indices(){
+std::vector<int> RequestIdentity::column_indices(){
   return column_indices_;
 }
 

@@ -64,7 +64,7 @@ class DatasetCacheManager {
     unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns);
     
   Status RetrieveColumns(RequestIdentity* request_identity,
-    const std::vector<int>& col_ids,
+    std::vector<int> col_ids,
     std::shared_ptr<CacheEngine> cache_engine,
     unordered_map<int, std::shared_ptr<CachedColumn>>& retrieved_columns
     );

@@ -34,6 +34,8 @@
 #include "util/alignment.h"
 #include "util/test_util_prod.h"
 
+#include "cache/lru_cache.h"
+
 // Useful in tests that require accurate cache capacity accounting.
 DEFINE_bool(cache_force_single_shard, false,
             "Override all cache implementations to use just one shard");
@@ -121,6 +123,7 @@ class HandleTable {
 
   RLHandle* Insert(RLHandle* h) {
     RLHandle** ptr = FindPointer(h->key(), h->hash);
+  
     RLHandle* old = *ptr;
     h->next_hash = (old == nullptr ? nullptr : old->next_hash);
     *ptr = h;
@@ -496,6 +499,7 @@ class BlockCache : public Cache {
     handle->charge = (charge == kAutomaticCharge) ? pegasus_malloc_usable_size(h.get())
                                                   : charge;
     handle->hash = HashSlice(key);
+
     memcpy(handle->kv_data, key.data(), key_len);
 
     return h;
@@ -533,6 +537,7 @@ class BlockCache : public Cache {
   UniqueHandle Insert(
     UniquePendingHandle handle,
     Cache::EvictionCallback* eviction_callback) override {
+   
     RLHandle* h = reinterpret_cast<RLHandle*>(DCHECK_NOTNULL(handle.release()));
     // Set the remaining RLHandle members which were not already allocated during
     // Allocate().
@@ -555,7 +560,7 @@ class BlockCache : public Cache {
         }
       }
 
-     while (usage_ > capacity_ && rl_.next != &rl_) {
+     while (usage_ > capacity_ * 0.8 && rl_.next != &rl_) {
         RLHandle* old = rl_.next;
         RL_Remove(old);
         table_.Remove(old->key(), old->hash);
@@ -570,6 +575,7 @@ class BlockCache : public Cache {
     // performance reasons
     while (to_remove_head != nullptr) {
       RLHandle* next = to_remove_head->next;
+     
       FreeEntry(to_remove_head);
       to_remove_head = next;
     }
@@ -675,6 +681,7 @@ protected:
     RLHandle* e = reinterpret_cast<RLHandle*>(handle);
     bool last_reference = Unref(e);
     if (last_reference) {
+     
       FreeEntry(e);
     }
   }
@@ -685,9 +692,17 @@ protected:
   }
 
 private:
-  static inline uint32_t HashSlice(const Slice& s) {
-      return util_hash::CityHash64(
-        reinterpret_cast<const char *>(s.data()), s.size());
+  static inline uint32_t HashSlice(Slice s) {
+    auto* entry_ptr = reinterpret_cast<LRUCache::CacheKey*>(s.mutable_data());
+    std::string dataset_path = entry_ptr->dataset_path_;
+    std::string partition_path = entry_ptr->partition_path_;
+    std::string column_id = std::to_string(entry_ptr->column_id_);
+    std::string key = dataset_path + partition_path + column_id;
+
+    std::hash<std::string> h;
+    return h(key);
+      // return util_hash::CityHash64(
+      //   reinterpret_cast<const char *>(s.data()), s.size());
   }
 
   // Initialized before use.

@@ -56,15 +56,15 @@ class LRUCache {
   // important that the layout be fixed and kept compatible for all
   // future releases.
   struct CacheKey {
-    CacheKey(const std::string& dataset_path, const std::string& partition_path,
+    CacheKey(std::string dataset_path, std::string partition_path,
      int column_id, int64_t occupied_size) :
       dataset_path_(dataset_path),
       partition_path_(partition_path),
       column_id_(column_id),
       occupied_size_(occupied_size){}
 
-   const std::string& dataset_path_;
-   const std::string& partition_path_;
+   std::string dataset_path_;
+   std::string partition_path_;
    int column_id_;
    int64_t occupied_size_;
   };
@@ -87,6 +87,7 @@ class LRUCache {
     void EvictedEntry(Slice key, Slice val) override {
       // VLOG(2) << strings::Substitute("EvictedEntry callback for key '$0'",
       //                                key.ToString());
+     
       auto* entry_ptr = reinterpret_cast<LRUCache::CacheKey*>(key.mutable_data());
       std::string dataset_path = entry_ptr->dataset_path_;
       std::string partition_path = entry_ptr->partition_path_;
@@ -95,7 +96,7 @@ class LRUCache {
        cache_block_manager_->GetCachedDatasets().size() == 0) {
         return;
       }
-
+     
        // Before insert into the column, check whether the dataset is inserted.
       std::shared_ptr<CachedDataset> dataset;
       cache_block_manager_->GetCachedDataSet(dataset_path, &dataset);
