@@ -26,6 +26,7 @@ using namespace std;
 
 namespace arrow {
   class ChunkedArray;
+  class MemoryPool;
 }
 
 namespace pegasus {
@@ -35,18 +36,18 @@ class CacheMemoryPool;
 class CacheRegion {
  public:
   CacheRegion();
-  CacheRegion(const std::shared_ptr<CacheMemoryPool>& memory_pool,
+  CacheRegion(CacheMemoryPool* memory_pool,
     const std::shared_ptr<arrow::ChunkedArray>& chunked_array, int64_t size);
   
   ~CacheRegion();
   
   int64_t size() const;
   std::shared_ptr<arrow::ChunkedArray> chunked_array() const;
-  std::shared_ptr<CacheMemoryPool> memory_pool() const;
+  CacheMemoryPool* memory_pool() const;
  private:
   // the pool object associated to the chunked array
   // use shared ptr to managed the life time
-  std::shared_ptr<CacheMemoryPool> memory_pool_;
+  CacheMemoryPool* memory_pool_;
   std::shared_ptr<arrow::ChunkedArray> chunked_array_;
   int64_t size_;
 };

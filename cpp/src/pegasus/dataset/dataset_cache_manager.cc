@@ -150,11 +150,11 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
     
     // Read the columns into ChunkArray.
     // Asumming the cache memory pool is only in same store.
-    std::shared_ptr<CacheMemoryPool> memory_pool(new CacheMemoryPool(cache_engine));
+    CacheMemoryPool* memory_pool = new CacheMemoryPool(cache_engine);
     RETURN_IF_ERROR(memory_pool->Create());
     
     parquet::ArrowReaderProperties properties(parquet::default_arrow_reader_properties());
-    std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, memory_pool.get(), properties));
+    std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, memory_pool, properties));
 
     std::shared_ptr<CachedPartition> partition;
     GetPartition(request_identity, &partition);
