@@ -465,6 +465,251 @@ int DetermineShardBits() {
   return bits;
 }
 
+class BlockCache : public Cache {
+ public:
+  explicit BlockCache(size_t capacity, const string& id)
+  : capacity_(capacity) {
+    // Make empty circular linked list.
+    rl_.next = &rl_;
+    rl_.prev = &rl_;
+  }
+
+  ~BlockCache() {};
+
+  UniquePendingHandle Allocate(Slice key, int val_len, int charge) override {
+    int key_len = key.size();
+    DCHECK_GE(key_len, 0);
+    DCHECK_GE(val_len, 0);
+    int key_len_padded = PEGASUS_ALIGN_UP(key_len, sizeof(void*));
+    UniquePendingHandle h(reinterpret_cast<PendingHandle*>(
+        new uint8_t[sizeof(RLHandle)
+                    + key_len_padded + val_len // the kv_data VLA data
+                    - 1 // (the VLA has a 1-byte placeholder)
+                   ]),
+        PendingHandleDeleter(this));
+    RLHandle* handle = reinterpret_cast<RLHandle*>(h.get());
+    handle->key_length = key_len;
+    handle->val_length = val_len;
+    // TODO(PEGASUS-1091): account for the footprint of structures used by Cache's
+    //                  internal housekeeping (RL handles, etc.) in case of
+    //                  non-automatic charge.
+    handle->charge = (charge == kAutomaticCharge) ? pegasus_malloc_usable_size(h.get())
+                                                  : charge;
+    handle->hash = HashSlice(key);
+    memcpy(handle->kv_data, key.data(), key_len);
+
+    return h;
+  }
+
+  void RL_Append(RLHandle* e) {
+    // Make "e" newest entry by inserting just before rl_.
+    e->next = &rl_;
+    e->prev = rl_.prev;
+    e->prev->next = e;
+    e->next->prev = e;
+    usage_ += e->charge;
+  }
+
+  void RL_Remove(RLHandle* e) {
+    e->next->prev = e->prev;
+    e->prev->next = e->next;
+    DCHECK_GE(usage_, e->charge);
+    usage_ -= e->charge;
+  }
+
+  bool Unref(RLHandle* e) {
+    DCHECK_GT(e->refs.load(std::memory_order_relaxed), 0);
+    return e->refs.fetch_sub(1) == 1;
+  }
+
+  void FreeEntry(RLHandle* e) {
+    DCHECK_EQ(e->refs.load(std::memory_order_relaxed), 0);
+    if (e->eviction_callback) {
+      e->eviction_callback->EvictedEntry(e->key(), e->value());
+    }
+    delete [] e;
+  }
+
+  UniqueHandle Insert(
+    UniquePendingHandle handle,
+    Cache::EvictionCallback* eviction_callback) override {
+    RLHandle* h = reinterpret_cast<RLHandle*>(DCHECK_NOTNULL(handle.release()));
+    // Set the remaining RLHandle members which were not already allocated during
+    // Allocate().
+    h->eviction_callback = eviction_callback;
+    // Two refs for the handle: one from CacheShard, one for the returned handle.
+    h->refs.store(2, std::memory_order_relaxed);
+
+    RLHandle* to_remove_head = nullptr;
+    {
+      std::lock_guard<decltype(mutex_)> l(mutex_);
+
+      RL_Append(h);
+
+      RLHandle* old = table_.Insert(h);
+     if (old != nullptr) {
+        RL_Remove(old);
+        if (Unref(old)) {
+          old->next = to_remove_head;
+          to_remove_head = old;
+        }
+      }
+
+     while (usage_ > capacity_ && rl_.next != &rl_) {
+        RLHandle* old = rl_.next;
+        RL_Remove(old);
+        table_.Remove(old->key(), old->hash);
+        if (Unref(old)) {
+          old->next = to_remove_head;
+          to_remove_head = old;
+        }
+      }
+    }
+
+    // we free the entries here outside of mutex for
+    // performance reasons
+    while (to_remove_head != nullptr) {
+      RLHandle* next = to_remove_head->next;
+      FreeEntry(to_remove_head);
+      to_remove_head = next;
+    }
+
+    return UniqueHandle(reinterpret_cast<Cache::Handle*>(h),
+     Cache::HandleDeleter(this));;
+  }
+
+  void RL_UpdateAfterLookup(RLHandle* e) {
+    RL_Remove(e);
+    RL_Append(e);
+  }
+
+  UniqueHandle Lookup(const Slice& key, CacheBehavior caching) override {
+    const uint32_t hash = HashSlice(key);
+    RLHandle* e;
+    {
+      std::lock_guard<decltype(mutex_)> l(mutex_);
+      e = table_.Lookup(key, hash);
+      if (e != nullptr) {
+        e->refs.fetch_add(1, std::memory_order_relaxed);
+        RL_UpdateAfterLookup(e);
+      }
+   }
+  return UniqueHandle(
+        reinterpret_cast<Cache::Handle*>(e),
+        Cache::HandleDeleter(this));
+  }
+
+  void Erase(const Slice& key) override {
+    const uint32_t hash = HashSlice(key);
+  
+    RLHandle* e;
+    bool last_reference = false;
+    {
+      std::lock_guard<decltype(mutex_)> l(mutex_);
+      e = table_.Remove(key, hash);
+      if (e != nullptr) {
+        RL_Remove(e);
+        last_reference = Unref(e);
+      }
+    }
+    // mutex not held here
+    // last_reference will only be true if e != NULL
+    if (last_reference) {
+      FreeEntry(e);
+    }
+  }
+
+  Slice Value(const UniqueHandle& handle) const override {
+    return reinterpret_cast<const RLHandle*>(handle.get())->value();
+  }
+
+  void Release(Handle* handle) override {
+    RLHandle* e = reinterpret_cast<RLHandle*>(handle);
+    bool last_reference = Unref(e);
+    if (last_reference) {
+      FreeEntry(e);
+    }
+  }
+
+  void Free(PendingHandle* h) override {
+    uint8_t* data = reinterpret_cast<uint8_t*>(h);
+    delete [] data;
+  }
+
+  uint8_t* MutableValue(UniquePendingHandle* handle) override {
+    return reinterpret_cast<RLHandle*>(handle->get())->mutable_val_ptr();
+  }
+
+  size_t Invalidate(const InvalidationControl& ctl) override {
+    size_t invalid_entry_count = 0;
+    size_t valid_entry_count = 0;
+    RLHandle* to_remove_head = nullptr;
+
+    {
+      std::lock_guard<decltype(mutex_)> l(mutex_);
+
+      // rl_.next is the oldest (a.k.a. least relevant) entry in the recency list.
+      RLHandle* h = rl_.next;
+      while (h != nullptr && h != &rl_ &&
+           ctl.iteration_func(valid_entry_count, invalid_entry_count)) {
+        if (ctl.validity_func(h->key(), h->value())) {
+          // Continue iterating over the list.
+          h = h->next;
+          ++valid_entry_count;
+          continue;
+        }
+        // Copy the handle slated for removal.
+        RLHandle* h_to_remove = h;
+        // Prepare for next iteration of the cycle.
+        h = h->next;
+
+        RL_Remove(h_to_remove);
+        table_.Remove(h_to_remove->key(), h_to_remove->hash);
+        if (Unref(h_to_remove)) {
+          h_to_remove->next = to_remove_head;
+          to_remove_head = h_to_remove;
+        }
+        ++invalid_entry_count;
+     }
+    }
+    // Once removed from the lookup table and the recency list, the entries
+    // with no references left must be deallocated because Cache::Release()
+    // wont be called for them from elsewhere.
+    while (to_remove_head != nullptr) {
+      RLHandle* next = to_remove_head->next;
+      FreeEntry(to_remove_head);
+      to_remove_head = next;
+    }
+    return invalid_entry_count;
+  }
+
+private:
+  static inline uint32_t HashSlice(const Slice& s) {
+      return util_hash::CityHash64(
+        reinterpret_cast<const char *>(s.data()), s.size());
+  }
+
+  // Initialized before use.
+  size_t capacity_;
+
+  // mutex_ protects the following state.
+  simple_spinlock mutex_;
+  size_t usage_;
+
+  // Dummy head of recency list.
+  // rl.prev is newest entry, rl.next is oldest entry.
+  RLHandle rl_;
+
+  HandleTable table_;
+
+  atomic<int64_t> deferred_consumption_ { 0 };
+
+  // Initialized based on capacity_ to ensure an upper bound on the error on the
+  // MemTracker consumption.
+  int64_t max_deferred_consumption_;
+
+};
+
 template<Cache::EvictionPolicy policy>
 class ShardedCache : public Cache {
  public:
@@ -590,7 +835,7 @@ Cache* NewCache<Cache::EvictionPolicy::FIFO,
 template<>
 Cache* NewCache<Cache::EvictionPolicy::LRU,
                 Cache::MemoryType::DRAM>(size_t capacity, const std::string& id) {
-  return new cache::ShardedCache<Cache::EvictionPolicy::LRU>(capacity, id);
+  return new cache::BlockCache(capacity, id);
 }
 
 std::ostream& operator<<(std::ostream& os, Cache::MemoryType mem_type) {
