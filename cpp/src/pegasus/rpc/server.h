@@ -85,12 +85,13 @@ class PEGASUS_RPC_EXPORT TableRecordBatchStream : public RecordBatchStream {
  public:
   /// \param[in] reader produces a sequence of record batches
   /// \param[in,out] pool a MemoryPool to use for allocations
-  explicit TableRecordBatchStream(std::shared_ptr<arrow::Table> table,
-   std::vector<std::shared_ptr<CachedColumn>> columns);
+  explicit TableRecordBatchStream(std::vector<std::shared_ptr<CachedColumn>> columns,
+   std::shared_ptr<arrow::Table> table);
 
  private:
-  std::shared_ptr<arrow::Table> table_;
+  // For evict use case, when this columns_ is destructed, the memory pool will be released. So we need ensure the table_ is destructed firstly..
   std::vector<std::shared_ptr<CachedColumn>> columns_;
+  std::shared_ptr<arrow::Table> table_;
 };
 
 /// \brief A reader for IPC payloads uploaded by a client. Also allows

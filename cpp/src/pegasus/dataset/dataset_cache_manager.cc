@@ -107,7 +107,7 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
   //   new rpc::RecordBatchStream(std::shared_ptr<RecordBatchReader>(
   //     new TableBatchReader(*table))));
   *data_stream = std::unique_ptr<rpc::FlightDataStream>(
-  new rpc::TableRecordBatchStream(table, columns));
+  new rpc::TableRecordBatchStream(columns, table));
 
   return Status::OK();
 }
