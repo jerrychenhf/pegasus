@@ -40,7 +40,7 @@ TEST(SpakrCatalogTest, Unit) {
   DataSetRequest::RequestProperties properties;
 
   properties[DataSetRequest::TABLE_LOCATION] = dataset_path;
-  properties[DataSetRequest::PROVIDER] = "SPARK";
+  properties[DataSetRequest::CATALOG_PROVIDER] = "SPARK";
   properties[DataSetRequest::COLUMN_NAMES] = "a, b, c";
   dataset_request.set_properties(properties);
 

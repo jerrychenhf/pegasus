@@ -31,7 +31,7 @@ Status CatalogManager::GetCatalog(DataSetRequest* dataset_request,
   
   const auto properties = dataset_request->get_properties();
   std::unordered_map<std::string, std::string>::const_iterator it = 
-      properties.find(DataSetRequest::PROVIDER);
+      properties.find(DataSetRequest::CATALOG_PROVIDER);
   if (it != properties.end()) {
     if (it->second == CATALOG_ID_SPARK) {
       *catalog = spark_catalog_;
