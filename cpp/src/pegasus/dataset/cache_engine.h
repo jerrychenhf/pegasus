@@ -36,7 +36,7 @@ class CacheEngine {
 
   enum CachePolicy {
     LRU,
-    NonLRU,
+    NonEvict,
   };
 
  private:

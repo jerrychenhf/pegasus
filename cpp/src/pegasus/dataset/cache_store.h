@@ -31,11 +31,12 @@ class CacheStore {
    CacheStore(long capacity, std::shared_ptr<Store> store);
    ~CacheStore();
    Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_region);
+   Status GetUsedSize(long& used_size);
 
   private:
   std::shared_ptr<Store> store_;
   long capacity_;
-  long occupied_size_;
+  long used_size_;
 };
 } // namespace pegasus                              
 

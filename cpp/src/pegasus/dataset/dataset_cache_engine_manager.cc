@@ -38,8 +38,8 @@ Status DatasetCacheEngineManager::Init() {
     if (*it == CacheEngine::CachePolicy::LRU) {
       cache_policy_type = "LRU";
       cache_engine = std::shared_ptr<CacheEngine>(new LruCacheEngine(100));
-    } else if (*it == CacheEngine::CachePolicy::NonLRU) {
-      cache_policy_type = "NonLRU";
+    } else if (*it == CacheEngine::CachePolicy::NonEvict) {
+      cache_policy_type = "NonEvict";
       cache_engine = std::shared_ptr<CacheEngine>(new NonEvictionCacheEngine());
     }
     cached_engines_.insert(std::make_pair(cache_policy_type, cache_engine));
@@ -54,8 +54,8 @@ Status DatasetCacheEngineManager::GetCacheEngine(CacheEngine::CachePolicy cache_
         return Status::KeyError("Could not find cache store.");
       }
       *cache_engine = entry->second;
-    } else if (cache_policy == CacheEngine::CachePolicy::NonLRU) {
-      auto entry = cached_engines_.find("NonLRU");
+    } else if (cache_policy == CacheEngine::CachePolicy::NonEvict) {
+      auto entry = cached_engines_.find("NonEvict");
       if (entry == cached_engines_.end()) {
         return Status::KeyError("Could not find cache store.");
       }

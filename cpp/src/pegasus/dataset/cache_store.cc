@@ -22,7 +22,10 @@ using namespace std;
 namespace pegasus {
   CacheStore::CacheStore(long capacity, std::shared_ptr<Store> store): capacity_(capacity), store_(store) {}
   CacheStore::~CacheStore(){}
-
+  
+  Status CacheStore::GetUsedSize(long& size) {
+    size = used_size_;
+  }
   Status CacheStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) {
       store_->Allocate(size, cache_region);
   }
