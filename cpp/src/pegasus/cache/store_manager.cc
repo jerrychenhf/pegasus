@@ -27,17 +27,32 @@ StoreManager::StoreManager() {
   std::shared_ptr<Store> store;
   std::vector<Store::StoreType> store_types = env->GetStoreTypes();
   for(std::vector<Store::StoreType>::iterator it = store_types.begin(); it != store_types.end(); ++it) {
-    GetStore(*it, &store);
-    stores_->push_back(store);
+    std::shared_ptr<Store> store;
+    if (*it == Store::StoreType::MEMORY) {
+      store = std::shared_ptr<MemoryStore>(new MemoryStore());
+      stores_.insert(std::make_pair("MEMORY", store));
+    } else if (*it == Store::StoreType::DCPMM) {
+      store = std::shared_ptr<DCPMMStore>(new DCPMMStore());
+      stores_.insert(std::make_pair("DCPMM", store));
+    } 
   }
 }
 
 Status StoreManager::GetStore(Store::StoreType store_type, std::shared_ptr<Store>* store) {
+
   if (store_type == Store::StoreType::MEMORY) {
-    *store = std::shared_ptr<MemoryStore>(new MemoryStore());
+    auto  entry = stores_.find("MEMORY");
+    if (entry == stores_.end()) {
+      return Status::KeyError("Could not find  DRAM store.");
+    }
+    *store = entry->second;
     return Status::OK();
   } else if (store_type == Store::StoreType::DCPMM) {
-    *store = std::shared_ptr<DCPMMStore>(new DCPMMStore());
+    auto  entry = stores_.find("DCPMM");
+    if (entry == stores_.end()) {
+      return Status::KeyError("Could not find  DCPMM store.");
+    }
+    *store = entry->second;
     return Status::OK();
   } else {
     return Status::Invalid("Invalid store type!");

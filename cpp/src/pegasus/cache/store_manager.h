@@ -29,7 +29,7 @@ class StoreManager {
   Status GetStore(Store::StoreType cache_type, std::shared_ptr<Store>* store);
 
  private:
-  std::shared_ptr<std::vector<std::shared_ptr<Store>>> stores_;
+  std::unordered_map<std::string, std::shared_ptr<Store>> stores_;
 };
 
 } // namespace pegasus
