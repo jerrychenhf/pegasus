@@ -20,6 +20,7 @@
 
 #include "arrow/record_batch.h"
 #include "arrow/flight/server.h"
+#include "arrow/table.h"
 
 #include "pegasus/dataset/identity.h"
 #include "pegasus/dataset/dataset_cache_block_manager.h"

@@ -71,19 +71,23 @@ Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity, std::sha
   return Status::OK();
  }
 
-// Status DatasetCacheBlockManager::InsertPartition(Identity* identity, std::shared_ptr<CachedPartition> new_partition) {
-//   std::string dataset_path = identity->dataset_path();
-//   std::shared_ptr<CachedDataset>* dataset;
-//   GetCachedDataSet(identity, dataset);
-//   string partition_path = identity->file_path();
-//   (*dataset)->cached_partitions_[partition_path] = new_partition;
-// }
+Status DatasetCacheBlockManager::InsertDataSet(Identity* identity, std::shared_ptr<CachedDataset> new_dataset) {
+  std::string dataset_path = identity->dataset_path();
+  cached_datasets_.insert(std::make_pair(dataset_path, new_dataset));
+}
 
-Status DatasetCacheBlockManager::InsertColumn(Identity* identity, std::shared_ptr<CachedColumn> new_column) {
-  // std::shared_ptr<CachedPartition>* partition;
-  // GetCachedPartition(identity, partition);
-  // int column_id = identity->num_rows();
-  // (*partition)->cached_columns_[std::to_string(column_id)] = std::move(new_column);
+Status DatasetCacheBlockManager::InsertPartition(Identity* identity, std::shared_ptr<CachedPartition> new_partition) {
+  std::string dataset_path = identity->dataset_path();
+  std::shared_ptr<CachedDataset>* dataset;
+  GetCachedDataSet(identity, dataset);
+  string partition_path = identity->file_path();
+  (*dataset)->cached_partitions_[partition_path] = new_partition;
+}
+
+Status DatasetCacheBlockManager::InsertColumn(Identity* identity, string column_id, std::shared_ptr<CachedColumn> new_column) {
+  std::shared_ptr<CachedPartition>* partition;
+  GetCachedPartition(identity, partition);
+  (*partition)->cached_columns_[column_id] = std::move(new_column);
 }
 
 } // namespace pegasus

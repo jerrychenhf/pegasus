@@ -30,13 +30,13 @@ namespace pegasus {
 
 class CachedColumn {
  public:
-  explicit CachedColumn(string partition_path, int column_id, CacheRegion cache_region) :
+  explicit CachedColumn(string partition_path, int column_id, std::shared_ptr<CacheRegion> cache_region) :
   partition_path_(partition_path), column_id_(column_id), cache_region_(cache_region) {}
 
  private:
   string partition_path_;
   int column_id_;
-  CacheRegion cache_region_;
+  std::shared_ptr<CacheRegion> cache_region_;
 };
 
 class CachedPartition {
@@ -64,8 +64,9 @@ class DatasetCacheBlockManager {
   Status GetCachedDataSet(Identity* identity, std::shared_ptr<CachedDataset>* dataset);
   Status GetCachedPartition(Identity* identity, std::shared_ptr<CachedPartition>* partitios);
   Status GetCachedColumns(Identity* identity, std::unordered_map<string, std::shared_ptr<CachedColumn>>* cached_columns);
-  // Status InsertPartition(Identity* identity, std::shared_ptr<CachedPartition> new_partition);
-  Status InsertColumn(Identity* identity, std::shared_ptr<CachedColumn> new_column);
+  Status InsertDataSet(Identity* identity, std::shared_ptr<CachedDataset> new_dataset);
+  Status InsertPartition(Identity* identity, std::shared_ptr<CachedPartition> new_partition);
+  Status InsertColumn(Identity* identity, string column_id, std::shared_ptr<CachedColumn> new_column);
  
  private: 
   std::unordered_map<std::string, std::shared_ptr<CachedDataset>> cached_datasets_;
