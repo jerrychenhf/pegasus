@@ -26,6 +26,7 @@ namespace pegasus {
 
 class CacheEntryHolder {
  public:
+  CacheEntryHolder();
   CacheEntryHolder(long base_offset, long length, long occupied_size);
   ~CacheEntryHolder();
 

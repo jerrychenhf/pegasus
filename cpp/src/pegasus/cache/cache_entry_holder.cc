@@ -21,6 +21,8 @@
 
 namespace pegasus {
 
+CacheEntryHolder::CacheEntryHolder(){}
+
 CacheEntryHolder::CacheEntryHolder(long base_offset, long length, long occupied_size)
     : base_offset_(base_offset), length_(length), occupied_size_(occupied_size) {}
 

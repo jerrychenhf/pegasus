@@ -25,12 +25,14 @@ namespace pegasus {
 
 LruCacheEngine::LruCacheEngine(long capacity): cache_(capacity) {}
 
- Status PutValue() {
+ Status LruCacheEngine::PutValue(std::string partition_path, int column_id, CacheEntryHolder cache_entry_holder) {
    // TODO
    // 1. Get the StoreAllocator by calling DatasetCacheStoreManager#GetStoreAllocator method
    // 2. Call StoreManager#Store#Allocate method to allocate the memory to store the value
    // 3. Call the related LRUxxCache.insert to insert value
    // 4. Update the info in DatasetCacheBlockManager
+  CacheEntryKey key = CacheEntryKey(partition_path, column_id);
+  cache_.insert(key, cache_entry_holder);
  }
 
 LruCacheEngine::~LruCacheEngine() {

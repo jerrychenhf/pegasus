@@ -23,6 +23,9 @@
 #include <boost/compute/detail/lru_cache.hpp>
 #include "pegasus/util/lru_cache.h"
 #include "pegasus/cache/cache_entry_holder.h"
+#include "boost/functional/hash.hpp"
+
+using namespace boost;
 
 namespace pegasus {
 
@@ -38,15 +41,38 @@ class CacheEngine {
   CachePolicy cache_policy;
 };
 
-class CacheKey {
+class CacheEntryKey {
  public:
-  explicit CacheKey(string file_path, int row_group_id, int column_id) : file_path_(file_path),
-  row_group_id_(row_group_id), column_id_(column_id) {}
+  explicit CacheEntryKey(std::string partition_path, int column_id) : partition_path_(partition_path), column_id_(column_id) {
+    static const int kSeedValue = 4;
+    size_t result = kSeedValue;
+
+    boost::hash_combine(result, partition_path);
+    boost::hash_combine(result, std::to_string(column_id));
+    hash_code_ = result;
+  }
+
+  std::size_t Hash() const { return hash_code_; }
+
+  bool operator==(const CacheEntryKey& other) const {
+    // arrow schema does not overload equality operators.
+    if (partition_path_ != other.partition_path_) {
+      return false;
+    }
+
+    if (column_id_ != other.column_id_) {
+      return false;
+    }
+    return true;
+  }
+
+  bool operator!=(const CacheEntryKey& other) const { return !(*this == other); }
+
   
  private:
-  string file_path_;
-  int row_group_id_;
+  std::string partition_path_;
   int column_id_;
+  size_t hash_code_;
 };
 
 class LruCacheEngine : public CacheEngine {
@@ -54,10 +80,10 @@ class LruCacheEngine : public CacheEngine {
   LruCacheEngine(long capacity);
   ~LruCacheEngine();
 
-  Status PutValue();
+  Status PutValue(std::string partition_path, int column_id, CacheEntryHolder cache_entry_holder);
 
  private:
-  LruCache<CacheKey, CacheEntryHolder> cache_;
+  LruCache<CacheEntryKey, CacheEntryHolder> cache_;
 };
 
 class NonLruCacheEngine : public CacheEngine {
