@@ -24,7 +24,8 @@ MemoryStore::MemoryStore() {
 }
 
 Status MemoryStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) {
-
+  uint8_t* address = reinterpret_cast<uint8_t*>(std::malloc(size));
+  *cache_region = std::shared_ptr<CacheRegion>(new CacheRegion(&address, size, 0));
 }
 
 Status MemoryStore::GetTotalSize(long& total_size) {

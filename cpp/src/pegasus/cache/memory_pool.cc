@@ -17,16 +17,22 @@
 
 #include "pegasus/cache/memory_pool.h"
 
-
 namespace pegasus {
     
-DRAMMemoryPool::DRAMMemoryPool() {}
+DRAMMemoryPool::DRAMMemoryPool() {
+  ExecEnv* env =  ExecEnv::GetInstance();
+  store_manager_ = env->get_store_manager();
+}
 DRAMMemoryPool::~DRAMMemoryPool() {}
 
 arrow::Status DRAMMemoryPool::Allocate(int64_t size, uint8_t** out) {
-    *out = reinterpret_cast<uint8_t*>(std::malloc(size));
-    return arrow::Status::OK();
-  }
+  std::shared_ptr<Store> store;
+  store_manager_->GetStore(Store::MEMORY, &store);
+  std::shared_ptr<CacheRegion> cache_region;
+  store->Allocate(size, &cache_region);
+  out = cache_region->address();
+  return arrow::Status::OK();
+}
 
   void DRAMMemoryPool::Free(uint8_t* buffer, int64_t size)  { std::free(buffer); }
 

@@ -27,13 +27,14 @@ namespace pegasus {
 class CacheRegion {
  public:
   CacheRegion();
-  CacheRegion(long base_offset, long length, long occupied_size);
+  CacheRegion(uint8_t** address, long length, long occupied_size);
+  uint8_t** address();
   long length();
   long occupies_size();
   ~CacheRegion();
 
  private:
-  long base_offset_;
+  uint8_t** address_;
   long length_;
   long occupied_size_; 
 };

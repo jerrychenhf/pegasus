@@ -20,6 +20,7 @@
 
 #include <arrow/status.h>
 #include <arrow/memory_pool.h>
+#include "pegasus/runtime/exec_env.h"
 
 using namespace arrow;
 
@@ -31,6 +32,7 @@ class DRAMMemoryPool : public arrow::MemoryPool
 public:
   DRAMMemoryPool();
   ~DRAMMemoryPool();
+
   arrow::Status Allocate(int64_t size, uint8_t **out) override;
   arrow::Status Reallocate(int64_t old_size, int64_t new_size, uint8_t **ptr) override;
 
@@ -41,6 +43,9 @@ public:
   int64_t max_memory() const override;
 
   std::string backend_name() const override;
+
+  private:
+    std::shared_ptr<StoreManager> store_manager_;
 };
 } // namespace pegasus
 

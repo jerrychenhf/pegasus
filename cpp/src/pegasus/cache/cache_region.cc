@@ -23,10 +23,13 @@ namespace pegasus {
 
 CacheRegion::CacheRegion(){}
 
-CacheRegion::CacheRegion(long base_offset, long length, long occupied_size)
-    : base_offset_(base_offset), length_(length), occupied_size_(occupied_size) {}
+CacheRegion::CacheRegion(uint8_t** base_offset, long length, long occupied_size)
+    : address_(base_offset), length_(length), occupied_size_(occupied_size) {}
 
  CacheRegion::~CacheRegion () {}  
+ uint8_t** CacheRegion::address() {
+   return address_;
+ }
 
  long CacheRegion::length() {
      return length_;
