@@ -623,19 +623,6 @@ class BlockCache : public Cache {
     return reinterpret_cast<const RLHandle*>(handle.get())->value();
   }
 
-  void Release(Handle* handle) override {
-    RLHandle* e = reinterpret_cast<RLHandle*>(handle);
-    bool last_reference = Unref(e);
-    if (last_reference) {
-      FreeEntry(e);
-    }
-  }
-
-  void Free(PendingHandle* h) override {
-    uint8_t* data = reinterpret_cast<uint8_t*>(h);
-    delete [] data;
-  }
-
   uint8_t* MutableValue(UniquePendingHandle* handle) override {
     return reinterpret_cast<RLHandle*>(handle->get())->mutable_val_ptr();
   }
@@ -681,6 +668,20 @@ class BlockCache : public Cache {
       to_remove_head = next;
     }
     return invalid_entry_count;
+  }
+  
+protected:
+  void Release(Handle* handle) override {
+    RLHandle* e = reinterpret_cast<RLHandle*>(handle);
+    bool last_reference = Unref(e);
+    if (last_reference) {
+      FreeEntry(e);
+    }
+  }
+
+  void Free(PendingHandle* h) override {
+    uint8_t* data = reinterpret_cast<uint8_t*>(h);
+    delete [] data;
   }
 
 private:
