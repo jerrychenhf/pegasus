@@ -67,16 +67,28 @@ const std::string CacheStoreManager::CACHE_STORE_ID_DCPMM = "DCPMM";
   }
 
   Status CacheStoreManager::GetCacheStore(CacheStore** cache_store){
-    // DRAM > DCPMM > FILE
+  
     if(cached_stores_.size() == 1) {
       *cache_store = cached_stores_.begin()->second.get();
       return Status::OK();
     } else {
-      // TO BE IMPROVED
-      // choose stores depend on other factors
-      Status status = GetCacheStore(CACHE_STORE_ID_DRAM, cache_store);
+      // choose max available size store
+      int64_t max_size;
+      std::string max_key;
+      for (auto iter = cached_stores_.begin();
+       iter != cached_stores_.end(); iter++) {
+         std::shared_ptr<CacheStore> cache_store = iter->second;
+         max_size = std::max(max_size, cache_store->GetAvailableSize());
+         max_key = iter->first;
+      }
+
+      Status status = GetCacheStore(max_key, cache_store);
+
       if(!status.ok()) {
-        return GetCacheStore(CACHE_STORE_ID_DCPMM, cache_store);
+        stringstream ss;
+        ss << "Failed to get the cache store in cache store manager with id: " << max_key;
+        LOG(ERROR) << ss.str();
+        return Status::UnknownError(ss.str());
       }
       
       return Status::OK();

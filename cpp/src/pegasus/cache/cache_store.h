@@ -39,6 +39,7 @@ class CacheStore {
    
    int64_t GetUsedSize() const { return used_size_; }
    int64_t GetCapacity() const { return capacity_; }
+   int64_t GetAvailableSize() const { return capacity_ - used_size_; }
    
   private:
   Store* store_;
