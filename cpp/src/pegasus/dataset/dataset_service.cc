@@ -155,7 +155,7 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   }
 
   std::shared_ptr<arrow::Schema> new_schema;
-  auto result = builder.Finish();
+  arrow::Result<std::shared_ptr<arrow::Schema>> result = builder.Finish();
   if (result.ok()) {
     new_schema = result.ValueOrDie();
   } else {
