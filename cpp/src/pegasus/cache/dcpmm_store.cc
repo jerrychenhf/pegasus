@@ -45,6 +45,7 @@ namespace pegasus {
 typedef int (*memkind_create_pmem)(const char*, size_t, memkind**);
 typedef int (*memkind_destroy_kind)(memkind*);
 typedef void* (*memkind_malloc)(memkind*, size_t);
+typedef void* (*memkind_realloc)(memkind*, void*, size_t);
 typedef size_t (*memkind_malloc_usable_size)(memkind*, void*);
 typedef void (*memkind_free)(memkind*, void*);
 #define CALL_MEMKIND(func_name, ...) ((func_name)g_##func_name)(__VA_ARGS__)
@@ -53,6 +54,7 @@ typedef void (*memkind_free)(memkind*, void*);
 void* g_memkind_create_pmem;
 void* g_memkind_destroy_kind;
 void* g_memkind_malloc;
+void* g_memkind_realloc;
 void* g_memkind_malloc_usable_size;
 void* g_memkind_free;
 
@@ -181,7 +183,23 @@ Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
   return Status::OK();
 }
 
-Status Reallocate(int64_t old_size, int64_t new_size, StoreRegion* store_region) {
+Status DCPMMStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* store_region) {
+  DCHECK(store_region != NULL);
+
+  //check the free size. If no free size available, fail
+  int64_t available_size = capacity_ - used_size_;
+  if ((new_size - old_size) > available_size) {
+    return Status::Invalid("Request memory size" , (new_size - old_size), "is large than available size.");
+  }
+
+  void* p = CALL_MEMKIND(memkind_realloc, vmp_, store_region->address(), new_size);
+  
+  uint8_t* new_address = reinterpret_cast<uint8_t*>(p);
+  
+  store_region->reset_address(new_address, new_size);
+
+  size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, p);
+  used_size_ += occupied_size;
   return Status::OK();
 }
 
