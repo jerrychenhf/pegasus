@@ -22,7 +22,7 @@
 
 #include "pegasus/dataset/identity.h"
 #include "pegasus/dataset/cache_engine.h"
-#include "pegasus/cache/cache_entry_holder.h"
+#include "pegasus/cache/cache_region.h"
 
 using namespace std;
 
@@ -30,13 +30,13 @@ namespace pegasus {
 
 class CachedColumn {
  public:
-  explicit CachedColumn(string partition_path, int column_id, CacheEntryHolder cache_entry_holder) :
+  explicit CachedColumn(string partition_path, int column_id, CacheRegion cache_entry_holder) :
   partition_path_(partition_path), column_id_(column_id), cache_entry_holder_(cache_entry_holder) {}
 
  private:
   string partition_path_;
   int column_id_;
-  CacheEntryHolder cache_entry_holder_;
+  CacheRegion cache_entry_holder_;
 };
 
 class CachedPartition {

@@ -22,7 +22,7 @@
 #include "pegasus/dataset/dataset.h"
 #include <boost/compute/detail/lru_cache.hpp>
 #include "pegasus/util/lru_cache.h"
-#include "pegasus/cache/cache_entry_holder.h"
+#include "pegasus/cache/cache_region.h"
 #include "boost/functional/hash.hpp"
 #include "pegasus/dataset/cache_store_manager.h"
 
@@ -32,7 +32,7 @@ namespace pegasus {
 
 class CacheEngine {
  public:
- virtual Status PutValue(std::string partition_path, int column_id, CacheEntryHolder cache_entry_holder) = 0;
+ virtual Status PutValue(std::string partition_path, int column_id, CacheRegion cache_entry_holder) = 0;
 
   enum CachePolicy {
     LRU,
@@ -82,20 +82,20 @@ class LruCacheEngine : public CacheEngine {
   LruCacheEngine(long capacity);
   ~LruCacheEngine();
 
-  Status PutValue(std::string partition_path, int column_id, CacheEntryHolder cache_entry_holder) override;
+  Status PutValue(std::string partition_path, int column_id, CacheRegion cache_entry_holder) override;
 // on evict event; call back
  private:
  std::shared_ptr<CacheStoreManager> cache_store_manager_;
-  LruCache<CacheEntryKey, CacheEntryHolder> cache_;
+  LruCache<CacheEntryKey, CacheRegion> cache_;
 };
 
 //NonEvictCacheEngine 
-class NonLruCacheEngine : public CacheEngine {
+class NonEvictionCacheEngine : public CacheEngine {
  public:
-  NonLruCacheEngine();
-  ~NonLruCacheEngine();
+  NonEvictionCacheEngine();
+  ~NonEvictionCacheEngine();
 
-  Status PutValue(std::string partition_path, int column_id, CacheEntryHolder cache_entry_holder) override;
+  Status PutValue(std::string partition_path, int column_id, CacheRegion cache_entry_holder) override;
 };
 } // namespace pegasus                              
 

@@ -15,24 +15,29 @@
 // specific language governing permissions and limitations
 // under the License.
 
-/// \brief Data structure providing an opaque identifier or credential to use
-/// when requesting a data stream with the DoGet RPC
-#include "pegasus/cache/cache_entry_holder.h"
+#ifndef PEGASUS_MEMORY_BLOCK_HOLDER_H
+#define PEGASUS_MEMORY_BLOCK_HOLDER_H
+
+#include <string>
+
+using namespace std;
 
 namespace pegasus {
 
-CacheEntryHolder::CacheEntryHolder(){}
+class CacheRegion {
+ public:
+  CacheRegion();
+  CacheRegion(long base_offset, long length, long occupied_size);
+  long length();
+  long occupies_size();
+  ~CacheRegion();
 
-CacheEntryHolder::CacheEntryHolder(long base_offset, long length, long occupied_size)
-    : base_offset_(base_offset), length_(length), occupied_size_(occupied_size) {}
-
- CacheEntryHolder::~CacheEntryHolder () {}  
-
- long CacheEntryHolder::length() {
-     return length_;
- }
- long CacheEntryHolder::occupies_size() {
-     return occupied_size_;
- }
+ private:
+  long base_offset_;
+  long length_;
+  long occupied_size_; 
+};
 
 } // namespace pegasus
+
+#endif  // PEGASUS_MEMORY_BLOCK_HOLDER_H

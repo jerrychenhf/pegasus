@@ -22,7 +22,7 @@
 
 #include "pegasus/common/status.h"
 #include "pegasus/cache/store.h"
-#include "pegasus/cache/cache_entry_holder.h"
+#include "pegasus/cache/cache_region.h"
 
 namespace pegasus {
 
@@ -30,7 +30,7 @@ class CacheStore {
   public:
    CacheStore(long capacity, std::shared_ptr<Store> store);
    ~CacheStore();
-   Status Allocate(long size, std::shared_ptr<CacheEntryHolder>* cache_entry_holder);
+   Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_entry_holder);
 
   private:
   std::shared_ptr<Store> store_;

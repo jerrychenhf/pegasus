@@ -23,7 +23,7 @@ namespace pegasus {
   CacheStore::CacheStore(long capacity, std::shared_ptr<Store> store): capacity_(capacity), store_(store) {}
   CacheStore::~CacheStore(){}
 
-  Status CacheStore::Allocate(long size, std::shared_ptr<CacheEntryHolder>* cache_entry_holder) {
+  Status CacheStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_entry_holder) {
       store_->Allocate(size, cache_entry_holder);
   }
 } // namespace pegasus

@@ -60,7 +60,7 @@ set (PEGASUS_LIBS
   DatasetCacheManager
   DatasetCacheBlockManager
   DatasetCacheEngineManager
-  CacheEntryHolder
+  CacheRegion
   DRAMMemoryPool
   CacheEngine
   CacheStore

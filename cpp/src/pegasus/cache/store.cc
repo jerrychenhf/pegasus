@@ -23,7 +23,7 @@ MemoryStore::MemoryStore() {
 
 }
 
-Status MemoryStore::Allocate(long size, std::shared_ptr<CacheEntryHolder>* cache_entry_holder) {
+Status MemoryStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_entry_holder) {
 
 }
 
@@ -43,7 +43,7 @@ DCPMMStore::DCPMMStore() {
 
 }
 
-Status DCPMMStore::Allocate(long size, std::shared_ptr<CacheEntryHolder>* cache_entry_holder) {
+Status DCPMMStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_entry_holder) {
 
 }
 
