@@ -32,7 +32,7 @@ std::string Identity::file_path() const {
     return file_path_;
   }
 
-std::vector<int64_t> Identity::col_ids() const { 
+std::vector<int> Identity::col_ids() const { 
     return col_ids_;
   }
 
