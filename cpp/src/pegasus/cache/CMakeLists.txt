@@ -26,7 +26,7 @@ add_library(Cache
   store.cc
   store_manager.cc
   cache_region.cc
-  memory_pool.cc
+  cache_memory_pool.cc
 )
 add_dependencies(Cache gen-deps)
 

@@ -28,11 +28,11 @@ using namespace arrow;
 namespace pegasus
 {
 
-class DRAMMemoryPool : public arrow::MemoryPool
+class CacheMemoryPool : public arrow::MemoryPool
 {
 public:
-  DRAMMemoryPool(std::shared_ptr<CacheEngine> cache_engine);
-  ~DRAMMemoryPool();
+  CacheMemoryPool(std::shared_ptr<CacheEngine> cache_engine);
+  ~CacheMemoryPool();
 
   arrow::Status Allocate(int64_t size, uint8_t **out) override;
   arrow::Status Reallocate(int64_t old_size, int64_t new_size, uint8_t **ptr) override;

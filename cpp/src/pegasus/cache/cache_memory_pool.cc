@@ -15,17 +15,17 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "cache/memory_pool.h"
+#include "cache/cache_memory_pool.h"
 
 namespace pegasus {
     
-DRAMMemoryPool::DRAMMemoryPool(std::shared_ptr<CacheEngine> cache_engine) {
+CacheMemoryPool::CacheMemoryPool(std::shared_ptr<CacheEngine> cache_engine) {
   cache_engine_ = cache_engine;
   occupied_size = 0;
 }
-DRAMMemoryPool::~DRAMMemoryPool() {}
+CacheMemoryPool::~CacheMemoryPool() {}
 
-arrow::Status DRAMMemoryPool::Allocate(int64_t size, uint8_t** out) {
+arrow::Status CacheMemoryPool::Allocate(int64_t size, uint8_t** out) {
   if (size < 0) {
     return arrow::Status::Invalid("negative malloc size");
   }
@@ -39,9 +39,9 @@ arrow::Status DRAMMemoryPool::Allocate(int64_t size, uint8_t** out) {
   return arrow::Status::OK();
 }
 
-void DRAMMemoryPool::Free(uint8_t* buffer, int64_t size)  { std::free(buffer); }
+void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  { std::free(buffer); }
 
-arrow::Status DRAMMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
+arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
   *ptr = reinterpret_cast<uint8_t*>(std::realloc(*ptr, new_size));
 
   if (*ptr == NULL) {
@@ -51,10 +51,10 @@ arrow::Status DRAMMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uin
   return arrow::Status::OK();
 }
 
-int64_t DRAMMemoryPool::bytes_allocated() const  { return occupied_size; }
+int64_t CacheMemoryPool::bytes_allocated() const  { return occupied_size; }
   
-int64_t DRAMMemoryPool::max_memory() const {return 100;}
+int64_t CacheMemoryPool::max_memory() const {return 100;}
 
-std::string DRAMMemoryPool::backend_name() const { return "DRAM"; }
+std::string CacheMemoryPool::backend_name() const { return "DRAM"; }
 
 } // namespace pegasus
