@@ -19,6 +19,7 @@
 #define PEGASUS_DATASET_CACHE_ENGINE_MANAGER_H
 
 #include "pegasus/common/status.h"
+#include "pegasus/dataset/cache_engine.h"
 
 
 using namespace std;
@@ -29,8 +30,11 @@ class DatasetCacheEngineManager {
   DatasetCacheEngineManager();
   ~DatasetCacheEngineManager();
 
-  Status ListCacheEngines();
-  Status GetCacheEngine();
+  Status ListCacheEngines(std::shared_ptr<std::vector<std::shared_ptr<CacheEngine>>>* cache_engines);
+  Status GetCacheEngine(CacheEngine::CachePolicy cache_policy, std::shared_ptr<CacheEngine>* cache_engine);
+
+  private:
+  std::shared_ptr<std::vector<std::shared_ptr<CacheEngine>>> cache_engines_;
 };
 
 } // namespace pegasus

@@ -22,6 +22,7 @@
 #include "pegasus/common/worker_manager.h"
 #include "pegasus/dataset/dataset_store.h"
 #include "pegasus/storage/storage_plugin_factory.h"
+#include "pegasus/dataset/cache_engine.h"
 
 using namespace std;
 
@@ -64,6 +65,8 @@ class ExecEnv {
 
   std::vector<Store::StoreType> GetStoreTypes();
 
+  std::vector<CacheEngine::CachePolicy> GetCachePolicies();
+
   std::string GetNameNodeHost();
 
   int32_t GetNameNodePort();
@@ -81,6 +84,7 @@ class ExecEnv {
   int32_t worker_grpc_port_;
   StoragePlugin::StoragePluginType storage_plugin_type_;
   std::vector<Store::StoreType> store_types_;
+  std::vector<CacheEngine::CachePolicy> cache_policies_;
 
   std::string namenode_hostname_;
   int32_t namenode_port_;

@@ -24,4 +24,6 @@ namespace pegasus {
 MemoryBlockHolder::MemoryBlockHolder(long base_offset, long length, long occupied_size)
     : base_offset_(base_offset), length_(length), occupied_size_(occupied_size) {}
 
+ MemoryBlockHolder::~MemoryBlockHolder () {}  
+
 } // namespace pegasus

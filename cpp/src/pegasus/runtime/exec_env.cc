@@ -64,6 +64,8 @@ ExecEnv::ExecEnv(const std::string& planner_hostname, int32_t planner_port,
       store_types_.push_back(Store::StoreType::FILE);
     }
   }
+  // TODO need get the cache policy and store policy from configuration
+  cache_policies_.push_back(CacheEngine::LRU);
 
   exec_env_ = this;
 }
@@ -90,6 +92,10 @@ StoragePlugin::StoragePluginType const ExecEnv::GetStoragePluginType() {
 
 std::vector<Store::StoreType> ExecEnv::GetStoreTypes() {
   return store_types_;
+}
+
+std::vector<CacheEngine::CachePolicy> ExecEnv::GetCachePolicies() {
+  return cache_policies_;
 }
 
 std::string ExecEnv::GetNameNodeHost() {

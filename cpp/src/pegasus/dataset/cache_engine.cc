@@ -37,4 +37,7 @@ LruCacheEngine::~LruCacheEngine() {
 
 }
 
+NonLruCacheEngine::NonLruCacheEngine() {}
+NonLruCacheEngine:: ~NonLruCacheEngine(){}
+
 } // namespace pegasus
