@@ -49,8 +49,9 @@ typedef ClientConnection<rpc::FlightClient> FlightClientConnection;
 WorkerHeartbeat::WorkerHeartbeat()
   : heartbeat_client_cache_(new FlightClientCache()),
     node_info_update_timestamp_(0),
-    node_info_heartbeat_timestamp_(0),
-    node_info_changed_(0)
+    node_info_changed_(0),
+    node_info_heartbeat_timestamp_(0)
+    
 {
   heartbeat_threadpool_ = std::unique_ptr<ThreadPool<ScheduledHeartbeat>>(
     new ThreadPool<ScheduledHeartbeat>("worker-heartbeat",
