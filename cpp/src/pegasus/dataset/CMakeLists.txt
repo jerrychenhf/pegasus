@@ -72,11 +72,6 @@ add_library(DatasetCacheEngineManager
 )
 add_dependencies(DatasetCacheEngineManager gen-deps)
 
-add_library(DatasetCacheStoreManager
-  dataset_cache_store_manager.cc
-)
-add_dependencies(DatasetCacheStoreManager gen-deps)
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++0x")
 
 

@@ -27,7 +27,7 @@
 namespace pegasus {
 
 DatasetCacheManager::DatasetCacheManager(): dataset_cache_block_manager_(new DatasetCacheBlockManager()),
- dataset_cache_engine_manager_(new DatasetCacheEngineManager()), dataset_cache_store_manager_(new DatasetCacheStoreManager()){
+ dataset_cache_engine_manager_(new DatasetCacheEngineManager()) {
    ExecEnv* env =  ExecEnv::GetInstance();
    storage_plugin_factory_ = env->get_storage_plugin_factory();
 }
@@ -60,7 +60,6 @@ Status DatasetCacheManager::GetDatasetStream(Identity* identity, std::unique_ptr
     std::shared_ptr<HdfsReadableFile> file;
 
     storage_plugin_->GetReadableFile(partition_path, &file);
-    Store::StoreType store_type = dataset_cache_store_manager_->GetStorePolicy();
 
     std::shared_ptr<MemoryPool>* memory_pool;
     // dataset_cache_store_manager_->GetStoreMemoryPool(store_type, memory_pool);
