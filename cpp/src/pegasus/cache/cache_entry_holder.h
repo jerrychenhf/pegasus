@@ -24,10 +24,10 @@ using namespace std;
 
 namespace pegasus {
 
-class MemoryBlockHolder {
+class CacheEntryHolder {
  public:
-  MemoryBlockHolder(long base_offset, long length, long occupied_size);
-  ~MemoryBlockHolder();
+  CacheEntryHolder(long base_offset, long length, long occupied_size);
+  ~CacheEntryHolder();
 
  private:
   long base_offset_;

@@ -23,6 +23,7 @@
 #include "pegasus/dataset/identity.h"
 #include "pegasus/cache/store_manager.h"
 #include "pegasus/dataset/cache_engine.h"
+#include "pegasus/cache/cache_entry_holder.h"
 
 using namespace std;
 
@@ -30,12 +31,12 @@ namespace pegasus {
 
 class CachedColumn {
  public:
-  explicit CachedColumn(int column_id, std::string address) :
-  column_id_(column_id), address_(address) {}
+  explicit CachedColumn(int column_id, CacheEntryHolder cache_entry_holder) :
+  column_id_(column_id), cache_entry_holder_(cache_entry_holder) {}
 
  private:
   int column_id_;
-  std::string address_;
+  CacheEntryHolder cache_entry_holder_;
 };
 
 class CachedPartition {

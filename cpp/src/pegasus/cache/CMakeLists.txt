@@ -29,10 +29,10 @@ add_library(Store
 )
 add_dependencies(Store gen-deps)
 
-add_library(MemoryBlockHolder
-  memory_block_holder.cc
+add_library(CacheEntryHolder
+  cache_entry_holder.cc
 )
-add_dependencies(MemoryBlockHolder gen-deps)
+add_dependencies(CacheEntryHolder gen-deps)
 
 add_library(DRAMMemoryPool
   memory_pool.cc

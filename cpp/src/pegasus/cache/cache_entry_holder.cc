@@ -17,13 +17,13 @@
 
 /// \brief Data structure providing an opaque identifier or credential to use
 /// when requesting a data stream with the DoGet RPC
-#include "pegasus/cache/memory_block_holder.h"
+#include "pegasus/cache/cache_entry_holder.h"
 
 namespace pegasus {
 
-MemoryBlockHolder::MemoryBlockHolder(long base_offset, long length, long occupied_size)
+CacheEntryHolder::CacheEntryHolder(long base_offset, long length, long occupied_size)
     : base_offset_(base_offset), length_(length), occupied_size_(occupied_size) {}
 
- MemoryBlockHolder::~MemoryBlockHolder () {}  
+ CacheEntryHolder::~CacheEntryHolder () {}  
 
 } // namespace pegasus

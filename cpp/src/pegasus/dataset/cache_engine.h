@@ -22,7 +22,7 @@
 #include "pegasus/dataset/dataset.h"
 #include <boost/compute/detail/lru_cache.hpp>
 #include "pegasus/util/lru_cache.h"
-#include "pegasus/cache/memory_block_holder.h"
+#include "pegasus/cache/cache_entry_holder.h"
 
 namespace pegasus {
 
@@ -57,7 +57,7 @@ class LruCacheEngine : public CacheEngine {
   Status PutValue();
 
  private:
-  LruCache<CacheKey, MemoryBlockHolder> cache_;
+  LruCache<CacheKey, CacheEntryHolder> cache_;
 };
 
 class NonLruCacheEngine : public CacheEngine {
