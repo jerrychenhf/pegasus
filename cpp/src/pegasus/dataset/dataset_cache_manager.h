@@ -19,7 +19,6 @@
 #define PEGASUS_DATASET_CACHE_MANAGER_H
 
 #include "arrow/record_batch.h"
-#include "arrow/flight/server.h"
 #include "arrow/table.h"
 
 #include "dataset/identity.h"
@@ -27,10 +26,10 @@
 #include "dataset/dataset_cache_engine_manager.h"
 #include "storage/storage_plugin.h"
 #include "storage/storage_plugin_factory.h"
+#include "rpc/server.h"
 
 using namespace std;
 using namespace arrow;
-using namespace arrow::flight;
 
 namespace pegasus {
 
@@ -39,7 +38,7 @@ class DatasetCacheManager {
   DatasetCacheManager();
   ~DatasetCacheManager();
 
-  Status GetDatasetStream(Identity* identity, std::unique_ptr<FlightDataStream>* data_stream);
+  Status GetDatasetStream(Identity* identity, std::unique_ptr<rpc::FlightDataStream>* data_stream);
   static CacheEngine::CachePolicy GetCachePolicy(Identity* identity);
 
  private: 

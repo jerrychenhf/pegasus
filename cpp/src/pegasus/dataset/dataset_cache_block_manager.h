@@ -23,6 +23,7 @@
 #include "dataset/identity.h"
 #include "dataset/cache_engine.h"
 #include "cache/cache_region.h"
+#include "arrow/table.h"
 
 using namespace std;
 
@@ -30,13 +31,15 @@ namespace pegasus {
 
 class CachedColumn {
  public:
-  explicit CachedColumn(string partition_path, int column_id, std::shared_ptr<CacheRegion> cache_region) :
-  partition_path_(partition_path), column_id_(column_id), cache_region_(cache_region) {}
+  explicit CachedColumn(string partition_path, int column_id, std::shared_ptr<arrow::ChunkedArray> chunked_array) :
+  partition_path_(partition_path), column_id_(column_id), chunked_array_(chunked_array) {}
 
- private:
+
+
+ public:
   string partition_path_;
   int column_id_;
-  std::shared_ptr<CacheRegion> cache_region_;
+  std::shared_ptr<arrow::ChunkedArray> chunked_array_;
 };
 
 class CachedPartition {
