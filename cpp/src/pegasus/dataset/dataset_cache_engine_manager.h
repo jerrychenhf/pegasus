@@ -30,11 +30,11 @@ class DatasetCacheEngineManager {
   DatasetCacheEngineManager();
   ~DatasetCacheEngineManager();
 
-  Status ListCacheEngines(std::shared_ptr<std::vector<std::shared_ptr<CacheEngine>>>* cache_engines);
+  Status Init();
   Status GetCacheEngine(CacheEngine::CachePolicy cache_policy, std::shared_ptr<CacheEngine>* cache_engine);
 
   private:
-  std::shared_ptr<std::vector<std::shared_ptr<CacheEngine>>> cache_engines_;
+   std::unordered_map<std::string, std::shared_ptr<CacheEngine>> cached_engines_;
 };
 
 } // namespace pegasus

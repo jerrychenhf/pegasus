@@ -27,11 +27,11 @@ namespace pegasus {
   Status CacheStoreManager::Init() {
     ExecEnv* env =  ExecEnv::GetInstance();
     std::shared_ptr<Store> store;
-    std::unordered_map<string, long> store_infos = env->GetCacheStoresInfo();
+    std::unordered_map<string, long> cache_stores_info = env->GetCacheStoresInfo();
     store_manager_ = env->get_store_manager();
 
     Store::StoreType store_type_;
-    for(std::unordered_map<string, long>::iterator it = store_infos.begin(); it != store_infos.end(); ++it) {
+    for(std::unordered_map<string, long>::iterator it = cache_stores_info.begin(); it != cache_stores_info.end(); ++it) {
       string store_type = it->first;
       long capacity = it->second;
       std::shared_ptr<Store> store;
@@ -46,11 +46,17 @@ namespace pegasus {
 
       store_manager_->GetStore(store_type_, &store);
       std::shared_ptr<CacheStore> cache_store = std::shared_ptr<CacheStore>(new CacheStore(capacity, store));
-      cache_stores_->push_back(cache_store);
+      cached_stores_.insert(std::make_pair(store_type, cache_store));
     }
   }
 
   Status CacheStoreManager::GetCacheStore(std::shared_ptr<CacheStore>* cache_store){
-      // MEMORY > DCPMM > FILE
+    // MEMORY > DCPMM > FILE
+    auto entry = cached_stores_.find("MEMORY");
+    if (entry == cached_stores_.end()) {
+      return Status::KeyError("Could not find  cache store.");
+    }
+    *cache_store = entry->second;
+    return Status::OK();
   }
 } // namespace pegasus

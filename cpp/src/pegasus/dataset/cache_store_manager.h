@@ -36,7 +36,7 @@ class CacheStoreManager {
    Status GetCacheStore(std::shared_ptr<CacheStore>* cache_store);
 
   private:
-   std::shared_ptr<std::vector<std::shared_ptr<CacheStore>>> cache_stores_;
+   std::unordered_map<std::string, std::shared_ptr<CacheStore>> cached_stores_;
    std::shared_ptr<StoreManager> store_manager_;
 };
 } // namespace pegasus                              
