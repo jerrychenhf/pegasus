@@ -165,7 +165,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       std::shared_ptr<arrow::ChunkedArray> chunked_array;
       RETURN_IF_ERROR(parquet_reader->ReadColumnChunk(*iter, &chunked_array));
       int64_t column_size = memory_pool->bytes_allocated() - occupied_size;
-      occupied_size = memory_pool->bytes_allocated() + occupied_size;
+      occupied_size += column_size;
       CacheRegion* cache_region = new CacheRegion(memory_pool,
         chunked_array, column_size);
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
