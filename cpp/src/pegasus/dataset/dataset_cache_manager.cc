@@ -34,7 +34,7 @@ DatasetCacheManager::DatasetCacheManager(): dataset_cache_block_manager_(new Dat
 DatasetCacheManager::~DatasetCacheManager() {
 }
 
-CacheEngine::CachePolicy DatasetCacheManager::GetCachePolicy(Identity* identity) {
+CacheEngine::CachePolicy GetCachePolicy(Identity* identity) {
   // TODO Choose the CachePolicy based on the data type in Identity
   return CacheEngine::CachePolicy::LRU;
 }
