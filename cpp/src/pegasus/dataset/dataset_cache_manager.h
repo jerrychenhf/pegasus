@@ -29,7 +29,6 @@
 #include "rpc/server.h"
 
 using namespace std;
-using namespace arrow;
 
 namespace pegasus {
 
