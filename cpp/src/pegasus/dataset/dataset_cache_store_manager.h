@@ -18,7 +18,11 @@
 #ifndef PEGASUS_DATASET_CACHE_STORE_MANAGER_H
 #define PEGASUS_DATASET_CACHE_STORE_MANAGER_H
 
+#include <unordered_map>
+
 #include "pegasus/common/status.h"
+#include "pegasus/cache/store.h"
+
 
 
 using namespace std;
@@ -29,8 +33,10 @@ class DatasetCacheStoreManager {
   DatasetCacheStoreManager();
   ~DatasetCacheStoreManager();
 
-  Status ListStoreAllocators();
-  Status GetStoreAllocator();
+  Status GetStoreAllocator(std::shared_ptr<Store>* store);
+
+  private:
+  std::unordered_map<std::string, std::shared_ptr<Store>> configured_stores_;
 };
 
 } // namespace pegasus

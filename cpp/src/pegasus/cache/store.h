@@ -28,6 +28,7 @@ class Store {
   virtual Status Allocate(long size) = 0;
   virtual Status GetTotalSize(long& total_size) = 0;
   virtual Status GetUsedSize(long& used_size) = 0;
+  virtual std::string GetStoreName() = 0;
 
   enum StoreType {
     MEMORY,
@@ -51,6 +52,8 @@ class MemoryStore : public Store {
   Status Allocate(long size) override;
   Status GetTotalSize(long& total_size) override;
   Status GetUsedSize(long& used_size) override;
+  std::string GetStoreName() override;
+
 };
 
 class DCPMMStore : public Store {
@@ -59,6 +62,7 @@ class DCPMMStore : public Store {
   Status Allocate(long size) override;
   Status GetTotalSize(long& total_size) override;
   Status GetUsedSize(long& used_size) override;
+  std::string GetStoreName() override;
 };
 
 class FileStore : public Store {
@@ -67,6 +71,7 @@ class FileStore : public Store {
   Status Allocate(long size) override;
   Status GetTotalSize(long& total_size) override;
   Status GetUsedSize(long& used_size) override;
+  std::string GetStoreName() override;
 };
 
 } // namespace pegasus

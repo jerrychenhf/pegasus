@@ -67,6 +67,8 @@ class ExecEnv {
 
   std::vector<CacheEngine::CachePolicy> GetCachePolicies();
 
+  std::vector<Store::StoreType> GetConfiguredStoreTypes();
+
   std::string GetNameNodeHost();
 
   int32_t GetNameNodePort();
@@ -84,6 +86,7 @@ class ExecEnv {
   int32_t worker_grpc_port_;
   StoragePlugin::StoragePluginType storage_plugin_type_;
   std::vector<Store::StoreType> store_types_;
+  std::vector<Store::StoreType> configured_store_types_;
   std::vector<CacheEngine::CachePolicy> cache_policies_;
 
   std::string namenode_hostname_;

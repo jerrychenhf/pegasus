@@ -35,6 +35,10 @@ Status MemoryStore::GetUsedSize(long& used_size) {
     
 }
 
+std::string MemoryStore::GetStoreName() {
+    return "MEMORY";
+}
+
 DCPMMStore::DCPMMStore() {
 
 }
@@ -51,6 +55,10 @@ Status DCPMMStore::GetUsedSize(long& used_size) {
     
 }
 
+std::string DCPMMStore::GetStoreName() {
+    return "DCPMM";
+}
+
 FileStore::FileStore() {
 
 }
@@ -65,6 +73,10 @@ Status FileStore::GetTotalSize(long& total_size) {
 
 Status FileStore::GetUsedSize(long& used_size) {
 
+}
+
+std::string FileStore::GetStoreName() {
+    return "FILE";
 }
 
 } // namespace pegasus

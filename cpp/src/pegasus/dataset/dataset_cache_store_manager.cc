@@ -19,6 +19,7 @@
 #include <unordered_map>
 
 #include "pegasus/dataset/dataset_cache_store_manager.h"
+#include "pegasus/runtime/exec_env.h"
 
 using namespace pegasus;
 
@@ -26,15 +27,26 @@ namespace pegasus {
 
 // Initialize all the Store Allocator based on the configuration.
 DatasetCacheStoreManager::DatasetCacheStoreManager() {
+  ExecEnv* env =  ExecEnv::GetInstance();
+  std::shared_ptr<StoreFactory> store_factory = env->get_store_factory();
+  std::shared_ptr<Store> store;
+  std::vector<Store::StoreType> store_types = env->GetConfiguredStoreTypes();
+  for(std::vector<Store::StoreType>::iterator it = store_types.begin(); it != store_types.end(); ++it) {
+    store_factory->GetStore(*it, &store);
+    configured_stores_[store->GetStoreName()] = store;
+  }
 }
 
 DatasetCacheStoreManager::~DatasetCacheStoreManager() {}
 
-// Get all configurated Store allocators.
-Status ListStoreAllocators() {
-}
-
 // Get the available store allocators(DRAM > DCPMM > SSD)
-Status GetStoreAllocator() {
+Status DatasetCacheStoreManager::GetStoreAllocator(std::shared_ptr<Store>* store) {
+
+    auto entry = configured_stores_.find("MEMORY");
+  
+    if (entry == configured_stores_.end()) {
+       return Status::KeyError("Could not find the store.", Store::StoreType::MEMORY);
+    }
+    *store = entry->second;
 }
 } // namespace pegasus
