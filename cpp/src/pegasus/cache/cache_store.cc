@@ -29,7 +29,7 @@ namespace pegasus {
   Status CacheStore::Allocate(int64_t size, StoreRegion* store_region) {
     if (store_ == nullptr) {
       stringstream ss;
-      ss << "Failed to allocate cache region in current cache store. Because the store is NULL";
+      ss << "Failed to allocate store region in current cache store. Because the store is NULL";
       LOG(ERROR) << ss.str();
       return Status::UnknownError(ss.str());
     }
@@ -37,7 +37,7 @@ namespace pegasus {
     Status status = store_->Allocate(size, store_region);
     if (!status.ok()) {
       stringstream ss;
-      ss << "Failed to allocate cache region in current cache store";
+      ss << "Failed to allocate store region in current cache store";
       LOG(ERROR) << ss.str();
       return Status::UnknownError(ss.str());
     }
@@ -46,23 +46,43 @@ namespace pegasus {
     return Status::OK();
   }
 
-  Status CacheStore::Free(StoreRegion* store_region) {
-    if (store_ == nullptr) {
-      stringstream ss;
-      ss << "Failed to free cache region in current cache store. Because the store is NULL";
-      LOG(ERROR) << ss.str();
-      return Status::UnknownError(ss.str());
-    }
-    
-    int64_t size = store_region->length();
-    Status status = store_->Free(store_region);
-    if (!status.ok()) {
-      stringstream ss;
-      ss << "Failed to free cache region in current cache store";
-      LOG(ERROR) << ss.str();
-      return Status::UnknownError(ss.str());
-    }
-    used_size_ -= size;
-    return Status::OK();
+Status CacheStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* store_region) {
+   if (store_ == nullptr) {
+    stringstream ss;
+    ss << "Failed to reallocate store region in current cache store. Because the store is NULL";
+    LOG(ERROR) << ss.str();
+    return Status::UnknownError(ss.str());
   }
+
+  Status status = store_->Reallocate(old_size, new_size, store_region);
+  if (!status.ok()) {
+    stringstream ss;
+    ss << "Failed to reallocate store region in current cache store";
+    LOG(ERROR) << ss.str();
+    return Status::UnknownError(ss.str());
+  }
+  
+  used_size_ += (new_size - old_size);
+  return Status::OK();
+}
+
+Status CacheStore::Free(StoreRegion* store_region) {
+  if (store_ == nullptr) {
+    stringstream ss;
+    ss << "Failed to free store region in current cache store. Because the store is NULL";
+    LOG(ERROR) << ss.str();
+    return Status::UnknownError(ss.str());
+  }
+    
+  int64_t size = store_region->length();
+  Status status = store_->Free(store_region);
+  if (!status.ok()) {
+    stringstream ss;
+    ss << "Failed to free store region in current cache store";
+    LOG(ERROR) << ss.str();
+    return Status::UnknownError(ss.str());
+  }
+  used_size_ -= size;
+  return Status::OK();
+}
 } // namespace pegasus

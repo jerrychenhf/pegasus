@@ -35,6 +35,7 @@ class DCPMMStore : public Store {
   virtual Status Init(const std::unordered_map<string, string>* properties);
   
   virtual Status Allocate(int64_t size, StoreRegion* store_region) override;
+  virtual Status Reallocate(int64_t old_size, int64_t new_size, StoreRegion* store_region) override;
   virtual Status Free(StoreRegion* store_region) override;
   
   virtual int64_t GetCapacity()override { return capacity_; }

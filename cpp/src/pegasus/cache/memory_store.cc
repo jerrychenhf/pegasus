@@ -46,6 +46,26 @@ Status MemoryStore::Allocate(int64_t size, StoreRegion* store_region) {
   return Status::OK();
 }
 
+Status MemoryStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* store_region) {
+  DCHECK(store_region != NULL);
+
+  //check the free size. If no free size available, fail
+  int64_t available_size = capacity_ - used_size_;
+  if ((new_size - old_size) > available_size) {
+    return Status::Invalid("Request memory size" , (new_size - old_size), "is large than available size.");
+  }
+
+  uint8_t* new_address = reinterpret_cast<uint8_t*>(
+    std::realloc(store_region->address(), new_size));
+  if(new_address == NULL) {
+    return Status::OutOfMemory("Reallocate of size ", new_size, " failed");
+  }
+
+  store_region->reset_address(new_address, new_size);
+  used_size_ += (new_size - old_size);
+  return Status::OK();
+}
+
 Status MemoryStore::Free(StoreRegion* store_region) {
   DCHECK(store_region != NULL);
   

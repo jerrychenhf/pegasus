@@ -51,7 +51,7 @@ arrow::Status CacheMemoryPool::Allocate(int64_t size, uint8_t** out) {
     return arrow::Status::OutOfMemory("Failed to allocate cache region in cache memory pool");
   }
   
-  *out = reinterpret_cast<uint8_t*>(store_region.address());
+  *out = store_region.address();
   occupied_size += size;
   return arrow::Status::OK();
 }
@@ -66,14 +66,31 @@ void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
 }
 
 arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
-  *ptr = reinterpret_cast<uint8_t*>(std::realloc(*ptr, new_size));
+  uint8_t* previous_ptr = *ptr;
+  if (cache_store_ == nullptr)
+    return arrow::Status::Invalid("Cache store is not correctly initialized.");
 
-  if (*ptr == nullptr) {
-    return arrow::Status::OutOfMemory("realloc of size ", new_size, " failed");
+  if(new_size <= old_size) {
+    *ptr = previous_ptr;
+    stringstream ss;
+    ss << "The reallocate new size", new_size, "is smaller than the old size", old_size;
+    LOG(INFO) << ss.str();
+    return arrow::Status::OK();
   }
 
-  occupied_size += new_size;
+  StoreRegion store_region;
+  store_region.reset_address(*ptr, old_size);
 
+  Status status = cache_store_->Reallocate(old_size, new_size, &store_region);
+
+  if(!status.ok()) {
+    *ptr = previous_ptr;
+    return arrow::Status::OutOfMemory("Failed to reallocate memory in cache memory pool");
+  }
+
+  *ptr = store_region.address();
+
+  occupied_size += (new_size - old_size);
   return arrow::Status::OK();
 }
 

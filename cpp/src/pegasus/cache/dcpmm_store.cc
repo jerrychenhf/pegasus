@@ -181,6 +181,10 @@ Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
   return Status::OK();
 }
 
+Status Reallocate(int64_t old_size, int64_t new_size, StoreRegion* store_region) {
+  return Status::OK();
+}
+
 Status DCPMMStore::Free(StoreRegion* store_region) {
   DCHECK(store_region != NULL);
   

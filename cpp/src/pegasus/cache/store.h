@@ -34,6 +34,7 @@ class Store {
   virtual Status Init(const std::unordered_map<string, string>* properties) = 0;
 
   virtual Status Allocate(int64_t size, StoreRegion* store_region) = 0;
+  virtual Status Reallocate(int64_t old_size, int64_t new_size, StoreRegion* store_region) = 0;
   virtual Status Free(StoreRegion* store_region) = 0;
   
   virtual int64_t GetCapacity() = 0;
