@@ -36,11 +36,13 @@ class DatasetCacheStoreManager {
 
   Status Init();
   Status GetCacheEntryHolder(string store_type, long capacity, std::shared_ptr<CacheEntryHolder>* cache_entry_holder);
+  long GetAvailableSize(Store::StoreType store_type);
   Status GetStoreAllocator(Store::StoreType store_type, std::shared_ptr<CacheEntryHolder>* cache_entry_holder);
   Store::StoreType GetStorePolicy();
 
   private:
   std::unordered_map<std::string, std::shared_ptr<CacheEntryHolder>*> available_stores_;
+  std::unordered_map<std::string, long > available_store_sizze_;
   std::shared_ptr<StoreManager> store_manager_;
 };
 

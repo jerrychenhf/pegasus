@@ -28,4 +28,11 @@ CacheEntryHolder::CacheEntryHolder(long base_offset, long length, long occupied_
 
  CacheEntryHolder::~CacheEntryHolder () {}  
 
+ long CacheEntryHolder::length() {
+     return length_;
+ }
+ long CacheEntryHolder::occupies_size() {
+     return occupied_size_;
+ }
+
 } // namespace pegasus

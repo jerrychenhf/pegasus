@@ -28,6 +28,8 @@ class CacheEntryHolder {
  public:
   CacheEntryHolder();
   CacheEntryHolder(long base_offset, long length, long occupied_size);
+  long length();
+  long occupies_size();
   ~CacheEntryHolder();
 
  private:

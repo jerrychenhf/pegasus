@@ -26,7 +26,7 @@ namespace pegasus {
 
 // Initialize all the Store Allocator based on the configuration.
 DatasetCacheStoreManager::DatasetCacheStoreManager() {
-
+    Init();
 }
 
 DatasetCacheStoreManager::~DatasetCacheStoreManager() {}
@@ -62,6 +62,12 @@ Status DatasetCacheStoreManager::GetStoreAllocator(Store::StoreType store_type, 
         auto entry  = available_stores_.find("DCPMM");
         cache_entry_holder = entry->second;
     }
+}
+
+long DatasetCacheStoreManager::GetAvailableSize(Store::StoreType store_type) {
+    std::shared_ptr<CacheEntryHolder> cache_entry_holder;
+    GetStoreAllocator(store_type, &cache_entry_holder);
+    return (cache_entry_holder->length() - cache_entry_holder->occupies_size());
 }
 
 Store::StoreType DatasetCacheStoreManager::GetStorePolicy() {
