@@ -19,37 +19,42 @@
 
 namespace pegasus {
     
-DRAMMemoryPool::DRAMMemoryPool() {
-  ExecEnv* env =  ExecEnv::GetInstance();
-  store_manager_ = env->get_store_manager();
+DRAMMemoryPool::DRAMMemoryPool(std::shared_ptr<CacheEngine> cache_engine) {
+  cache_engine_ = cache_engine;
+  occupied_size = 0;
 }
 DRAMMemoryPool::~DRAMMemoryPool() {}
 
 arrow::Status DRAMMemoryPool::Allocate(int64_t size, uint8_t** out) {
-  std::shared_ptr<Store> store;
-  store_manager_->GetStore(Store::MEMORY, &store);
+  if (size < 0) {
+    return arrow::Status::Invalid("negative malloc size");
+  }
+  LruCacheEngine *lru_cache_engine = dynamic_cast<LruCacheEngine *>(cache_engine_.get());
+  std::shared_ptr<CacheStore> cache_store;
+  lru_cache_engine->cache_store_manager_->GetCacheStore(&cache_store);
   std::shared_ptr<CacheRegion> cache_region;
-  store->Allocate(size, &cache_region);
+  cache_store->Allocate(size, &cache_region);
   out = cache_region->address();
+  occupied_size = size + occupied_size;
   return arrow::Status::OK();
 }
 
-  void DRAMMemoryPool::Free(uint8_t* buffer, int64_t size)  { std::free(buffer); }
+void DRAMMemoryPool::Free(uint8_t* buffer, int64_t size)  { std::free(buffer); }
 
-  arrow::Status DRAMMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
-    *ptr = reinterpret_cast<uint8_t*>(std::realloc(*ptr, new_size));
+arrow::Status DRAMMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
+  *ptr = reinterpret_cast<uint8_t*>(std::realloc(*ptr, new_size));
 
-    if (*ptr == NULL) {
-      return arrow::Status::OutOfMemory("realloc of size ", new_size, " failed");
-    }
-
-    return arrow::Status::OK();
+  if (*ptr == NULL) {
+    return arrow::Status::OutOfMemory("realloc of size ", new_size, " failed");
   }
 
-  int64_t DRAMMemoryPool::bytes_allocated() const  { return -1; }
-  
-  int64_t DRAMMemoryPool::max_memory() const {return 100;}
+  return arrow::Status::OK();
+}
 
-  std::string DRAMMemoryPool::backend_name() const { return "DRAM"; }
+int64_t DRAMMemoryPool::bytes_allocated() const  { return occupied_size; }
+  
+int64_t DRAMMemoryPool::max_memory() const {return 100;}
+
+std::string DRAMMemoryPool::backend_name() const { return "DRAM"; }
 
 } // namespace pegasus

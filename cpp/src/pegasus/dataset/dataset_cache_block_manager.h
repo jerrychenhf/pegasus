@@ -31,13 +31,13 @@ namespace pegasus {
 
 class CachedColumn {
  public:
-  explicit CachedColumn(string partition_path, int column_id, std::shared_ptr<arrow::ChunkedArray> chunked_array) :
-  partition_path_(partition_path), column_id_(column_id), chunked_array_(chunked_array) {}
+  explicit CachedColumn(string partition_path, int column_id, std::shared_ptr<CacheRegion> cache_region) :
+  partition_path_(partition_path), column_id_(column_id), cache_region_(cache_region) {}
 
  public:
   string partition_path_;
   int column_id_;
-  std::shared_ptr<arrow::ChunkedArray> chunked_array_;
+  std::shared_ptr<CacheRegion> cache_region_;
 };
 
 class CachedPartition {
