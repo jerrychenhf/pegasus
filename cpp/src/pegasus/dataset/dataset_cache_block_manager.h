@@ -105,14 +105,14 @@ class CachedDataset {
   Status DeletePartition(std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path);
   
   const std::string& GetDatasetPath() { return dataset_path_; }
-  std::unordered_map<DatasetKey, std::shared_ptr<CachedPartition>, hasher> GetCachedPartitions() {
+  std::unordered_map<string, std::shared_ptr<CachedPartition>> GetCachedPartitions() {
     return cached_partitions_;
   }
 
   private:
    const std::string& dataset_path_;
    boost::mutex cached_partitions_lock_;
-   std::unordered_map<DatasetKey, std::shared_ptr<CachedPartition>, hasher> cached_partitions_;
+   std::unordered_map<string, std::shared_ptr<CachedPartition>> cached_partitions_;
 };
 
 class DatasetCacheBlockManager {
@@ -126,13 +126,13 @@ class DatasetCacheBlockManager {
 
   Status DeleteDataset(const std::string& dataset_path);
 
-  std::unordered_map<DatasetKey, std::shared_ptr<CachedDataset>, hasher> GetCachedDatasets() {
+  std::unordered_map<string, std::shared_ptr<CachedDataset>> GetCachedDatasets() {
     return cached_datasets_;
   }
 
  private: 
   boost::mutex cached_datasets_lock_;
-  std::unordered_map<DatasetKey, std::shared_ptr<CachedDataset>, hasher> cached_datasets_;
+  std::unordered_map<string, std::shared_ptr<CachedDataset>> cached_datasets_;
 };
 
 } // namespace pegasus
