@@ -63,7 +63,7 @@ Status DatasetCacheManager::GetDatasetStream(Identity* identity, std::unique_ptr
     Store::StoreType store_type = dataset_cache_store_manager_->GetStorePolicy();
 
     std::shared_ptr<MemoryPool>* memory_pool;
-    dataset_cache_store_manager_->GetStoreMemoryPool(store_type, memory_pool);
+    // dataset_cache_store_manager_->GetStoreMemoryPool(store_type, memory_pool);
     parquet::ArrowReaderProperties properties(new parquet::ArrowReaderProperties());
 
     // std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, memory_pool, properties));

@@ -39,9 +39,6 @@ Status StoreManager::GetStore(Store::StoreType store_type, std::shared_ptr<Store
   } else if (store_type == Store::StoreType::DCPMM) {
     *store = std::shared_ptr<DCPMMStore>(new DCPMMStore());
     return Status::OK();
-  } else if (store_type == Store::StoreType::FILE) {
-    *store = std::shared_ptr<FileStore>(new FileStore());
-    return Status::OK();
   } else {
     return Status::Invalid("Invalid store type!");
   }

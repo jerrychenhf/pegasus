@@ -23,8 +23,8 @@
 #include "pegasus/common/status.h"
 #include "pegasus/cache/store.h"
 #include "pegasus/cache/memory_pool.h"
-
-
+#include "pegasus/runtime/exec_env.h"
+#include "pegasus/cache/cache_entry_holder.h"
 
 using namespace std;
 
@@ -35,12 +35,13 @@ class DatasetCacheStoreManager {
   ~DatasetCacheStoreManager();
 
   Status Init();
-  Status GetStoreAllocator(Store::StoreType store_type, std::shared_ptr<Store>* store);
-  Status GetStoreMemoryPool(Store::StoreType store_type, std::shared_ptr<MemoryPool>* memory_pool);
+  Status GetCacheEntryHolder(string store_type, long capacity, std::shared_ptr<CacheEntryHolder>* cache_entry_holder);
+  Status GetStoreAllocator(Store::StoreType store_type, std::shared_ptr<CacheEntryHolder>* cache_entry_holder);
   Store::StoreType GetStorePolicy();
 
   private:
-  std::unordered_map<std::string, std::shared_ptr<Store>> configured_stores_;
+  std::unordered_map<std::string, std::shared_ptr<CacheEntryHolder>*> available_stores_;
+  std::shared_ptr<StoreManager> store_manager_;
 };
 
 } // namespace pegasus

@@ -19,7 +19,6 @@
 #include <unordered_map>
 
 #include "pegasus/dataset/dataset_cache_store_manager.h"
-#include "pegasus/runtime/exec_env.h"
 
 using namespace pegasus;
 
@@ -35,50 +34,38 @@ DatasetCacheStoreManager::~DatasetCacheStoreManager() {}
 Status DatasetCacheStoreManager::Init() {
   ExecEnv* env =  ExecEnv::GetInstance();
   std::shared_ptr<Store> store;
-  std::unordered_map<string, long> store_types = env->GetConfiguredStoreInfo();
-//   for(std::vector<Store::StoreType>::iterator it = store_types.begin(); it != store_types.end(); ++it) {
-//     store_factory->GetStore(*it, &store);
-//     configured_stores_[store->GetStoreName()] = store;
-//   }
+  std::unordered_map<string, long> store_infos = env->GetConfiguredStoreInfo();
+  store_manager_ = env->get_store_manager();
+
+  for(std::unordered_map<string, long>::iterator it = store_infos.begin(); it != store_infos.end(); ++it) {
+      string store_type = it->first;
+      long capacity = it->second;
+      std::shared_ptr<CacheEntryHolder>* cache_entry_holder;
+      GetCacheEntryHolder(store_type, capacity, cache_entry_holder);
+      available_stores_[store_type] = std::move(cache_entry_holder);
+  }
 }
 
-// Get the available store allocators(DRAM > DCPMM > SSD)
-Status DatasetCacheStoreManager::GetStoreAllocator(Store::StoreType store_type, std::shared_ptr<Store>* store) {
-    if (store_type == Store::StoreType::MEMORY) {
-        auto entry = configured_stores_.find("MEMORY");
-  
-        if (entry == configured_stores_.end()) {
-            return Status::KeyError("Could not find the store.", Store::StoreType::MEMORY);
-        }
-        *store = entry->second;
-    } else if (store_type == Store::StoreType::DCPMM) {
-        auto entry = configured_stores_.find("DCPMM");
-  
-        if (entry == configured_stores_.end()) {
-            return Status::KeyError("Could not find the store.", Store::StoreType::DCPMM);
-        }
-        *store = entry->second;
-    } else if (store_type == Store::StoreType::FILE) {
-        auto entry = configured_stores_.find("FILE");
-  
-        if (entry == configured_stores_.end()) {
-            return Status::KeyError("Could not find the store.", Store::StoreType::FILE);
-        }
-        *store = entry->second;
+Status DatasetCacheStoreManager::GetCacheEntryHolder(string store_type, long capacity, std::shared_ptr<CacheEntryHolder>* cache_entry_holder) {
+    if (store_type == "MEMORY") {
+        std::shared_ptr<Store> store;
+        store_manager_->GetStore(Store::StoreType::MEMORY, &store);
+        store->Allocate(capacity, cache_entry_holder);
     }
 }
 
-Status DatasetCacheStoreManager::GetStoreMemoryPool(Store::StoreType store_type, std::shared_ptr<MemoryPool>* memory_pool) {
+Status DatasetCacheStoreManager::GetStoreAllocator(Store::StoreType store_type, std::shared_ptr<CacheEntryHolder>* cache_entry_holder) {
     if (store_type == Store::StoreType::MEMORY) {
-       *memory_pool = std::shared_ptr<MemoryPool>(new DRAMMemoryPool());
+        auto entry  = available_stores_.find("MEMORY");
+        cache_entry_holder = entry->second;
     } else if (store_type == Store::StoreType::DCPMM) {
-       *memory_pool = std::shared_ptr<MemoryPool>(new DRAMMemoryPool());
-    } else if (store_type == Store::StoreType::FILE) {
-       *memory_pool = std::shared_ptr<MemoryPool>(new DRAMMemoryPool());
+        auto entry  = available_stores_.find("DCPMM");
+        cache_entry_holder = entry->second;
     }
 }
 
 Store::StoreType DatasetCacheStoreManager::GetStorePolicy() {
+    // MEMORY > DCPMM > FILE
   return Store::StoreType::MEMORY;
 }
 

@@ -23,7 +23,7 @@ MemoryStore::MemoryStore() {
 
 }
 
-Status MemoryStore::Allocate(long size) {
+Status MemoryStore::Allocate(long size, std::shared_ptr<CacheEntryHolder>* cache_entry_holder) {
 
 }
 
@@ -43,7 +43,7 @@ DCPMMStore::DCPMMStore() {
 
 }
 
-Status DCPMMStore::Allocate(long size) {
+Status DCPMMStore::Allocate(long size, std::shared_ptr<CacheEntryHolder>* cache_entry_holder) {
 
 }
 
@@ -59,24 +59,24 @@ std::string DCPMMStore::GetStoreName() {
     return "DCPMM";
 }
 
-FileStore::FileStore() {
+// FileStore::FileStore() {
 
-}
+// }
 
-Status FileStore::Allocate(long size) {
+// Status FileStore::Allocate(long size) {
 
-}
+// }
 
-Status FileStore::GetTotalSize(long& total_size) {
+// Status FileStore::GetTotalSize(long& total_size) {
     
-}
+// }
 
-Status FileStore::GetUsedSize(long& used_size) {
+// Status FileStore::GetUsedSize(long& used_size) {
 
-}
+// }
 
-std::string FileStore::GetStoreName() {
-    return "FILE";
-}
+// std::string FileStore::GetStoreName() {
+//     return "FILE";
+// }
 
 } // namespace pegasus
