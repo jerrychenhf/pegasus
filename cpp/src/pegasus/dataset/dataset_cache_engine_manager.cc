@@ -14,8 +14,8 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-#include "pegasus/dataset/dataset_cache_engine_manager.h"
-#include "pegasus/runtime/exec_env.h"
+#include "dataset/dataset_cache_engine_manager.h"
+#include "runtime/exec_env.h"
 
 using namespace pegasus;
 

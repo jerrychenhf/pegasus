@@ -20,10 +20,10 @@
 
 #include <vector>
 
-#include "pegasus/common/status.h"
-#include "pegasus/cache/store.h"
-#include "pegasus/cache/store_manager.h"
-#include "pegasus/dataset/cache_store.h"
+#include "common/status.h"
+#include "cache/store.h"
+#include "cache/store_manager.h"
+#include "dataset/cache_store.h"
 
 namespace pegasus {
 

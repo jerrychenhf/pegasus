@@ -22,11 +22,11 @@
 #include "arrow/flight/server.h"
 #include "arrow/table.h"
 
-#include "pegasus/dataset/identity.h"
-#include "pegasus/dataset/dataset_cache_block_manager.h"
-#include "pegasus/dataset/dataset_cache_engine_manager.h"
-#include "pegasus/storage/storage_plugin.h"
-#include "pegasus/storage/storage_plugin_factory.h"
+#include "dataset/identity.h"
+#include "dataset/dataset_cache_block_manager.h"
+#include "dataset/dataset_cache_engine_manager.h"
+#include "storage/storage_plugin.h"
+#include "storage/storage_plugin_factory.h"
 
 using namespace std;
 using namespace arrow;

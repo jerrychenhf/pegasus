@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/cache/memory_pool.h"
+#include "cache/memory_pool.h"
 
 namespace pegasus {
     

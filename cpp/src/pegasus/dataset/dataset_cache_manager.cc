@@ -18,10 +18,10 @@
 #include <memory>
 #include <unordered_map>
 
-#include "pegasus/dataset/dataset_cache_manager.h"
-#include "pegasus/runtime/exec_env.h"
-#include "pegasus/parquet/parquet_reader.h"
-#include "pegasus/cache/memory_pool.h"
+#include "dataset/dataset_cache_manager.h"
+#include "runtime/exec_env.h"
+#include "parquet/parquet_reader.h"
+#include "cache/memory_pool.h"
 
 using namespace arrow;
 namespace pegasus {

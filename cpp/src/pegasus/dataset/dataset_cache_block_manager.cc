@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/dataset/dataset_cache_block_manager.h"
+#include "dataset/dataset_cache_block_manager.h"
 
 using namespace pegasus;
 

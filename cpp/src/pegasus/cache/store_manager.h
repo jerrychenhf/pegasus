@@ -17,7 +17,7 @@
 
 #include <vector>
 
-#include "pegasus/cache/store.h"
+#include "cache/store.h"
 
 namespace pegasus {
 

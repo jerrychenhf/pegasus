@@ -20,9 +20,9 @@
 
 #include <unordered_map>
 
-#include "pegasus/dataset/identity.h"
-#include "pegasus/dataset/cache_engine.h"
-#include "pegasus/cache/cache_region.h"
+#include "dataset/identity.h"
+#include "dataset/cache_engine.h"
+#include "cache/cache_region.h"
 
 using namespace std;
 

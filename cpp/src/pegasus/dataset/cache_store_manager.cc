@@ -15,8 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/runtime/exec_env.h"
-#include "pegasus/dataset/cache_store_manager.h"
+#include "runtime/exec_env.h"
+#include "dataset/cache_store_manager.h"
 
 using namespace std;
 

@@ -18,13 +18,13 @@
 #ifndef PEGASUS_CACHE_ENGINE_H
 #define PEGASUS_CACHE_ENGINE_H
 
-#include "pegasus/common/status.h"
-#include "pegasus/dataset/dataset.h"
+#include "common/status.h"
+#include "dataset/dataset.h"
 #include <boost/compute/detail/lru_cache.hpp>
-#include "pegasus/util/lru_cache.h"
-#include "pegasus/cache/cache_region.h"
+#include "util/lru_cache.h"
+#include "cache/cache_region.h"
 #include "boost/functional/hash.hpp"
-#include "pegasus/dataset/cache_store_manager.h"
+#include "dataset/cache_store_manager.h"
 
 using namespace boost;
 

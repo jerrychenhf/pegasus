@@ -20,7 +20,7 @@
 
 #include <arrow/status.h>
 #include <arrow/memory_pool.h>
-#include "pegasus/runtime/exec_env.h"
+#include "runtime/exec_env.h"
 
 using namespace arrow;
 

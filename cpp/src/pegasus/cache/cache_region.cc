@@ -17,7 +17,7 @@
 
 /// \brief Data structure providing an opaque identifier or credential to use
 /// when requesting a data stream with the DoGet RPC
-#include "pegasus/cache/cache_region.h"
+#include "cache/cache_region.h"
 
 namespace pegasus {
 

@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/dataset/cache_engine.h"
+#include "dataset/cache_engine.h"
 
 using namespace std;
 

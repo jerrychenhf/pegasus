@@ -18,8 +18,8 @@
 #ifndef PEGASUS_STORE_H
 #define PEGASUS_STORE_H
 
-#include "pegasus/common/status.h"
-#include "pegasus/cache/cache_region.h"
+#include "common/status.h"
+#include "cache/cache_region.h"
 
 namespace pegasus {
 
