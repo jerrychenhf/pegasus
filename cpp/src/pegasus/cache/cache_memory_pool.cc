@@ -73,7 +73,7 @@ arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, ui
   if(new_size <= old_size) {
     *ptr = previous_ptr;
     stringstream ss;
-    ss << "The reallocate new size", new_size, "is smaller than the old size", old_size;
+    ss << "The reallocate new size is smaller than the old size";
     LOG(INFO) << ss.str();
     return arrow::Status::OK();
   }
