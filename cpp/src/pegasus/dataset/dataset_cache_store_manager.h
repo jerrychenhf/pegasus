@@ -22,6 +22,7 @@
 
 #include "pegasus/common/status.h"
 #include "pegasus/cache/store.h"
+#include "pegasus/cache/memory_pool.h"
 
 
 
@@ -33,7 +34,9 @@ class DatasetCacheStoreManager {
   DatasetCacheStoreManager();
   ~DatasetCacheStoreManager();
 
-  Status GetStoreAllocator(std::shared_ptr<Store>* store);
+  Status GetStoreAllocator(Store::StoreType store_type, std::shared_ptr<Store>* store);
+  Status GetStoreMemoryPool(Store::StoreType store_type, std::shared_ptr<MemoryPool>* memory_pool);
+  Store::StoreType GetStorePolicy();
 
   private:
   std::unordered_map<std::string, std::shared_ptr<Store>> configured_stores_;

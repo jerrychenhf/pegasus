@@ -40,13 +40,43 @@ DatasetCacheStoreManager::DatasetCacheStoreManager() {
 DatasetCacheStoreManager::~DatasetCacheStoreManager() {}
 
 // Get the available store allocators(DRAM > DCPMM > SSD)
-Status DatasetCacheStoreManager::GetStoreAllocator(std::shared_ptr<Store>* store) {
-
-    auto entry = configured_stores_.find("MEMORY");
+Status DatasetCacheStoreManager::GetStoreAllocator(Store::StoreType store_type, std::shared_ptr<Store>* store) {
+    if (store_type == Store::StoreType::MEMORY) {
+        auto entry = configured_stores_.find("MEMORY");
   
-    if (entry == configured_stores_.end()) {
-       return Status::KeyError("Could not find the store.", Store::StoreType::MEMORY);
+        if (entry == configured_stores_.end()) {
+            return Status::KeyError("Could not find the store.", Store::StoreType::MEMORY);
+        }
+        *store = entry->second;
+    } else if (store_type == Store::StoreType::DCPMM) {
+        auto entry = configured_stores_.find("DCPMM");
+  
+        if (entry == configured_stores_.end()) {
+            return Status::KeyError("Could not find the store.", Store::StoreType::DCPMM);
+        }
+        *store = entry->second;
+    } else if (store_type == Store::StoreType::FILE) {
+        auto entry = configured_stores_.find("FILE");
+  
+        if (entry == configured_stores_.end()) {
+            return Status::KeyError("Could not find the store.", Store::StoreType::FILE);
+        }
+        *store = entry->second;
     }
-    *store = entry->second;
 }
+
+Status DatasetCacheStoreManager::GetStoreMemoryPool(Store::StoreType store_type, std::shared_ptr<MemoryPool>* memory_pool) {
+    if (store_type == Store::StoreType::MEMORY) {
+       *memory_pool = std::shared_ptr<MemoryPool>(new DRAMMemoryPool());
+    } else if (store_type == Store::StoreType::DCPMM) {
+       *memory_pool = std::shared_ptr<MemoryPool>(new DRAMMemoryPool());
+    } else if (store_type == Store::StoreType::FILE) {
+       *memory_pool = std::shared_ptr<MemoryPool>(new DRAMMemoryPool());
+    }
+}
+
+Store::StoreType DatasetCacheStoreManager::GetStorePolicy() {
+  return Store::StoreType::MEMORY;
+}
+
 } // namespace pegasus

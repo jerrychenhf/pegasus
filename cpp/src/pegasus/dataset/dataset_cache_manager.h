@@ -24,6 +24,9 @@
 #include "pegasus/dataset/identity.h"
 #include "pegasus/dataset/dataset_cache_block_manager.h"
 #include "pegasus/dataset/dataset_cache_engine_manager.h"
+#include "pegasus/storage/storage_plugin.h"
+#include "pegasus/storage/storage_plugin_factory.h"
+#include "pegasus/dataset/dataset_cache_store_manager.h"
 
 using namespace std;
 using namespace arrow;
@@ -36,12 +39,15 @@ class DatasetCacheManager {
   DatasetCacheManager();
   ~DatasetCacheManager();
 
-  Status GetDatasetStream(Identity identity, std::unique_ptr<FlightDataStream>* data_stream);
-  CacheEngine::CachePolicy GetCachePolicy(Identity identity);
+  Status GetDatasetStream(Identity* identity, std::unique_ptr<FlightDataStream>* data_stream);
+  CacheEngine::CachePolicy GetCachePolicy(Identity* identity);
 
  private: 
   std::shared_ptr<DatasetCacheBlockManager> dataset_cache_block_manager_;
   std::shared_ptr<DatasetCacheEngineManager> dataset_cache_engine_manager_;
+  std::shared_ptr<DatasetCacheStoreManager> dataset_cache_store_manager_;
+  std::shared_ptr<StoragePlugin> storage_plugin_;
+  std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
 };
 
 } // namespace pegasus

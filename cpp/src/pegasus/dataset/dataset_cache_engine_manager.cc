@@ -46,7 +46,7 @@ Status DatasetCacheEngineManager::GetCacheEngine(CacheEngine::CachePolicy cache_
         *cache_engine = std::shared_ptr<CacheEngine>(new LruCacheEngine(100)); // we need also get the cache capacity
          return Status::OK();
     } else if (cache_policy == CacheEngine::CachePolicy::NonLRU) {
-        *cache_engine = std::shared_ptr<CacheEngine>(new NonLruCacheEngine);
+        *cache_engine = std::shared_ptr<CacheEngine>(new NonLruCacheEngine());
          return Status::OK();
     } else {
         return Status::Invalid("Invalid cache engine type!");

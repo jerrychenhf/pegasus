@@ -26,7 +26,7 @@ using namespace arrow;
 namespace pegasus
 {
 
-class DRAMMemoryPool : public MemoryPool
+class DRAMMemoryPool : public arrow::MemoryPool
 {
 public:
   DRAMMemoryPool();

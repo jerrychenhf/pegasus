@@ -20,7 +20,8 @@
 
 namespace pegasus {
     
-DRAMMemoryPool::DRAMMemoryPool() { }
+DRAMMemoryPool::DRAMMemoryPool() {}
+DRAMMemoryPool::~DRAMMemoryPool() {}
 
 arrow::Status DRAMMemoryPool::Allocate(int64_t size, uint8_t** out) {
     *out = reinterpret_cast<uint8_t*>(std::malloc(size));
@@ -40,6 +41,8 @@ arrow::Status DRAMMemoryPool::Allocate(int64_t size, uint8_t** out) {
   }
 
   int64_t DRAMMemoryPool::bytes_allocated() const  { return -1; }
+  
+  int64_t DRAMMemoryPool::max_memory() const {return 100;}
 
   std::string DRAMMemoryPool::backend_name() const { return "DRAM"; }
 

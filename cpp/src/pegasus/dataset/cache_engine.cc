@@ -35,11 +35,12 @@ LruCacheEngine::LruCacheEngine(long capacity): cache_(capacity) {}
   cache_.insert(key, cache_entry_holder);
  }
 
-LruCacheEngine::~LruCacheEngine() {
-
-}
+LruCacheEngine::~LruCacheEngine() {}
 
 NonLruCacheEngine::NonLruCacheEngine() {}
 NonLruCacheEngine:: ~NonLruCacheEngine(){}
+
+Status NonLruCacheEngine::PutValue(std::string partition_path, int column_id, CacheEntryHolder cache_entry_holder) {
+ }
 
 } // namespace pegasus
