@@ -64,6 +64,8 @@ set (PEGASUS_LIBS
   CacheEntryHolder
   DRAMMemoryPool
   CacheEngine
+  CacheStore
+  CacheStoreManager
   Store
   Metadata
   Status

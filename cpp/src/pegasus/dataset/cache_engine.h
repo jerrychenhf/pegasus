@@ -24,6 +24,7 @@
 #include "pegasus/util/lru_cache.h"
 #include "pegasus/cache/cache_entry_holder.h"
 #include "boost/functional/hash.hpp"
+#include "pegasus/dataset/cache_store_manager.h"
 
 using namespace boost;
 
@@ -84,10 +85,11 @@ class LruCacheEngine : public CacheEngine {
   Status PutValue(std::string partition_path, int column_id, CacheEntryHolder cache_entry_holder) override;
 // on evict event; call back
  private:
+ std::shared_ptr<CacheStoreManager> cache_store_manager_;
   LruCache<CacheEntryKey, CacheEntryHolder> cache_;
 };
 
-// 
+//NonEvictCacheEngine 
 class NonLruCacheEngine : public CacheEngine {
  public:
   NonLruCacheEngine();

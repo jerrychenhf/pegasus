@@ -22,7 +22,6 @@
 #include "pegasus/dataset/dataset_store.h"
 #include "pegasus/storage/storage_plugin_factory.h"
 #include "pegasus/dataset/cache_engine.h"
-#include "pegasus/cache/store_manager.h"
 
 using namespace std;
 

@@ -16,13 +16,12 @@
 // under the License.
 
 #include "pegasus/dataset/cache_engine.h"
-#include "pegasus/runtime/exec_env.h"
 
 using namespace std;
 
 namespace pegasus {
 
-LruCacheEngine::LruCacheEngine(long capacity): cache_(capacity) {}
+LruCacheEngine::LruCacheEngine(long capacity): cache_(capacity), cache_store_manager_(new CacheStoreManager()) {}
 
  Status LruCacheEngine::PutValue(std::string partition_path, int column_id, CacheEntryHolder cache_entry_holder) {
    // TODO
@@ -30,6 +29,11 @@ LruCacheEngine::LruCacheEngine(long capacity): cache_(capacity) {}
    // 2. Call StoreManager#Store#Allocate method to allocate the memory to store the value
    // 3. Call the related LRUxxCache.insert to insert value
    // 4. Update the info in DatasetCacheBlockManager
+
+  // std::shared_ptr<CacheStore> cache_store;
+  // cache_store_manager_->GetCacheStore(&cache_store);
+  // std::shared_ptr<CacheEntryHolder> cache_entry_holder;
+  // cache_store->Allocate(0, cache_entry_holder);
   CacheEntryKey key = CacheEntryKey(partition_path, column_id);
   cache_.insert(key, cache_entry_holder);
  }

@@ -57,6 +57,16 @@ add_library(CacheEngine
 )
 add_dependencies(CacheEngine gen-deps)
 
+add_library(CacheStore
+  cache_store.cc
+)
+add_dependencies(CacheStore gen-deps)
+
+add_library(CacheStoreManager
+  cache_store_manager.cc
+)
+add_dependencies(CacheStoreManager gen-deps)
+
 add_library(DatasetCacheEngineManager
   dataset_cache_engine_manager.cc
 )
