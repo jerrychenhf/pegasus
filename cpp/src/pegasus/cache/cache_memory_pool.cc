@@ -53,6 +53,7 @@ arrow::Status CacheMemoryPool::Allocate(int64_t size, uint8_t** out) {
   
   *out = store_region.address();
   occupied_size += size;
+  LOG(INFO) << "Allocate memory in cache memory pool and the allocated size is " << size;
   return arrow::Status::OK();
 }
 
@@ -62,6 +63,7 @@ void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
     
   StoreRegion storeRegion(buffer, size, size);
   cache_store_->Free(&storeRegion);
+  LOG(INFO) << "Free memory in cache memory pool and the free size is " << size;
   occupied_size -= size;
 }
 
