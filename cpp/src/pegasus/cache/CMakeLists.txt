@@ -34,3 +34,8 @@ add_library(MemoryBlockHolder
 )
 add_dependencies(MemoryBlockHolder gen-deps)
 
+add_library(DRAMMemoryPool
+  memory_pool.cc
+)
+add_dependencies(DRAMMemoryPool gen-deps)
+
