@@ -31,9 +31,9 @@ namespace pegasus {
   RequestIdentity();
   RequestIdentity(std::string dataset_path, std::string partition_path, std::vector<int> column_indices);
 
-  std::string dataset_path();
-  std::vector<int> column_indices();
-  std::string partition_path();
+  const std::string& dataset_path();
+  const std::vector<int>& column_indices();
+  const std::string& partition_path();
 
   void set_schema(std::shared_ptr<arrow::Schema> schema);
   void get_schema(std::shared_ptr<arrow::Schema>* schema);

@@ -63,7 +63,7 @@ Status DatasetCacheBlockManager::Init() {
   return Status::OK();
 }
 
-Status DatasetCacheBlockManager::GetCachedDataSet(std::string dataset_path,
+Status DatasetCacheBlockManager::GetCachedDataSet(const std::string& dataset_path,
  std::shared_ptr<CachedDataset>* dataset) {
  
   {
@@ -91,7 +91,7 @@ Status DatasetCacheBlockManager::GetCachedDataSet(std::string dataset_path,
 
 
 Status CachedDataset::GetCachedPartition(std::shared_ptr<CachedDataset> cached_dataset,
- std::string partition_path,
+ const std::string& partition_path,
    std::shared_ptr<CachedPartition>* partition) {
 
    {
@@ -155,7 +155,7 @@ bool CachedPartition::InsertColumn(std::shared_ptr<CachedPartition> cached_parti
   }
 }
 
-Status DatasetCacheBlockManager::DeleteDataset(std::string dataset_path) {
+Status DatasetCacheBlockManager::DeleteDataset(const std::string& dataset_path) {
   {
     boost::lock_guard<boost::mutex> l(cached_datasets_lock_);
     LOG(WARNING) << "Delete the dataset";
@@ -165,7 +165,7 @@ Status DatasetCacheBlockManager::DeleteDataset(std::string dataset_path) {
 }
 
 Status CachedDataset::DeletePartition(
-  std::shared_ptr<CachedDataset> cached_dataset, std::string partition_path){
+  std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path){
   {
     boost::lock_guard<boost::mutex> l(cached_partitions_lock_); 
     LOG(WARNING) << "Delete the partition";
