@@ -167,4 +167,9 @@ void LRUCache::Insert(LRUCache::PendingEntry* entry, LRUCacheHandle* inserted) {
   inserted->SetHandle(std::move(h));
 }
 
+void LRUCache::Erase(const CacheKey& key) {
+  Slice key_slice(reinterpret_cast<const uint8_t*>(&key), sizeof(key));
+  cache_->Erase(key_slice);
+}
+
 } // namespace pegasus
