@@ -39,7 +39,12 @@ arrow::Status CacheMemoryPool::Allocate(int64_t size, uint8_t** out) {
   return arrow::Status::OK();
 }
 
-void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  { std::free(buffer); }
+void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
+  LruCacheEngine *lru_cache_engine = dynamic_cast<LruCacheEngine *>(cache_engine_.get());
+  std::shared_ptr<CacheStore> cache_store;
+  lru_cache_engine->cache_store_manager_->GetCacheStore(&cache_store);
+  cache_store->Free(buffer, size);
+}
 
 arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
   *ptr = reinterpret_cast<uint8_t*>(std::realloc(*ptr, new_size));
@@ -55,6 +60,9 @@ int64_t CacheMemoryPool::bytes_allocated() const  { return occupied_size; }
   
 int64_t CacheMemoryPool::max_memory() const {return 100;}
 
-std::string CacheMemoryPool::backend_name() const { return "DRAM"; }
+std::string CacheMemoryPool::backend_name() const {
+  // can get the store type (MEMORY, DCPMM...)
+  return "cache memory pool";
+}
 
 } // namespace pegasus

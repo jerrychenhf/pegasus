@@ -26,7 +26,13 @@ namespace pegasus {
   Status CacheStore::GetUsedSize(long& size) {
     size = used_size_;
   }
+
   Status CacheStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) {
       store_->Allocate(size, cache_region);
   }
+
+  Status CacheStore::Free(uint8_t *buffer, int64_t size) {
+    store_->Free(buffer, size);
+  }
+
 } // namespace pegasus

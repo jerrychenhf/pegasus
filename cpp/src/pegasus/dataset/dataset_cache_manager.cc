@@ -48,44 +48,44 @@ Status InsertColumnsToBlockManager(Identity* identity,
  std::unordered_map<string, std::shared_ptr<CachedColumn>> retrieved_columns) {
     // Before insert into the column, check whether the dataset is inserted.
     std::shared_ptr<CachedDataset> dataset;
-    DCHECK(dataset_cache_block_manager->GetCachedDataSet(identity, &dataset).ok());
+    RETURN_IF_ERROR(dataset_cache_block_manager->GetCachedDataSet(identity, &dataset));
     if (dataset == NULL) {
       // Insert new dataset.
       std::shared_ptr<CachedDataset> new_dataset = std::shared_ptr<CachedDataset>(
         new CachedDataset(identity->dataset_path()));
-      DCHECK(dataset_cache_block_manager->InsertDataSet(identity, new_dataset).ok());
+      RETURN_IF_ERROR(dataset_cache_block_manager->InsertDataSet(identity, new_dataset));
 
     }
     // After check the dataset, continue to check whether the partition is inserted.
     std::shared_ptr<CachedPartition> partition;
-    DCHECK(dataset_cache_block_manager->GetCachedPartition(identity, &partition).ok());
+    RETURN_IF_ERROR(dataset_cache_block_manager->GetCachedPartition(identity, &partition));
     if (partition == NULL) {
       std::shared_ptr<CachedPartition> new_partition = std::shared_ptr<CachedPartition>(
         new CachedPartition(identity->dataset_path(), identity->file_path()));
-      DCHECK(dataset_cache_block_manager->InsertPartition(identity, new_partition).ok());
+      RETURN_IF_ERROR(dataset_cache_block_manager->InsertPartition(identity, new_partition));
     }
 
     // Insert the columns into dataset_cache_block_manager.
     for(auto iter = retrieved_columns.begin(); iter != retrieved_columns.end(); iter ++) {
-      DCHECK(dataset_cache_block_manager->InsertColumn(identity, iter->first, iter->second).ok());
+      RETURN_IF_ERROR(dataset_cache_block_manager->InsertColumn(identity, iter->first, iter->second));
     }
 }
-
+// method name action
 Status RetrieveAndCacheAndInsertColumns(Identity* identity, std::shared_ptr<StoragePluginFactory> storage_plugin_factory,
  std::vector<int> col_ids, std::shared_ptr<DatasetCacheBlockManager> dataset_cache_block_manager,
   std::shared_ptr<DatasetCacheEngineManager> dataset_cache_engine_manager) {
     std::string partition_path = identity->file_path();
     std::shared_ptr<StoragePlugin> storage_plugin;
 
-    // Get the ReadableFile
-    DCHECK(storage_plugin_factory->GetStoragePlugin(partition_path, &storage_plugin).ok());
+    // Get the ReadableFile Debug Check
+    RETURN_IF_ERROR(storage_plugin_factory->GetStoragePlugin(partition_path, &storage_plugin));
     std::shared_ptr<HdfsReadableFile> file;
-    DCHECK(storage_plugin->GetReadableFile(partition_path, &file).ok());
+    RETURN_IF_ERROR(storage_plugin->GetReadableFile(partition_path, &file));
 
      // Get cache engine.
     std::shared_ptr<CacheEngine> cache_engine;
     CacheEngine::CachePolicy cache_policy = GetCachePolicy(identity);
-    DCHECK(dataset_cache_engine_manager->GetCacheEngine(cache_policy, &cache_engine).ok());
+    RETURN_IF_ERROR(dataset_cache_engine_manager->GetCacheEngine(cache_policy, &cache_engine));
 
     // Read the columns into ChunkArray.
     arrow::MemoryPool* memory_pool = new CacheMemoryPool(cache_engine);
@@ -96,7 +96,7 @@ Status RetrieveAndCacheAndInsertColumns(Identity* identity, std::shared_ptr<Stor
     int64_t occupied_size = 0;
     for(auto iter = col_ids.begin(); iter != col_ids.end(); iter ++) {
       std::shared_ptr<arrow::ChunkedArray> chunked_out;
-      DCHECK(parquet_reader->ReadColumnChunk(*iter, chunked_out).ok());
+      RETURN_IF_ERROR(parquet_reader->ReadColumnChunk(*iter, chunked_out));
       arrow::ChunkedArray* chunked_array = chunked_out.get();
       int64_t column_size = memory_pool->bytes_allocated() - occupied_size;
       occupied_size = memory_pool->bytes_allocated() + occupied_size;
@@ -104,7 +104,7 @@ Status RetrieveAndCacheAndInsertColumns(Identity* identity, std::shared_ptr<Stor
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, *iter, cache_region));
       retrieved_columns.insert(std::make_pair(std::to_string(*iter), column));
-      DCHECK(cache_engine->PutValue(partition_path, *iter, cache_region).ok());
+      RETURN_IF_ERROR(cache_engine->PutValue(partition_path, *iter, cache_region));
     }
     InsertColumnsToBlockManager(identity, dataset_cache_block_manager, retrieved_columns);
 }
@@ -125,14 +125,14 @@ Status WrapDatasetStream(std::unique_ptr<rpc::FlightDataStream>* data_stream,
  std::shared_ptr<DatasetCacheBlockManager> dataset_cache_block_manager_, Identity* identity) {
 
   std::unordered_map<string, std::shared_ptr<CachedColumn>> cached_columns;
-  DCHECK(dataset_cache_block_manager_->GetCachedColumns(identity, &cached_columns).ok());
+  RETURN_IF_ERROR(dataset_cache_block_manager_->GetCachedColumns(identity, &cached_columns));
 
   std::shared_ptr<Table> table;
   for(auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
     std::shared_ptr<CachedColumn> cache_column = iter->second;
     std::shared_ptr<CacheRegion> cache_region = cache_column->cache_region_;
     std::shared_ptr<arrow::ChunkedArray> chunked_out(cache_region->chunked_array());
-    DCHECK(Table::FromChunkedStructArray(chunked_out, &table).ok());
+    RETURN_IF_ERROR(Status::fromArrowStatus(Table::FromChunkedStructArray(chunked_out, &table)));
   }
   *data_stream = std::unique_ptr<rpc::FlightDataStream>(
     new rpc::RecordBatchStream(std::shared_ptr<RecordBatchReader>(new TableBatchReader(*table))));
@@ -141,8 +141,8 @@ Status WrapDatasetStream(std::unique_ptr<rpc::FlightDataStream>* data_stream,
 Status RetrieveAndCacheAndInsertAndWrapStream(Identity* identity, std::shared_ptr<StoragePluginFactory> storage_plugin_factory,
  std::vector<int> col_ids, std::shared_ptr<DatasetCacheBlockManager> dataset_cache_block_manager,
   std::unique_ptr<rpc::FlightDataStream>* data_stream, std::shared_ptr<DatasetCacheEngineManager> dataset_cache_engine_manager) {
-    DCHECK(RetrieveAndCacheAndInsertColumns(identity, storage_plugin_factory, col_ids, dataset_cache_block_manager, dataset_cache_engine_manager).ok());
-    DCHECK(WrapDatasetStream(data_stream, dataset_cache_block_manager, identity).ok());
+    RETURN_IF_ERROR(RetrieveAndCacheAndInsertColumns(identity, storage_plugin_factory, col_ids, dataset_cache_block_manager, dataset_cache_engine_manager));
+    RETURN_IF_ERROR(WrapDatasetStream(data_stream, dataset_cache_block_manager, identity));
 }
 
 // Wrap the data to flight data stream.

@@ -62,7 +62,7 @@ class ExecEnv {
 
   StoragePlugin::StoragePluginType const GetStoragePluginType();
 
-  std::vector<Store::StoreType> GetStoreTypes();
+  std::unordered_map<string, long> GetStoresInfo();
 
   std::vector<CacheEngine::CachePolicy> GetCachePolicies();
 
@@ -83,6 +83,7 @@ class ExecEnv {
   std::string worker_grpc_hostname_;
   int32_t worker_grpc_port_;
   StoragePlugin::StoragePluginType storage_plugin_type_;
+  std::unordered_map<string, long> stores_info_;
   std::vector<Store::StoreType> store_types_;
   std::unordered_map<string, long> cache_stores_info_; // string: store type
   std::vector<CacheEngine::CachePolicy> cache_policies_;
