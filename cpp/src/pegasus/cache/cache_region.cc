@@ -26,7 +26,7 @@ CacheRegion::CacheRegion()
   : memory_pool_(nullptr), chunked_array_(nullptr), size_(0){
 }
 
-CacheRegion::CacheRegion(CacheMemoryPool* memory_pool,
+CacheRegion::CacheRegion(const std::shared_ptr<CacheMemoryPool>& memory_pool,
   const std::shared_ptr<arrow::ChunkedArray>& chunked_array, int64_t size)
   : memory_pool_(memory_pool), chunked_array_(chunked_array), size_(size) {
 }
@@ -42,7 +42,7 @@ std::shared_ptr<arrow::ChunkedArray>  CacheRegion::chunked_array() const {
     return chunked_array_;
 }
 
-CacheMemoryPool* CacheRegion::memory_pool() const {
+std::shared_ptr<CacheMemoryPool> CacheRegion::memory_pool() const {
  return memory_pool_;
 }
 
