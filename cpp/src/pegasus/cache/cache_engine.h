@@ -35,7 +35,7 @@ class CacheEngine {
  public:
  virtual Status Init(const std::shared_ptr<CacheEngineInfo>& info) = 0;
  virtual Status GetCacheStore(CacheStore** cache_store) = 0;
- virtual Status PutValue(LRUCache::CacheKey* key) = 0;
+ virtual Status PutValue(LRUCache::CacheKey* key, int64_t column_size) = 0;
  virtual Status TouchValue(LRUCache::CacheKey* key) = 0;
  virtual Status EraseValue(LRUCache::CacheKey* key) = 0;
 
@@ -62,7 +62,7 @@ class LruCacheEngine : public CacheEngine {
   
   Status GetCacheStore(CacheStore** cache_store) override;
 
-  Status PutValue(LRUCache::CacheKey* key) override;
+  Status PutValue(LRUCache::CacheKey* key, int64_t column_size) override;
 
   Status TouchValue(LRUCache::CacheKey* key) override;
 
@@ -87,7 +87,7 @@ class NonEvictionCacheEngine : public CacheEngine {
     return Status::NotImplemented("Not yet implemented.");
   }
 
-  Status PutValue(LRUCache::CacheKey* key) override {
+  Status PutValue(LRUCache::CacheKey* key, int64_t column_size) override {
     return Status::NotImplemented("Not yet implemented.");
   }
 

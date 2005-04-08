@@ -145,11 +145,11 @@ Status LRUCache::Init() {
   return Status::OK();
 }
 
-void LRUCache::Insert(const CacheKey* key) {
+void LRUCache::Insert(const CacheKey* key, int64_t column_size) {
   
   Slice key_slice(reinterpret_cast<const uint8_t*>(key), sizeof(CacheKey));
 
-  auto handle(cache_->Allocate(key_slice, 0, key->occupied_size_));
+  auto handle(cache_->Allocate(key_slice, 0, column_size));
   CHECK(handle);
   
   auto h(cache_->Insert(std::move(handle),

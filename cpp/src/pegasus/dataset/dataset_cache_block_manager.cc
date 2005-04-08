@@ -137,9 +137,8 @@ Status CachedDataset::GetCachedPartition(
       if (entry != cached_columns_.end()) {
         int colId = *iter;
         auto find_column = entry->second;
-        int64_t column_size = find_column->GetCacheRegion()->size();
 
-        LRUCache::CacheKey* key = new LRUCache::CacheKey(dataset_path, partition_path, colId, column_size);
+        LRUCache::CacheKey* key = new LRUCache::CacheKey(dataset_path, partition_path, colId);
         // Touch value in lru cache when access the cached column.
         cache_engine->TouchValue(key);
 
@@ -202,9 +201,8 @@ Status CachedPartition::DeleteEntry(std::shared_ptr<CacheEngine> cache_engine) {
     for (auto iter = cached_columns_.begin(); iter != cached_columns_.end(); iter ++) {
       std::shared_ptr<CachedColumn> column = iter->second;
       int column_id = iter->first;
-      int64_t column_size = column->GetCacheRegion()->size();
 
-      LRUCache::CacheKey* key = new LRUCache::CacheKey(dataset_path_, partition_path_, column_id, column_size);
+      LRUCache::CacheKey* key = new LRUCache::CacheKey(dataset_path_, partition_path_, column_id);
       cache_engine->EraseValue(key);
       LOG(WARNING) << "Delete the partition and the dataset path: "
       << dataset_path_ << " and the partition path: "<< partition_path_ << " and the column id: " << column_id;

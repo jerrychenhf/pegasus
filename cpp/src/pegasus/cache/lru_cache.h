@@ -57,16 +57,14 @@ class LRUCache {
   // future releases.
   struct CacheKey {
     CacheKey(std::string dataset_path, std::string partition_path,
-     int column_id, int64_t occupied_size) :
+     int column_id) :
       dataset_path_(dataset_path),
       partition_path_(partition_path),
-      column_id_(column_id),
-      occupied_size_(occupied_size){}
+      column_id_(column_id){}
 
    std::string dataset_path_;
    std::string partition_path_;
    int column_id_;
-   int64_t occupied_size_;
   };
 
   class LRUEvictionCallback : public Cache::EvictionCallback {
@@ -182,7 +180,7 @@ class LRUCache {
 
   // Insert the given block into the cache. 'inserted' is set to refer to the
   // entry in the cache.
-  void Insert(const CacheKey* key);
+  void Insert(const CacheKey* key, int64_t column_size);
 
   void Touch(const CacheKey* key);
 
