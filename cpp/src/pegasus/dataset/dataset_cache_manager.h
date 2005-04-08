@@ -47,10 +47,13 @@ class DatasetCacheManager {
 
   Status DropCachedDataset(std::vector<rpc::PartsDropListofDataset> drop_lists);
 
- public:
+  DatasetCacheBlockManager* GetBlockManager() {
+    return cache_block_manager_;
+  }
+
+ private: 
   DatasetCacheEngineManager* cache_engine_manager_;
   DatasetCacheBlockManager* cache_block_manager_;
- private: 
   
   std::shared_ptr<StorageFactory> storage_factory_;
   

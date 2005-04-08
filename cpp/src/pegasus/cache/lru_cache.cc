@@ -139,9 +139,8 @@ LRUCache::LRUCache(size_t capacity)
 
 Status LRUCache::Init() {
   WorkerExecEnv* env = WorkerExecEnv::GetInstance();
-  env->GetDatasetCacheManager()->cache_block_manager_;
   eviction_callback_ = new LRUEvictionCallback(
-    env->GetDatasetCacheManager()->cache_block_manager_);
+    env->GetDatasetCacheManager()->GetBlockManager());
   return Status::OK();
 }
 

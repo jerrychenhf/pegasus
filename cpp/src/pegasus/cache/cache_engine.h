@@ -68,7 +68,7 @@ class LruCacheEngine : public CacheEngine {
 
   Status EraseValue(LRUCache::CacheKey* key) override;
 
- public:
+ private:
   std::shared_ptr<CacheStoreManager> cache_store_manager_;
   LRUCache* lru_cache_;
 };
