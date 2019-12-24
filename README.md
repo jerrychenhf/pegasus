@@ -13,9 +13,12 @@ out-of-source. If you are not familiar with this terminology:
   invoke ``cmake $CMAKE_ARGS ..`` from this directory
 
 ### Building:
+
+```
 git clone https://gitlab.devtools.intel.com/intel-bigdata/pegasus
 cd pegasus/cpp
 mkdir build
 cd build
 cmake ..
 make
+```
