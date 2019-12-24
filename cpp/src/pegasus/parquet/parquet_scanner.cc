@@ -15,22 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include <string>
-#include <vector>
-#include "pegasus/storage/storage_plugin.h"
-#include "pegasus/util/consistent_hashing.h"
-
-using namespace std;
-
 namespace pegasus {
 
-HDFSStoragePlugin::HDFSStoragePlugin() {
-
-}
-
-Status HDFSStoragePlugin::GetFileList(std::string dataset_path, std::shared_ptr<std::vector<std::string>>* file_list) {
- //TODO 
-  return Status::OK();
-}
 
 } // namespace pegasus

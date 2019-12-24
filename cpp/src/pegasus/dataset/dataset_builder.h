@@ -15,41 +15,36 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_FLIGHTINFO_BUILDER_H
-#define PEGASUS_FLIGHTINFO_BUILDER_H
-
-#include "arrow/flight/types.h"
+#ifndef PEGASUS_DATASET_BUILDER_H
+#define PEGASUS_DATASET_BUILDER_H
 
 #include "pegasus/dataset/dataset.h"
-
-using namespace arrow;
-using namespace arrow::flight;
+#include "pegasus/parquet/parquet_metadata.h"
 
 namespace pegasus {
 
-class FlightInfoBuilder {
+class DataSetBuilder {
+ public:
+  DataSetBuilder(std::string dataset_path, std::shared_ptr<std::vector<std::string>> file_list);
 
-public:
-  FlightInfoBuilder(std::shared_ptr<DataSet> dataset);
-  FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> datasets);
+  Status BuildDataset(std::shared_ptr<DataSet>* dataset);
 
-  Status BuildFlightInfo(std::unique_ptr<FlightInfo>* flight_info);
+  Status GetSchma(std::shared_ptr<std::string>* schema);
 
-  Status BuildFlightListing(std::unique_ptr<FlightListing>* listings);
+  Status GetDataSetPath(std::shared_ptr<std::string>* path);
 
-  Status GetFlightDescriptor(std::unique_ptr<FlightDescriptor>* flight_descriptor);
-
-  Status GetFlightEndpoints(std::unique_ptr<std::vector<FlightEndpoint>>* endpoints);
+  Status GetEndpoints(std::shared_ptr<std::vector<Endpoint>>* endpoints);
 
   Status GetTotalRecords(int64_t* total_records);
     
   Status GetTotalBytes(int64_t* total_bytes);
 
-private:
-  std::shared_ptr<DataSet> dataset_;
-  std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> datasets_;
+ private:
+  std::string dataset_path;
+  std::shared_ptr<std::vector<std::string>> file_list_;
+  std::shared_ptr<std::vector<parquet::FileMetaData>>* files_metadata_;
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_FLIGHTINFO_BUILDER_H
+#endif  // PEGASUS_DATASET_BUILDER_H

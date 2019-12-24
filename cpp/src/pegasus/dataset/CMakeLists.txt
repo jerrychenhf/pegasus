@@ -34,7 +34,8 @@ add_library(Dataset
   dataset_service.cc
   dataset_store.cc
   dataset.cc
-  )
+  dataset_builder.cc
+)
 add_dependencies(Dataset gen-deps)
 
 add_library(FlightInfo

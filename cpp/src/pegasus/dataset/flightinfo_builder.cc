@@ -19,7 +19,7 @@
 
 namespace pegasus {
 
-FlightInfoBuilder::FlightInfoBuilder(std::unique_ptr<DataSet> dataset) : dataset_(std::move(dataset)){
+FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<DataSet> dataset) : dataset_(dataset){
 
 }
 

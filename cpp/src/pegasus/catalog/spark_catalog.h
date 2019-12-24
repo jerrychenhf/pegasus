@@ -15,40 +15,23 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_STORAGE_PLUGIN_H
-#define PEGASUS_STORAGE_PLUGIN_H
+#ifndef PEGASUS_SPARK_CATALOG_H
+#define PEGASUS_SPARK_CATALOG_H
 
-#include "pegasus/common/status.h"
-#include "pegasus/dataset/dataset.h"
+#include <string>
+
+using namespace std;
 
 namespace pegasus {
 
-class StoragePlugin {
+class SparkCatalog {
  public:
-  StoragePlugin();
-  ~StoragePlugin();
-  Status Auth(std::string passwd);
-  virtual Status GetFileList(std::string dataset_path, std::shared_ptr<std::vector<std::string>>* file_list) = 0;
-    
-  enum StoragePluginType {
-    HDFS,
-    S3,
-  };
+  SparkCatalog(std::string path);
 
-  StoragePluginType GetPluginType();
+  std::string GetFileFormat();
 
- private:
-  StoragePluginType storage_plugin_type_;;
-};
-
-class HDFSStoragePlugin : public StoragePlugin {
- public:
-  HDFSStoragePlugin();
-  ~HDFSStoragePlugin();
-  Status GetFileList(std::string dataset_path, std::shared_ptr<std::vector<std::string>>* file_list) override;
-  StoragePluginType GetPluginType();
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_STORAGE_PLUGIN_H
+#endif  // PEGASUS_SPARK_CATALOG_H

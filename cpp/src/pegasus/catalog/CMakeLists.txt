@@ -15,20 +15,16 @@
 # specific language governing permissions and limitations
 # under the License.
 
+message (STATUS "catalog ${BUILD_OUTPUT_ROOT_DIRECTORY}")
+# where to put generated libraries
+set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/catalog")
 
+# where to put generated binaries
+set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/catalog")
 
-add_custom_target(gen-deps)
-
-add_subdirectory(util)
-add_subdirectory(common)
-add_subdirectory(catalog)
-add_subdirectory(parquet)
-add_subdirectory(cache)
-add_subdirectory(client)
-add_subdirectory(dataset)
-add_subdirectory(storage)
-add_subdirectory(runtime)
-add_subdirectory(server)
-
+add_library(Spark_Catalog
+  spark_catalog.cc
+)
+add_dependencies(Spark_Catalog gen-deps)
 
 

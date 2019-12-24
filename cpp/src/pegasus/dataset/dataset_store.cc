@@ -19,7 +19,7 @@
 
 namespace pegasus {
 
-Status DataSetStore::GetDataSets(std::unique_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
+Status DataSetStore::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
   
   datasets->get()->reserve(planner_metadata_.size());
   for(auto entry : planner_metadata_) {
@@ -28,14 +28,14 @@ Status DataSetStore::GetDataSets(std::unique_ptr<std::vector<std::shared_ptr<Dat
   return Status::OK();
 }
 
-Status DataSetStore::GetDataSet(std::string dataset_path, std::unique_ptr<DataSet>* dataset) {
+Status DataSetStore::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset) {
   
   auto entry = planner_metadata_.find(dataset_path);
   if (entry == planner_metadata_.end()) {
     return Status::KeyError("Could not find dataset.", dataset_path);
-    }
+  }
   auto find_dataset = entry->second;
-  *dataset = std::unique_ptr<DataSet>(new DataSet(*find_dataset));
+  *dataset = std::shared_ptr<DataSet>(new DataSet(*find_dataset));
   return Status::OK();
 }
 
@@ -48,7 +48,7 @@ Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset) {
 
 Status DataSetStore::InsertEndPoint(std::string dataset_path, std::shared_ptr<Endpoint> new_endpoint) {
    
-  std::unique_ptr<DataSet>* dataset;
+  std::shared_ptr<DataSet>* dataset;
   GetDataSet(dataset_path, dataset);
   std::vector<Endpoint> endpoints = (*dataset)->endpoints();
 

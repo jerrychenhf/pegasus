@@ -15,18 +15,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
+#ifndef PEGASUS_PARQUET_METADATA_H
+#define PEGASUS_PARQUET_METADATA_H
 
- Status Planner::WokerReport(const ServerCallContext& context, const Action& action,
-                  std::unique_ptr<ResultStream>* out) {
-    if(action.type == "add") {
-      worker_manager
-    }
+#include "parquet/api/reader.h"
 
-  }
+#include "pegasus/common/status.h"
 
-  Status AddWorker(std::unique_ptr<ResultStream>* out) {
-    worker_manger.add
-    std::shared_ptr<Buffer> buf = Buffer::FromString("ok");
-    *out = std::unique_ptr<ResultStream>(new SimpleResultStream({Result{buf}}));
-    return Status::OK();
-  }
+namespace pegasus {
+
+class ParquetMetadata {
+
+ public:
+  ParquetMetadata(std::shared_ptr<std::vector<std::string>> flie_list);
+  Status GetFilesMeta(std::shared_ptr<std::vector<parquet::FileMetaData>>* files_metadata);
+
+ private:
+  std::shared_ptr<std::vector<std::string>> flie_list_;
+  std::vector<parquet::FileMetaData> files_metadata_;
+};
+
+} // namespace pegasus
+
+#endif  // PEGASUS_PARQUET_METADATA_H

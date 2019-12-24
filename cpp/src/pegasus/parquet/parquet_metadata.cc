@@ -15,40 +15,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_STORAGE_PLUGIN_H
-#define PEGASUS_STORAGE_PLUGIN_H
-
-#include "pegasus/common/status.h"
-#include "pegasus/dataset/dataset.h"
+#include "pegasus/parquet/parquet_metadata.h"
 
 namespace pegasus {
 
-class StoragePlugin {
- public:
-  StoragePlugin();
-  ~StoragePlugin();
-  Status Auth(std::string passwd);
-  virtual Status GetFileList(std::string dataset_path, std::shared_ptr<std::vector<std::string>>* file_list) = 0;
-    
-  enum StoragePluginType {
-    HDFS,
-    S3,
-  };
+ParquetMetadata::ParquetMetadata(std::shared_ptr<std::vector<std::string>> flie_list) {
 
-  StoragePluginType GetPluginType();
+}
 
- private:
-  StoragePluginType storage_plugin_type_;;
-};
+Status ParquetMetadata::GetFilesMeta(std::shared_ptr<std::vector<parquet::FileMetaData>>* files_metadata) {
 
-class HDFSStoragePlugin : public StoragePlugin {
- public:
-  HDFSStoragePlugin();
-  ~HDFSStoragePlugin();
-  Status GetFileList(std::string dataset_path, std::shared_ptr<std::vector<std::string>>* file_list) override;
-  StoragePluginType GetPluginType();
-};
+}
 
 } // namespace pegasus
-
-#endif  // PEGASUS_STORAGE_PLUGIN_H

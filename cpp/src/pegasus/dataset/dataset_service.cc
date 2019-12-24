@@ -22,6 +22,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "pegasus/dataset/dataset_builder.h"
 #include "pegasus/dataset/dataset_service.h"
 #include "pegasus/dataset/flightinfo_builder.h"
 #include "pegasus/util/consistent_hashing.h"
@@ -36,16 +37,22 @@ Status DataSetService::Init() {
   worker_manager_ = env->GetInstance()->get_worker_manager();
 }
 
-Status DataSetService::GetDataSets(std::unique_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
+Status DataSetService::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
   dataset_store_->GetDataSets(datasets);
   return Status::OK();
 }
 
-Status DataSetService::GetDataSet(std::string dataset_path, std::unique_ptr<DataSet>* dataset) {
+Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset) {
 
   dataset_store_->GetDataSet(dataset_path, dataset);
-  if(dataset == NULL) {
-    storage_plugin_->get()->GetDataSet(dataset_path, dataset);
+  if (dataset == NULL) {
+    std::shared_ptr<std::vector<std::string>>* file_list;
+    storage_plugin_->get()->GetFileList(dataset_path, file_list);
+
+    std::shared_ptr<DataSetBuilder> dataset_builder = 
+        std::shared_ptr<DataSetBuilder>(new DataSetBuilder(dataset_path, *file_list));
+    
+    dataset_builder->BuildDataset(dataset);
 
   // insert the locations to dataset.
     std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations;
@@ -60,20 +67,20 @@ Status DataSetService::GetDataSet(std::string dataset_path, std::unique_ptr<Data
 /// Build FlightInfo from DataSet.
 Status DataSetService::GetFlightInfo(std::string dataset_path, std::unique_ptr<FlightInfo>* flight_info) {
     
-  std::unique_ptr<DataSet>* dataset;
+  std::shared_ptr<DataSet>* dataset;
   GetDataSet(dataset_path, dataset);
 
-  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(std::move(*dataset)));
+  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(*dataset));
   flightinfo_builder_->BuildFlightInfo(flight_info);
 }
 
 /// Build FlightInfos from DataSets.
 Status DataSetService::GetFlightListing(std::unique_ptr<FlightListing>* listings) {
     
-  std::unique_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets;
+  std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets;
   GetDataSets(datasets);
 
-  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(std::move(*datasets)));
+  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(*datasets));
   flightinfo_builder_->BuildFlightListing(listings);
 }
 

@@ -14,3 +14,17 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
+#ifndef PEGASUS_SPARK_CATALOG_H
+#define PEGASUS_SPARK_CATALOG_H
+
+#include "pegasus/catalog/spark_catalog.h"
+
+using namespace std;
+
+namespace pegasus {
+
+
+} // namespace pegasus
+
+#endif  // PEGASUS_SPARK_CATALOG_H

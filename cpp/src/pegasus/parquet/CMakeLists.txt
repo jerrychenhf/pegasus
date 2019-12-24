@@ -16,19 +16,15 @@
 # under the License.
 
 
+# where to put generated libraries
+set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/parquet")
 
-add_custom_target(gen-deps)
+# where to put generated binaries
+set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/parquet")
 
-add_subdirectory(util)
-add_subdirectory(common)
-add_subdirectory(catalog)
-add_subdirectory(parquet)
-add_subdirectory(cache)
-add_subdirectory(client)
-add_subdirectory(dataset)
-add_subdirectory(storage)
-add_subdirectory(runtime)
-add_subdirectory(server)
-
-
+add_library(Parquet
+  parquet_metadata.cc
+  parquet_scanner.cc
+)
+add_dependencies(Parquet gen-deps)
 
