@@ -23,6 +23,7 @@
 
 #include "pegasus/common/location.h"
 #include "pegasus/dataset/identity.h"
+#include "pegasus/util/conhash.h"
 
 using namespace std;
 
@@ -38,6 +39,8 @@ namespace pegasus {
     Location GetLocation(Identity identity);
     std::string GetHash(std::string key);
     std::vector<Location> GetLocations();
+private:
+	struct conhash_s *conhash;
   };
 
 } // namespace pegasus

@@ -34,6 +34,7 @@ class PEGASUS_EXPORT DataSet {
     /// Path identifying a particular dataset. 
     std::string dataset_path;
     std::vector<Endpoint> endpoints;
+    uint64_t timestamp;
     int64_t total_records;
     int64_t total_bytes;
   };
