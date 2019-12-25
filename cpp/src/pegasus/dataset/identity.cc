@@ -44,5 +44,9 @@ bool Identity::Equals(const Identity& other) const {
 
 }
 
+Status SerializeToString(std::string* out) {
+	out->assign(file_path_ + std::to_string(row_group_id));
+	return 0;
+}
 
 } // namespace pegasus

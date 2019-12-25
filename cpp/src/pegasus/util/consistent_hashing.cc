@@ -25,7 +25,7 @@ ConsistentHashRing::ConsistentHashRing(std::vector<Location> locations)
 	{
 		conhash = conhash_init(NULL);
 	}
-	//TODO: add each node in <locations>
+	//TODO: add each node in <locations> to conhash
 	for (auto lcn:locations) {
 		AddLocation(lcn);
 	}
@@ -41,39 +41,29 @@ void ConsistentHashRing::AddLocation(Location location)
 void ConsistentHashRing::AddLocation(Location location, int num_virtual_nodes)
 {
 	struct node_s node;
-	conhash_set_node(&node, location.ToString(), num_virtual_nodes);
+	conhash_set_node(&node, location.ToString().c_str(), num_virtual_nodes);
 	conhash_add_node(conhash, &node);
 }
- 
+
 void ConsistentHashRing::RemoveLocation(Location location)
 {
 	//TODO: the libcohash needs update to remove dependency on node
 	//TODO: how to get the num_virtual_nodes?
 	struct node_s node;
-	conhash_set_node(&node, location.ToString(), 10);
+	conhash_set_node(&node, location.ToString().c_str(), 10);
 	conhash_del_node(conhash, &node);
 }
 
 Location ConsistentHashRing::GetLocation(Identity identity)
 {
-	struct node_s* pnode;
+	const struct node_s* pnode;
 	std::string idstr;
 	identity.SerializeToString(&idstr);
-	pnode = conhash_lookup(conhash, idstr);
+	pnode = conhash_lookup(conhash, idstr.c_str());
 	//TODO: refactor lcn.Parse?
 	Location lcn;
 	lcn.Parse(idstr, &lcn);
 	return lcn;
-}
-
-std::string ConsistentHashRing::GetHash(std::string key)
-{
-	//
-}
-
-std::vector<Location> ConsistentHashRing::GetLocations()
-{
-	//TODO: why do we need this method?
 }
 
 } // namespace pegasus
