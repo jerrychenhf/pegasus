@@ -31,7 +31,7 @@ make install
 ### Building pegasus
 
 ```
-git clone https://gitlab.devtools.intel.com/intel-bigdata/pegasus
+git clone https://gitlab.devtools.intel.com/intel-bigdata/pegasus.git
 cd pegasus/cpp
 mkdir build
 cd build
