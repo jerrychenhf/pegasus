@@ -25,7 +25,7 @@ ConsistentHashRing::ConsistentHashRing(std::vector<Location> locations)
 	{
 		conhash = conhash_init(NULL);
 	}
-	//TODO: add each node in <locations> to conhash
+
 	for (auto lcn:locations) {
 		AddLocation(lcn);
 	}

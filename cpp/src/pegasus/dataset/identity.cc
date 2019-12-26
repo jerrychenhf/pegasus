@@ -41,12 +41,12 @@ int64_t Identity::bytes() const {
   }
   
 bool Identity::Equals(const Identity& other) const {
-
+	return false;
 }
 
-Status SerializeToString(std::string* out) {
-	out->assign(file_path_ + std::to_string(row_group_id));
-	return 0;
+Status Identity::SerializeToString(std::string* out) const {
+	out->assign(file_path_ + std::to_string(row_group_id_));
+	return Status::OK();
 }
 
 } // namespace pegasus
