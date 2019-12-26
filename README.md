@@ -22,6 +22,7 @@ git clone https://github.com/apache/arrow.git
 cd arrow/cpp
 mkdir build-arrow
 cd build-arrow
+yum install openssl-devel flex bison -y
 cmake -DARROW_FLIGHT=ON -DARROW_PARQUET=ON -DARROW_HDFS=ON ..
 make
 make install
