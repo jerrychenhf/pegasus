@@ -18,17 +18,22 @@
 #ifndef PEGASUS_STORAGE_PLUGIN_H
 #define PEGASUS_STORAGE_PLUGIN_H
 
+#include <arrow/io/hdfs.h>
 #include "pegasus/common/status.h"
 #include "pegasus/dataset/dataset.h"
 
 namespace pegasus {
+using HadoopFileSystem = arrow::io::HadoopFileSystem;
+using HdfsConnectionConfig = arrow::io::HdfsConnectionConfig;
 
 class StoragePlugin {
  public:
   StoragePlugin();
   ~StoragePlugin();
+  Status Init();
+  Status Connect();
   Status Auth(std::string passwd);
-  virtual Status GetFileList(std::string dataset_path, std::shared_ptr<std::vector<std::string>>* file_list) = 0;
+  virtual Status ListFiles(std::string dataset_path, std::shared_ptr<std::vector<std::string>>* file_list) = 0;
     
   enum StoragePluginType {
     HDFS,
@@ -45,8 +50,14 @@ class HDFSStoragePlugin : public StoragePlugin {
  public:
   HDFSStoragePlugin();
   ~HDFSStoragePlugin();
-  Status GetFileList(std::string dataset_path, std::shared_ptr<std::vector<std::string>>* file_list) override;
+  Status Init();
+  Status Connect();
+  Status ListFiles(std::string dataset_path, std::shared_ptr<std::vector<std::string>>* file_list) override;
   StoragePluginType GetPluginType();
+
+ private:
+  std::shared_ptr<HadoopFileSystem> client_;
+  HdfsConnectionConfig conf_;
 };
 
 } // namespace pegasus

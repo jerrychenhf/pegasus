@@ -38,10 +38,10 @@ class DataSetService {
   Status Init();
   Status Start();
   Status Stop();
-  Status GetFlightInfo(std::string dataset_path, std::unique_ptr<FlightInfo>* flight_info);
+  Status GetFlightInfo(std::string table_name, std::unique_ptr<FlightInfo>* flight_info);
   Status GetFlightListing(std::unique_ptr<FlightListing>* listings);
   Status GetDataSets( std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets);
-  Status GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset);
+  Status GetDataSet(std::string table_name, std::shared_ptr<DataSet>* dataset);
 
  private:
   std::shared_ptr<StoragePlugin>* storage_plugin_;

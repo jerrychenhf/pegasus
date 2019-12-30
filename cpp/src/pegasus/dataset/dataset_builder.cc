@@ -15,7 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/catalog/spark_catalog.h"
 #include "pegasus/dataset/dataset_builder.h"
 #include "pegasus/parquet/parquet_metadata.h"
 
@@ -27,19 +26,11 @@ DataSetBuilder::DataSetBuilder(std::string dataset_path, std::shared_ptr<std::ve
 }
 
 Status DataSetBuilder::BuildDataset(std::shared_ptr<DataSet>* dataset) {
-  std::unique_ptr<SparkCatalog> spark_catalog = std::unique_ptr<SparkCatalog>(new SparkCatalog(dataset_path));
-  if (spark_catalog->GetFileFormat() == "parquet") {
-    std::shared_ptr<ParquetMetadata> table_meta = std::shared_ptr<ParquetMetadata>(new ParquetMetadata(file_list_));
-    table_meta->GetFilesMeta(files_metadata_);
-   }
+
+
 }
 
 Status DataSetBuilder::GetTotalRecords(int64_t* total_records) {
-
- for(auto it = (*files_metadata_)->begin(); it != (*files_metadata_)->end(); it++) {
-  int64_t num_rows = it->num_rows();
-  *total_records += num_rows;
- }
 
 }
 

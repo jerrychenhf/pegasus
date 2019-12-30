@@ -22,7 +22,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include "pegasus/dataset/dataset_builder.h"
+#include "pegasus/catalog/spark_catalog.h"
 #include "pegasus/dataset/dataset_service.h"
 #include "pegasus/dataset/flightinfo_builder.h"
 #include "pegasus/util/consistent_hashing.h"
@@ -42,17 +42,16 @@ Status DataSetService::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<D
   return Status::OK();
 }
 
-Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset) {
+Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSet>* dataset) {
 
+  std::unique_ptr<SparkCatalog> spark_catalog = std::unique_ptr<SparkCatalog>(new SparkCatalog());
+  std::unique_ptr<TableMetadata>* table_meta;
+  spark_catalog->GetTableMeta(table_name, table_meta);
+  std::string dataset_path = table_meta->get()->location;
   dataset_store_->GetDataSet(dataset_path, dataset);
   if (dataset == NULL) {
     std::shared_ptr<std::vector<std::string>>* file_list;
-    storage_plugin_->get()->GetFileList(dataset_path, file_list);
-
-    std::shared_ptr<DataSetBuilder> dataset_builder = 
-        std::shared_ptr<DataSetBuilder>(new DataSetBuilder(dataset_path, *file_list));
-    
-    dataset_builder->BuildDataset(dataset);
+    storage_plugin_->get()->ListFiles(dataset_path, file_list);
 
   // insert the locations to dataset.
     std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations;
@@ -65,10 +64,10 @@ Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<Data
 }
 
 /// Build FlightInfo from DataSet.
-Status DataSetService::GetFlightInfo(std::string dataset_path, std::unique_ptr<FlightInfo>* flight_info) {
+Status DataSetService::GetFlightInfo(std::string table_name, std::unique_ptr<FlightInfo>* flight_info) {
     
   std::shared_ptr<DataSet>* dataset;
-  GetDataSet(dataset_path, dataset);
+  GetDataSet(table_name, dataset);
 
   flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(*dataset));
   flightinfo_builder_->BuildFlightInfo(flight_info);

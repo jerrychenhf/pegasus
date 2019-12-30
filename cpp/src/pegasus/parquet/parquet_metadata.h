@@ -24,15 +24,17 @@
 
 namespace pegasus {
 
+using FileMetaData = parquet::FileMetaData;
+
 class ParquetMetadata {
 
  public:
-  ParquetMetadata(std::shared_ptr<std::vector<std::string>> flie_list);
-  Status GetFilesMeta(std::shared_ptr<std::vector<parquet::FileMetaData>>* files_metadata);
+  ParquetMetadata(std::shared_ptr<std::vector<std::string>> flie_path_list);
+  Status GetFilesMeta(std::shared_ptr<std::vector<std::shared_ptr<FileMetaData>>>* files_metadata);
 
  private:
-  std::shared_ptr<std::vector<std::string>> flie_list_;
-  std::vector<parquet::FileMetaData> files_metadata_;
+  std::shared_ptr<std::vector<std::string>> flie_path_list_;
+  std::vector<FileMetaData> files_metadata_;
 };
 
 } // namespace pegasus

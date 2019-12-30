@@ -15,11 +15,25 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/catalog/spark_catalog.h"
+#ifndef PEGASUS_TABLE_METADATA_H
+#define PEGASUS_TABLE_METADATA_H
 
-using namespace std;
+#include <string>
+
+#include "pegasus/common/status.h"
 
 namespace pegasus {
 
+class TableMetadata {
+ public:
+  TableMetadata();
+
+//provider the name of the data source provider for this table, e.g. parquet, orc, etc.
+  std::string provider;
+  std::string location;
+};
+
 
 } // namespace pegasus
+
+#endif  // PEGASUS_SPARK_CATALOG_H

@@ -15,10 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/catalog/spark_catalog.h"
-
-using namespace std;
-
 namespace pegasus {
 
 

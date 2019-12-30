@@ -41,6 +41,8 @@ class ServerOptions {
   StoragePlugin::StoragePluginType storage_plugin_type_;
   std::vector<Store::StoreType> store_types_;
 
+  std::string namenode_hostname_;
+  std::string namenode_port_;
 };
 
 }  // namespace pegasus
