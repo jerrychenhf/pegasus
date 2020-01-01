@@ -42,5 +42,3 @@ add_library(FlightInfo
 )
 add_dependencies(FlightInfo gen-deps)
 
-#target_link_libraries(Dataset Status SparkCatalog Runtime Location FlightInfo Endpoint)
-

@@ -27,6 +27,4 @@ add_library(Runtime
 )
 add_dependencies(Runtime gen-deps)
 
-#target_link_libraries(Runtime Store)
-
 

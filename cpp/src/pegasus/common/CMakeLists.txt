@@ -40,5 +40,3 @@ add_library(ServerOptions
   server_options.cc
 )
 add_dependencies(ServerOptions gen-deps)
-
-#target_link_libraries(Location Uri)
