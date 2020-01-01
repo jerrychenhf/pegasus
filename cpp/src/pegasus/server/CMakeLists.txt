@@ -21,13 +21,13 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/server")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/server")
 
-#add_executable(daemon
- # daemon-main.cc
-#)
-
 add_subdirectory(planner)
 add_subdirectory(worker)
 
-#target_link_libraries(daemon Planner Worker ${GFLAGS_LIBRARIES})
+add_executable(daemon
+  daemon-main.cc
+)
+
+target_link_libraries(daemon ${PEGASUS_LINK_LIBS} ${ARROW_SHARED_LIB} ${ARROW_FLIGHT_SHARED_LIB} ${GFLAGS_LIBRARIES} ${BOOST_SYSTEM_LIBRARY} ${BOOST_STATIC_FILESYSTEM_LIBRARY})
 
 

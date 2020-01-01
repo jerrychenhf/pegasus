@@ -19,8 +19,10 @@
 
 #include "pegasus/util/global_flags.h"
 
-DEFINE_string(hostname, "", "Hostname to use for this daemon. If not set, the system default will be used");
+DEFINE_string(planner_hostname, "", "Hostname to use for this planner. If not set, the system default will be used");
 DEFINE_int32(planner_port, 30001, "port on which planner is exported");
+DEFINE_string(worker_hostname, "", "Hostname to use for this worker. If not set, the system default will be used");
 DEFINE_int32(worker_port, 30002, "port on which worker is exported");
 
 DEFINE_string(storage_plugin_type, "HDFS", "StoragePluginType");
+DEFINE_string(store_types, "DRAM", "StoreType");

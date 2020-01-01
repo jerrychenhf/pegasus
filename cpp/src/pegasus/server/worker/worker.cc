@@ -21,13 +21,12 @@
 #include <memory>
 #include <string>
 
-
 #include "pegasus/server/worker/worker.h"
 #include "pegasus/cache/cache_manager.h"
 
 namespace pegasus {
 
-Worker::Worker(ServerOptions options) {
+Worker::Worker(std::shared_ptr<ServerOptions> options) : options_(options) {
   std::unique_ptr<ExecEnv> exec_env_ = std::unique_ptr<ExecEnv>(new ExecEnv(options_));
   worker_table_api_service_ = std::unique_ptr<WorkerTableAPIService>(new WorkerTableAPIService());
         // new from worker
@@ -36,6 +35,7 @@ Worker::Worker(ServerOptions options) {
 
 Status Worker::Init() {
   worker_table_api_service_->Init();
+  return Status::OK();
 }
 
 } // namespace pegasus

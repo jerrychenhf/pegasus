@@ -28,8 +28,6 @@ using HdfsConnectionConfig = arrow::io::HdfsConnectionConfig;
 
 class StoragePlugin {
  public:
-  StoragePlugin();
-  ~StoragePlugin();
   Status Init();
   Status Connect();
   Status Auth(std::string passwd);

@@ -26,14 +26,12 @@ namespace pegasus {
 
 class ServerOptions {
  public:
-  ServerOptions(const Location& location,
-      const StoragePlugin::StoragePluginType& storage_plugin_type);
+  ServerOptions(std::string hostname, int32_t port,
+      std::string storage_plugin_type);
   
-  ServerOptions(const Location& location,
-      const StoragePlugin::StoragePluginType& storage_plugin_type,
-      const Store::StoreType& store_types);
-
-  ~ServerOptions();
+  ServerOptions(std::string hostname, int32_t port,
+      std::string storage_plugin_type,
+      std::string store_types);
 
   /// \brief The host & port (or domain socket path) to listen on.
   /// Use port 0 to bind to an available port.

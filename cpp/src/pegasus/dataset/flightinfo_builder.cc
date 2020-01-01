@@ -23,6 +23,10 @@ FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<DataSet> dataset) : dataset
 
 }
 
+FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> datasets) {
+
+}
+
 Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<FlightInfo>* flight_info) {
   std::unique_ptr<FlightDescriptor>* flight_descriptor;
   GetFlightDescriptor(flight_descriptor);
@@ -43,7 +47,7 @@ Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<FlightInfo>* flight_in
 }
 
 
-Status BuildFlightInfo(std::unique_ptr<FlightInfo>* flight_info) {
+Status FlightInfoBuilder::BuildFlightListing(std::unique_ptr<FlightListing>* listings) {
   
 }
 
@@ -54,7 +58,6 @@ Status FlightInfoBuilder::GetFlightDescriptor(std::unique_ptr<FlightDescriptor>*
 Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<FlightEndpoint>>* endpoints) {
 
 }
-
 
 Status FlightInfoBuilder::GetTotalRecords(int64_t* total_records) {
     

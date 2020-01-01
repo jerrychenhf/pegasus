@@ -21,6 +21,10 @@ namespace pegasus {
 
 Location::Location() { uri_ = std::make_shared<pegasus::internal::Uri>(); }
 
+Location::~Location() {
+  
+}
+
 Status Location::Parse(const std::string& uri_string, Location* location) {
   return location->uri_->Parse(uri_string);
 }

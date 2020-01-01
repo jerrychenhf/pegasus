@@ -19,6 +19,14 @@
 
 namespace pegasus {
 
+PlannerTableAPIService::PlannerTableAPIService() {
+
+}
+
+PlannerTableAPIService::~PlannerTableAPIService() {
+  
+}
+
 Status PlannerTableAPIService::Init() {
   ExecEnv* env =  ExecEnv::GetInstance();
   //TODO

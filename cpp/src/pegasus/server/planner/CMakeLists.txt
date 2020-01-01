@@ -28,4 +28,4 @@ add_library(Planner
 )
 add_dependencies(Planner gen-deps)
 
-
+#target_link_libraries(Planner Status StringBuilder ServerOptions Dataset Runtime ${GFLAGS_LIBRARIES})

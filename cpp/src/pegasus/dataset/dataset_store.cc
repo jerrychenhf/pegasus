@@ -19,6 +19,14 @@
 
 namespace pegasus {
 
+DataSetStore::DataSetStore() {
+
+}
+
+DataSetStore::~DataSetStore() {
+
+}
+
 Status DataSetStore::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
   
   datasets->get()->reserve(planner_metadata_.size());

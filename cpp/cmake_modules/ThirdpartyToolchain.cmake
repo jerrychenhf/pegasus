@@ -66,7 +66,8 @@ set(PEGASUS_THIRDPARTY_DEPENDENCIES
     Protobuf
     Snappy
     Thrift
-    uriparser)
+    uriparser
+    Arrow)
 
 # TODO(wesm): External GTest shared libraries are not currently
 # supported when building with MSVC because of the way that
@@ -130,6 +131,8 @@ macro(build_dependency DEPENDENCY_NAME)
     build_thrift()
   elseif("${DEPENDENCY_NAME}" STREQUAL "uriparser")
     build_uriparser()
+  elseif("${DEPENDENCY_NAME}" STREQUAL "Arrow")
+    build_arrow()
   else()
     message(FATAL_ERROR "Unknown thirdparty dependency to build: ${DEPENDENCY_NAME}")
   endif()
@@ -1528,3 +1531,97 @@ if(PEGASUS_WITH_GRPC)
     endif()
   endif()
 endif()
+
+macro(build_arrow)
+  message(STATUS "Building Arrow from source")
+
+  set(ARROW_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/arrow_ep-prefix/src/arrow_ep")
+  set(ARROW_INCLUDE_DIR "${ARROW_PREFIX}/include")
+
+  set(ARROW_LIB_DIR "${ARROW_PREFIX}")
+  if (MSVC)
+    set(ARROW_SHARED_LIB "${ARROW_PREFIX}/bin/arrow.dll")
+    set(ARROW_SHARED_IMPLIB "${ARROW_LIB_DIR}/arrow.lib")
+    set(ARROW_STATIC_LIB "${ARROW_LIB_DIR}/arrow_static.lib")
+  else()
+    set(ARROW_SHARED_LIB "${ARROW_LIB_DIR}/libarrow${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    set(ARROW_STATIC_LIB "${ARROW_LIB_DIR}/libarrow.a")
+  endif()
+  
+  set(ARROW_CMAKE_ARGS
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DCMAKE_CXX_FLAGS=${EP_CXX_FLAGS}
+    -DCMAKE_C_FLAGS=${EP_C_FLAGS}
+    -DCMAKE_INSTALL_PREFIX=${ARROW_PREFIX}
+    -DCMAKE_INSTALL_LIBDIR=${ARROW_LIB_DIR}
+    -DARROW_JEMALLOC=OFF
+    -DARROW_PARQUET=ON
+    -DARROW_FLIGHT=ON
+    -DARROW_HDFS=ON
+    -DARROW_BUILD_SHARED=${PEGASUS_BUILD_SHARED}
+    -DARROW_BOOST_USE_SHARED=${PEGASUS_BOOST_USE_SHARED}
+    -DARROW_BUILD_TESTS=OFF)
+  
+  if (MSVC AND PARQUET_USE_STATIC_CRT)
+    set(ARROW_CMAKE_ARGS ${ARROW_CMAKE_ARGS} -DARROW_USE_STATIC_CRT=ON)
+  endif()
+  
+  if ("$ENV{PEGASUS_ARROW_VERSION}" STREQUAL "")
+    set(ARROW_VERSION "apache-arrow-0.15.1")
+  else()
+    set(ARROW_VERSION "$ENV{PEGASUS_ARROW_VERSION}")
+  endif()
+  message(STATUS "Building Apache Arrow from commit: ${ARROW_VERSION}")
+  
+  set(ARROW_URL "https://github.com/apache/arrow/archive/${ARROW_VERSION}.tar.gz")
+  
+  if (CMAKE_VERSION VERSION_GREATER "3.7")
+    set(ARROW_CONFIGURE SOURCE_SUBDIR "cpp" CMAKE_ARGS ${ARROW_CMAKE_ARGS})
+  else()
+    set(ARROW_CONFIGURE CONFIGURE_COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}"
+      ${ARROW_CMAKE_ARGS} "${CMAKE_CURRENT_BINARY_DIR}/arrow_ep-prefix/src/arrow_ep/cpp")
+  endif()
+  
+  ExternalProject_Add(arrow_ep
+    URL ${ARROW_URL}
+    ${ARROW_CONFIGURE}
+    BUILD_BYPRODUCTS "${ARROW_SHARED_LIB}" "${ARROW_STATIC_LIB}")
+  
+  if (MSVC)
+    ExternalProject_Add_Step(arrow_ep copy_dll_step
+      DEPENDEES install
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${BUILD_OUTPUT_ROOT_DIRECTORY}
+      COMMAND ${CMAKE_COMMAND} -E copy ${ARROW_SHARED_LIB} ${BUILD_OUTPUT_ROOT_DIRECTORY})
+  endif()
+endmacro()
+
+set(PEGASUS_NEED_ARROW 1)
+
+if(PEGASUS_NEED_ARROW)
+  find_package(Arrow)
+  if(NOT ARROW_FOUND)
+    build_arrow()
+    set(ARROW_VENDORED 1)
+  else()
+    set(ARROW_VENDORED 0)
+  endif()
+
+  include_directories(SYSTEM ${ARROW_INCLUDE_DIR})
+  add_library(arrow SHARED IMPORTED)
+  if(MSVC)
+    set_target_properties(arrow
+                        PROPERTIES IMPORTED_IMPLIB "${ARROW_SHARED_IMPLIB}")
+  else()
+    set_target_properties(arrow
+                        PROPERTIES IMPORTED_LOCATION "${ARROW_SHARED_LIB}")
+  endif()
+  add_library(arrow_static STATIC IMPORTED)
+  set_target_properties(arrow_static PROPERTIES IMPORTED_LOCATION ${ARROW_STATIC_LIB})
+
+  if (ARROW_VENDORED)
+    add_dependencies(arrow arrow_ep)
+    add_dependencies(arrow_static arrow_ep)
+  endif()
+endif()
+
+set_target_properties(arrow PROPERTIES IMPORTED_LOCATION "${ARROW_SHARED_LIB}")

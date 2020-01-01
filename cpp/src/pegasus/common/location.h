@@ -35,6 +35,7 @@ class Location {
  public:
   /// \brief Initialize a blank location.
   Location();
+  ~Location();
   /// \brief Initialize a location by parsing a URI string
   static Status Parse(const std::string& uri_string, Location* location);
 

@@ -35,8 +35,12 @@ Planner::Planner(std::shared_ptr<ServerOptions> options) : options_(options) {
   std::unique_ptr<DataSetService>(new DataSetService());
 }
 
+Planner::~Planner() {
+}
+
 Status Planner::Init() {
   planner_table_api_service_->Init();
+  return Status::OK();
 }
 
 } // namespace pegasus

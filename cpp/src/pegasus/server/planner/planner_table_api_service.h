@@ -41,13 +41,9 @@ class PlannerTableAPIService : public arrow::flight::FlightServerBase {
                                const FlightDescriptor& request,
                                std::unique_ptr<FlightInfo>* info) override;
 
-  arrow::Status DoAction(const ServerCallContext& context, const Action& action,
-                          std::unique_ptr<ResultStream>* out) override;
-
  private:
   std::shared_ptr<DataSetService> dataset_service_;
   std::shared_ptr<WorkerManager> worker_manager_;
-
 };
 
 }  // namespace pegasus

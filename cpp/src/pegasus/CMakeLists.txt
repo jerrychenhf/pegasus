@@ -16,8 +16,44 @@
 # under the License.
 
 
-
 add_custom_target(gen-deps)
+
+if (NOT APPLE)
+  # When compiling on Mac with clang using these linker flags are undefined and Clang on
+  # Mac will abort on unknown compiler or linker flags. In the long-term we should
+  # move away from using these flags to have a coherent build on OS X and Linux.
+  set(WL_START_GROUP "-Wl,--start-group")
+  set(WL_END_GROUP "-Wl,--end-group")
+endif()
+
+set (PEGASUS_LIBS
+  CacheManager
+  Store
+  SparkCatalog
+  Status
+  Location
+  WorkerManager
+  ServerOptions
+  Endpoint
+  Dataset
+  FlightInfo
+  Parquet
+  Runtime
+  Planner
+  Worker
+  StoragePlugin
+  Hash
+  GlobalFlags
+  Log
+  StringBuilder
+  Uri
+)
+
+set (PEGASUS_LINK_LIBS
+  ${WL_START_GROUP}
+  ${PEGASUS_LIBS}
+  ${WL_END_GROUP}
+)
 
 add_subdirectory(util)
 add_subdirectory(common)
@@ -29,6 +65,7 @@ add_subdirectory(dataset)
 add_subdirectory(storage)
 add_subdirectory(runtime)
 add_subdirectory(server)
+
 
 
 

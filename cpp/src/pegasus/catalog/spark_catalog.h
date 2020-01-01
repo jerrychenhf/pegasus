@@ -30,6 +30,7 @@ namespace pegasus {
 class SparkCatalog {
  public:
   SparkCatalog();
+  ~SparkCatalog();
 
   Status GetTableMeta(std::string table_name, std::unique_ptr<TableMetadata>* table_meta);
 };

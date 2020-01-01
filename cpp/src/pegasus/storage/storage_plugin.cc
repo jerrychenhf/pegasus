@@ -39,6 +39,10 @@ HDFSStoragePlugin::HDFSStoragePlugin() {
 
 }
 
+HDFSStoragePlugin::~HDFSStoragePlugin() {
+
+}
+
 Status HDFSStoragePlugin::Init() {
   ExecEnv* env =  ExecEnv::GetInstance();
   const std::string host = env->GetOptions()->namenode_hostname_;
@@ -78,6 +82,10 @@ Status HDFSStoragePlugin::ListFiles(std::string dataset_path, std::shared_ptr<st
     }
   }
   return Status::OK();
+}
+
+StoragePlugin::StoragePluginType HDFSStoragePlugin::GetPluginType() {
+
 }
 
 } // namespace pegasus

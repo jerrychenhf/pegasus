@@ -24,8 +24,6 @@ namespace pegasus {
 
 class Store {
  public:
-  Store();
-  ~Store();
 
   virtual Status Allocate(long size) = 0;
   virtual Status GetTotalSize(long& total_size) = 0;

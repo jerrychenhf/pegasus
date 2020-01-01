@@ -22,6 +22,8 @@ namespace pegasus {
     
 StoreFactory::StoreFactory() { }
 
+StoreFactory::~StoreFactory() { }
+
 Status StoreFactory::GetStore(Store::StoreType cache_type, std::shared_ptr<Store>* store) {
   if (cache_type == Store::StoreType::MEMORY) {
     *store = std::shared_ptr<MemoryStore>(new MemoryStore());

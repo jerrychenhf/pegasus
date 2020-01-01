@@ -15,36 +15,31 @@
 // specific language governing permissions and limitations
 // under the License.
 
-/*
+#include <iostream> 
+
 #include "pegasus/common/location.h"
+#include "pegasus/common/server_options.h"
 #include "pegasus/util/global_flags.h"
 #include "pegasus/runtime/exec_env.h"
 #include "pegasus/server/planner/planner.h"
-#include "pegasus/common/server_options.h"
 
-using namespace std;
-using namespace arrow;
-using namespace arrow::flight;
-
-DECLARE_string(hostname);
+DECLARE_string(planner_hostname);
 DECLARE_int32(planner_port);
 DECLARE_string(storage_plugin_type);
 
+using namespace std;
+using namespace pegasus;
+
 int PlannerMain(int argc, char** argv) {
 
-  Location location;
-  Location::ForGrpcTcp(FLAGS_hostname, FLAGS_planner_port, &location);
-
-  std::shared_ptr<ServerOptions> options(location, FLAGS_storage_plugin_type);
+  std::shared_ptr<ServerOptions> options(new ServerOptions(FLAGS_planner_hostname,
+      FLAGS_planner_port, FLAGS_storage_plugin_type));
 
   std::unique_ptr<Planner> planner_server(new Planner(options));
 
-  planner_server->Init(options);
-  // Exit with a clean error code (0) on SIGTERM
-  planner_server->SetShutdownOnSignals({SIGTERM});
+  planner_server->Init();
 
   std::cout << "Server listening on localhost:" << FLAGS_planner_port << std::endl;
-  planner_server->Serve();
+
   return 0;
 }
-*/

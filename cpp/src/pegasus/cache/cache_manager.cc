@@ -31,6 +31,10 @@ CacheManager::CacheManager() {
   storage_plugin_factory->GetStoragePlugin(env->GetOptions()->storage_plugin_type_, storage_plugin_);
 }
 
+CacheManager::~CacheManager() {
+}
+
+
 // if ticket is not exist,connect to storage with file location and row group index to get table chunk,
 // store the table chunk to worker cache
 // if exist, return the appropriate table chunk given the ticket

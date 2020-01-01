@@ -28,5 +28,7 @@ add_library(Worker
 )
 add_dependencies(Worker gen-deps)
 
+#target_link_libraries(Worker StringBuilder ServerOptions CacheManager Runtime ${GFLAGS_LIBRARIES})
+
 
 

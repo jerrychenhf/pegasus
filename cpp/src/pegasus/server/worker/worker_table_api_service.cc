@@ -20,6 +20,14 @@
 
 namespace pegasus {
 
+WorkerTableAPIService::WorkerTableAPIService() {
+
+}
+
+WorkerTableAPIService::~WorkerTableAPIService() {
+  
+}
+
 Status WorkerTableAPIService::Init() {
   ExecEnv* env = ExecEnv::GetInstance();
   //TODO

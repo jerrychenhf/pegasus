@@ -21,6 +21,8 @@ namespace pegasus {
 
 StoragePluginFactory::StoragePluginFactory() { }
 
+StoragePluginFactory::~StoragePluginFactory() { }
+
 Status StoragePluginFactory::GetStoragePlugin(StoragePlugin::StoragePluginType storage_plugin_type,
   std::shared_ptr<StoragePlugin>* storage_plugin) {
 

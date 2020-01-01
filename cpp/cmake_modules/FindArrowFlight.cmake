@@ -47,6 +47,7 @@ if(${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
 endif()
 find_package(Arrow ${find_package_arguments})
 
+set(ARROW_VERSION "1.0.0-SNAPSHOT")
 if(ARROW_FOUND)
   arrow_find_package(ARROW_FLIGHT
                      "${ARROW_HOME}"
@@ -75,7 +76,6 @@ mark_as_advanced(ARROW_FLIGHT_IMPORT_LIB
                  ARROW_FLIGHT_VERSION
                  ARROW_FLIGHT_VERSION_MATCH)
 
-include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(ArrowFlight
                                   REQUIRED_VARS
                                   ARROW_FLIGHT_INCLUDE_DIR

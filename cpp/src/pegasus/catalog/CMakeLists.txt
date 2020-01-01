@@ -22,9 +22,10 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/catalog")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/catalog")
 
-add_library(Spark_Catalog
+add_library(SparkCatalog
   spark_catalog.cc
+  table_metadata.cc
 )
-add_dependencies(Spark_Catalog gen-deps)
+add_dependencies(SparkCatalog gen-deps)
 
 

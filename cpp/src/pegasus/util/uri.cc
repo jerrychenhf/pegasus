@@ -21,10 +21,30 @@
 #include <sstream>
 #include <vector>
 
-
 namespace pegasus {
 namespace internal {
 
+Uri::Uri() {}
+
+Uri::~Uri() {}
+
+std::string Uri::scheme() const {}
+
+std::string Uri::host() const {}
+
+bool Uri::has_host() const {}
+
+std::string Uri::port_text() const {}
+
+int32_t Uri::port() const {}
+
+std::string Uri::path() const {}
+
+std::string Uri::query_string() const {}
+
+const std::string& Uri::ToString() const {}
+
+Status Uri::Parse(const std::string& uri_string) {}
 
 }  // namespace internal
 }  // namespace pegasus

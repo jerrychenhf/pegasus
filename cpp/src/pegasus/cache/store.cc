@@ -19,4 +19,52 @@
 
 namespace pegasus {
 
+MemoryStore::MemoryStore() {
+
+}
+
+Status MemoryStore::Allocate(long size) {
+
+}
+
+Status MemoryStore::GetTotalSize(long& total_size) {
+    
+}
+
+Status MemoryStore::GetUsedSize(long& used_size) {
+    
+}
+
+DCPMMStore::DCPMMStore() {
+
+}
+
+Status DCPMMStore::Allocate(long size) {
+
+}
+
+Status DCPMMStore::GetTotalSize(long& total_size) {
+    
+}
+
+Status DCPMMStore::GetUsedSize(long& used_size) {
+    
+}
+
+FileStore::FileStore() {
+
+}
+
+Status FileStore::Allocate(long size) {
+
+}
+
+Status FileStore::GetTotalSize(long& total_size) {
+    
+}
+
+Status FileStore::GetUsedSize(long& used_size) {
+
+}
+
 } // namespace pegasus

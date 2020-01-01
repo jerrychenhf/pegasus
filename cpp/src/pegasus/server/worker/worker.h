@@ -30,8 +30,7 @@ namespace pegasus {
 
 class Worker {
  public:
-  Worker(ServerOptions options);
-  ~Worker();
+  Worker(std::shared_ptr<ServerOptions> options);
   Status Init();
 
  private:

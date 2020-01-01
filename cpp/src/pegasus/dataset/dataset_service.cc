@@ -29,6 +29,14 @@
 
 namespace pegasus {
 
+DataSetService::DataSetService() {
+
+}
+
+DataSetService::~DataSetService() {
+  
+}
+
 Status DataSetService::Init() {
   ExecEnv* env =  ExecEnv::GetInstance();
   dataset_store_ = std::unique_ptr<DataSetStore>(new DataSetStore);

@@ -15,15 +15,40 @@
 // specific language governing permissions and limitations
 // under the License.
 
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 #include "pegasus/common/server_options.h"
 
 namespace pegasus {
 
-ServerOptions::ServerOptions(const Location& location,
-      const StoragePlugin::StoragePluginType& storage_plugin_type,
-      const Store::StoreType& store_types)
-    : location_(location),
-    storage_plugin_type_(storage_plugin_type),
-    store_types_(store_types) {}
+ServerOptions::ServerOptions(std::string hostname, int32_t port,
+    std::string storage_plugin_type) {
+
+  pegasus::Location::ForGrpcTcp(hostname, port, &location_);
+  if(storage_plugin_type == "HDFS") {
+    storage_plugin_type_= StoragePlugin::StoragePluginType::HDFS;
+  } else if(storage_plugin_type == "S3") {
+    storage_plugin_type_= StoragePlugin::StoragePluginType::S3;
+  } 
+}
+
+ServerOptions::ServerOptions(std::string hostname, int32_t port,
+    std::string storage_plugin_type,
+    std::string store_types) {
+  ServerOptions(hostname, port, storage_plugin_type);
+
+  std::vector<std::string> types;
+  boost::split(types, store_types, boost::is_any_of(", "), boost::token_compress_on);
+  for(std::vector<std::string>::iterator it = types.begin(); it != types.end(); ++it) {
+    if(*it == "MEMORY") {
+      store_types_.push_back(Store::StoreType::MEMORY);
+    } else if(*it == "DCPMM") {
+      store_types_.push_back(Store::StoreType::DCPMM);
+    } else if(*it == "FILE") {
+      store_types_.push_back(Store::StoreType::FILE);
+    }
+  }
+}
 
 }  // namespace pegasus

@@ -24,4 +24,6 @@ ExecEnv::ExecEnv(std::shared_ptr<ServerOptions> options)
     worker_manager_(new WorkerManager()), store_factory_(new StoreFactory) {
 }
 
+ExecEnv* ExecEnv::exec_env_ = nullptr;
+
 } // namespace pegasus

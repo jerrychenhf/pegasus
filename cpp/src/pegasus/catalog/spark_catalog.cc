@@ -21,5 +21,16 @@ using namespace std;
 
 namespace pegasus {
 
+SparkCatalog::SparkCatalog() {
+
+}
+
+SparkCatalog::~SparkCatalog() {
+    
+}
+
+Status SparkCatalog::GetTableMeta(std::string table_name, std::unique_ptr<TableMetadata>* table_meta) {
+    
+}
 
 } // namespace pegasus
