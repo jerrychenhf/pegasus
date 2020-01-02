@@ -32,6 +32,9 @@ class Endpoint {
 
   /// The location where identity can be redeemed. 
   Location location;
+public:
+  Endpoint(Identity id, Location loc): identity(id), location(loc) {};
+  ~Endpoint();
 
   bool Equals(const Endpoint& other) const;
 

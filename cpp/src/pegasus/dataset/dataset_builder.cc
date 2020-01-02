@@ -20,14 +20,40 @@
 
 namespace pegasus {
 
-DataSetBuilder::DataSetBuilder(std::string dataset_path, std::shared_ptr<std::vector<std::string>> file_list)
-  : file_list_(file_list) {
+DataSetBuilder::DataSetBuilder(std::string dataset_path, std::shared_ptr<std::vector<std::string>> file_list, std::shared_ptr<std::vector<Location>> vectloc)
+  : file_list_(file_list), vectloc_(vectloc) {
 
 }
 
 Status DataSetBuilder::BuildDataset(std::shared_ptr<DataSet>* dataset) {
-
-
+  dataset = &std::make_shared<DataSet>();
+  DataSet* pds = dataset->get();
+  DataSet::Data dd;
+  dd.dataset_path = dataset_path;
+  for (int i=0; i<file_list_->size; i++)
+  {
+    // create Identity
+    Identity id((*file_list_)[i], 0, 0, 0);
+    // create Location
+    Location loc(vectloc_->at(i));
+    // create Endpoint
+    Endpoint ep(id, loc);
+    dd.endpoints.push_back(ep);
+  }
+#if 0
+  pds->data_.dataset_path = dataset_path;
+  for (auto filepath : *file_list_)
+  {
+    // create Identity
+    // create Location
+    // create Endpoint
+    Endpoint ep;
+    // insert Endpoint
+    pds->data_.endpoints.push_back(ep);
+  }
+  //TODO: set timestamp
+  pds->data_.timestamp = 0;
+#endif
 }
 
 Status DataSetBuilder::GetTotalRecords(int64_t* total_records) {

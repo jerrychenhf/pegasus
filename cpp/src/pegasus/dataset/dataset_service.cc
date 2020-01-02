@@ -64,8 +64,25 @@ Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSe
   // insert the locations to dataset.
     std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations;
     worker_manager_->GetWorkerLocations(worker_locations);
-      //TODO: worker with label
-      //std::unique_ptr<ConsistentHashRing>(new ConsistentHashRing(worker_locations))->GetLocation(identity);
+
+    // setup the identity vector
+    std::vector<Identity> vectident;
+    for (auto filepath : **file_list)
+    {
+//    Identity(std::string file_path, int64_t row_group_id, int64_t num_rows, int64_t bytes);
+      vectident.push_back(Identity(filepath, 0, 0, 0));
+    }
+
+    // get locations vector from identity vector
+    ConsistentHashRing* cnhs = new ConsistentHashRing(worker_locations);
+    std::shared_ptr<std::vector<Location>> vectloc = std::make_shared<std::vector<Location>>();
+    *vectloc = cnhs->GetLocations(vectident);
+
+    // build the dataset
+    DataSetBuilder* dsbuilder = new DataSetBuilder(dataset_path, *file_list, vectloc);
+    // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
+    std::shared_ptr<DataSet>* dataset;
+    dsbuilder->BuildDataset(dataset);
     dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(dataset->get()));
   }
   return Status::OK();

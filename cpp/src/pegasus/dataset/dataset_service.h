@@ -22,6 +22,7 @@
 
 #include "pegasus/dataset/dataset.h"
 #include "pegasus/dataset/dataset_store.h"
+#include "pegasus/dataset/dataset_builder.h"
 #include "pegasus/dataset/flightinfo_builder.h"
 #include "pegasus/runtime/exec_env.h"
 #include "pegasus/storage/storage_plugin_factory.h"

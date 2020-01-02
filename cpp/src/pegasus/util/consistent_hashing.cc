@@ -19,51 +19,75 @@
 
 namespace pegasus {
 
-ConsistentHashRing::ConsistentHashRing(std::vector<Location> locations)
+ConsistentHashRing::ConsistentHashRing(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations)
 {
 	if (NULL == conhash)
 	{
 		conhash = conhash_init(NULL);
 	}
+	std::vector<std::shared_ptr<Location>> lcns;
+	for (auto lcn:lcns) {
+		AddLocation(*lcn);
+	}
+}
 
-	for (auto lcn:locations) {
-		AddLocation(lcn);
+ConsistentHashRing::~ConsistentHashRing()
+{
+	if (NULL != conhash)
+	{
+		conhash_fini(conhash);
 	}
 }
 
 void ConsistentHashRing::AddLocation(Location location)
 {
-	//TODO: set a proper value for num_vn
-	int num_vn = 10;
+	int num_vn = location.GetCacheSize()/10;
+	num_vn = std::max(MIN_VIRT_NODE_NUM, num_vn);
+	num_vn = std::min(MAX_VIRT_NODE_NUM, num_vn);
 	AddLocation(location, num_vn);
 }
 
 void ConsistentHashRing::AddLocation(Location location, int num_virtual_nodes)
 {
-	struct node_s node;
-	conhash_set_node(&node, location.ToString().c_str(), num_virtual_nodes);
-	conhash_add_node(conhash, &node);
+	struct node_s* pnode = new (struct node_s);
+	conhash_set_node(pnode, location.ToString().c_str(), num_virtual_nodes);
+	conhash_add_node(conhash, pnode);
 }
-
+#if 0
 void ConsistentHashRing::RemoveLocation(Location location)
 {
 	//TODO: the libcohash needs update to remove dependency on node
-	//TODO: how to get the num_virtual_nodes?
 	struct node_s node;
-	conhash_set_node(&node, location.ToString().c_str(), 10);
+	conhash_set_node(&node, location.ToString().c_str(), MAX_VIRT_NODE_NUM);
 	conhash_del_node(conhash, &node);
 }
-
+#endif
 Location ConsistentHashRing::GetLocation(Identity identity)
 {
 	const struct node_s* pnode;
-	std::string idstr;
-	identity.SerializeToString(&idstr);
+	std::string idstr = identity.flie_path();
+//	identity.SerializeToString(&idstr);
 	pnode = conhash_lookup(conhash, idstr.c_str());
-	//TODO: refactor lcn.Parse?
+	// create the location object and fill with phynode's location (uri).
 	Location lcn;
-	lcn.Parse(idstr, &lcn);
+	lcn.Parse(pnode->iden, &lcn);  	//TODO: refactor Location::Parse()?
 	return lcn;
+}
+
+std::vector<Location> ConsistentHashRing::GetLocations(std::vector<Identity> vectident)
+{
+	std::vector<Location> vectloc;
+	const struct node_s* pnode;
+	for (auto ident:vectident)
+	{
+		std::string idstr = ident.flie_path();
+		pnode = conhash_lookup(conhash, idstr.c_str());
+		// create the location object and fill with phynode's location (uri).
+		Location lcn;
+		lcn.Parse(pnode->iden, &lcn);  	//TODO: refactor Location::Parse()?
+		vectloc.push_back(lcn);
+	}
+	return vectloc;
 }
 
 } // namespace pegasus
