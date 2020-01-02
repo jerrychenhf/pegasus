@@ -28,6 +28,11 @@ make
 make install
 ```
 
+Setting up ARROW_HOME variable, add the following command to ~/.bashrc file.
+```
+export ARROW_HOME=/usr/local
+```
+
 ### Building pegasus
 
 ```
