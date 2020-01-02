@@ -29,7 +29,6 @@ namespace pegasus {
 Worker::Worker(std::shared_ptr<ServerOptions> options) : options_(options) {
   std::unique_ptr<ExecEnv> exec_env_ = std::unique_ptr<ExecEnv>(new ExecEnv(options_));
   worker_table_api_service_ = std::unique_ptr<WorkerTableAPIService>(new WorkerTableAPIService());
-        // new from worker
   cache_manager_ = std::unique_ptr<CacheManager>(new CacheManager());
 }
 

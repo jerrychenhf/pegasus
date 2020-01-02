@@ -43,8 +43,3 @@ add_library(StringBuilder
   string_builder.cc
 )
 add_dependencies(StringBuilder gen-deps)
-
-add_library(Uri
-  uri.cc
-)
-add_dependencies(Uri gen-deps)

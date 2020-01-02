@@ -30,8 +30,10 @@ WorkerTableAPIService::~WorkerTableAPIService() {
 
 Status WorkerTableAPIService::Init() {
   ExecEnv* env = ExecEnv::GetInstance();
+
   //TODO
   //FlightServerBase::Init(env->GetOptions);
+  return Status::OK();
 }
 
   /// \brief Get a stream of IPC payloads to put on the wire

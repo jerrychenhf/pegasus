@@ -29,7 +29,7 @@ namespace pegasus {
 
 class PlannerTableAPIService : public arrow::flight::FlightServerBase {
  public:
-  PlannerTableAPIService();
+  PlannerTableAPIService(std::shared_ptr<DataSetService> dataset_service);
   ~PlannerTableAPIService();
 
   Status Init();

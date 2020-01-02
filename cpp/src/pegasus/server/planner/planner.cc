@@ -31,8 +31,8 @@ namespace pegasus {
 Planner::Planner(std::shared_ptr<ServerOptions> options) : options_(options) {
   std::unique_ptr<ExecEnv> exec_env_ = std::unique_ptr<ExecEnv>(new ExecEnv(options_));
   worker_manager_ = exec_env_->get_worker_manager();
-  planner_table_api_service_ = std::unique_ptr<PlannerTableAPIService>(new PlannerTableAPIService());
-  std::unique_ptr<DataSetService>(new DataSetService());
+  dataset_service_ = std::unique_ptr<DataSetService>(new DataSetService());
+  planner_table_api_service_ = std::unique_ptr<PlannerTableAPIService>(new PlannerTableAPIService(dataset_service_));
 }
 
 Planner::~Planner() {

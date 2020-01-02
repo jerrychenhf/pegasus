@@ -24,6 +24,15 @@ set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/planner")
 add_library(Planner
   planner_table_api_service.cc
   planner.cc
-  planner_main.cc
 )
 add_dependencies(Planner gen-deps)
+
+add_executable(plannerd planner_main.cc)
+target_link_libraries(plannerd
+  ${PEGASUS_LINK_LIBS}
+  ${ARROW_SHARED_LIB}
+  ${ARROW_FLIGHT_SHARED_LIB}
+  ${GFLAGS_LIBRARIES}
+  ${BOOST_SYSTEM_LIBRARY}
+  ${BOOST_STATIC_FILESYSTEM_LIBRARY}
+)

@@ -18,18 +18,18 @@
 #include <string>
 #include <vector>
 
-#include "arrow/status.h"
 #include "arrow/filesystem/filesystem.h"
+#include "arrow/status.h"
+#include "arrow/util/uri.h"
+
 #include "pegasus/runtime/exec_env.h"
 #include "pegasus/storage/storage_plugin.h"
 #include "pegasus/util/consistent_hashing.h"
-#include "pegasus/util/uri.h"
+
 
 using namespace std;
 
 namespace pegasus {
-
-using internal::Uri;
 
 using HdfsDriver = arrow::io::HdfsDriver;
 using HdfsPathInfo = arrow::io::HdfsPathInfo;
@@ -70,7 +70,7 @@ Status HDFSStoragePlugin::ListFiles(std::string dataset_path, std::shared_ptr<st
     return Status(StatusCode(st.code()), st.message());
   }
   for (const auto& child_info : children) {
-    Uri uri;
+    arrow::internal::Uri uri;
     uri.Parse(child_info.name);
     std::string child_path = uri.path();
 

@@ -22,6 +22,8 @@ namespace pegasus {
 ExecEnv::ExecEnv(std::shared_ptr<ServerOptions> options)
   : options_(options), storage_plugin_factory_(new StoragePluginFactory()), 
     worker_manager_(new WorkerManager()), store_factory_(new StoreFactory) {
+      
+  exec_env_ = this;
 }
 
 ExecEnv* ExecEnv::exec_env_ = nullptr;

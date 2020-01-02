@@ -29,6 +29,7 @@ namespace pegasus {
 // Get the worker locations
 class WorkerManager {
  public:
+  WorkerManager();
   Status GetWorkerLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations);
   Status InsertWorkerLocation(Location worker_location);
   Status RemoveWorkerLocation(Location worker_location);

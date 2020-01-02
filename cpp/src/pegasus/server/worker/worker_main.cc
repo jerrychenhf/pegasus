@@ -31,17 +31,13 @@ DECLARE_string(storage_plugin_type);
 using namespace std;
 using namespace pegasus;
 
-int WorkerMain(int argc, char** argv) {
+int main(int argc, char** argv) {
   
   gflags::ParseCommandLineFlags(&argc, &argv, true);
-
   std::shared_ptr<ServerOptions> options(new ServerOptions(FLAGS_worker_hostname,
       FLAGS_worker_port, FLAGS_storage_plugin_type, FLAGS_store_types));
-
   std::unique_ptr<Worker> worker_server(new Worker(options));
-
   worker_server->Init();
-
-  std::cout << "Server listening on host:" << FLAGS_worker_port << std::endl;
+  std::cout << "Worker listening on:" << FLAGS_worker_hostname << ":" << FLAGS_worker_port << std::endl;
   return 0;
 }

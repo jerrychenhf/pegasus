@@ -19,8 +19,8 @@
 
 namespace pegasus {
 
-PlannerTableAPIService::PlannerTableAPIService() {
-
+PlannerTableAPIService::PlannerTableAPIService(std::shared_ptr<DataSetService> dataset_service) {
+  dataset_service_= dataset_service;
 }
 
 PlannerTableAPIService::~PlannerTableAPIService() {
@@ -32,7 +32,8 @@ Status PlannerTableAPIService::Init() {
   //TODO
   //FlightServerBase::Init(env->GetOptions);
   worker_manager_ = env->get_worker_manager();
-  dataset_service_ = std::unique_ptr<DataSetService>(new DataSetService());
+  
+  return Status::OK();
 }
 
 /// \brief Retrieve a list of available fields given an optional opaque

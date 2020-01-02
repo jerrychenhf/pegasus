@@ -15,22 +15,33 @@
 // specific language governing permissions and limitations
 // under the License.
 
+#include <memory>
+#include <sstream>
+#include <utility>
+
 #include "pegasus/common/location.h"
+#include "arrow/status.h"
 
 namespace pegasus {
 
-Location::Location() { uri_ = std::make_shared<pegasus::internal::Uri>(); }
+Location::Location() { uri_ = std::make_shared<arrow::internal::Uri>(); }
 
 Location::~Location() {
   
 }
 
 Status Location::Parse(const std::string& uri_string, Location* location) {
-  return location->uri_->Parse(uri_string);
+  arrow::Status st = location->uri_->Parse(uri_string);
+  if (!st.ok()) {
+      return Status(StatusCode(st.code()), st.message());
+  }
+  return Status::OK();
 }
 
 Status Location::ForGrpcTcp(const std::string& host, const int port, Location* location) {
-
+  std::stringstream uri_string;
+  uri_string << "grpc+tcp://" << host << ':' << port;
+  return Location::Parse(uri_string.str(), location);
 }
 
 Status Location::ForGrpcTls(const std::string& host, const int port, Location* location) {

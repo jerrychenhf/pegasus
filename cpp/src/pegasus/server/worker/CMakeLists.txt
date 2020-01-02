@@ -24,9 +24,17 @@ set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/worker")
 add_library(Worker
   worker_table_api_service.cc
   worker.cc
-  worker_main.cc
 )
 add_dependencies(Worker gen-deps)
 
+add_executable(workerd worker_main.cc)
+target_link_libraries(workerd
+  ${PEGASUS_LINK_LIBS}
+  ${ARROW_SHARED_LIB}
+  ${ARROW_FLIGHT_SHARED_LIB}
+  ${GFLAGS_LIBRARIES}
+  ${BOOST_SYSTEM_LIBRARY}
+  ${BOOST_STATIC_FILESYSTEM_LIBRARY}
+)
 
 

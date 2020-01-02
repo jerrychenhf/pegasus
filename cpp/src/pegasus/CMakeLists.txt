@@ -46,7 +46,6 @@ set (PEGASUS_LIBS
   GlobalFlags
   Log
   StringBuilder
-  Uri
 )
 
 set (PEGASUS_LINK_LIBS
@@ -64,7 +63,8 @@ add_subdirectory(client)
 add_subdirectory(dataset)
 add_subdirectory(storage)
 add_subdirectory(runtime)
-add_subdirectory(server)
+add_subdirectory(server/planner)
+add_subdirectory(server/worker)
 
 
 

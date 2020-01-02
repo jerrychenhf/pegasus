@@ -25,7 +25,7 @@
 #include <vector>
 
 #include "pegasus/common/status.h"
-#include "pegasus/util/uri.h"
+#include "arrow/util/uri.h"
 
 using namespace std;
 
@@ -74,7 +74,7 @@ class Location {
     return !(left == right);
   }
  private:
-  std::shared_ptr<pegasus::internal::Uri> uri_;
+  std::shared_ptr<arrow::internal::Uri> uri_;
 
 };
 
