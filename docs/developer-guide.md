@@ -14,8 +14,17 @@ out-of-source. If you are not familiar with this terminology:
 
 ### Prerequisites
 
+#### Apache Arrow
 You should have Apache Arrow C++ package installed in your building machine.
-Here are the steps of building and installing from source.
+
+#### Building from Source Code
+Refer to [Arrow Building document](https://arrow.apache.org/docs/developers/cpp.html#building) for the detail steps and prerequisties for building Arrow.
+
+A few notes building:
+- Some CMake versions may cause download problems for dependancies on CentOS with http(s) proxy. On my CentOS 7 environment, both CMake 3.15.4 and CMake 3.10.2 caused download problem. The system default CMake version 3.7.1 works.
+- Suggest to run as root user. Even "make" command needs "root" user for making and installing dependent libraries.
+
+Here are a simple steps of building and installing from source.
 
 ```
 git clone https://github.com/apache/arrow.git
