@@ -26,6 +26,9 @@ namespace pegasus {
 
 Location::Location() { uri_ = std::make_shared<arrow::internal::Uri>(); }
 
+//TODO: is it correct to assign uri_??
+Location::Location(const Location &loc) { uri_ = loc.uri_; cachesizegb_ = loc.cachesizegb_; }
+
 Location::~Location() {
   
 }

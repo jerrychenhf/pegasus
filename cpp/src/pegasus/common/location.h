@@ -35,6 +35,7 @@ class Location {
  public:
   /// \brief Initialize a blank location.
   Location();
+  Location(const Location &loc);
   ~Location();
   /// \brief Initialize a location by parsing a URI string
   static Status Parse(const std::string& uri_string, Location* location);
@@ -67,6 +68,16 @@ class Location {
 
   bool Equals(const Location& other) const;
 
+  uint32_t GetCacheSize()
+  {
+    return cachesizegb_;
+  }
+
+  void SetCacheSize(uint32_t cachesizeinGB)
+  {
+    cachesizegb_ = cachesizeinGB;
+  }
+
   friend bool operator==(const Location& left, const Location& right) {
     return left.Equals(right);
   }
@@ -75,7 +86,7 @@ class Location {
   }
  private:
   std::shared_ptr<arrow::internal::Uri> uri_;
-
+  uint32_t cachesizegb_;
 };
 
 } // namespace pegasus
