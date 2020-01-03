@@ -45,10 +45,8 @@ HDFSStoragePlugin::~HDFSStoragePlugin() {
 
 Status HDFSStoragePlugin::Init() {
   ExecEnv* env =  ExecEnv::GetInstance();
-  const std::string host = env->GetOptions()->namenode_hostname_;
-  const std::string port = env->GetOptions()->namenode_port_;
-  conf_.host = host.empty() ? "localhost" : host;
-  conf_.port = port.empty() ? 50070 : std::stoi(port);
+  conf_.host = env->GetNameNodeHost();
+  conf_.port = env->GetNameNodePort();
   conf_.driver = HdfsDriver::LIBHDFS;
 }
 

@@ -33,7 +33,6 @@ set (PEGASUS_LIBS
   Status
   Location
   WorkerManager
-  ServerOptions
   Endpoint
   Dataset
   FlightInfo

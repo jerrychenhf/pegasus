@@ -20,7 +20,6 @@
 
 #include "pegasus/dataset/dataset_service.h"
 #include "pegasus/common/worker_manager.h"
-#include "pegasus/common/server_options.h"
 #include "pegasus/storage/storage_plugin.h"
 #include "pegasus/server/planner/planner_table_api_service.h"
 
@@ -30,14 +29,13 @@ namespace pegasus {
 
 class Planner {
  public:
-  Planner(std::shared_ptr<ServerOptions> options);
+  Planner();
   ~Planner();
-  Status Init();
+  void Start();
 
  private:
   ExecEnv* exec_env_;
-  std::shared_ptr<ServerOptions> options_;
-  std::shared_ptr<WorkerManager> worker_manager_;
+  WorkerManager* worker_manager_;
   std::shared_ptr<PlannerTableAPIService> planner_table_api_service_;
   std::shared_ptr<DataSetService> dataset_service_;
 };

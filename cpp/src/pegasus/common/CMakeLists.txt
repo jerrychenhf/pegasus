@@ -35,8 +35,3 @@ add_library(WorkerManager
   worker_manager.cc
 )
 add_dependencies(WorkerManager gen-deps)
-
-add_library(ServerOptions
-  server_options.cc
-)
-add_dependencies(ServerOptions gen-deps)

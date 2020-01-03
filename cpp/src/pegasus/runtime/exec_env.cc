@@ -15,17 +15,89 @@
 // specific language governing permissions and limitations
 // under the License.
 
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 #include "pegasus/runtime/exec_env.h"
+#include "pegasus/util/global_flags.h"
+
+DECLARE_string(planner_hostname);
+DECLARE_int32(planner_port);
+DECLARE_string(worker_hostname);
+DECLARE_int32(worker_port);
+DECLARE_string(storage_plugin_type);
+DECLARE_string(store_types);
 
 namespace pegasus {
 
-ExecEnv::ExecEnv(std::shared_ptr<ServerOptions> options)
-  : options_(options), storage_plugin_factory_(new StoragePluginFactory()), 
+ExecEnv* ExecEnv::exec_env_ = nullptr;
+
+ExecEnv::ExecEnv()
+  : ExecEnv(FLAGS_planner_hostname, FLAGS_planner_port,
+        FLAGS_worker_hostname, FLAGS_worker_port,
+        FLAGS_storage_plugin_type, FLAGS_store_types) {}
+
+ExecEnv::ExecEnv(const std::string& planner_hostname, int32_t planner_port,
+    const std::string& worker_hostname, int32_t worker_port,
+    const std::string& storage_plugin_type, const std::string& store_types)
+  : storage_plugin_factory_(new StoragePluginFactory()), 
     worker_manager_(new WorkerManager()), store_factory_(new StoreFactory) {
       
+  planner_grpc_hostname_ = planner_hostname;
+  planner_grpc_port_ = planner_port;
+  worker_grpc_hostname_ = worker_hostname;
+  worker_grpc_port_ = worker_port;
+  if(storage_plugin_type == "HDFS") {
+    storage_plugin_type_ = StoragePlugin::HDFS;
+  } else if(storage_plugin_type == "S3") {
+    storage_plugin_type_ = StoragePlugin::S3;
+  }
+
+  std::vector<std::string> types;
+  boost::split(types, store_types, boost::is_any_of(", "), boost::token_compress_on);
+  for(std::vector<std::string>::iterator it = types.begin(); it != types.end(); ++it) {
+    if(*it == "MEMORY") {
+      store_types_.push_back(Store::StoreType::MEMORY);
+    } else if(*it == "DCPMM") {
+      store_types_.push_back(Store::StoreType::DCPMM);
+    } else if(*it == "FILE") {
+      store_types_.push_back(Store::StoreType::FILE);
+    }
+  }
+
   exec_env_ = this;
 }
 
-ExecEnv* ExecEnv::exec_env_ = nullptr;
+std::string ExecEnv::GetPlannerGrpcHost() {
+  return planner_grpc_hostname_;
+}
+
+int32_t ExecEnv::GetPlannerGrpcPort() {
+  return planner_grpc_port_;
+}
+
+std::string ExecEnv::GetWorkerGrpcHost() {
+  return worker_grpc_hostname_;
+}
+
+int32_t ExecEnv::GetWorkerGrpcPort() {
+  return worker_grpc_port_;
+}
+
+StoragePlugin::StoragePluginType const ExecEnv::GetStoragePluginType() {
+  return storage_plugin_type_;
+}
+
+std::vector<Store::StoreType> ExecEnv::GetStoreTypes() {
+  return store_types_;
+}
+
+std::string ExecEnv::GetNameNodeHost() {
+  return namenode_hostname_;
+}
+
+int32_t ExecEnv::GetNameNodePort() {
+  return namenode_port_;
+}
 
 } // namespace pegasus

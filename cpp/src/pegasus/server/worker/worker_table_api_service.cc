@@ -21,7 +21,7 @@
 namespace pegasus {
 
 WorkerTableAPIService::WorkerTableAPIService() {
-
+  env_ =  ExecEnv::GetInstance();
 }
 
 WorkerTableAPIService::~WorkerTableAPIService() {
@@ -29,18 +29,31 @@ WorkerTableAPIService::~WorkerTableAPIService() {
 }
 
 Status WorkerTableAPIService::Init() {
-  ExecEnv* env = ExecEnv::GetInstance();
+  std::string hostname = env_->GetWorkerGrpcHost();
+  int32_t port = env_->GetWorkerGrpcPort();
 
-  //TODO
-  //FlightServerBase::Init(env->GetOptions);
+  arrow::flight::Location location;
+  arrow::flight::Location::ForGrpcTcp(hostname, port, &location);
+  arrow::flight::FlightServerOptions options(location);
+  arrow::Status st = FlightServerBase::Init(options);
+  if (!st.ok()) {
+    return Status(StatusCode(st.code()), st.message());
+  }
   return Status::OK();
 }
 
-  /// \brief Get a stream of IPC payloads to put on the wire
-  /// \param[in] context The call context.
-  /// \param[in] request an opaque ticket+
-  /// \param[out] stream the returned stream provider
-  /// \return Status
+Status WorkerTableAPIService::Serve() {
+  arrow::Status st = FlightServerBase::Serve();
+  if (!st.ok()) {
+    return Status(StatusCode(st.code()), st.message());
+  }
+}
+
+/// \brief Get a stream of IPC payloads to put on the wire
+/// \param[in] context The call context.
+/// \param[in] request an opaque ticket+
+/// \param[out] stream the returned stream provider
+/// \return Status
 arrow::Status WorkerTableAPIService::DoGet(const ServerCallContext& context, const Ticket& request,
                std::unique_ptr<FlightDataStream>* data_stream) {
     

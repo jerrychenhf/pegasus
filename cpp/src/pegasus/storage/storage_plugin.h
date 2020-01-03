@@ -41,7 +41,7 @@ class StoragePlugin {
   StoragePluginType GetPluginType();
 
  private:
-  StoragePluginType storage_plugin_type_;;
+  StoragePluginType storage_plugin_type_;
 };
 
 class HDFSStoragePlugin : public StoragePlugin {

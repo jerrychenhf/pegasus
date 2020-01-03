@@ -38,6 +38,8 @@ class WorkerTableAPIService : public arrow::flight::FlightServerBase {
 
   Status Init();
 
+  Status Serve();
+
   arrow::Status DoGet(const ServerCallContext& context, const Ticket& request,
                std::unique_ptr<FlightDataStream>* data_stream) override;
 
@@ -47,7 +49,7 @@ class WorkerTableAPIService : public arrow::flight::FlightServerBase {
 
 private:
   std::shared_ptr<CacheManager> cache_manager_;
-
+  ExecEnv* env_;
 };
     
 }  // namespace pegasus

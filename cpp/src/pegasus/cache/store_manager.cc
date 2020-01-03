@@ -23,9 +23,9 @@ namespace pegasus {
 
 StoreManager::StoreManager() {
   ExecEnv* env =  ExecEnv::GetInstance();
-  std::shared_ptr<StoreFactory> store_factory = env->get_store_factory();
+  StoreFactory* store_factory = env->get_store_factory();
   std::shared_ptr<Store>* store;
-  std::vector<Store::StoreType> store_types = env->GetOptions()->store_types_;
+  std::vector<Store::StoreType> store_types = env->GetStoreTypes();
   for(std::vector<Store::StoreType>::iterator it = store_types.begin(); it != store_types.end(); ++it) {
     store_factory->GetStore(*it, store);
     stores_->push_back(*store);

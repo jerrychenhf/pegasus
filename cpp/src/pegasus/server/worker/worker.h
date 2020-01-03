@@ -22,7 +22,6 @@
 #include "pegasus/runtime/exec_env.h"
 #include "pegasus/storage/storage_plugin.h"
 #include "pegasus/server/worker/worker_table_api_service.h"
-#include "pegasus/common/server_options.h"
 
 using namespace std;
 
@@ -30,11 +29,10 @@ namespace pegasus {
 
 class Worker {
  public:
-  Worker(std::shared_ptr<ServerOptions> options);
-  Status Init();
+  Worker();
+  void Start();
 
  private:
-  std::shared_ptr<ServerOptions> options_;
   std::shared_ptr<WorkerTableAPIService> worker_table_api_service_;
   std::shared_ptr<CacheManager> cache_manager_;
 };

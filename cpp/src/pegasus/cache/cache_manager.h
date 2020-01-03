@@ -44,7 +44,7 @@ class CacheManager {
 
  private: 
   std::shared_ptr<Location> location_;
-  std::shared_ptr<StoragePlugin>* storage_plugin_;
+  std::shared_ptr<StoragePlugin> storage_plugin_;
   std::shared_ptr<StoreManager> store_manager_;
 };
 

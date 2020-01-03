@@ -26,13 +26,13 @@ StoragePluginFactory::~StoragePluginFactory() { }
 Status StoragePluginFactory::GetStoragePlugin(StoragePlugin::StoragePluginType storage_plugin_type,
   std::shared_ptr<StoragePlugin>* storage_plugin) {
 
-  if (storage_plugin_type == StoragePlugin::StoragePluginType::HDFS) {
-    *storage_plugin = std::shared_ptr<StoragePlugin>(new HDFSStoragePlugin());
-    return Status::OK();
-  } else {
-    return Status::Invalid("Invalid storage plugin type!");
+  switch (storage_plugin_type) {
+    case StoragePlugin::HDFS:
+      *storage_plugin = std::shared_ptr<StoragePlugin>(new HDFSStoragePlugin());
+      return Status::OK();
+    default:
+      return Status::Invalid("Invalid storage plugin type!");
   }
-  
 }
 
 } // namespace pegasus

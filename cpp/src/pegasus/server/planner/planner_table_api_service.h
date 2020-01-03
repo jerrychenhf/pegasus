@@ -34,6 +34,8 @@ class PlannerTableAPIService : public arrow::flight::FlightServerBase {
 
   Status Init();
 
+  Status Serve();
+
   arrow::Status ListFlights(const ServerCallContext& context, const Criteria* criteria,
                              std::unique_ptr<FlightListing>* listings) override;
 
@@ -43,7 +45,8 @@ class PlannerTableAPIService : public arrow::flight::FlightServerBase {
 
  private:
   std::shared_ptr<DataSetService> dataset_service_;
-  std::shared_ptr<WorkerManager> worker_manager_;
+  WorkerManager* worker_manager_;
+  ExecEnv* env_;
 };
 
 }  // namespace pegasus

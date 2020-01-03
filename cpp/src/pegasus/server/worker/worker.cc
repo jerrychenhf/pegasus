@@ -21,20 +21,27 @@
 #include <memory>
 #include <string>
 
-#include "pegasus/server/worker/worker.h"
+#include "pegasus/util/global_flags.h"
+
 #include "pegasus/cache/cache_manager.h"
+#include "pegasus/util/logging.h"
+#include "pegasus/server/worker/worker.h"
+
+DECLARE_string(worker_hostname);
+DECLARE_int32(worker_port);
 
 namespace pegasus {
 
-Worker::Worker(std::shared_ptr<ServerOptions> options) : options_(options) {
-  std::unique_ptr<ExecEnv> exec_env_ = std::unique_ptr<ExecEnv>(new ExecEnv(options_));
+Worker::Worker() {
+  std::unique_ptr<ExecEnv> exec_env_(new ExecEnv());
   worker_table_api_service_ = std::unique_ptr<WorkerTableAPIService>(new WorkerTableAPIService());
   cache_manager_ = std::unique_ptr<CacheManager>(new CacheManager());
 }
 
-Status Worker::Init() {
-  worker_table_api_service_->Init();
-  return Status::OK();
+void Worker::Start() {
+  PEGASUS_CHECK_OK(worker_table_api_service_->Init());
+  std::cout << "Worker listening on:" << FLAGS_worker_hostname << ":" << FLAGS_worker_port << std::endl;
+  PEGASUS_CHECK_OK(worker_table_api_service_->Serve());
 }
 
 } // namespace pegasus

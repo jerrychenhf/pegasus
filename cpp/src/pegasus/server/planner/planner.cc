@@ -21,15 +21,20 @@
 #include <memory>
 #include <string>
 
+#include "pegasus/util/global_flags.h"
+
 #include "pegasus/dataset/dataset_service.h"
+#include "pegasus/util/logging.h"
 #include "pegasus/server/planner/planner.h"
 #include "pegasus/storage/storage_plugin.h"
 
+DECLARE_string(planner_hostname);
+DECLARE_int32(planner_port);
 
 namespace pegasus {
 
-Planner::Planner(std::shared_ptr<ServerOptions> options) : options_(options) {
-  std::unique_ptr<ExecEnv> exec_env_ = std::unique_ptr<ExecEnv>(new ExecEnv(options_));
+Planner::Planner() {
+  std::unique_ptr<ExecEnv> exec_env_(new ExecEnv());
   worker_manager_ = exec_env_->get_worker_manager();
   dataset_service_ = std::unique_ptr<DataSetService>(new DataSetService());
   planner_table_api_service_ = std::unique_ptr<PlannerTableAPIService>(new PlannerTableAPIService(dataset_service_));
@@ -38,9 +43,10 @@ Planner::Planner(std::shared_ptr<ServerOptions> options) : options_(options) {
 Planner::~Planner() {
 }
 
-Status Planner::Init() {
-  planner_table_api_service_->Init();
-  return Status::OK();
+void Planner::Start() {
+  PEGASUS_CHECK_OK(planner_table_api_service_->Init());
+  std::cout << "Planner listening on:" << FLAGS_planner_hostname << ":" << FLAGS_planner_port << std::endl;
+  PEGASUS_CHECK_OK(planner_table_api_service_->Serve());
 }
 
 } // namespace pegasus

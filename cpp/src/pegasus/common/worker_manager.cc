@@ -19,7 +19,7 @@
 
 namespace pegasus {
 WorkerManager::WorkerManager() {
-    
+
 }
 
 Status WorkerManager::GetWorkerLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations) {

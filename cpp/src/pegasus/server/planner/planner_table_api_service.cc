@@ -20,7 +20,9 @@
 namespace pegasus {
 
 PlannerTableAPIService::PlannerTableAPIService(std::shared_ptr<DataSetService> dataset_service) {
+  env_ =  ExecEnv::GetInstance();
   dataset_service_= dataset_service;
+  worker_manager_ = env_->get_worker_manager();
 }
 
 PlannerTableAPIService::~PlannerTableAPIService() {
@@ -28,12 +30,25 @@ PlannerTableAPIService::~PlannerTableAPIService() {
 }
 
 Status PlannerTableAPIService::Init() {
-  ExecEnv* env =  ExecEnv::GetInstance();
-  //TODO
-  //FlightServerBase::Init(env->GetOptions);
-  worker_manager_ = env->get_worker_manager();
-  
+
+  std::string hostname = env_->GetPlannerGrpcHost();
+  int32_t port = env_->GetPlannerGrpcPort();
+  arrow::flight::Location location;
+  arrow::flight::Location::ForGrpcTcp(hostname, port, &location);
+  arrow::flight::FlightServerOptions options(location);
+  arrow::Status st = FlightServerBase::Init(options);
+  if (!st.ok()) {
+    return Status(StatusCode(st.code()), st.message());
+  }
   return Status::OK();
+}
+
+
+Status PlannerTableAPIService::Serve() {
+  arrow::Status st = FlightServerBase::Serve();
+  if (!st.ok()) {
+    return Status(StatusCode(st.code()), st.message());
+  }
 }
 
 /// \brief Retrieve a list of available fields given an optional opaque
