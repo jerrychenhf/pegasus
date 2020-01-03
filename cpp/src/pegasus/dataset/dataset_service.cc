@@ -58,8 +58,8 @@ Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSe
   std::string dataset_path = table_meta->get()->location;
   dataset_store_->GetDataSet(dataset_path, dataset);
   if (dataset == NULL) {
-    std::shared_ptr<std::vector<std::string>>* file_list;
-    storage_plugin_->ListFiles(dataset_path, file_list);
+    std::shared_ptr<std::vector<std::string>> file_list;
+    storage_plugin_->ListFiles(dataset_path, &file_list);
 
   // insert the locations to dataset.
     std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations;
@@ -67,7 +67,7 @@ Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSe
 
     // setup the identity vector
     std::vector<Identity> vectident;
-    for (auto filepath : **file_list)
+    for (auto filepath : *file_list)
     {
 //    Identity(std::string file_path, int64_t row_group_id, int64_t num_rows, int64_t bytes);
       vectident.push_back(Identity(filepath, 0, 0, 0));
@@ -81,7 +81,7 @@ Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSe
 
     // build the dataset
 //    DataSetBuilder* dsbuilder = new DataSetBuilder(dataset_path, *file_list, vectloc);
-    auto dsbuilder = std::make_shared<DataSetBuilder>(dataset_path, *file_list, vectloc);
+    auto dsbuilder = std::make_shared<DataSetBuilder>(dataset_path, file_list, vectloc);
     // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
     std::shared_ptr<DataSet>* dataset;
     dsbuilder->BuildDataset(dataset);
@@ -104,10 +104,10 @@ Status DataSetService::GetFlightInfo(std::string table_name, std::unique_ptr<Fli
 /// Build FlightInfos from DataSets.
 Status DataSetService::GetFlightListing(std::unique_ptr<FlightListing>* listings) {
     
-  std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets;
-  GetDataSets(datasets);
+  std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> datasets;
+  GetDataSets(&datasets);
 
-  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(*datasets));
+  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(datasets));
   flightinfo_builder_->BuildFlightListing(listings);
 }
 

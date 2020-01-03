@@ -28,18 +28,18 @@ FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr
 }
 
 Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<FlightInfo>* flight_info) {
-  std::unique_ptr<FlightDescriptor>* flight_descriptor;
-  GetFlightDescriptor(flight_descriptor);
-  std::unique_ptr<std::vector<FlightEndpoint>>* endpoints;
-  GetFlightEndpoints(endpoints);
+  std::unique_ptr<FlightDescriptor> flight_descriptor;
+  GetFlightDescriptor(&flight_descriptor);
+  std::unique_ptr<std::vector<FlightEndpoint>> endpoints;
+  GetFlightEndpoints(&endpoints);
   int64_t* total_records;
   GetTotalRecords(total_records);
   int64_t* total_bytes;
   GetTotalBytes(total_bytes);
 
   arrow::flight::FlightInfo::Data flight_data;
-  flight_data.descriptor = *flight_descriptor->get();
-  flight_data.endpoints = *endpoints->get();
+  flight_data.descriptor = *flight_descriptor;
+  flight_data.endpoints = *endpoints;
   flight_data.total_records = *total_records;
   flight_data.total_bytes = *total_bytes;
   arrow::flight::FlightInfo value(flight_data);
