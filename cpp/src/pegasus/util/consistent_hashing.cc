@@ -19,11 +19,13 @@
 
 namespace pegasus {
 
+struct conhash_s* ConsistentHashRing::conhash = NULL;
+
 ConsistentHashRing::ConsistentHashRing(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations)
 {
-	if (NULL == conhash)
+	if (NULL == ConsistentHashRing::conhash)
 	{
-		conhash = conhash_init(NULL);
+		ConsistentHashRing::conhash = conhash_init(NULL);
 	}
 	std::vector<std::shared_ptr<Location>> lcns;
 	for (auto lcn:lcns) {
@@ -33,9 +35,9 @@ ConsistentHashRing::ConsistentHashRing(std::shared_ptr<std::vector<std::shared_p
 
 ConsistentHashRing::~ConsistentHashRing()
 {
-	if (NULL != conhash)
+	if (NULL != ConsistentHashRing::conhash)
 	{
-		conhash_fini(conhash);
+		conhash_fini(ConsistentHashRing::conhash);
 	}
 }
 

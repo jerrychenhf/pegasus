@@ -74,12 +74,14 @@ Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSe
     }
 
     // get locations vector from identity vector
-    ConsistentHashRing* cnhs = new ConsistentHashRing(worker_locations);
-    std::shared_ptr<std::vector<Location>> vectloc = std::make_shared<std::vector<Location>>();
+    ConsistentHashRing* cnhs = new ConsistentHashRing(worker_locations);  //TODO: use smart ptr
+    auto vectloc = std::make_shared<std::vector<Location>>();
     *vectloc = cnhs->GetLocations(vectident);
+    delete cnhs;
 
     // build the dataset
-    DataSetBuilder* dsbuilder = new DataSetBuilder(dataset_path, *file_list, vectloc);
+//    DataSetBuilder* dsbuilder = new DataSetBuilder(dataset_path, *file_list, vectloc);
+    auto dsbuilder = std::make_shared<DataSetBuilder>(dataset_path, *file_list, vectloc);
     // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
     std::shared_ptr<DataSet>* dataset;
     dsbuilder->BuildDataset(dataset);
@@ -90,12 +92,13 @@ Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSe
 
 /// Build FlightInfo from DataSet.
 Status DataSetService::GetFlightInfo(std::string table_name, std::unique_ptr<FlightInfo>* flight_info) {
-    
+
   std::shared_ptr<DataSet>* dataset;
   GetDataSet(table_name, dataset);
 
   flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(*dataset));
   flightinfo_builder_->BuildFlightInfo(flight_info);
+  return Status::OK();
 }
 
 /// Build FlightInfos from DataSets.

@@ -28,7 +28,7 @@ DataSetBuilder::DataSetBuilder(std::string dataset_path, std::shared_ptr<std::ve
 Status DataSetBuilder::BuildDataset(std::shared_ptr<DataSet>* dataset) {
   DataSet::Data dd;
   dd.dataset_path = dataset_path;
-  for (int i=0; i<file_list_->size; i++)
+  for (size_t i=0; i<file_list_->size(); i++)
   {
     // create Identity
     Identity id((*file_list_)[i], 0, 0, 0);
@@ -38,13 +38,14 @@ Status DataSetBuilder::BuildDataset(std::shared_ptr<DataSet>* dataset) {
     Endpoint ep(id, loc);
     dd.endpoints.push_back(ep);
   }
-  *dataset = std::make_shared<DataSet>(&dd);
+  *dataset = std::make_shared<DataSet>(dd);
 
   return Status::OK();
 }
 
 Status DataSetBuilder::GetTotalRecords(int64_t* total_records) {
-
+  *total_records = file_list_->size();  //TODO: need to confirm
+  return Status::OK();
 }
 
 } // namespace pegasus

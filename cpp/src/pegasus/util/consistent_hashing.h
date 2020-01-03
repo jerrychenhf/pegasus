@@ -43,7 +43,7 @@ namespace pegasus {
     std::string GetHash(std::string key);
     std::vector<Location> GetLocations(std::vector<Identity> vectident);
   private:
-	  struct conhash_s *conhash;
+	  static struct conhash_s *conhash;
   };
 
 } // namespace pegasus

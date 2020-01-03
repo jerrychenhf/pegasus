@@ -26,6 +26,11 @@ set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/util")
 
 add_library(Hash
   consistent_hashing.cc
+  conhash.c
+  conhash_inter.c
+  conhash_util.c
+  util_rbtree.c
+  md5.c
 )
 add_dependencies(Hash gen-deps)
 
