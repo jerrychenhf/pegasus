@@ -43,7 +43,6 @@ class DataSetBuilder {
   std::string dataset_path;
   std::shared_ptr<std::vector<std::string>> file_list_;
   std::shared_ptr<std::vector<Location>> vectloc_;
-  std::shared_ptr<std::vector<std::shared_ptr<FileMetaData>>>* files_metadata_;
 };
 
 } // namespace pegasus

@@ -27,7 +27,7 @@ namespace pegasus {
 
 CacheManager::CacheManager() {
   ExecEnv* env =  ExecEnv::GetInstance();
-  StoragePluginFactory* storage_plugin_factory = env->get_storage_plugin_factory();
+  std::shared_ptr<StoragePluginFactory> storage_plugin_factory = env->get_storage_plugin_factory();
   storage_plugin_factory->GetStoragePlugin(env->GetStoragePluginType(), &storage_plugin_);
 }
 

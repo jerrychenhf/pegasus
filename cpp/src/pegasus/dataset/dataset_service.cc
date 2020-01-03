@@ -40,7 +40,7 @@ DataSetService::~DataSetService() {
 Status DataSetService::Init() {
   ExecEnv* env =  ExecEnv::GetInstance();
   dataset_store_ = std::unique_ptr<DataSetStore>(new DataSetStore);
-  StoragePluginFactory* storage_plugin_factory_ = env->get_storage_plugin_factory();
+  std::shared_ptr<StoragePluginFactory> storage_plugin_factory_ = env->get_storage_plugin_factory();
   storage_plugin_factory_->GetStoragePlugin(env->GetStoragePluginType(), &storage_plugin_);
   worker_manager_ = env->GetInstance()->get_worker_manager();
 }
@@ -53,9 +53,9 @@ Status DataSetService::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<D
 Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSet>* dataset) {
 
   std::unique_ptr<SparkCatalog> spark_catalog = std::unique_ptr<SparkCatalog>(new SparkCatalog());
-  std::unique_ptr<TableMetadata>* table_meta;
-  spark_catalog->GetTableMeta(table_name, table_meta);
-  std::string dataset_path = table_meta->get()->location;
+  std::unique_ptr<TableMetadata> table_meta;
+  spark_catalog->GetTableMeta(table_name, &table_meta);
+  std::string dataset_path = table_meta->location;
   dataset_store_->GetDataSet(dataset_path, dataset);
   if (dataset == NULL) {
     std::shared_ptr<std::vector<std::string>> file_list;
@@ -83,9 +83,9 @@ Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSe
 //    DataSetBuilder* dsbuilder = new DataSetBuilder(dataset_path, *file_list, vectloc);
     auto dsbuilder = std::make_shared<DataSetBuilder>(dataset_path, file_list, vectloc);
     // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
-    std::shared_ptr<DataSet>* dataset;
-    dsbuilder->BuildDataset(dataset);
-    dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(dataset->get()));
+    std::shared_ptr<DataSet> dataset;
+    dsbuilder->BuildDataset(&dataset);
+    dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(dataset));
   }
   return Status::OK();
 }
@@ -93,10 +93,10 @@ Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSe
 /// Build FlightInfo from DataSet.
 Status DataSetService::GetFlightInfo(std::string table_name, std::unique_ptr<FlightInfo>* flight_info) {
 
-  std::shared_ptr<DataSet>* dataset;
-  GetDataSet(table_name, dataset);
+  std::shared_ptr<DataSet> dataset;
+  GetDataSet(table_name, &dataset);
 
-  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(*dataset));
+  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(dataset));
   flightinfo_builder_->BuildFlightInfo(flight_info);
   return Status::OK();
 }

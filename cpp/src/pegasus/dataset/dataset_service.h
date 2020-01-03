@@ -45,7 +45,7 @@ class DataSetService {
   Status GetDataSet(std::string table_name, std::shared_ptr<DataSet>* dataset);
 
  private:
-  WorkerManager* worker_manager_;
+  std::shared_ptr<WorkerManager> worker_manager_;
   std::shared_ptr<StoragePlugin> storage_plugin_;
   std::shared_ptr<FlightInfoBuilder> flightinfo_builder_;
   std::shared_ptr<DataSetStore> dataset_store_;

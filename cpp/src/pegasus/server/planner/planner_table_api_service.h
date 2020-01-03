@@ -45,7 +45,7 @@ class PlannerTableAPIService : public arrow::flight::FlightServerBase {
 
  private:
   std::shared_ptr<DataSetService> dataset_service_;
-  WorkerManager* worker_manager_;
+  std::shared_ptr<WorkerManager> worker_manager_;
   ExecEnv* env_;
 };
 

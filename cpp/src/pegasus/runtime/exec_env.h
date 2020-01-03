@@ -40,16 +40,16 @@ class ExecEnv {
 
   Status Init();
 
-  WorkerManager* get_worker_manager() {
-    return worker_manager_.get(); 
+  std::shared_ptr<WorkerManager> get_worker_manager() {
+    return worker_manager_; 
   }
 
-  StoragePluginFactory* get_storage_plugin_factory() {
-    return storage_plugin_factory_.get(); 
+  std::shared_ptr<StoragePluginFactory> get_storage_plugin_factory() {
+    return storage_plugin_factory_; 
   }
 
-  StoreFactory* get_store_factory() {
-    return store_factory_.get();
+  std::shared_ptr<StoreFactory> get_store_factory() {
+    return store_factory_;
   }
 
   std::string GetPlannerGrpcHost();
