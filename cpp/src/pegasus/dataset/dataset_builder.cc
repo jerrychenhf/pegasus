@@ -26,8 +26,6 @@ DataSetBuilder::DataSetBuilder(std::string dataset_path, std::shared_ptr<std::ve
 }
 
 Status DataSetBuilder::BuildDataset(std::shared_ptr<DataSet>* dataset) {
-  dataset = &std::make_shared<DataSet>();
-  DataSet* pds = dataset->get();
   DataSet::Data dd;
   dd.dataset_path = dataset_path;
   for (int i=0; i<file_list_->size; i++)
@@ -40,20 +38,9 @@ Status DataSetBuilder::BuildDataset(std::shared_ptr<DataSet>* dataset) {
     Endpoint ep(id, loc);
     dd.endpoints.push_back(ep);
   }
-#if 0
-  pds->data_.dataset_path = dataset_path;
-  for (auto filepath : *file_list_)
-  {
-    // create Identity
-    // create Location
-    // create Endpoint
-    Endpoint ep;
-    // insert Endpoint
-    pds->data_.endpoints.push_back(ep);
-  }
-  //TODO: set timestamp
-  pds->data_.timestamp = 0;
-#endif
+  *dataset = std::make_shared<DataSet>(&dd);
+
+  return Status::OK();
 }
 
 Status DataSetBuilder::GetTotalRecords(int64_t* total_records) {
