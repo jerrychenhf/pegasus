@@ -84,7 +84,7 @@ int conhash_del_node(struct conhash_s *conhash, struct node_s *node)
         return -1;
     }
     node->flag &= (~NODE_FLAG_IN);
-    /* add replicas of server */
+    /* del replicas of server */
     __conhash_del_replicas(conhash, node);
 
     return 0;

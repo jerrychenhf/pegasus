@@ -45,7 +45,8 @@ bool Identity::Equals(const Identity& other) const {
 }
 
 Status Identity::SerializeToString(std::string* out) const {
-	out->assign(file_path_ + std::to_string(row_group_id_));
+//	out->assign(file_path_ + std::to_string(row_group_id_));
+	out->assign(file_path_);
 	return Status::OK();
 }
 

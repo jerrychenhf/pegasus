@@ -76,6 +76,7 @@ void __conhash_del_replicas(struct conhash_s *conhash, struct node_s *node)
         {
             vnode = rbnode->data;
             if((vnode->hash == hash) && (vnode->node == node))
+//            if (vnode->hash == hash)
             {
                 conhash->ivnodes--;
                 util_rbtree_delete(&(conhash->vnode_tree), rbnode);
@@ -110,8 +111,11 @@ util_rbtree_node_t *__conhash_get_rbnode(struct node_s *node, long hash)
 
 void __conhash_del_rbnode(util_rbtree_node_t *rbnode)
 {
-    struct virtual_node_s *node;
-    node = rbnode->data;
+    struct virtual_node_s *vnode;
+    vnode = rbnode->data;
+    struct node_s *node;
+    node = vnode->node;
     free(node);
+    free(vnode);
     free(rbnode);
 }

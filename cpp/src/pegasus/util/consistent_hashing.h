@@ -28,19 +28,22 @@
 using namespace std;
 
 namespace pegasus {
-  // TODO: using libconhash
+#define MAX_VIRT_NODE_NUM 100
+#define MIN_VIRT_NODE_NUM 1
   // Consistent hash ring to distribute items across nodes (locations). If we add 
   // or remove nodes, it minimizes the item migration.
-  class ConsistentHashRing {  
-    ConsistentHashRing(std::vector<Location> locations);
+  class ConsistentHashRing {
+  public:
+    ConsistentHashRing(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations);
+    ~ConsistentHashRing();
     void AddLocation(Location location);
     void AddLocation(Location location, int num_virtual_nodes);
     void RemoveLocation(Location location);
     Location GetLocation(Identity identity);
     std::string GetHash(std::string key);
-    std::vector<Location> GetLocations();
-private:
-	struct conhash_s *conhash;
+    std::vector<Location> GetLocations(std::vector<Identity> vectident);
+  private:
+	  static struct conhash_s *conhash;
   };
 
 } // namespace pegasus
