@@ -22,6 +22,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "pegasus/catalog/pegasus_catalog.h"
 #include "pegasus/catalog/spark_catalog.h"
 #include "pegasus/dataset/dataset_service.h"
 #include "pegasus/dataset/flightinfo_builder.h"
@@ -94,11 +95,12 @@ Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSe
 Status DataSetService::GetFlightInfo(std::string table_name, std::unique_ptr<FlightInfo>* flight_info) {
 
   std::shared_ptr<DataSet> dataset;
-  GetDataSet(table_name, &dataset);
-
+  Status st = GetDataSet(table_name, &dataset);
+  if (!st.ok()) {
+    return st;
+  }
   flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(dataset));
-  flightinfo_builder_->BuildFlightInfo(flight_info);
-  return Status::OK();
+  return flightinfo_builder_->BuildFlightInfo(flight_info);
 }
 
 /// Build FlightInfos from DataSets.
@@ -109,6 +111,7 @@ Status DataSetService::GetFlightListing(std::unique_ptr<FlightListing>* listings
 
   flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(datasets));
   flightinfo_builder_->BuildFlightListing(listings);
+  return Status::OK();
 }
 
 } // namespace pegasus

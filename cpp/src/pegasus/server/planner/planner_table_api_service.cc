@@ -73,7 +73,8 @@ arrow::Status PlannerTableAPIService::ListFlights(const ServerCallContext& conte
 /// \return Status
 arrow::Status PlannerTableAPIService::GetFlightInfo(const ServerCallContext& context, const FlightDescriptor& request,
                        std::unique_ptr<FlightInfo>* out) {
-  if (request.type == FlightDescriptor::PATH) {
+
+  /*if (request.type == FlightDescriptor::PATH) {
     std::vector<std::string> request_path = request.path;
     if (request_path.size() != 1) {
       return arrow::Status::Invalid("Invalid path");
@@ -83,6 +84,15 @@ arrow::Status PlannerTableAPIService::GetFlightInfo(const ServerCallContext& con
     dataset_service_->GetFlightInfo(dataset_path, out);
 
     arrow::Status::OK();
+  }*/
+
+  if (request.type == FlightDescriptor::CMD) {
+    std::string request_table_name = request.cmd;
+    Status st = dataset_service_->GetFlightInfo(request_table_name, out);
+    if (!st.ok()) {
+      return arrow::Status(arrow::StatusCode(st.code()), st.message());
+    }
+    return arrow::Status::OK();
   } else {
     return arrow::Status::NotImplemented(request.type);
   }

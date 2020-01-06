@@ -44,6 +44,7 @@ Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<FlightInfo>* flight_in
   flight_data.total_bytes = *total_bytes;
   arrow::flight::FlightInfo value(flight_data);
   *flight_info = std::unique_ptr<FlightInfo>(new FlightInfo(value));
+  return Status::OK();
 }
 
 

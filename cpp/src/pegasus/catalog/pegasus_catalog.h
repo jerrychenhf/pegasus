@@ -15,23 +15,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/catalog/spark_catalog.h"
+#ifndef PEGASUS_CATALOG_H
+#define PEGASUS_CATALOG_H
+
+#include "pegasus/common/status.h"
+#include "pegasus/catalog/table_metadata.h"
+
+#include <string>
 
 using namespace std;
 
 namespace pegasus {
 
-SparkCatalog::SparkCatalog() {
+class PegasusCatalog {
+ public:
+  PegasusCatalog();
+  ~PegasusCatalog();
 
-}
-
-SparkCatalog::~SparkCatalog() {
-    
-}
-
-// TODO: Get table metadata from spark catalog
-Status SparkCatalog::GetTableMeta(std::string table_name, std::unique_ptr<TableMetadata>* table_meta) {
-
-}
+  Status GetTableMeta(std::string table_name, std::unique_ptr<TableMetadata>* table_meta);
+};
 
 } // namespace pegasus
+
+#endif  // PEGASUS_CATALOG_H
