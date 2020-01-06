@@ -33,7 +33,7 @@ class DataSetBuilder {
 
   Status GetDataSetPath(std::shared_ptr<std::string>* path);
 
-  Status GetEndpoints(std::shared_ptr<std::vector<Endpoint>>* endpoints);
+  Status GetPartitions(std::shared_ptr<std::vector<Partition>>* endpoints);
 
   Status GetTotalRecords(int64_t* total_records);
     

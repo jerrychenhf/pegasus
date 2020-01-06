@@ -33,7 +33,7 @@ set (PEGASUS_LIBS
   Status
   Location
   WorkerManager
-  Endpoint
+  Partition
   Dataset
   FlightInfo
   Parquet

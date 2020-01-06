@@ -26,22 +26,22 @@
 namespace pegasus {
 
 /// \brief A identity and location where the identity can be redeemed
-class Endpoint {
+class Partition {
   ///  identify;
   Identity identity;
 
   /// The location where identity can be redeemed. 
   Location location;
 public:
-  Endpoint(Identity id, Location loc): identity(id), location(loc) {};
-  ~Endpoint();
+  Partition(Identity id, Location loc): identity(id), location(loc) {};
+  ~Partition();
 
-  bool Equals(const Endpoint& other) const;
+  bool Equals(const Partition& other) const;
 
-  friend bool operator==(const Endpoint& left, const Endpoint& right) {
+  friend bool operator==(const Partition& left, const Partition& right) {
     return left.Equals(right);
   }
-  friend bool operator!=(const Endpoint& left, const Endpoint& right) {
+  friend bool operator!=(const Partition& left, const Partition& right) {
     return !(left == right);
   }
 };

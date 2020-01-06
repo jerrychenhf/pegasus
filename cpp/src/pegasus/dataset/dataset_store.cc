@@ -54,11 +54,11 @@ Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset) {
   return Status::OK();
 }
 
-Status DataSetStore::InsertEndPoint(std::string dataset_path, std::shared_ptr<Endpoint> new_endpoint) {
+Status DataSetStore::InsertEndPoint(std::string dataset_path, std::shared_ptr<Partition> new_endpoint) {
    
   std::shared_ptr<DataSet>* dataset;
   GetDataSet(dataset_path, dataset);
-  std::vector<Endpoint> endpoints = (*dataset)->endpoints();
+  std::vector<Partition> endpoints = (*dataset)->endpoints();
 
   DataSet::Data data = DataSet::Data();
   data.dataset_path = dataset_path;

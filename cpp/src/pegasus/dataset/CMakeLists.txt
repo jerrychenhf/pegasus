@@ -22,11 +22,11 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/dataset")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/dataset")
 
-add_library(Endpoint
-  endpoint.cc
+add_library(Partition
+  partition.cc
   identity.cc
 )
-add_dependencies(Endpoint gen-deps)
+add_dependencies(Partition gen-deps)
 
 add_library(Dataset
   dataset_listing.cc
