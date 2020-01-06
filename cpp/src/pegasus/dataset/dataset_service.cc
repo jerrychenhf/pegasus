@@ -44,6 +44,7 @@ Status DataSetService::Init() {
   std::shared_ptr<StoragePluginFactory> storage_plugin_factory_ = env->get_storage_plugin_factory();
   storage_plugin_factory_->GetStoragePlugin(env->GetStoragePluginType(), &storage_plugin_);
   worker_manager_ = env->GetInstance()->get_worker_manager();
+  return Status::OK();
 }
 
 Status DataSetService::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
@@ -59,6 +60,14 @@ Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSe
   std::string dataset_path = table_meta->location;
   dataset_store_->GetDataSet(dataset_path, dataset);
   if (dataset == NULL) {
+    CacheDataSet(dataset_path, dataset);
+  }
+
+  return Status::OK();
+}
+
+Status DataSetService::CacheDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset) {
+
     std::shared_ptr<std::vector<std::string>> file_list;
     storage_plugin_->ListFiles(dataset_path, &file_list);
 
@@ -84,23 +93,33 @@ Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSe
 //    DataSetBuilder* dsbuilder = new DataSetBuilder(dataset_path, *file_list, vectloc);
     auto dsbuilder = std::make_shared<DataSetBuilder>(dataset_path, file_list, vectloc);
     // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
-    std::shared_ptr<DataSet> dataset;
-    dsbuilder->BuildDataset(&dataset);
-    dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(dataset));
-  }
+    dsbuilder->BuildDataset(dataset);
+    dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));
+
   return Status::OK();
 }
 
 /// Build FlightInfo from DataSet.
-Status DataSetService::GetFlightInfo(std::string table_name, std::unique_ptr<FlightInfo>* flight_info) {
+Status DataSetService::GetFlightInfo(std::string table_name, std::string sqlcmd, std::unique_ptr<FlightInfo>* flight_info) {
 
   std::shared_ptr<DataSet> dataset;
   Status st = GetDataSet(table_name, &dataset);
   if (!st.ok()) {
     return st;
   }
-  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(dataset));
+  std::shared_ptr<DataSet> datasetfiltered;
+  // TODO: Filter dataset
+  st = FilterDataSet(sqlcmd, dataset, &datasetfiltered);
+  if (!st.ok()) {
+    return st;
+  }
+  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(datasetfiltered));
   return flightinfo_builder_->BuildFlightInfo(flight_info);
+}
+
+Status DataSetService::FilterDataSet(std::string sqlcmd, std::shared_ptr<DataSet> dataset, std::shared_ptr<DataSet>* datasetfiltered)
+{
+  return Status::OK();
 }
 
 /// Build FlightInfos from DataSets.

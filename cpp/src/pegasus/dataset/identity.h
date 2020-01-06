@@ -58,6 +58,7 @@ public:
 
  private:
   std::string file_path_;
+  int64_t partid;
   int64_t row_group_id_;
   int64_t num_rows_;
   int64_t bytes_;

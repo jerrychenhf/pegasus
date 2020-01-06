@@ -88,7 +88,7 @@ arrow::Status PlannerTableAPIService::GetFlightInfo(const ServerCallContext& con
 
   if (request.type == FlightDescriptor::CMD) {
     std::string request_table_name = request.cmd;
-    Status st = dataset_service_->GetFlightInfo(request_table_name, out);
+    Status st = dataset_service_->GetFlightInfo(request_table_name, request_table_name, out);  //TODO: use correct sqlcmd parameter
     if (!st.ok()) {
       return arrow::Status(arrow::StatusCode(st.code()), st.message());
     }
