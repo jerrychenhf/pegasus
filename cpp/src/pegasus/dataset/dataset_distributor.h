@@ -15,40 +15,43 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_CONSISTENT_HASHING_H
-#define PEGASUS_CONSISTENT_HASHING_H
+#ifndef PEGASUS_DATASET_DISTRIBUTOR_H
+#define PEGASUS_DATASET_DISTRIBUTOR_H
 
 #include <string>
 #include <vector>
 
 #include "pegasus/common/location.h"
 #include "pegasus/dataset/identity.h"
-#include "pegasus/dataset/dataset_distributor.h"
 #include "pegasus/util/conhash.h"
 
 using namespace std;
 
 namespace pegasus {
-#define MAX_VIRT_NODE_NUM 100
-#define MIN_VIRT_NODE_NUM 1
-  // Consistent hash ring to distribute items across nodes (locations). If we add 
-  // or remove nodes, it minimizes the item migration.
-  class ConsistentHashRing : DSDistributor {
+
+enum {
+  CONHASH,
+  LOCALONLY,
+  LOCALPREFER
+};
+
+  class DSDistributor {
   public:
-    ConsistentHashRing();
-    ~ConsistentHashRing();
-    void PrepareValidLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations);
-    void SetupDist();
+    DSDistributor();
+    ~DSDistributor();
+    virtual void PrepareValidLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations);
+    virtual void SetupDist();
     void AddLocation(Location location);
     void AddLocation(Location location, int num_virtual_nodes);
     void RemoveLocation(Location location);
     Location GetLocation(Identity identity);
     std::string GetHash(std::string key);
-    void GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<std::vector<Location>> vectloc);
-  private:
-	  static struct conhash_s *conhash;
+    virtual void GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<std::vector<Location>> vectloc);
+//  private:
+	  int distpolicy_;
+    std::shared_ptr<std::vector<std::shared_ptr<Location>>> validlocations_;
   };
 
 } // namespace pegasus
 
-#endif // PEGASUS_CONSISTENT_HASHING_H
+#endif // PEGASUS_DATASET_DISTRIBUTOR_H

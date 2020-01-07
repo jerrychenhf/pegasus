@@ -21,16 +21,9 @@ namespace pegasus {
 
 struct conhash_s* ConsistentHashRing::conhash = NULL;
 
-ConsistentHashRing::ConsistentHashRing(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations)
+ConsistentHashRing::ConsistentHashRing()
 {
-	if (NULL == ConsistentHashRing::conhash)
-	{
-		ConsistentHashRing::conhash = conhash_init(NULL);
-	}
-	std::vector<std::shared_ptr<Location>> lcns;
-	for (auto lcn:lcns) {
-		AddLocation(*lcn);
-	}
+	distpolicy_ = CONHASH;
 }
 
 ConsistentHashRing::~ConsistentHashRing()
@@ -38,6 +31,35 @@ ConsistentHashRing::~ConsistentHashRing()
 	if (NULL != ConsistentHashRing::conhash)
 	{
 		conhash_fini(ConsistentHashRing::conhash);
+	}
+}
+
+//
+void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations)
+{
+	// If the locations are not provided, get the worker locations from worker_manager
+	if (nullptr != locations)
+	{
+		validlocations_ = locations;
+	}
+	else
+	{
+		//TODO: get worker_manager first
+		std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations;
+		worker_manager_->GetWorkerLocations(worker_locations);
+		validlocations_ = worker_locations;
+	}
+}
+
+void ConsistentHashRing::SetupDist()
+{
+	if (NULL == ConsistentHashRing::conhash)
+	{
+		ConsistentHashRing::conhash = conhash_init(NULL);
+	}
+//	std::vector<std::shared_ptr<Location>> lcns;
+	for (auto lcn:(*validlocations_)) {
+		AddLocation(*lcn);
 	}
 }
 
@@ -76,20 +98,19 @@ Location ConsistentHashRing::GetLocation(Identity identity)
 	return lcn;
 }
 
-std::vector<Location> ConsistentHashRing::GetLocations(std::vector<Identity> vectident)
+void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<std::vector<Location>> vectloc)
 {
-	std::vector<Location> vectloc;
+//	std::vector<Location> vectloc;
 	const struct node_s* pnode;
-	for (auto ident:vectident)
+	for (auto ident:(*vectident))
 	{
 		std::string idstr = ident.flie_path();
 		pnode = conhash_lookup(conhash, idstr.c_str());
 		// create the location object and fill with phynode's location (uri).
 		Location lcn;
 		lcn.Parse(pnode->iden, &lcn);  	//TODO: refactor Location::Parse()?
-		vectloc.push_back(lcn);
+		vectloc->push_back(lcn);
 	}
-	return vectloc;
 }
 
 } // namespace pegasus

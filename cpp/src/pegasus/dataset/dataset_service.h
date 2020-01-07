@@ -43,7 +43,8 @@ class DataSetService {
   Status GetFlightListing(std::unique_ptr<FlightListing>* listings);
   Status GetDataSets( std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets);
   Status GetDataSet(std::string table_name, std::shared_ptr<DataSet>* dataset);
-  Status CacheDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset);
+  Status CacheDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy, 
+                            std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations);
   Status FilterDataSet(std::string sqlcmd, std::shared_ptr<DataSet> dataset, std::shared_ptr<DataSet>* datasetfiltered);
  private:
   std::shared_ptr<WorkerManager> worker_manager_;

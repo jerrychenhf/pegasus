@@ -66,35 +66,51 @@ Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSe
   return Status::OK();
 }
 
-Status DataSetService::CacheDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset) {
+Status DataSetService::CacheDataSet(std::string dataset_path, std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<DataSet>* dataset,
+                             int distpolicy, std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations) {
 
+  std::shared_ptr<DSDistributor> distributor;
+  switch (distpolicy)
+  {
+    case CONHASH:
+//      distributor = std::make_shared<DSDistributor>(new ConsistentHashRing());
+      distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<ConsistentHashRing>());
+      break;
+    case LOCALONLY:
+      distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<DistLocalOnly>());
+      break;
+    case LOCALPREFER:
+      distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<DistLocalPrefer>());
+      break;
+    default:
+      return Status::NotImplemented("Distributor Type");
+  }
+  distributor->PrepareValidLocations(worker_locations);
+
+  distributor->SetupDist();
+
+  //TODO: handle the identity vector setup for other types besides ondisk dataset
+  if (nullptr == vectident)
+  {
+    vectident = std::make_shared<std::vector<Identity>>();
+    // setup the identity vector for ondisk dataset
     std::shared_ptr<std::vector<std::string>> file_list;
     storage_plugin_->ListFiles(dataset_path, &file_list);
-
-  // insert the locations to dataset.
-    std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations;
-    worker_manager_->GetWorkerLocations(worker_locations);
-
-    // setup the identity vector
-    std::vector<Identity> vectident;
     for (auto filepath : *file_list)
     {
-//    Identity(std::string file_path, int64_t row_group_id, int64_t num_rows, int64_t bytes);
-      vectident.push_back(Identity(filepath, 0, 0, 0));
+  //    Identity(std::string file_path, int64_t row_group_id, int64_t num_rows, int64_t bytes);
+      vectident->push_back(Identity(filepath, 0, 0, 0));
     }
+  }
+  // get locations vector from identity vector
+  auto vectloc = std::make_shared<std::vector<Location>>();
+  distributor->GetDistLocations(vectident, vectloc);
 
-    // get locations vector from identity vector
-    ConsistentHashRing* cnhs = new ConsistentHashRing(worker_locations);  //TODO: use smart ptr
-    auto vectloc = std::make_shared<std::vector<Location>>();
-    *vectloc = cnhs->GetLocations(vectident);
-    delete cnhs;
-
-    // build the dataset
-//    DataSetBuilder* dsbuilder = new DataSetBuilder(dataset_path, *file_list, vectloc);
-    auto dsbuilder = std::make_shared<DataSetBuilder>(dataset_path, file_list, vectloc);
-    // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
-    dsbuilder->BuildDataset(dataset);
-    dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));
+  // build the dataset and insert it to dataset store.
+  auto dsbuilder = std::make_shared<DataSetBuilder>(dataset_path, file_list, vectloc);
+  // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
+  dsbuilder->BuildDataset(dataset);
+  dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));
 
   return Status::OK();
 }
@@ -119,6 +135,7 @@ Status DataSetService::GetFlightInfo(std::string table_name, std::string sqlcmd,
 
 Status DataSetService::FilterDataSet(std::string sqlcmd, std::shared_ptr<DataSet> dataset, std::shared_ptr<DataSet>* datasetfiltered)
 {
+  //TODO: parse the sqlcmd and filter the dataset 
   return Status::OK();
 }
 
