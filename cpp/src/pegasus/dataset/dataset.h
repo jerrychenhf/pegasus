@@ -46,7 +46,7 @@ class PEGASUS_EXPORT DataSet {
   /// The path of the dataset
   const std::string& dataset_path() const { return data_.dataset_path; }
 
-  /// A list of endpoints associated with the dataset.
+  /// A list of partitions associated with the dataset.
   const std::vector<Partition>& partitions() const { return data_.partitions; }
 
   /// The total number of records (rows) in the dataset. If unknown, set to -1

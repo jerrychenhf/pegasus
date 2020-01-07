@@ -36,7 +36,7 @@ Status DataSetBuilder::BuildDataset(std::shared_ptr<DataSet>* dataset) {
     Location loc(vectloc_->at(i));
     // create Partition
     Partition ep(id, loc);
-    dd.endpoints.push_back(ep);
+    dd.partitions.push_back(ep);
   }
   *dataset = std::make_shared<DataSet>(dd);
 
