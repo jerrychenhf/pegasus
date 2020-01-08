@@ -17,27 +17,60 @@
 
 #include "pegasus/dataset/dataset_builder.h"
 #include "pegasus/parquet/parquet_metadata.h"
+#include "pegasus/util/consistent_hashing.h"
+#include "pegasus/dataset/partition.h"
 
 namespace pegasus {
 
-DataSetBuilder::DataSetBuilder(std::string dataset_path, std::shared_ptr<std::vector<std::string>> file_list, std::shared_ptr<std::vector<Location>> vectloc)
-  : file_list_(file_list), vectloc_(vectloc) {
+//DataSetBuilder::DataSetBuilder() {}
 
-}
+Status DataSetBuilder::BuildDataset(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy) {
 
-Status DataSetBuilder::BuildDataset(std::shared_ptr<DataSet>* dataset) {
+#if 0 //TODO: need redesign
+  std::shared_ptr<DSDistributor> distributor;
+  switch (distpolicy)
+  {
+    case CONHASH:
+//      distributor = std::make_shared<DSDistributor>(new ConsistentHashRing());
+      distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<ConsistentHashRing>());
+      break;
+    case LOCALONLY:
+      distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<DistLocalOnly>());
+      break;
+    case LOCALPREFER:
+      distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<DistLocalPrefer>());
+      break;
+    default:
+      return Status::NotImplemented("Distributor Type");
+  }
+#endif
+  //TODO: only consider ConsistentHashRing for now
+  std::shared_ptr<DSDistributor> distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<ConsistentHashRing>());
+  distributor->PrepareValidLocations(nullptr);
+  distributor->SetupDist();
+
+  // create partitions with identities
+    auto vectident = std::make_shared<std::vector<Identity>>();
+    auto partitions = std::make_shared<std::vector<Partition>>();
+    // setup the identity vector for ondisk dataset
+    std::shared_ptr<std::vector<std::string>> file_list;
+    //TODO: get storage_plugin_ from dataset_service
+//    storage_plugin_ = ExecEnv::GetInstance()->get_storage_plugin_();
+//    storage_plugin_->ListFiles(dataset_path, &file_list);
+    for (auto filepath : *file_list)
+    {
+      partitions->push_back(Partition(Identity(filepath, 0, 0, 0)));
+    }
+  // allocate location for each partition
+  auto vectloc = std::make_shared<std::vector<Location>>();
+  distributor->GetDistLocations(partitions);
+
+  // build dataset
   DataSet::Data dd;
   dd.dataset_path = dataset_path;
-  for (size_t i=0; i<file_list_->size(); i++)
-  {
-    // create Identity
-    Identity id((*file_list_)[i], 0, 0, 0);
-    // create Location
-    Location loc(vectloc_->at(i));
-    // create Partition
-    Partition ep(id, loc);
-    dd.partitions.push_back(ep);
-  }
+  for (auto partt : *partitions)
+    dd.partitions.push_back(partt);
+
   *dataset = std::make_shared<DataSet>(dd);
 
   return Status::OK();

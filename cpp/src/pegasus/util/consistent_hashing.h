@@ -45,6 +45,7 @@ namespace pegasus {
     Location GetLocation(Identity identity);
     std::string GetHash(std::string key);
     void GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<std::vector<Location>> vectloc);
+    void GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions);
   private:
 	  static struct conhash_s *conhash;
   };

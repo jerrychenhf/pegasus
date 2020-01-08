@@ -33,10 +33,15 @@ class Partition {
   /// The location where identity can be redeemed. 
   Location location;
 public:
+  Partition(Identity id): identity(id) {};
   Partition(Identity id, Location loc): identity(id), location(loc) {};
   ~Partition();
 
   bool Equals(const Partition& other) const;
+
+  std::string GetIdentPath() {return identity.flie_path();}
+
+  void UpdateLocation(Location lcn) {location = lcn;}
 
   friend bool operator==(const Partition& left, const Partition& right) {
     return left.Equals(right);

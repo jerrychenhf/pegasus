@@ -32,6 +32,8 @@ using namespace std;
 
 namespace pegasus {
 
+class Filter{}; //to pass compile
+
 class DataSetService {
  public:
   DataSetService();
@@ -39,13 +41,12 @@ class DataSetService {
   Status Init();
   Status Start();
   Status Stop();
-  Status GetFlightInfo(std::string table_name, std::string sqlcmd, std::unique_ptr<FlightInfo>* flight_info);
+  Status GetFlightInfo(std::string dataset_path, std::vector<Filter>* parttftr, std::unique_ptr<FlightInfo>* flight_info);
   Status GetFlightListing(std::unique_ptr<FlightListing>* listings);
   Status GetDataSets( std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets);
   Status GetDataSet(std::string table_name, std::shared_ptr<DataSet>* dataset);
-  Status CacheDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy, 
-                            std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations);
-  Status FilterDataSet(std::string sqlcmd, std::shared_ptr<DataSet> dataset, std::shared_ptr<DataSet>* datasetfiltered);
+  Status CacheDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy);
+  Status FilterDataSet(std::vector<Filter>* parttftr, std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet>* resultdataset);
  private:
   std::shared_ptr<WorkerManager> worker_manager_;
   std::shared_ptr<StoragePlugin> storage_plugin_;

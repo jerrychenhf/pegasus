@@ -52,90 +52,48 @@ Status DataSetService::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<D
   return Status::OK();
 }
 
-Status DataSetService::GetDataSet(std::string table_name, std::shared_ptr<DataSet>* dataset) {
+Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset) {
 
-  std::unique_ptr<SparkCatalog> spark_catalog = std::unique_ptr<SparkCatalog>(new SparkCatalog());
-  std::unique_ptr<TableMetadata> table_meta;
-  spark_catalog->GetTableMeta(table_name, &table_meta);
-  std::string dataset_path = table_meta->location;
   dataset_store_->GetDataSet(dataset_path, dataset);
   if (dataset == NULL) {
-    CacheDataSet(dataset_path, dataset);
+    CacheDataSet(dataset_path, dataset, CONHASH);
   }
 
   return Status::OK();
 }
 
-Status DataSetService::CacheDataSet(std::string dataset_path, std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<DataSet>* dataset,
-                             int distpolicy, std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations) {
-
-  std::shared_ptr<DSDistributor> distributor;
-  switch (distpolicy)
-  {
-    case CONHASH:
-//      distributor = std::make_shared<DSDistributor>(new ConsistentHashRing());
-      distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<ConsistentHashRing>());
-      break;
-    case LOCALONLY:
-      distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<DistLocalOnly>());
-      break;
-    case LOCALPREFER:
-      distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<DistLocalPrefer>());
-      break;
-    default:
-      return Status::NotImplemented("Distributor Type");
-  }
-  distributor->PrepareValidLocations(worker_locations);
-
-  distributor->SetupDist();
-
-  //TODO: handle the identity vector setup for other types besides ondisk dataset
-  if (nullptr == vectident)
-  {
-    vectident = std::make_shared<std::vector<Identity>>();
-    // setup the identity vector for ondisk dataset
-    std::shared_ptr<std::vector<std::string>> file_list;
-    storage_plugin_->ListFiles(dataset_path, &file_list);
-    for (auto filepath : *file_list)
-    {
-  //    Identity(std::string file_path, int64_t row_group_id, int64_t num_rows, int64_t bytes);
-      vectident->push_back(Identity(filepath, 0, 0, 0));
-    }
-  }
-  // get locations vector from identity vector
-  auto vectloc = std::make_shared<std::vector<Location>>();
-  distributor->GetDistLocations(vectident, vectloc);
+Status DataSetService::CacheDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy) {
 
   // build the dataset and insert it to dataset store.
-  auto dsbuilder = std::make_shared<DataSetBuilder>(dataset_path, file_list, vectloc);
+  auto dsbuilder = std::make_shared<DataSetBuilder>();
   // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
-  dsbuilder->BuildDataset(dataset);
+  dsbuilder->BuildDataset(dataset_path, dataset, distpolicy);
   dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));
 
   return Status::OK();
 }
 
 /// Build FlightInfo from DataSet.
-Status DataSetService::GetFlightInfo(std::string table_name, std::string sqlcmd, std::unique_ptr<FlightInfo>* flight_info) {
+Status DataSetService::GetFlightInfo(std::string dataset_path, std::vector<Filter>* parttftr, std::unique_ptr<FlightInfo>* flight_info) {
 
   std::shared_ptr<DataSet> dataset;
-  Status st = GetDataSet(table_name, &dataset);
+  Status st = GetDataSet(dataset_path, &dataset);
   if (!st.ok()) {
     return st;
   }
-  std::shared_ptr<DataSet> datasetfiltered;
-  // TODO: Filter dataset
-  st = FilterDataSet(sqlcmd, dataset, &datasetfiltered);
+  std::shared_ptr<ResultDataSet> rdataset;
+  // Filter dataset
+  st = FilterDataSet(parttftr, dataset, &rdataset);
   if (!st.ok()) {
     return st;
   }
-  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(datasetfiltered));
+  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdataset));
   return flightinfo_builder_->BuildFlightInfo(flight_info);
 }
 
-Status DataSetService::FilterDataSet(std::string sqlcmd, std::shared_ptr<DataSet> dataset, std::shared_ptr<DataSet>* datasetfiltered)
+Status DataSetService::FilterDataSet(std::vector<Filter>* parttftr, std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet>* resultdataset)
 {
-  //TODO: parse the sqlcmd and filter the dataset 
+  //TODO: filter the dataset 
   return Status::OK();
 }
 

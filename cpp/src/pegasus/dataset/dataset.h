@@ -59,6 +59,37 @@ class PEGASUS_EXPORT DataSet {
   Data data_;
 };
 
+class PEGASUS_EXPORT ResultDataSet {
+ public:
+  struct Data {
+    std::string schema;
+    /// Path identifying a particular dataset. 
+    std::string dataset_path;
+    std::vector<Partition> partitions;
+    int64_t total_records;
+    int64_t total_bytes;
+  };
+
+  explicit ResultDataSet(const Data& data) : data_(data) {}
+  explicit ResultDataSet(Data&& data)
+      : data_(std::move(data)) {}
+
+  /// The path of the dataset
+  const std::string& dataset_path() const { return data_.dataset_path; }
+
+  /// A list of partitions associated with the dataset.
+  const std::vector<Partition>& partitions() const { return data_.partitions; }
+
+  /// The total number of records (rows) in the dataset. If unknown, set to -1
+  int64_t total_records() const { return data_.total_records; }
+
+  /// The total number of bytes in the dataset. If unknown, set to -1
+  int64_t total_bytes() const { return data_.total_bytes; }
+
+ private:
+  Data data_;
+};
+
 } // namespace pegasus
 
 #endif  // PEGASUS_DATASET_H

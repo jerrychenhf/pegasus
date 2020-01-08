@@ -46,7 +46,7 @@ void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<std::
 	{
 		//TODO: get worker_manager first
 		std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations;
-		worker_manager_->GetWorkerLocations(worker_locations);
+//		worker_manager_->GetWorkerLocations(worker_locations);
 		validlocations_ = worker_locations;
 	}
 }
@@ -110,6 +110,21 @@ void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>>
 		Location lcn;
 		lcn.Parse(pnode->iden, &lcn);  	//TODO: refactor Location::Parse()?
 		vectloc->push_back(lcn);
+	}
+}
+
+void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions)
+{
+	const struct node_s* pnode;
+	for (auto partt:(*partitions))
+//	for (auto ident:(*vectident))
+	{
+		std::string idstr = partt.GetIdentPath();
+		pnode = conhash_lookup(conhash, idstr.c_str());
+		// create the location object and fill with phynode's location (uri).
+		Location lcn;
+		lcn.Parse(pnode->iden, &lcn);  	//TODO: refactor Location::Parse()?
+		partt.UpdateLocation(lcn);
 	}
 }
 

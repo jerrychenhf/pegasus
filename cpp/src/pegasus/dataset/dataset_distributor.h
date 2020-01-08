@@ -23,6 +23,7 @@
 
 #include "pegasus/common/location.h"
 #include "pegasus/dataset/identity.h"
+#include "pegasus/dataset/partition.h"
 #include "pegasus/util/conhash.h"
 
 using namespace std;
@@ -47,6 +48,7 @@ enum {
     Location GetLocation(Identity identity);
     std::string GetHash(std::string key);
     virtual void GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<std::vector<Location>> vectloc);
+    virtual void GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions);
 //  private:
 	  int distpolicy_;
     std::shared_ptr<std::vector<std::shared_ptr<Location>>> validlocations_;

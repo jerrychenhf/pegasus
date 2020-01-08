@@ -25,9 +25,9 @@ namespace pegasus {
 
 class DataSetBuilder {
  public:
-  DataSetBuilder(std::string dataset_path, std::shared_ptr<std::vector<std::string>> file_list, std::shared_ptr<std::vector<Location>> vectloc);
+  DataSetBuilder() {}
 
-  Status BuildDataset(std::shared_ptr<DataSet>* dataset);
+  Status BuildDataset(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy);
 
   Status GetSchma(std::shared_ptr<std::string>* schema);
 
@@ -40,9 +40,9 @@ class DataSetBuilder {
   Status GetTotalBytes(int64_t* total_bytes);
 
  private:
-  std::string dataset_path;
-  std::shared_ptr<std::vector<std::string>> file_list_;
-  std::shared_ptr<std::vector<Location>> vectloc_;
+//  std::string dataset_path;
+//  std::shared_ptr<std::vector<std::string>> file_list_;
+//  std::shared_ptr<std::vector<Location>> vectloc_;
 };
 
 } // namespace pegasus
