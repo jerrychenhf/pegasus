@@ -15,28 +15,24 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_WORKER_H
-#define PEGASUS_WORKER_H
+#ifndef PEGASUS_DATASET_CACHE_ENGINE_MANAGER_H
+#define PEGASUS_DATASET_CACHE_ENGINE_MANAGER_H
 
-#include "pegasus/dataset/dataset_cache_manager.h"
-#include "pegasus/runtime/exec_env.h"
-#include "pegasus/storage/storage_plugin.h"
-#include "pegasus/server/worker/worker_table_api_service.h"
+#include "pegasus/common/status.h"
+
 
 using namespace std;
 
 namespace pegasus {
-
-class Worker {
+class DatasetCacheEngineManager {
  public:
-  Worker();
-  void Start();
+  DatasetCacheEngineManager();
+  ~DatasetCacheEngineManager();
 
- private:
-  std::shared_ptr<WorkerTableAPIService> worker_table_api_service_;
-  std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
+  Status ListCacheEngines();
+  Status GetCacheEngine();
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_WORKER_H
+#endif  // PEGASUS_DATASET_CACHE_ENGINE_MANAGER_H

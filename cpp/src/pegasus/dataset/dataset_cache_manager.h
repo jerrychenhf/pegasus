@@ -15,28 +15,35 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_WORKER_H
-#define PEGASUS_WORKER_H
+#ifndef PEGASUS_DATASET_CACHE_MANAGER_H
+#define PEGASUS_DATASET_CACHE_MANAGER_H
 
-#include "pegasus/dataset/dataset_cache_manager.h"
-#include "pegasus/runtime/exec_env.h"
-#include "pegasus/storage/storage_plugin.h"
-#include "pegasus/server/worker/worker_table_api_service.h"
+#include "arrow/record_batch.h"
+#include "arrow/flight/server.h"
+
+#include "pegasus/dataset/identity.h"
+#include "pegasus/dataset/dataset_cache_block_manager.h"
+#include "pegasus/dataset/dataset_cache_engine_manager.h"
 
 using namespace std;
+using namespace arrow;
+using namespace arrow::flight;
 
 namespace pegasus {
 
-class Worker {
+class DatasetCacheManager {
  public:
-  Worker();
-  void Start();
+  DatasetCacheManager();
+  ~DatasetCacheManager();
 
- private:
-  std::shared_ptr<WorkerTableAPIService> worker_table_api_service_;
-  std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
+  Status GetDatasetStream(Identity identity, std::unique_ptr<FlightDataStream>* data_stream);
+  CacheEngine::CachePolicy GetCachePolicy(Identity identity);
+
+ private: 
+  std::shared_ptr<DatasetCacheBlockManager> dataset_cache_block_manager_;
+  std::shared_ptr<DatasetCacheEngineManager> dataset_cache_engine_manager_;
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_WORKER_H
+#endif  // PEGASUS_DATASET_CACHE_MANAGER_H

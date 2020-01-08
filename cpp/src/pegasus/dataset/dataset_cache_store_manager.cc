@@ -15,28 +15,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_WORKER_H
-#define PEGASUS_WORKER_H
+#include <memory>
+#include <unordered_map>
 
-#include "pegasus/dataset/dataset_cache_manager.h"
-#include "pegasus/runtime/exec_env.h"
-#include "pegasus/storage/storage_plugin.h"
-#include "pegasus/server/worker/worker_table_api_service.h"
+#include "pegasus/dataset/dataset_cache_store_manager.h"
 
-using namespace std;
+using namespace pegasus;
 
 namespace pegasus {
 
-class Worker {
- public:
-  Worker();
-  void Start();
+// Initialize all the Store Allocator based on the configuration.
+DatasetCacheStoreManager::DatasetCacheStoreManager() {
+}
 
- private:
-  std::shared_ptr<WorkerTableAPIService> worker_table_api_service_;
-  std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
-};
+DatasetCacheStoreManager::~DatasetCacheStoreManager() {}
 
+// Get all configurated Store allocators.
+Status ListStoreAllocators() {
+}
+
+// Get the available store allocators(DRAM > DCPMM > SSD)
+Status GetStoreAllocator() {
+}
 } // namespace pegasus
-
-#endif  // PEGASUS_WORKER_H

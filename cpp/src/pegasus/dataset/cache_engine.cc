@@ -15,28 +15,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_WORKER_H
-#define PEGASUS_WORKER_H
-
-#include "pegasus/dataset/dataset_cache_manager.h"
+#include "pegasus/dataset/cache_engine.h"
 #include "pegasus/runtime/exec_env.h"
-#include "pegasus/storage/storage_plugin.h"
-#include "pegasus/server/worker/worker_table_api_service.h"
+#include "pegasus/cache/store_factory.h"
 
 using namespace std;
 
 namespace pegasus {
 
-class Worker {
- public:
-  Worker();
-  void Start();
+LruCacheEngine::LruCacheEngine(long capacity): cache_(capacity) {}
 
- private:
-  std::shared_ptr<WorkerTableAPIService> worker_table_api_service_;
-  std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
-};
+ Status PutValue() {
+   // TODO
+   // 1. Get the StoreAllocator by calling DatasetCacheStoreManager#GetStoreAllocator method
+   // 2. Call StoreManager#Store#Allocate method to allocate the memory to store the value
+   // 3. Call the related LRUxxCache.insert to insert value
+   // 4. Update the info in DatasetCacheBlockManager
+ }
+
+LruCacheEngine::~LruCacheEngine() {
+
+}
 
 } // namespace pegasus
-
-#endif  // PEGASUS_WORKER_H

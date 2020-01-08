@@ -14,29 +14,24 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+#include "pegasus/dataset/dataset_cache_engine_manager.h"
 
-#ifndef PEGASUS_WORKER_H
-#define PEGASUS_WORKER_H
-
-#include "pegasus/dataset/dataset_cache_manager.h"
-#include "pegasus/runtime/exec_env.h"
-#include "pegasus/storage/storage_plugin.h"
-#include "pegasus/server/worker/worker_table_api_service.h"
-
-using namespace std;
+using namespace pegasus;
 
 namespace pegasus {
 
-class Worker {
- public:
-  Worker();
-  void Start();
+DatasetCacheEngineManager::DatasetCacheEngineManager() {
+    // Initialize all configurated cache engines.
+}
 
- private:
-  std::shared_ptr<WorkerTableAPIService> worker_table_api_service_;
-  std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
-};
+DatasetCacheEngineManager::~DatasetCacheEngineManager() {}
 
+// Get all configurated cache engines.
+Status ListCacheEngines() {
+}
+
+// Get the specific cache engine based on the available capacity.
+Status GetCacheEngine() {
+
+}
 } // namespace pegasus
-
-#endif  // PEGASUS_WORKER_H

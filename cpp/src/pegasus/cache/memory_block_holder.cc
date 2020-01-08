@@ -15,28 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_WORKER_H
-#define PEGASUS_WORKER_H
-
-#include "pegasus/dataset/dataset_cache_manager.h"
-#include "pegasus/runtime/exec_env.h"
-#include "pegasus/storage/storage_plugin.h"
-#include "pegasus/server/worker/worker_table_api_service.h"
-
-using namespace std;
+/// \brief Data structure providing an opaque identifier or credential to use
+/// when requesting a data stream with the DoGet RPC
+#include "pegasus/cache/memory_block_holder.h"
 
 namespace pegasus {
 
-class Worker {
- public:
-  Worker();
-  void Start();
-
- private:
-  std::shared_ptr<WorkerTableAPIService> worker_table_api_service_;
-  std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
-};
+MemoryBlockHolder::MemoryBlockHolder(long base_offset, long length, long occupied_size)
+    : base_offset_(base_offset), length_(length), occupied_size_(occupied_size) {}
 
 } // namespace pegasus
-
-#endif  // PEGASUS_WORKER_H

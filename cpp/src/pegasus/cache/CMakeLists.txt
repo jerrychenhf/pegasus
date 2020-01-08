@@ -22,15 +22,15 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/cache")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/cache")
 
-add_library(CacheManager
-  cache_manager.cc
-)
-add_dependencies(CacheManager gen-deps)
-
 add_library(Store
   store.cc
   store_manager.cc
   store_factory.cc
 )
 add_dependencies(Store gen-deps)
+
+add_library(MemoryBlockHolder
+  memory_block_holder.cc
+)
+add_dependencies(MemoryBlockHolder gen-deps)
 

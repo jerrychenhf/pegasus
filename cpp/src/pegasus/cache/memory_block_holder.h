@@ -15,39 +15,26 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_CACHE_MANAGER_H
-#define PEGASUS_CACHE_MANAGER_H
+#ifndef PEGASUS_MEMORY_BLOCK_HOLDER_H
+#define PEGASUS_MEMORY_BLOCK_HOLDER_H
 
-#include "arrow/record_batch.h"
-#include "arrow/flight/server.h"
-
-#include "pegasus/dataset/identity.h"
-#include "pegasus/common/location.h"
-#include "pegasus/storage/storage_plugin.h"
-#include "pegasus/cache/store_manager.h"
-
+#include <string>
 
 using namespace std;
-using namespace arrow;
-using namespace arrow::flight;
 
 namespace pegasus {
 
-class CacheManager {
+class MemoryBlockHolder {
  public:
-  CacheManager();
-  ~CacheManager();
+  MemoryBlockHolder(long base_offset, long length, long occupied_size);
+  ~MemoryBlockHolder();
 
-  Status GetTableChunk(Identity identity, std::unique_ptr<RecordBatch> out);
-  Status InsertTableChunk(std::shared_ptr<RecordBatch> in);
-  Status GetFlightDataStream(Identity Identity, std::unique_ptr<FlightDataStream>* data_stream);
-
- private: 
-  std::shared_ptr<Location> location_;
-  std::shared_ptr<StoragePlugin> storage_plugin_;
-  std::shared_ptr<StoreManager> store_manager_;
+ private:
+  long base_offset_;
+  long length_;
+  long occupied_size_; 
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_CACHE_MANAGER_H
+#endif  // PEGASUS_MEMORY_BLOCK_HOLDER_H

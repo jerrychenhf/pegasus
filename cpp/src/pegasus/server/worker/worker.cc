@@ -23,7 +23,7 @@
 
 #include "pegasus/util/global_flags.h"
 
-#include "pegasus/cache/cache_manager.h"
+#include "pegasus/dataset/dataset_cache_manager.h"
 #include "pegasus/util/logging.h"
 #include "pegasus/server/worker/worker.h"
 
@@ -35,7 +35,7 @@ namespace pegasus {
 Worker::Worker() {
   std::unique_ptr<ExecEnv> exec_env_(new ExecEnv());
   worker_table_api_service_ = std::unique_ptr<WorkerTableAPIService>(new WorkerTableAPIService());
-  cache_manager_ = std::unique_ptr<CacheManager>(new CacheManager());
+  dataset_cache_manager_ = std::unique_ptr<DatasetCacheManager>(new DatasetCacheManager());
 }
 
 void Worker::Start() {

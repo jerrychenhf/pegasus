@@ -27,7 +27,12 @@ if (NOT APPLE)
 endif()
 
 set (PEGASUS_LIBS
-  CacheManager
+  DatasetCacheManager
+  DatasetCacheBlockManager
+  DatasetCacheEngineManager
+  DatasetCacheStoreManager
+  MemoryBlockHolder
+  CacheEngine
   Store
   SparkCatalog
   Status

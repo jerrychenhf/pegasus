@@ -20,7 +20,7 @@
 
 #include "arrow/flight/server.h"
 
-#include "pegasus/cache/cache_manager.h"
+#include "pegasus/dataset/dataset_cache_manager.h"
 
 
 namespace arrow {
@@ -48,7 +48,7 @@ class WorkerTableAPIService : public arrow::flight::FlightServerBase {
                std::unique_ptr<FlightMetadataWriter> writer) override;
 
 private:
-  std::shared_ptr<CacheManager> cache_manager_;
+  std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
   ExecEnv* env_;
 };
     

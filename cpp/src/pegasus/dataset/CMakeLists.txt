@@ -42,3 +42,29 @@ add_library(FlightInfo
 )
 add_dependencies(FlightInfo gen-deps)
 
+add_library(DatasetCacheManager
+  dataset_cache_manager.cc
+)
+add_dependencies(DatasetCacheManager gen-deps)
+
+add_library(DatasetCacheBlockManager
+  dataset_cache_block_manager.cc
+)
+add_dependencies(DatasetCacheBlockManager gen-deps)
+
+add_library(CacheEngine
+  cache_engine.cc
+)
+add_dependencies(CacheEngine gen-deps)
+
+add_library(DatasetCacheEngineManager
+  dataset_cache_engine_manager.cc
+)
+add_dependencies(DatasetCacheEngineManager gen-deps)
+
+add_library(DatasetCacheStoreManager
+  dataset_cache_store_manager.cc
+)
+add_dependencies(DatasetCacheStoreManager gen-deps)
+
+
