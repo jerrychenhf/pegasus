@@ -27,9 +27,9 @@ DatasetCacheBlockManager::DatasetCacheBlockManager() {
 DatasetCacheBlockManager::~DatasetCacheBlockManager() {}
 
 Status DatasetCacheBlockManager::GetCachedRecord(Identity identity, std::shared_ptr<CachedInfo>* cached_dataset) {
-  auto entry = cached_datasets_.find(identity.flie_path());
+  auto entry = cached_datasets_.find(identity.file_path());
   if (entry == cached_datasets_.end()) {
-      return Status::KeyError("Could not find the cached info.", identity.flie_path());
+      return Status::KeyError("Could not find the cached info.", identity.file_path());
   }
 
   auto find_cache_info = entry->second;

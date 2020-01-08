@@ -29,11 +29,11 @@ using FileMetaData = parquet::FileMetaData;
 class ParquetMetadata {
 
  public:
-  ParquetMetadata(std::shared_ptr<std::vector<std::string>> flie_path_list);
+  ParquetMetadata(std::shared_ptr<std::vector<std::string>> file_path_list);
   Status GetFilesMeta(std::shared_ptr<std::vector<std::shared_ptr<FileMetaData>>>* files_metadata);
 
  private:
-  std::shared_ptr<std::vector<std::string>> flie_path_list_;
+  std::shared_ptr<std::vector<std::string>> file_path_list_;
   std::vector<FileMetaData> files_metadata_;
 };
 

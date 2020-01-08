@@ -30,7 +30,7 @@ class Identity {
 public:
   Identity(std::string file_path, int64_t row_group_id, int64_t num_rows, int64_t bytes);
   
-  std::string flie_path() const;
+  std::string file_path() const;
   int64_t row_group_id() const;
   int64_t num_rows() const;
   int64_t bytes() const;

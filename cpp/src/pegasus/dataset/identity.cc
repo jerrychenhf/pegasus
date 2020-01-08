@@ -24,7 +24,7 @@ namespace pegasus {
 Identity::Identity(std::string file_path, int64_t row_group_id, int64_t num_rows, int64_t bytes)
     : file_path_(file_path), row_group_id_(row_group_id), num_rows_(num_rows), bytes_(bytes) {}
   
-std::string Identity::flie_path() const {
+std::string Identity::file_path() const {
     return file_path_;
   }
 

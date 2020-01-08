@@ -39,7 +39,7 @@ public:
 
   bool Equals(const Partition& other) const;
 
-  std::string GetIdentPath() {return identity.flie_path();}
+  std::string GetIdentPath() {return identity.file_path();}
 
   void UpdateLocation(Location lcn) {location = lcn;}
 
