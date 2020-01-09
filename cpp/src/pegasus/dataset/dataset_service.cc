@@ -74,7 +74,7 @@ Status DataSetService::CacheDataSet(std::string dataset_path, std::shared_ptr<Da
 }
 
 /// Build FlightInfo from DataSet.
-Status DataSetService::GetFlightInfo(std::string dataset_path, std::vector<Filter>* parttftr, std::unique_ptr<FlightInfo>* flight_info) {
+Status DataSetService::GetFlightInfo(std::string dataset_path, std::vector<Filter>* parttftrs, std::unique_ptr<FlightInfo>* flight_info) {
 
   std::shared_ptr<DataSet> dataset;
   Status st = GetDataSet(dataset_path, &dataset);
@@ -83,7 +83,7 @@ Status DataSetService::GetFlightInfo(std::string dataset_path, std::vector<Filte
   }
   std::shared_ptr<ResultDataSet> rdataset;
   // Filter dataset
-  st = FilterDataSet(parttftr, dataset, &rdataset);
+  st = FilterDataSet(parttftrs, dataset, &rdataset);
   if (!st.ok()) {
     return st;
   }
@@ -103,7 +103,19 @@ Status DataSetService::GetFlightListing(std::unique_ptr<FlightListing>* listings
   std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> datasets;
   GetDataSets(&datasets);
 
-  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(datasets));
+  auto rdatasets = std::make_shared<std::vector<std::shared_ptr<ResultDataSet>>>();
+  //TODO: fill the resultdataset
+/*  for (auto ds:(*datasets))
+  {
+    ResultDataSet::Data dd;
+    dd.dataset_path = ds->dataset_path();
+    dd.partitions = ds->partitions();
+    dd.total_bytes = ds->total_bytes();
+    dd.total_records = ds->total_records();
+    rdatasets->push_back(&ResultDataSet(dd));
+  }
+*/
+  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdatasets));
   flightinfo_builder_->BuildFlightListing(listings);
   return Status::OK();
 }

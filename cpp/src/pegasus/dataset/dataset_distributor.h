@@ -38,19 +38,19 @@ enum {
 
   class DSDistributor {
   public:
-    DSDistributor();
-    ~DSDistributor();
-    virtual void PrepareValidLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations);
-    virtual void SetupDist();
+    DSDistributor() {};
+    ~DSDistributor() {};
+    virtual void PrepareValidLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations) = 0;
+    virtual void SetupDist() = 0;
     void AddLocation(Location location);
     void AddLocation(Location location, int num_virtual_nodes);
     void RemoveLocation(Location location);
     Location GetLocation(Identity identity);
     std::string GetHash(std::string key);
-    virtual void GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<std::vector<Location>> vectloc);
-    virtual void GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions);
+    virtual void GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<std::vector<Location>> vectloc) = 0;
+    virtual void GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions) = 0;
 //  private:
-	  int distpolicy_;
+//	  int distpolicy_;
     std::shared_ptr<std::vector<std::shared_ptr<Location>>> validlocations_;
   };
 

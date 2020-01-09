@@ -23,7 +23,7 @@ struct conhash_s* ConsistentHashRing::conhash = NULL;
 
 ConsistentHashRing::ConsistentHashRing()
 {
-	distpolicy_ = CONHASH;
+//	distpolicy_ = CONHASH;
 }
 
 ConsistentHashRing::~ConsistentHashRing()

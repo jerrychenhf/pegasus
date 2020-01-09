@@ -19,11 +19,11 @@
 
 namespace pegasus {
 
-FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<DataSet> dataset) : dataset_(dataset){
+FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<ResultDataSet> dataset) : dataset_(dataset){
 
 }
 
-FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> datasets) {
+FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr<ResultDataSet>>> datasets) {
 
 }
 
@@ -50,22 +50,27 @@ Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<FlightInfo>* flight_in
 
 Status FlightInfoBuilder::BuildFlightListing(std::unique_ptr<FlightListing>* listings) {
   
+  return Status::OK();
 }
 
 Status FlightInfoBuilder::GetFlightDescriptor(std::unique_ptr<FlightDescriptor>* flight_descriptor) {
 
+  return Status::OK();
 }
 
 Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<FlightEndpoint>>* endpoints) {
 
+  return Status::OK();
 }
 
 Status FlightInfoBuilder::GetTotalRecords(int64_t* total_records) {
     
+  return Status::OK();
 }
 
 Status FlightInfoBuilder::GetTotalBytes(int64_t* total_bytes) {
     
+  return Status::OK();
 }
 
 } // namespace pegasus

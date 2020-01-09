@@ -45,7 +45,11 @@ Status DataSetBuilder::BuildDataset(std::string dataset_path, std::shared_ptr<Da
   }
 #endif
   //TODO: only consider ConsistentHashRing for now
-  std::shared_ptr<DSDistributor> distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<ConsistentHashRing>());
+//  std::shared_ptr<DSDistributor> distributor = std::make_shared<ConsistentHashRing>();  //error: conversion from ‘...’ to non-scalar type 
+//  std::shared_ptr<DSDistributor> distributor;
+//  distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<ConsistentHashRing>()); //error: is an inaccessible base of
+//  DSDistributor* distributor(new ConsistentHashRing); //error: is an inaccessible base of
+  auto distributor = std::make_shared<ConsistentHashRing>(); 
   distributor->PrepareValidLocations(nullptr);
   distributor->SetupDist();
 
@@ -77,7 +81,7 @@ Status DataSetBuilder::BuildDataset(std::string dataset_path, std::shared_ptr<Da
 }
 
 Status DataSetBuilder::GetTotalRecords(int64_t* total_records) {
-  *total_records = file_list_->size();  //TODO: need to confirm
+//  *total_records = file_list_->size();  //TODO: need to confirm
   return Status::OK();
 }
 

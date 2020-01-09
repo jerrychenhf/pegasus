@@ -43,6 +43,9 @@ class PEGASUS_EXPORT DataSet {
   explicit DataSet(Data&& data)
       : data_(std::move(data)) {}
 
+  /// Get the data_
+//  Data GetData() {return data_;}
+
   /// The path of the dataset
   const std::string& dataset_path() const { return data_.dataset_path; }
 

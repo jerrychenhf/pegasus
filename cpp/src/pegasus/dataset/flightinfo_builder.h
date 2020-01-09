@@ -30,8 +30,8 @@ namespace pegasus {
 class FlightInfoBuilder {
 
 public:
-  FlightInfoBuilder(std::shared_ptr<DataSet> dataset);
-  FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> datasets);
+  FlightInfoBuilder(std::shared_ptr<ResultDataSet> dataset);
+  FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr<ResultDataSet>>> datasets);
 
   Status BuildFlightInfo(std::unique_ptr<FlightInfo>* flight_info);
 
@@ -46,8 +46,8 @@ public:
   Status GetTotalBytes(int64_t* total_bytes);
 
 private:
-  std::shared_ptr<DataSet> dataset_;
-  std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> datasets_;
+  std::shared_ptr<ResultDataSet> dataset_;
+  std::shared_ptr<std::vector<std::shared_ptr<ResultDataSet>>> datasets_;
 };
 
 } // namespace pegasus
