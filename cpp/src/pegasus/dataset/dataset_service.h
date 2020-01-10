@@ -32,6 +32,13 @@ using namespace std;
 
 namespace pegasus {
 
+namespace rpc {
+
+class FlightInfo;
+class FlightListing;
+
+}  // namespace rpc
+
 class Filter{}; //to pass compile
 
 class DataSetService {
@@ -41,8 +48,8 @@ class DataSetService {
   Status Init();
   Status Start();
   Status Stop();
-  Status GetFlightInfo(std::string dataset_path, std::vector<Filter>* parttftrs, std::unique_ptr<FlightInfo>* flight_info);
-  Status GetFlightListing(std::unique_ptr<FlightListing>* listings);
+  Status GetFlightInfo(std::string dataset_path, std::vector<Filter>* parttftrs, std::unique_ptr<rpc::FlightInfo>* flight_info);
+  Status GetFlightListing(std::unique_ptr<rpc::FlightListing>* listings);
   Status GetDataSets( std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets);
   Status GetDataSet(std::string table_name, std::shared_ptr<DataSet>* dataset);
   Status CacheDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy);

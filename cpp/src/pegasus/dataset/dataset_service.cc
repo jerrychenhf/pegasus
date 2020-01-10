@@ -74,7 +74,7 @@ Status DataSetService::CacheDataSet(std::string dataset_path, std::shared_ptr<Da
 }
 
 /// Build FlightInfo from DataSet.
-Status DataSetService::GetFlightInfo(std::string dataset_path, std::vector<Filter>* parttftrs, std::unique_ptr<FlightInfo>* flight_info) {
+Status DataSetService::GetFlightInfo(std::string dataset_path, std::vector<Filter>* parttftrs, std::unique_ptr<rpc::FlightInfo>* flight_info) {
 
   std::shared_ptr<DataSet> dataset;
   Status st = GetDataSet(dataset_path, &dataset);
@@ -98,7 +98,7 @@ Status DataSetService::FilterDataSet(std::vector<Filter>* parttftr, std::shared_
 }
 
 /// Build FlightInfos from DataSets.
-Status DataSetService::GetFlightListing(std::unique_ptr<FlightListing>* listings) {
+Status DataSetService::GetFlightListing(std::unique_ptr<rpc::FlightListing>* listings) {
     
   std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> datasets;
   GetDataSets(&datasets);

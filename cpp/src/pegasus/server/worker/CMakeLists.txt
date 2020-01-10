@@ -29,9 +29,9 @@ add_dependencies(Worker gen-deps)
 
 add_executable(workerd worker_main.cc)
 target_link_libraries(workerd
+  pegasus_rpc_shared
   ${PEGASUS_LINK_LIBS}
   ${ARROW_SHARED_LIB}
-  ${ARROW_FLIGHT_SHARED_LIB}
   ${GFLAGS_LIBRARIES}
   ${BOOST_SYSTEM_LIBRARY}
   ${BOOST_STATIC_FILESYSTEM_LIBRARY}

@@ -29,9 +29,9 @@ add_dependencies(Planner gen-deps)
 
 add_executable(plannerd planner_main.cc)
 target_link_libraries(plannerd
+  pegasus_rpc_shared
   ${PEGASUS_LINK_LIBS}
   ${ARROW_SHARED_LIB}
-  ${ARROW_FLIGHT_SHARED_LIB}
   ${GFLAGS_LIBRARIES}
   ${BOOST_SYSTEM_LIBRARY}
   ${BOOST_STATIC_FILESYSTEM_LIBRARY}

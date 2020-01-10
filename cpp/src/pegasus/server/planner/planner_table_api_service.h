@@ -20,14 +20,28 @@
 
 #include <string>
 
-#include "arrow/flight/server.h"
+#include "pegasus/rpc/server.h"
 
 #include "pegasus/dataset/dataset_service.h"
 #include "pegasus/storage/storage_plugin.h"
 
 namespace pegasus {
 
-class PlannerTableAPIService : public arrow::flight::FlightServerBase {
+class DataSetService;
+class WorkerManager;
+
+namespace rpc {
+
+class ServerCallContext;
+class FlightServerBase;
+class FlightListing;
+class FlightInfo;
+class Criteria;
+class FlightDescriptor;
+
+}  //namespace rpc
+
+class PEGASUS_EXPORT PlannerTableAPIService : public rpc::FlightServerBase {
  public:
   PlannerTableAPIService(std::shared_ptr<DataSetService> dataset_service);
   ~PlannerTableAPIService();
@@ -36,12 +50,12 @@ class PlannerTableAPIService : public arrow::flight::FlightServerBase {
 
   Status Serve();
 
-  arrow::Status ListFlights(const ServerCallContext& context, const Criteria* criteria,
-                             std::unique_ptr<FlightListing>* listings) override;
+  arrow::Status ListFlights(const rpc::ServerCallContext& context, const rpc::Criteria* criteria,
+                             std::unique_ptr<rpc::FlightListing>* listings) override;
 
-  arrow::Status GetFlightInfo(const ServerCallContext& context,
-                               const FlightDescriptor& request,
-                               std::unique_ptr<FlightInfo>* info) override;
+  arrow::Status GetFlightInfo(const rpc::ServerCallContext& context,
+                               const rpc::FlightDescriptor& request,
+                               std::unique_ptr<rpc::FlightInfo>* info) override;
 
  private:
   std::shared_ptr<DataSetService> dataset_service_;

@@ -27,38 +27,38 @@ FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr
 
 }
 
-Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<FlightInfo>* flight_info) {
-  std::unique_ptr<FlightDescriptor> flight_descriptor;
+Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flight_info) {
+  std::unique_ptr<rpc::FlightDescriptor> flight_descriptor;
   GetFlightDescriptor(&flight_descriptor);
-  std::unique_ptr<std::vector<FlightEndpoint>> endpoints;
+  std::unique_ptr<std::vector<rpc::FlightEndpoint>> endpoints;
   GetFlightEndpoints(&endpoints);
   int64_t* total_records;
   GetTotalRecords(total_records);
   int64_t* total_bytes;
   GetTotalBytes(total_bytes);
 
-  arrow::flight::FlightInfo::Data flight_data;
+  rpc::FlightInfo::Data flight_data;
   flight_data.descriptor = *flight_descriptor;
   flight_data.endpoints = *endpoints;
   flight_data.total_records = *total_records;
   flight_data.total_bytes = *total_bytes;
-  arrow::flight::FlightInfo value(flight_data);
-  *flight_info = std::unique_ptr<FlightInfo>(new FlightInfo(value));
+  rpc::FlightInfo value(flight_data);
+  *flight_info = std::unique_ptr<rpc::FlightInfo>(new rpc::FlightInfo(value));
   return Status::OK();
 }
 
 
-Status FlightInfoBuilder::BuildFlightListing(std::unique_ptr<FlightListing>* listings) {
+Status FlightInfoBuilder::BuildFlightListing(std::unique_ptr<rpc::FlightListing>* listings) {
   
   return Status::OK();
 }
 
-Status FlightInfoBuilder::GetFlightDescriptor(std::unique_ptr<FlightDescriptor>* flight_descriptor) {
+Status FlightInfoBuilder::GetFlightDescriptor(std::unique_ptr<rpc::FlightDescriptor>* flight_descriptor) {
 
   return Status::OK();
 }
 
-Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<FlightEndpoint>>* endpoints) {
+Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::FlightEndpoint>>* endpoints) {
 
   return Status::OK();
 }

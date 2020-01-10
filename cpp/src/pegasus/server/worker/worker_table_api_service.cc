@@ -20,6 +20,12 @@
 
 namespace pegasus {
 
+namespace rpc {
+
+class Location;
+
+}  //namespace rpc
+
 WorkerTableAPIService::WorkerTableAPIService() {
   env_ =  ExecEnv::GetInstance();
 }
@@ -32,10 +38,10 @@ Status WorkerTableAPIService::Init() {
   std::string hostname = env_->GetWorkerGrpcHost();
   int32_t port = env_->GetWorkerGrpcPort();
 
-  arrow::flight::Location location;
-  arrow::flight::Location::ForGrpcTcp(hostname, port, &location);
-  arrow::flight::FlightServerOptions options(location);
-  arrow::Status st = FlightServerBase::Init(options);
+  pegasus::rpc::Location location;
+  pegasus::rpc::Location::ForGrpcTcp(hostname, port, &location);
+  pegasus::rpc::FlightServerOptions options(location);
+  arrow::Status st = rpc::FlightServerBase::Init(options);
   if (!st.ok()) {
     return Status(StatusCode(st.code()), st.message());
   }
@@ -43,7 +49,7 @@ Status WorkerTableAPIService::Init() {
 }
 
 Status WorkerTableAPIService::Serve() {
-  arrow::Status st = FlightServerBase::Serve();
+  arrow::Status st = rpc::FlightServerBase::Serve();
   if (!st.ok()) {
     return Status(StatusCode(st.code()), st.message());
   }
@@ -54,8 +60,8 @@ Status WorkerTableAPIService::Serve() {
 /// \param[in] request an opaque ticket+
 /// \param[out] stream the returned stream provider
 /// \return Status
-arrow::Status WorkerTableAPIService::DoGet(const ServerCallContext& context, const Ticket& request,
-               std::unique_ptr<FlightDataStream>* data_stream) {
+arrow::Status WorkerTableAPIService::DoGet(const rpc::ServerCallContext& context, const rpc::Ticket& request,
+               std::unique_ptr<rpc::FlightDataStream>* data_stream) {
     
   std::unique_ptr<arrow::RecordBatch> chunk;
 
@@ -70,9 +76,9 @@ arrow::Status WorkerTableAPIService::DoGet(const ServerCallContext& context, con
 /// \param[in] reader a sequence of uploaded record batches
 /// \param[in] writer send metadata back to the client
 /// \return Status
-arrow::Status WorkerTableAPIService::DoPut(const ServerCallContext& context,
-               std::unique_ptr<FlightMessageReader> reader,
-               std::unique_ptr<FlightMetadataWriter> writer) {
+arrow::Status WorkerTableAPIService::DoPut(const rpc::ServerCallContext& context,
+               std::unique_ptr<rpc::FlightMessageReader> reader,
+               std::unique_ptr<rpc::FlightMetadataWriter> writer) {
 
 //TODO
   return arrow::Status::OK();

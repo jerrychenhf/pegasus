@@ -27,6 +27,9 @@ using namespace std;
 
 namespace pegasus {
 
+class PlannerTableAPIService;
+
+
 class Planner {
  public:
   Planner();

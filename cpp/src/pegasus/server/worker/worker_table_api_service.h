@@ -18,7 +18,7 @@
 #ifndef PEGASUS_WORKER_TABLE_API_SERVICE_H
 #define PEGASUS_WORKER_TABLE_API_SERVICE_H
 
-#include "arrow/flight/server.h"
+#include "pegasus/rpc/server.h"
 
 #include "pegasus/dataset/dataset_cache_manager.h"
 
@@ -27,11 +27,22 @@ namespace arrow {
 
 class Status;
 
-}  // namespace ipc
+}  // namespace arrow
 
 namespace pegasus {
 
-class WorkerTableAPIService : public arrow::flight::FlightServerBase {
+namespace rpc {
+
+class ServerCallContext;
+class FlightServerBase;
+class FlightMessageReader;
+class FlightMetadataWriter;
+class FlightDataStream;
+struct Ticket;
+
+}  //namespace rpc
+
+class WorkerTableAPIService : public rpc::FlightServerBase {
  public:
   WorkerTableAPIService();
   ~WorkerTableAPIService();
@@ -40,12 +51,12 @@ class WorkerTableAPIService : public arrow::flight::FlightServerBase {
 
   Status Serve();
 
-  arrow::Status DoGet(const ServerCallContext& context, const Ticket& request,
-               std::unique_ptr<FlightDataStream>* data_stream) override;
+  arrow::Status DoGet(const rpc::ServerCallContext& context, const rpc::Ticket& request,
+               std::unique_ptr<rpc::FlightDataStream>* data_stream) override;
 
-  arrow::Status DoPut(const ServerCallContext& context,
-               std::unique_ptr<FlightMessageReader> reader,
-               std::unique_ptr<FlightMetadataWriter> writer) override;
+  arrow::Status DoPut(const rpc::ServerCallContext& context,
+               std::unique_ptr<rpc::FlightMessageReader> reader,
+               std::unique_ptr<rpc::FlightMetadataWriter> writer) override;
 
 private:
   std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;

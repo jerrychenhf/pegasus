@@ -18,14 +18,20 @@
 #ifndef PEGASUS_FLIGHTINFO_BUILDER_H
 #define PEGASUS_FLIGHTINFO_BUILDER_H
 
-#include "arrow/flight/types.h"
+#include "pegasus/rpc/types.h"
 
 #include "pegasus/dataset/dataset.h"
 
-using namespace arrow;
-using namespace arrow::flight;
-
 namespace pegasus {
+
+namespace rpc {
+
+class FlightInfo;
+class FlightListing;
+struct FlightDescriptor;
+struct FlightEndpoint;
+
+}  //namespace rpc
 
 class FlightInfoBuilder {
 
@@ -33,13 +39,13 @@ public:
   FlightInfoBuilder(std::shared_ptr<ResultDataSet> dataset);
   FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr<ResultDataSet>>> datasets);
 
-  Status BuildFlightInfo(std::unique_ptr<FlightInfo>* flight_info);
+  Status BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flight_info);
 
-  Status BuildFlightListing(std::unique_ptr<FlightListing>* listings);
+  Status BuildFlightListing(std::unique_ptr<rpc::FlightListing>* listings);
 
-  Status GetFlightDescriptor(std::unique_ptr<FlightDescriptor>* flight_descriptor);
+  Status GetFlightDescriptor(std::unique_ptr<rpc::FlightDescriptor>* flight_descriptor);
 
-  Status GetFlightEndpoints(std::unique_ptr<std::vector<FlightEndpoint>>* endpoints);
+  Status GetFlightEndpoints(std::unique_ptr<std::vector<rpc::FlightEndpoint>>* endpoints);
 
   Status GetTotalRecords(int64_t* total_records);
     

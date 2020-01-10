@@ -18,6 +18,13 @@
 #include "pegasus/server/planner/planner_table_api_service.h"
 
 namespace pegasus {
+class Status;
+
+namespace rpc {
+
+class Location;
+
+}  //namespace rpc
 
 PlannerTableAPIService::PlannerTableAPIService(std::shared_ptr<DataSetService> dataset_service) {
   env_ =  ExecEnv::GetInstance();
@@ -33,22 +40,22 @@ Status PlannerTableAPIService::Init() {
 
   std::string hostname = env_->GetPlannerGrpcHost();
   int32_t port = env_->GetPlannerGrpcPort();
-  arrow::flight::Location location;
-  arrow::flight::Location::ForGrpcTcp(hostname, port, &location);
-  arrow::flight::FlightServerOptions options(location);
-  arrow::Status st = FlightServerBase::Init(options);
+  rpc::Location location;
+  rpc::Location::ForGrpcTcp(hostname, port, &location);
+  rpc::FlightServerOptions options(location);
+  arrow::Status st = rpc::FlightServerBase::Init(options);
   if (!st.ok()) {
     return Status(StatusCode(st.code()), st.message());
   }
   return Status::OK();
 }
 
-
 Status PlannerTableAPIService::Serve() {
-  arrow::Status st = FlightServerBase::Serve();
+  arrow::Status st = rpc::FlightServerBase::Serve();
   if (!st.ok()) {
     return Status(StatusCode(st.code()), st.message());
   }
+  return Status::OK();
 }
 
 /// \brief Retrieve a list of available fields given an optional opaque
@@ -57,8 +64,8 @@ Status PlannerTableAPIService::Serve() {
 /// \param[in] criteria may be null
 /// \param[out] listings the returned listings iterator
 /// \return Status
-arrow::Status PlannerTableAPIService::ListFlights(const ServerCallContext& context, const Criteria* criteria,
-                     std::unique_ptr<FlightListing>* listings) {
+arrow::Status PlannerTableAPIService::ListFlights(const rpc::ServerCallContext& context, const rpc::Criteria* criteria,
+                     std::unique_ptr<rpc::FlightListing>* listings) {
     
   dataset_service_->GetFlightListing(listings);
 
@@ -71,8 +78,8 @@ arrow::Status PlannerTableAPIService::ListFlights(const ServerCallContext& conte
 /// \param[in] request may be null
 /// \param[out] info the returned flight info provider
 /// \return Status
-arrow::Status PlannerTableAPIService::GetFlightInfo(const ServerCallContext& context, const FlightDescriptor& request,
-                       std::unique_ptr<FlightInfo>* out) {
+arrow::Status PlannerTableAPIService::GetFlightInfo(const rpc::ServerCallContext& context, const rpc::FlightDescriptor& request,
+                       std::unique_ptr<rpc::FlightInfo>* out) {
 
   /*if (request.type == FlightDescriptor::PATH) {
     std::vector<std::string> request_path = request.path;
@@ -86,7 +93,7 @@ arrow::Status PlannerTableAPIService::GetFlightInfo(const ServerCallContext& con
     arrow::Status::OK();
   }*/
 
-  if (request.type == FlightDescriptor::CMD) {
+  if (request.type == rpc::FlightDescriptor::CMD) {
     std::string request_table_name = request.cmd;
     auto parttftrs = std::make_shared<std::vector<Filter>>();
     // TODO: parse sql cmd here?

@@ -55,6 +55,7 @@ endmacro()
 
 set(PEGASUS_THIRDPARTY_DEPENDENCIES
     BOOST
+    c-ares
     gflags
     GLOG
     gRPC
@@ -175,9 +176,9 @@ include_directories(SYSTEM "${THIRDPARTY_DIR}/flatbuffers/include")
 # ----------------------------------------------------------------------
 # Some EP's require other EP's
   set(PEGASUS_WITH_THRIFT OFF)
-  set(PEGASUS_WITH_GRPC OFF)
+  set(PEGASUS_WITH_GRPC ON)
   set(PEGASUS_WITH_URIPARSER OFF)
-  set(PEGASUS_WITH_PROTOBUF OFF)
+  set(PEGASUS_WITH_PROTOBUF ON)
 
 
 # ----------------------------------------------------------------------
@@ -218,6 +219,12 @@ else()
     )
 endif()
 
+if(DEFINED ENV{PEGASUS_CARES_URL})
+  set(CARES_SOURCE_URL "$ENV{PEGASUS_CARES_URL}")
+else()
+  set(CARES_SOURCE_URL
+      "https://c-ares.haxx.se/download/c-ares-${CARES_VERSION}.tar.gz")
+endif()
 
 if(DEFINED ENV{PEGASUS_GFLAGS_URL})
   set(GFLAGS_SOURCE_URL "$ENV{PEGASUS_GFLAGS_URL}")
@@ -1017,41 +1024,57 @@ if(PEGASUS_WITH_PROTOBUF)
   # TODO: Don't use global includes but rather target_include_directories
   include_directories(SYSTEM ${PROTOBUF_INCLUDE_DIR})
 
-  # Old CMake versions don't define the targets
-  if(NOT TARGET protobuf::libprotobuf)
-    add_library(protobuf::libprotobuf UNKNOWN IMPORTED)
-    set_target_properties(protobuf::libprotobuf
-                          PROPERTIES IMPORTED_LOCATION "${PROTOBUF_LIBRARY}"
-                                     INTERFACE_INCLUDE_DIRECTORIES
-                                     "${PROTOBUF_INCLUDE_DIR}")
-  endif()
-  if(NOT TARGET protobuf::libprotoc)
-    if(PROTOBUF_PROTOC_LIBRARY AND NOT Protobuf_PROTOC_LIBRARY)
-      # Old CMake versions have a different casing.
-      set(Protobuf_PROTOC_LIBRARY ${PROTOBUF_PROTOC_LIBRARY})
+  if(TARGET pegasus::protobuf::libprotobuf)
+    set(PEGASUS_PROTOBUF_LIBPROTOBUF pegasus::protobuf::libprotobuf)
+  else()
+    # Old CMake versions don't define the targets
+    if(NOT TARGET protobuf::libprotobuf)
+      add_library(protobuf::libprotobuf UNKNOWN IMPORTED)
+      set_target_properties(protobuf::libprotobuf
+                            PROPERTIES IMPORTED_LOCATION "${PROTOBUF_LIBRARY}"
+                                       INTERFACE_INCLUDE_DIRECTORIES
+                                       "${PROTOBUF_INCLUDE_DIR}")
     endif()
-    if(NOT Protobuf_PROTOC_LIBRARY)
-      message(FATAL_ERROR "libprotoc was set to ${Protobuf_PROTOC_LIBRARY}")
-    endif()
-    add_library(protobuf::libprotoc UNKNOWN IMPORTED)
-    set_target_properties(protobuf::libprotoc
-                          PROPERTIES IMPORTED_LOCATION "${Protobuf_PROTOC_LIBRARY}"
-                                     INTERFACE_INCLUDE_DIRECTORIES
-                                     "${PROTOBUF_INCLUDE_DIR}")
+    set(PEGASUS_PROTOBUF_LIBPROTOBUF protobuf::libprotobuf)
   endif()
-  if(NOT TARGET protobuf::protoc)
-    add_executable(protobuf::protoc IMPORTED)
-    set_target_properties(protobuf::protoc
-                          PROPERTIES IMPORTED_LOCATION "${PROTOBUF_PROTOC_EXECUTABLE}")
+  if(TARGET pegasus::protobuf::libprotoc)
+    set(PEGASUS_PROTOBUF_LIBPROTOC pegasus::protobuf::libprotoc)
+  else()
+    if(NOT TARGET protobuf::libprotoc)
+      if(PROTOBUF_PROTOC_LIBRARY AND NOT Protobuf_PROTOC_LIBRARY)
+        # Old CMake versions have a different casing.
+        set(Protobuf_PROTOC_LIBRARY ${PROTOBUF_PROTOC_LIBRARY})
+      endif()
+      if(NOT Protobuf_PROTOC_LIBRARY)
+        message(FATAL_ERROR "libprotoc was set to ${Protobuf_PROTOC_LIBRARY}")
+      endif()
+      add_library(protobuf::libprotoc UNKNOWN IMPORTED)
+      set_target_properties(protobuf::libprotoc
+                            PROPERTIES IMPORTED_LOCATION "${Protobuf_PROTOC_LIBRARY}"
+                                       INTERFACE_INCLUDE_DIRECTORIES
+                                       "${PROTOBUF_INCLUDE_DIR}")
+    endif()
+    set(PEGASUS_PROTOBUF_LIBPROTOC protobuf::libprotoc)
+  endif()
+  if(TARGET pegasus::protobuf::protoc)
+    set(PEGASUS_PROTOBUF_PROTOC pegasus::protobuf::protoc)
+  else()
+    if(NOT TARGET protobuf::protoc)
+      add_executable(protobuf::protoc IMPORTED)
+      set_target_properties(protobuf::protoc
+                            PROPERTIES IMPORTED_LOCATION "${PROTOBUF_PROTOC_EXECUTABLE}")
+    endif()
+    set(PEGASUS_PROTOBUF_PROTOC protobuf::protoc)
   endif()
 
   # Log protobuf paths as we often see issues with mixed sources for
   # the libraries and protoc.
-  get_target_property(PROTOBUF_PROTOC_EXECUTABLE protobuf::protoc IMPORTED_LOCATION)
+  get_target_property(PROTOBUF_PROTOC_EXECUTABLE ${PEGASUS_PROTOBUF_PROTOC}
+                      IMPORTED_LOCATION)
   message(STATUS "Found protoc: ${PROTOBUF_PROTOC_EXECUTABLE}")
   # Protobuf_PROTOC_LIBRARY is set by all versions of FindProtobuf.cmake
   message(STATUS "Found libprotoc: ${Protobuf_PROTOC_LIBRARY}")
-  get_target_property(PROTOBUF_LIBRARY protobuf::libprotobuf IMPORTED_LOCATION)
+  get_target_property(PROTOBUF_LIBRARY ${PEGASUS_PROTOBUF_LIBPROTOBUF} IMPORTED_LOCATION)
   message(STATUS "Found libprotobuf: ${PROTOBUF_LIBRARY}")
   message(STATUS "Found protobuf headers: ${PROTOBUF_INCLUDE_DIR}")
 endif()
@@ -1328,6 +1351,41 @@ if(PEGASUS_BUILD_TESTS)
   include_directories(SYSTEM ${GTEST_INCLUDE_DIR})
 endif()
 
+macro(build_cares)
+  message(STATUS "Building c-ares from source")
+  set(CARES_PREFIX "${THIRDPARTY_DIR}/cares_ep-install")
+  set(CARES_INCLUDE_DIR "${CARES_PREFIX}/include")
+
+  # If you set -DCARES_SHARED=ON then the build system names the library
+  # libcares_static.a
+  set(
+    CARES_STATIC_LIB
+    "${CARES_PREFIX}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cares${CMAKE_STATIC_LIBRARY_SUFFIX}"
+    )
+
+  set(CARES_CMAKE_ARGS
+      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      -DCARES_STATIC=ON
+      -DCARES_SHARED=OFF
+      "-DCMAKE_C_FLAGS=${EP_C_FLAGS}"
+      "-DCMAKE_INSTALL_PREFIX=${CARES_PREFIX}")
+
+  externalproject_add(cares_ep
+                      ${EP_LOG_OPTIONS}
+                      URL ${CARES_SOURCE_URL}
+                      CMAKE_ARGS ${CARES_CMAKE_ARGS}
+                      BUILD_BYPRODUCTS "${CARES_STATIC_LIB}")
+
+  file(MAKE_DIRECTORY ${CARES_INCLUDE_DIR})
+
+  add_dependencies(toolchain cares_ep)
+  add_library(c-ares::cares STATIC IMPORTED)
+  set_target_properties(c-ares::cares
+                        PROPERTIES IMPORTED_LOCATION "${CARES_STATIC_LIB}"
+                                   INTERFACE_INCLUDE_DIRECTORIES "${CARES_INCLUDE_DIR}")
+
+  set(CARES_VENDORED TRUE)
+endmacro()
 
 if(PEGASUS_WITH_GRPC)
   if(c-ares_SOURCE STREQUAL "AUTO")
@@ -1386,12 +1444,13 @@ macro(build_grpc)
     add_dependencies(grpc_dependencies gflags_ep)
   endif()
 
-  add_dependencies(grpc_dependencies protobuf::libprotobuf c-ares::cares)
+  add_dependencies(grpc_dependencies ${PEGASUS_PROTOBUF_LIBPROTOBUF} c-ares::cares)
 
-  get_target_property(GRPC_PROTOBUF_INCLUDE_DIR protobuf::libprotobuf
+  get_target_property(GRPC_PROTOBUF_INCLUDE_DIR ${PEGASUS_PROTOBUF_LIBPROTOBUF}
                       INTERFACE_INCLUDE_DIRECTORIES)
   get_filename_component(GRPC_PB_ROOT "${GRPC_PROTOBUF_INCLUDE_DIR}" DIRECTORY)
-  get_target_property(GRPC_Protobuf_PROTOC_LIBRARY protobuf::libprotoc IMPORTED_LOCATION)
+  get_target_property(GRPC_Protobuf_PROTOC_LIBRARY ${PEGASUS_PROTOBUF_LIBPROTOC}
+                      IMPORTED_LOCATION)
   get_target_property(GRPC_CARES_INCLUDE_DIR c-ares::cares INTERFACE_INCLUDE_DIRECTORIES)
   get_filename_component(GRPC_CARES_ROOT "${GRPC_CARES_INCLUDE_DIR}" DIRECTORY)
   get_target_property(GRPC_GFLAGS_INCLUDE_DIR ${GFLAGS_LIBRARIES}
