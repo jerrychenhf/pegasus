@@ -38,7 +38,42 @@ set(ARROW_CONFIG_SUFFIXES
     "_MINSIZEREL"
     "_DEBUG"
     "")
-                                  
+
+# Internal macro only for arrow_find_package.
+#
+# Find package by CMake package configuration.
+macro(arrow_find_package_cmake_package_configuration)
+  find_package(${cmake_package_name} CONFIG)
+  if(${cmake_package_name}_FOUND)
+    set(${prefix}_USE_CMAKE_PACKAGE_CONFIG TRUE PARENT_SCOPE)
+    if(TARGET ${target_shared})
+      foreach(suffix ${ARROW_CONFIG_SUFFIXES})
+        get_target_property(shared_lib ${target_shared} IMPORTED_LOCATION${suffix})
+        if(shared_lib)
+          # Remove shared library version:
+          #   libarrow.so.100.0.0 -> libarrow.so
+          # Because ARROW_HOME and pkg-config approaches don't add
+          # shared library version.
+          string(REGEX
+                 REPLACE "(${CMAKE_SHARED_LIBRARY_SUFFIX})[.0-9]+$" "\\1" shared_lib
+                         "${shared_lib}")
+          set(${prefix}_SHARED_LIB "${shared_lib}" PARENT_SCOPE)
+          break()
+        endif()
+      endforeach()
+    endif()
+    if(TARGET ${target_static})
+      foreach(suffix ${ARROW_CONFIG_SUFFIXES})
+        get_target_property(static_lib ${target_static} IMPORTED_LOCATION${suffix})
+        if(static_lib)
+          set(${prefix}_STATIC_LIB "${static_lib}" PARENT_SCOPE)
+          break()
+        endif()
+      endforeach()
+    endif()
+  endif()
+endmacro()    
+
 # Internal macro only for arrow_find_package.
 #
 # Find package by pkg-config.
