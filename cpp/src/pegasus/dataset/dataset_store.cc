@@ -20,7 +20,6 @@
 namespace pegasus {
 
 DataSetStore::DataSetStore() {
-
 }
 
 DataSetStore::~DataSetStore() {

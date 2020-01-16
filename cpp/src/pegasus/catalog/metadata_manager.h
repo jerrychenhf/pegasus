@@ -15,11 +15,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_TABLE_METADATA_H
-#define PEGASUS_TABLE_METADATA_H
+#ifndef PEGASUS_METADATA_H
+#define PEGASUS_METADATA_H
 
+#include <vector>
 #include <string>
 
+#include "pegasus/catalog/pegasus_catalog.h"
+#include "pegasus/catalog/spark_catalog.h"
 #include "pegasus/common/status.h"
 
 namespace pegasus {
@@ -28,12 +31,33 @@ class TableMetadata {
  public:
   TableMetadata();
 
-//provider the name of the data source provider for this table, e.g. parquet, orc, etc.
-  std::string provider;
-  std::string location;
+  std::string location_uri;
 };
 
+class PartitionMetadata {
+ public:
+  PartitionMetadata();
+
+  std::string location_uri;
+};
+
+class MetadataManager {
+ public:
+  MetadataManager();
+
+  std::string GetProvider(std::string dataset_path);
+  Status GetTableMeta(std::string dataset_path, std::shared_ptr<TableMetadata>* table_meta);
+  Status GetPartitionMeta(std::shared_ptr<std::vector<PartitionMetadata>>* partition_meta);
+
+ private:
+  // provider: spark catalog or pegasus catalog
+  std::string provider;
+  // file format for this table, e.g. parquet, orc, etc.
+  std::string file_format;
+  TableMetadata table_meta;
+  std::vector<PartitionMetadata> partitions_meta;
+};
 
 } // namespace pegasus
 
-#endif  // PEGASUS_SPARK_CATALOG_H
+#endif  // PEGASUS_METADATA_H

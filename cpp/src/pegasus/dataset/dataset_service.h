@@ -20,12 +20,12 @@
 
 #include <string>
 
+#include "pegasus/catalog/metadata_manager.h"
 #include "pegasus/dataset/dataset.h"
 #include "pegasus/dataset/dataset_store.h"
 #include "pegasus/dataset/dataset_builder.h"
 #include "pegasus/dataset/flightinfo_builder.h"
 #include "pegasus/runtime/exec_env.h"
-#include "pegasus/storage/storage_plugin_factory.h"
 #include "pegasus/common/worker_manager.h"
 
 using namespace std;
@@ -56,9 +56,9 @@ class DataSetService {
   Status FilterDataSet(std::vector<Filter>* parttftr, std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet>* resultdataset);
  private:
   std::shared_ptr<WorkerManager> worker_manager_;
-  std::shared_ptr<StoragePlugin> storage_plugin_;
   std::shared_ptr<FlightInfoBuilder> flightinfo_builder_;
   std::shared_ptr<DataSetStore> dataset_store_;
+  std::shared_ptr<MetadataManager> metadata_manager_;
 };
 
 } // namespace pegasus

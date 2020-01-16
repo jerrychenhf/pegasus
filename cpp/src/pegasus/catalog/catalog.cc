@@ -15,7 +15,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
+#include "pegasus/catalog/catalog.h"
+
+using namespace std;
+
 namespace pegasus {
 
+Catalog::Catalog() {
+
+}
+
+Catalog::~Catalog() {
+    
+}
 
 } // namespace pegasus

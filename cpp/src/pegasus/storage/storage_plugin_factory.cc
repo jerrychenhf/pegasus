@@ -23,9 +23,9 @@ StoragePluginFactory::StoragePluginFactory() { }
 
 StoragePluginFactory::~StoragePluginFactory() { }
 
-Status StoragePluginFactory::GetStoragePlugin(StoragePlugin::StoragePluginType storage_plugin_type,
-  std::shared_ptr<StoragePlugin>* storage_plugin) {
+Status StoragePluginFactory::GetStoragePlugin(std::string url, std::shared_ptr<StoragePlugin>* storage_plugin) {
 
+  StoragePlugin::StoragePluginType storage_plugin_type;
   switch (storage_plugin_type) {
     case StoragePlugin::HDFS:
       *storage_plugin = std::shared_ptr<StoragePlugin>(new HDFSStoragePlugin());

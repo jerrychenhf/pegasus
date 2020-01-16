@@ -41,9 +41,8 @@ DataSetService::~DataSetService() {
 Status DataSetService::Init() {
   ExecEnv* env =  ExecEnv::GetInstance();
   dataset_store_ = std::unique_ptr<DataSetStore>(new DataSetStore);
-  std::shared_ptr<StoragePluginFactory> storage_plugin_factory_ = env->get_storage_plugin_factory();
-  storage_plugin_factory_->GetStoragePlugin(env->GetStoragePluginType(), &storage_plugin_);
   worker_manager_ = env->GetInstance()->get_worker_manager();
+  metadata_manager_ = std::make_shared<MetadataManager>();
   return Status::OK();
 }
 
@@ -65,7 +64,7 @@ Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<Data
 Status DataSetService::CacheDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy) {
 
   // build the dataset and insert it to dataset store.
-  auto dsbuilder = std::make_shared<DataSetBuilder>();
+  auto dsbuilder = std::make_shared<DataSetBuilder>(metadata_manager_);
   // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
   dsbuilder->BuildDataset(dataset_path, dataset, distpolicy);
   dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));

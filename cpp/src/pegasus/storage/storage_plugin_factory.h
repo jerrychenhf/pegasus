@@ -18,6 +18,7 @@
 #ifndef PEGASUS_STORAGE_PLUGIN_FACTORY_H
 #define PEGASUS_STORAGE_PLUGIN_FACTORY_H
 
+#include <string>
 #include "pegasus/storage/storage_plugin.h"
 
 namespace pegasus {
@@ -26,8 +27,7 @@ class StoragePluginFactory {
   StoragePluginFactory();
   ~StoragePluginFactory();
     
-  Status GetStoragePlugin(StoragePlugin::StoragePluginType storage_plugin_type,
-    std::shared_ptr<StoragePlugin>* storage_plugin);
+  Status GetStoragePlugin(std::string url, std::shared_ptr<StoragePlugin>* storage_plugin);
 };
 
 } // namespace pegasus

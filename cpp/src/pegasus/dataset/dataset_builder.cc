@@ -16,13 +16,18 @@
 // under the License.
 
 #include "pegasus/dataset/dataset_builder.h"
-#include "pegasus/parquet/parquet_metadata.h"
-#include "pegasus/util/consistent_hashing.h"
+
 #include "pegasus/dataset/partition.h"
+#include "pegasus/parquet/parquet_metadata.h"
+#include "pegasus/runtime/exec_env.h"
+#include "pegasus/util/consistent_hashing.h"
 
 namespace pegasus {
 
-//DataSetBuilder::DataSetBuilder() {}
+DataSetBuilder::DataSetBuilder(std::shared_ptr<MetadataManager> metadata_manager) : metadata_manager_(metadata_manager) {
+  ExecEnv* env =  ExecEnv::GetInstance();
+  std::shared_ptr<StoragePluginFactory> storage_plugin_factory_ = env->get_storage_plugin_factory();
+}
 
 Status DataSetBuilder::BuildDataset(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy) {
 
@@ -54,17 +59,21 @@ Status DataSetBuilder::BuildDataset(std::string dataset_path, std::shared_ptr<Da
   distributor->SetupDist();
 
   // create partitions with identities
-    auto vectident = std::make_shared<std::vector<Identity>>();
-    auto partitions = std::make_shared<std::vector<Partition>>();
-    // setup the identity vector for ondisk dataset
+  auto vectident = std::make_shared<std::vector<Identity>>();
+  auto partitions = std::make_shared<std::vector<Partition>>();
+  // setup the identity vector for ondisk dataset
+  std::string provider = metadata_manager_->GetProvider(dataset_path);
+  if (provider == "spark") {
+    std::shared_ptr<TableMetadata> table_meta;
+    metadata_manager_->GetTableMeta(dataset_path, &table_meta);
+    std::string table_location = table_meta->location_uri;
+    storage_plugin_factory_->GetStoragePlugin(table_location, &storage_plugin_);
     std::shared_ptr<std::vector<std::string>> file_list;
-    //TODO: get storage_plugin_ from dataset_service
-//    storage_plugin_ = ExecEnv::GetInstance()->get_storage_plugin_();
-//    storage_plugin_->ListFiles(dataset_path, &file_list);
-    for (auto filepath : *file_list)
-    {
+    storage_plugin_->ListFiles(dataset_path, &file_list);
+    for (auto filepath : *file_list) {
       partitions->push_back(Partition(Identity(filepath, 0, 0, 0)));
     }
+  }
   // allocate location for each partition
   auto vectloc = std::make_shared<std::vector<Location>>();
   distributor->GetDistLocations(partitions);

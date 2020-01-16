@@ -18,14 +18,17 @@
 #ifndef PEGASUS_DATASET_BUILDER_H
 #define PEGASUS_DATASET_BUILDER_H
 
+#include "pegasus/catalog/metadata_manager.h"
 #include "pegasus/dataset/dataset.h"
 #include "pegasus/parquet/parquet_metadata.h"
+#include "pegasus/storage/storage_plugin.h"
+#include "pegasus/storage/storage_plugin_factory.h"
 
 namespace pegasus {
 
 class DataSetBuilder {
  public:
-  DataSetBuilder() {}
+  DataSetBuilder(std::shared_ptr<MetadataManager> metadata_manager);
 
   Status BuildDataset(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy);
 
@@ -43,6 +46,9 @@ class DataSetBuilder {
 //  std::string dataset_path;
 //  std::shared_ptr<std::vector<std::string>> file_list_;
 //  std::shared_ptr<std::vector<Location>> vectloc_;
+  std::shared_ptr<StoragePlugin> storage_plugin_;
+  std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
+  std::shared_ptr<MetadataManager> metadata_manager_;
 };
 
 } // namespace pegasus

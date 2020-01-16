@@ -18,8 +18,8 @@
 #ifndef PEGASUS_SPARK_CATALOG_H
 #define PEGASUS_SPARK_CATALOG_H
 
+#include "pegasus/catalog/catalog.h"
 #include "pegasus/common/status.h"
-#include "pegasus/catalog/table_metadata.h"
 
 #include <string>
 
@@ -27,12 +27,10 @@ using namespace std;
 
 namespace pegasus {
 
-class SparkCatalog {
+class SparkCatalog : public Catalog {
  public:
   SparkCatalog();
   ~SparkCatalog();
-
-  Status GetTableMeta(std::string table_name, std::unique_ptr<TableMetadata>* table_meta);
 };
 
 } // namespace pegasus

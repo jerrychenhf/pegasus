@@ -23,7 +23,6 @@
 #include "pegasus/common/status.h"
 #include "pegasus/dataset/dataset.h"
 
-
 namespace pegasus {
 
 class DataSetStore {

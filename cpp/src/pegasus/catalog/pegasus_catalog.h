@@ -15,11 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_CATALOG_H
-#define PEGASUS_CATALOG_H
+#ifndef PEGASUS_PEGASUS_CATALOG_H
+#define PEGASUS_PEGASUS_CATALOG_H
 
-#include "pegasus/common/status.h"
-#include "pegasus/catalog/table_metadata.h"
+#include "pegasus/catalog/catalog.h"
 
 #include <string>
 
@@ -27,14 +26,12 @@ using namespace std;
 
 namespace pegasus {
 
-class PegasusCatalog {
+class PegasusCatalog : public Catalog {
  public:
   PegasusCatalog();
   ~PegasusCatalog();
-
-  Status GetTableMeta(std::string table_name, std::unique_ptr<TableMetadata>* table_meta);
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_CATALOG_H
+#endif  // PEGASUS_PEGASUS_CATALOG_H

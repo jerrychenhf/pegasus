@@ -64,7 +64,7 @@ set (PEGASUS_LIBS
   MemoryBlockHolder
   CacheEngine
   Store
-  SparkCatalog
+  Metadata
   Status
   Location
   WorkerManager

@@ -15,18 +15,34 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/catalog/spark_catalog.h"
-
-using namespace std;
+#include "pegasus/catalog/metadata_manager.h"
 
 namespace pegasus {
 
-SparkCatalog::SparkCatalog() {
+TableMetadata::TableMetadata() {
 
 }
 
-SparkCatalog::~SparkCatalog() {
+PartitionMetadata::PartitionMetadata() {
     
 }
+
+MetadataManager::MetadataManager() {
+
+}
+
+std::string MetadataManager::GetProvider(std::string dataset_path) {
+    
+}
+
+Status MetadataManager::GetTableMeta(std::string dataset_path, std::shared_ptr<TableMetadata>* table_meta) {
+
+}
+
+Status MetadataManager::GetPartitionMeta(std::shared_ptr<std::vector<PartitionMetadata>>* partition_meta) {
+
+}
+
+
 
 } // namespace pegasus

@@ -29,8 +29,4 @@ PegasusCatalog::~PegasusCatalog() {
     
 }
 
-Status PegasusCatalog::GetTableMeta(std::string table_name, std::unique_ptr<TableMetadata>* table_meta) {
-    
-}
-
 } // namespace pegasus

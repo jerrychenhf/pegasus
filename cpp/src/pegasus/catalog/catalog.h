@@ -15,18 +15,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/catalog/spark_catalog.h"
+#ifndef PEGASUS_CATALOG_H
+#define PEGASUS_CATALOG_H
+
+#include "pegasus/common/status.h"
 
 using namespace std;
 
 namespace pegasus {
 
-SparkCatalog::SparkCatalog() {
-
-}
-
-SparkCatalog::~SparkCatalog() {
-    
-}
+class Catalog {
+ public:
+  Catalog();
+  ~Catalog();
+};
 
 } // namespace pegasus
+
+#endif  // PEGASUS_CATALOG_H
