@@ -22,12 +22,12 @@
 
 namespace pegasus {
 
-ParquetReader::ParquetReader(const std::shared_ptr<arrow::io::RandomAccessFile>& file) {
+ParquetReader::ParquetReader(const std::shared_ptr<arrow::io::RandomAccessFile>& file,
+                             arrow::MemoryPool* pool, const parquet::ArrowReaderProperties& properties) {
 
-  static parquet::ArrowReaderProperties default_reader_props;
   parquet::arrow::FileReaderBuilder builder;
   builder.Open(file);
-  builder.properties(default_reader_props)->Build(&file_reader_);
+  builder.memory_pool(pool)->properties(properties)->Build(&file_reader_);
 }
 
 Status ParquetReader::ReadTable(std::shared_ptr<arrow::Table> table) {
@@ -35,9 +35,9 @@ Status ParquetReader::ReadTable(std::shared_ptr<arrow::Table> table) {
   file_reader_->ReadTable(&table); 
 }
 
-Status ParquetReader::ReadColumnChunk(int column_index, std::shared_ptr<arrow::ChunkedArray> out) {
+Status ParquetReader::ReadColumnChunk(int column_index, std::shared_ptr<arrow::ChunkedArray> chunked_out) {
 
-  file_reader_->ReadColumn(column_index, &out);
+  file_reader_->ReadColumn(column_index, &chunked_out);
 }
 
 Status ParquetReader::ReadColumnChunk(int column_index, int size, std::shared_ptr<arrow::ChunkedArray> chunked_out) {
