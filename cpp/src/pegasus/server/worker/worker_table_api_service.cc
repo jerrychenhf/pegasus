@@ -62,8 +62,6 @@ Status WorkerTableAPIService::Serve() {
 /// \return Status
 arrow::Status WorkerTableAPIService::DoGet(const rpc::ServerCallContext& context, const rpc::Ticket& request,
                std::unique_ptr<rpc::FlightDataStream>* data_stream) {
-    
-  std::unique_ptr<arrow::RecordBatch> chunk;
 
   //TODO Ticket=>Identity
   // request => identity

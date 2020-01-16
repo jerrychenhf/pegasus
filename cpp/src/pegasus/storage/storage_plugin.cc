@@ -26,7 +26,6 @@
 #include "pegasus/storage/storage_plugin.h"
 #include "pegasus/util/consistent_hashing.h"
 
-
 using namespace std;
 
 namespace pegasus {
@@ -34,6 +33,7 @@ namespace pegasus {
 using HdfsDriver = arrow::io::HdfsDriver;
 using HdfsPathInfo = arrow::io::HdfsPathInfo;
 using ObjectType = arrow::io::ObjectType;
+
 
 HDFSStoragePlugin::HDFSStoragePlugin() {
 
@@ -80,6 +80,11 @@ Status HDFSStoragePlugin::ListFiles(std::string dataset_path, std::shared_ptr<st
     }
   }
   return Status::OK();
+}
+
+Status HDFSStoragePlugin::GetReadableFile(std::string file_path, std::shared_ptr<HdfsReadableFile>* file) {
+
+  client_->OpenReadable(file_path, file);
 }
 
 StoragePlugin::StoragePluginType HDFSStoragePlugin::GetPluginType() {

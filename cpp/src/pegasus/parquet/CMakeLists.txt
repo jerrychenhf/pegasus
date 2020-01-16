@@ -24,7 +24,7 @@ set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/parquet")
 
 add_library(Parquet
   parquet_metadata.cc
-  parquet_scanner.cc
+  parquet_reader.cc
 )
 add_dependencies(Parquet gen-deps)
 

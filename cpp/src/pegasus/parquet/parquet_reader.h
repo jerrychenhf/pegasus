@@ -15,7 +15,28 @@
 // specific language governing permissions and limitations
 // under the License.
 
+#ifndef PEGASUS_PARQUET_READER_H
+#define PEGASUS_PARQUET_READER_H
+
+#include "arrow/io/interfaces.h"
+#include "parquet/arrow/reader.h"
+
+#include "pegasus/common/status.h"
+
 namespace pegasus {
 
+class ParquetReader {
+ public:
+  ParquetReader(const std::shared_ptr<arrow::io::RandomAccessFile>& file);
+  Status ReadTable(std::shared_ptr<arrow::Table> table);
+  Status ReadColumnChunk(int column_index, std::shared_ptr<arrow::ChunkedArray> out);
+  Status ReadColumnChunk(int column_index, int size, std::shared_ptr<arrow::ChunkedArray> chunked_out);
+  Status ReadColumnChunk(int64_t row_group_index, int column_id, std::shared_ptr<arrow::ChunkedArray> chunked_out);
+
+ private:
+  std::unique_ptr< parquet::arrow::FileReader> file_reader_;
+};
 
 } // namespace pegasus
+
+#endif  // PEGASUS_PARQUET_READER_H
