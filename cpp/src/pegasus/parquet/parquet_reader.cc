@@ -35,6 +35,10 @@ Status ParquetReader::ReadTable(std::shared_ptr<arrow::Table> table) {
   file_reader_->ReadTable(&table); 
 }
 
+Status ParquetReader::ReadTable(const std::vector<int> column_indices, std::shared_ptr<::arrow::Table> table) {
+  file_reader_->ReadTable(column_indices, &table); 
+}
+
 Status ParquetReader::ReadColumnChunk(int column_index, std::shared_ptr<arrow::ChunkedArray> chunked_out) {
 
   file_reader_->ReadColumn(column_index, &chunked_out);
