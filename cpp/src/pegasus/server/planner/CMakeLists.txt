@@ -35,4 +35,5 @@ target_link_libraries(plannerd
   ${GFLAGS_LIBRARIES}
   ${BOOST_SYSTEM_LIBRARY}
   ${BOOST_STATIC_FILESYSTEM_LIBRARY}
+  ${GLOG_STATIC_LIB}
 )

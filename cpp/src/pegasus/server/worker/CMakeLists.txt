@@ -35,6 +35,7 @@ target_link_libraries(workerd
   ${GFLAGS_LIBRARIES}
   ${BOOST_SYSTEM_LIBRARY}
   ${BOOST_STATIC_FILESYSTEM_LIBRARY}
+  ${GLOG_STATIC_LIB}
 )
 
 
