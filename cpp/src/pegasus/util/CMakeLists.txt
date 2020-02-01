@@ -23,27 +23,15 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/util")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/util")
 
-add_library(Hash
+add_library(Util
   consistent_hashing.cc
   conhash.c
   conhash_inter.c
   conhash_util.c
   util_rbtree.c
   md5.c
-)
-add_dependencies(Hash gen-deps)
-
-add_library(GlobalFlags
   global_flags.cc
-)
-add_dependencies(GlobalFlags gen-deps)
-
-add_library(Log
   logging.cc
-)
-add_dependencies(Log gen-deps)
-
-add_library(StringBuilder
   string_builder.cc
 )
-add_dependencies(StringBuilder gen-deps)
+add_dependencies(Util gen-deps)

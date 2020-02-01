@@ -22,19 +22,11 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/cache")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/cache")
 
-add_library(Store
+add_library(Cache
   store.cc
   store_manager.cc
-)
-add_dependencies(Store gen-deps)
-
-add_library(CacheRegion
   cache_region.cc
-)
-add_dependencies(CacheRegion gen-deps)
-
-add_library(DRAMMemoryPool
   memory_pool.cc
 )
-add_dependencies(DRAMMemoryPool gen-deps)
+add_dependencies(Cache gen-deps)
 

@@ -57,31 +57,16 @@ if (NOT APPLE)
 endif()
 
 set (PEGASUS_LIBS
-  DatasetCacheManager
-  DatasetCacheBlockManager
-  DatasetCacheEngineManager
-  CacheRegion
-  DRAMMemoryPool
-  CacheEngine
-  CacheStore
-  CacheStoreManager
-  Store
+  Cache
   Metadata
-  Status
-  Location
-  WorkerManager
-  Partition
-  Dataset
-  FlightInfo
+  Common
+  DataSet
   Parquet
   Runtime
   Planner
   Worker
   StoragePlugin
-  Hash
-  GlobalFlags
-  Log
-  StringBuilder
+  Util
 )
 
 set (PEGASUS_LINK_LIBS

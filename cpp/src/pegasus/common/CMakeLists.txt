@@ -21,17 +21,9 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/common")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/common")
 
-add_library(Status
+add_library(Common
   status.cc
-)
-add_dependencies(Status gen-deps)
-
-add_library(Location
   location.cc
-)
-add_dependencies(Location gen-deps)
-
-add_library(WorkerManager
   worker_manager.cc
 )
-add_dependencies(WorkerManager gen-deps)
+add_dependencies(Common gen-deps)
