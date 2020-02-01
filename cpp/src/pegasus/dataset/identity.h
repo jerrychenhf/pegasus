@@ -19,7 +19,7 @@
 #pragma once
 
 #include <string>
-
+#include <vector>
 #include <pegasus/common/status.h>
 
 using namespace std;
@@ -28,10 +28,11 @@ namespace pegasus {
 
 class Identity {
 public:
-  Identity(std::string dataset_path, std::string file_path, int64_t row_group_id, int64_t num_rows, int64_t bytes);
+  Identity(std::string dataset_path, std::string file_path, /*std::vector<int64_t> col_ids,*/ int64_t row_group_id, int64_t num_rows, int64_t bytes);
   
   std::string dataset_path() const;
   std::string file_path() const;
+  std::vector<int64_t> col_ids() const;
   int64_t row_group_id() const;
   int64_t num_rows() const;
   int64_t bytes() const;
@@ -61,6 +62,7 @@ public:
   std::string dataset_path_;
   std::string file_path_;
   int64_t partid;
+  std::vector<int64_t> col_ids_;
   int64_t row_group_id_;
   int64_t num_rows_;
   int64_t bytes_;
