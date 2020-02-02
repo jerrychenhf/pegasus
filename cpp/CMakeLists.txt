@@ -49,6 +49,7 @@ set(PEGASUS_BINARY_DIR ${PROJECT_BINARY_DIR})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
 
+include(cmake_modules/cmake_fns.txt)
 include(FindPegasus)
 include(FindArrow)
 include(FindArrowFlight)

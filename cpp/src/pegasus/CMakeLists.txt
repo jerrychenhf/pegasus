@@ -56,6 +56,9 @@ if (NOT APPLE)
   set(WL_END_GROUP "-Wl,--end-group")
 endif()
 
+# resolve "#include "<subdir>/<name>.h"
+include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR})
+
 set (PEGASUS_LIBS
   Cache
   Metadata
@@ -74,7 +77,7 @@ set (PEGASUS_LINK_LIBS
   ${PEGASUS_LIBS}
   ${WL_END_GROUP}
 )
-
+add_subdirectory(gutil)
 add_subdirectory(rpc)
 add_subdirectory(util)
 add_subdirectory(common)
