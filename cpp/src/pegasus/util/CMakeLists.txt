@@ -33,5 +33,8 @@ add_library(Util
   global_flags.cc
   logging.cc
   string_builder.cc
+  time.cc
+  os-info.cc
+  thread.cc
 )
 add_dependencies(Util gen-deps)

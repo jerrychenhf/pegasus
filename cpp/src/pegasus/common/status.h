@@ -92,7 +92,10 @@ enum class StatusCode : char {
   UnknownError = 9,
   NotImplemented = 10,
   SerializationError = 11,
+  ThreadCreationFailed = 12,
   RError = 13,
+  ThreadPoolTaskTimeoutError = 14,
+  ThreadPoolSubmitFailed = 15,
   // Gandiva range of errors
   CodeGenError = 40,
   ExpressionValidationError = 41,
@@ -238,10 +241,25 @@ class PEGASUS_EXPORT Status : public util::EqualityComparable<Status>,
   static Status SerializationError(Args&&... args) {
     return Status::FromArgs(StatusCode::SerializationError, std::forward<Args>(args)...);
   }
-
+  
+  template <typename... Args>
+  static Status ThreadCreationFailed(Args&&... args) {
+    return Status::FromArgs(StatusCode::ThreadCreationFailed, std::forward<Args>(args)...);
+  }
+  
   template <typename... Args>
   static Status RError(Args&&... args) {
     return Status::FromArgs(StatusCode::RError, std::forward<Args>(args)...);
+  }
+  
+  template <typename... Args>
+  static Status ThreadPoolTaskTimeoutError(Args&&... args) {
+    return Status::FromArgs(StatusCode::ThreadPoolTaskTimeoutError, std::forward<Args>(args)...);
+  }
+  
+  template <typename... Args>
+  static Status ThreadPoolSubmitFailed(Args&&... args) {
+    return Status::FromArgs(StatusCode::ThreadPoolSubmitFailed, std::forward<Args>(args)...);
   }
 
   template <typename... Args>

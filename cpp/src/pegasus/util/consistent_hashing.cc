@@ -16,7 +16,7 @@
 // under the License.
 
 #include "pegasus/util/consistent_hashing.h"
-
+#include "pegasus/util/thread-pool.h"
 namespace pegasus {
 
 struct conhash_s* ConsistentHashRing::conhash = NULL;
