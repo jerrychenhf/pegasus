@@ -457,6 +457,12 @@ inline Status GenericToStatus(const Status& st) { return st; }
 
 }  // namespace internal
 
+/// This macro can be appended to a function definition to generate a compiler warning
+/// if the result is ignored.
+/// TODO: when we upgrade gcc from 4.9.2, we may be able to apply this to the Status
+/// type to get this automatically for all Status-returning functions.
+#define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+
 }  // namespace pegasus
 
 #endif  // PEGASUS_STATUS_H_

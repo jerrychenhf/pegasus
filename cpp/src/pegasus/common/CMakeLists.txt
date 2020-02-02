@@ -25,5 +25,6 @@ add_library(Common
   status.cc
   location.cc
   worker_manager.cc
+  init.cc
 )
 add_dependencies(Common gen-deps)
