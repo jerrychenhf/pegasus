@@ -53,6 +53,7 @@ include(cmake_modules/cmake_fns.txt)
 include(FindPegasus)
 include(FindArrow)
 include(FindArrowFlight)
+include(FindParquet)
 
 include(CMakePackageConfigHelpers)
 include(CMakeParseArguments)

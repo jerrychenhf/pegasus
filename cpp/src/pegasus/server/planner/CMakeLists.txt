@@ -32,6 +32,7 @@ target_link_libraries(plannerd
   pegasus_rpc_shared
   ${PEGASUS_LINK_LIBS}
   ${ARROW_SHARED_LIB}
+  ${PARQUET_SHARED_LIB}
   ${GFLAGS_LIBRARIES}
   ${BOOST_SYSTEM_LIBRARY}
   ${BOOST_STATIC_FILESYSTEM_LIBRARY}

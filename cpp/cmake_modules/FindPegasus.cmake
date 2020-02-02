@@ -39,10 +39,10 @@ set(ARROW_CONFIG_SUFFIXES
     "_DEBUG"
     "")
 
-# Internal macro only for arrow_find_package.
+# Internal macro only for pegasus_find_package.
 #
 # Find package by CMake package configuration.
-macro(arrow_find_package_cmake_package_configuration)
+macro(pegasus_find_package_cmake_package_configuration)
   find_package(${cmake_package_name} CONFIG)
   if(${cmake_package_name}_FOUND)
     set(${prefix}_USE_CMAKE_PACKAGE_CONFIG TRUE PARENT_SCOPE)
@@ -74,10 +74,10 @@ macro(arrow_find_package_cmake_package_configuration)
   endif()
 endmacro()    
 
-# Internal macro only for arrow_find_package.
+# Internal macro only for pegasus_find_package.
 #
 # Find package by pkg-config.
-macro(arrow_find_package_pkg_config)
+macro(pegasus_find_package_pkg_config)
   pkg_check_modules(${prefix}_PC ${pkg_config_name})
   if(${prefix}_PC_FOUND)
     set(${prefix}_USE_PKG_CONFIG TRUE PARENT_SCOPE)
@@ -132,26 +132,43 @@ macro(arrow_find_package_pkg_config)
   endif()
 endmacro()
 
-function(arrow_build_shared_library_name output_variable base_name)
+function(pegasus_build_shared_library_name output_variable base_name)
   set(${output_variable}
       "${CMAKE_SHARED_LIBRARY_PREFIX}${base_name}${CMAKE_SHARED_LIBRARY_SUFFIX}"
       PARENT_SCOPE)
 endfunction()
 
-function(arrow_build_import_library_name output_variable base_name)
+function(pegasus_build_import_library_name output_variable base_name)
   set(${output_variable}
       "${CMAKE_IMPORT_LIBRARY_PREFIX}${base_name}${CMAKE_IMPORT_LIBRARY_SUFFIX}"
       PARENT_SCOPE)
 endfunction()
 
-function(arrow_build_static_library_name output_variable base_name)
+function(pegasus_build_static_library_name output_variable base_name)
   set(
     ${output_variable}
     "${CMAKE_STATIC_LIBRARY_PREFIX}${base_name}${ARROW_MSVC_STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}"
     PARENT_SCOPE)
 endfunction()
 
-macro(arrow_find_package_home)
+# Internal function.
+#
+# Set macro value for ${macro_name} in ${header_content} to ${output_variable}.
+#
+# Example:
+#   pegasus_extract_macro_value(version_major
+#                             "PEGASUS_VERSION_MAJOR"
+#                             "#define PEGASUS_VERSION_MAJOR 1.0.0")
+#   # -> version_major=1.0.0
+function(pegasus_extract_macro_value output_variable macro_name header_content)
+  string(REGEX MATCH "#define +${macro_name} +[^\r\n]+" macro_definition
+               "${header_content}")
+  string(REGEX
+         REPLACE "^#define +${macro_name} +(.+)$" "\\1" macro_value "${macro_definition}")
+  set(${output_variable} "${macro_value}" PARENT_SCOPE)
+endfunction()
+
+macro(pegasus_find_package_home)
   find_path(${prefix}_include_dir "${header_path}"
             PATHS "${home}"
             PATH_SUFFIXES "include"
@@ -211,31 +228,31 @@ macro(arrow_find_package_home)
   endif()
 endmacro()
 
-function(arrow_find_package
+function(pegasus_find_package
          prefix
          home
          base_name
          header_path
          cmake_package_name
          pkg_config_name)
-  arrow_build_shared_library_name(shared_lib_name ${base_name})
-  arrow_build_import_library_name(import_lib_name ${base_name})
-  arrow_build_static_library_name(static_lib_name ${base_name})
+  pegasus_build_shared_library_name(shared_lib_name ${base_name})
+  pegasus_build_import_library_name(import_lib_name ${base_name})
+  pegasus_build_static_library_name(static_lib_name ${base_name})
 
   set(target_shared ${base_name}_shared)
   set(target_static ${base_name}_static)
 
   if(home)
-    arrow_find_package_home()
+    pegasus_find_package_home()
     set(${prefix}_FIND_APPROACH "HOME: ${home}" PARENT_SCOPE)
   else()
-    arrow_find_package_cmake_package_configuration()
+    pegasus_find_package_cmake_package_configuration()
     if(${cmake_package_name}_FOUND)
       set(${prefix}_FIND_APPROACH
           "CMake package configuration: ${cmake_package_name}"
           PARENT_SCOPE)
     else()
-      arrow_find_package_pkg_config()
+      pegasus_find_package_pkg_config()
       set(${prefix}_FIND_APPROACH "pkg-config: ${pkg_config_name}" PARENT_SCOPE)
     endif()
   endif()

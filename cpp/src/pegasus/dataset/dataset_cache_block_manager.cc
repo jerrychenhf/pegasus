@@ -65,7 +65,7 @@ Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity, std::sha
  Status DatasetCacheBlockManager::GetCachedColumns(Identity* identity, std::unordered_map<string, std::shared_ptr<CachedColumn>>* columns) {
   std::shared_ptr<CachedPartition>* partition;
   GetCachedPartition(identity, partition);
-  std::vector<int64_t> col_ids = identity->col_ids();
+  std::vector<int> col_ids = identity->col_ids();
   for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++)
 	{
 		auto entry = (*partition)->cached_columns_.find(std::to_string(*iter));
