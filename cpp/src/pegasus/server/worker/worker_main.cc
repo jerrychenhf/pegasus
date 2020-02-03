@@ -15,18 +15,25 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/common/location.h"
-#include "pegasus/util/global_flags.h"
-#include "pegasus/runtime/exec_env.h"
-#include "pegasus/server/worker/worker.h"
+#include "common/init.h"
+#include "common/location.h"
+#include "util/global_flags.h"
+#include "common/status.h"
+#include "runtime/exec_env.h"
+#include "server/worker/worker.h"
+
 
 using namespace std;
 using namespace pegasus;
 
 int main(int argc, char** argv) {
+  InitCommonRuntime(argc, argv);
+  
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-  std::unique_ptr<Worker> worker_server(new Worker());
-  worker_server->Start();
+  std::unique_ptr<Worker> worker(new Worker());
+  
+  ABORT_IF_ERROR(worker->Init());
+  ABORT_IF_ERROR(worker->Start());
   return 0;
 }

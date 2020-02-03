@@ -56,7 +56,7 @@ enum class PegasusLogLevel : int {
 
 #define PEGASUS_LOG_INTERNAL(level) ::pegasus::util::PegasusLog(__FILE__, __LINE__, level)
 #define PEGASUS_LOG(level) PEGASUS_LOG_INTERNAL(::pegasus::util::PegasusLogLevel::PEGASUS_##level)
-
+#define LOG(level) PEGASUS_LOG(level)
 #define PEGASUS_IGNORE_EXPR(expr) ((void)(expr))
 
 #define PEGASUS_CHECK(condition)                                               \

@@ -15,34 +15,34 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_WORKER_H
-#define PEGASUS_WORKER_H
-
-#include "common/status.h"
-#include "dataset/dataset_cache_manager.h"
-#include "runtime/exec_env.h"
-#include "storage/storage_plugin.h"
-#include "server/worker/worker_table_api_service.h"
 #include "server/worker/worker_heartbeat.h"
+#include "util/global_flags.h"
+#include "util/logging.h"
 
-using namespace std;
+DECLARE_string(planner_hostname);
+DECLARE_int32(planner_port);
 
 namespace pegasus {
 
-class Worker {
- public:
-  Worker();
-  ~Worker();
+WorkerHeartbeat::WorkerHeartbeat() {
   
-  Status Init();
-  Status Start();
+}
 
- private:
-  std::shared_ptr<WorkerTableAPIService> worker_table_api_service_;
-  std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
-  std::shared_ptr<WorkerHeartbeat> worker_heartbeat_;
-};
+WorkerHeartbeat::~WorkerHeartbeat() {
+  
+}
+
+Status WorkerHeartbeat::Init() {
+  //TO DO
+  
+  return Status::OK();
+}
+
+Status WorkerHeartbeat::Start() {
+  //TO DO INFO LOG
+  //std::cout << "Worker listening on:" << FLAGS_worker_hostname << ":" << FLAGS_worker_port << std::endl;
+  
+  return Status::OK();
+}
 
 } // namespace pegasus
-
-#endif  // PEGASUS_WORKER_H

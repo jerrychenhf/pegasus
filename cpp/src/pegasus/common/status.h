@@ -26,10 +26,12 @@
 #include <string>
 #include <utility>
 
-#include "pegasus/util/compare.h"
-#include "pegasus/util/macros.h"
-#include "pegasus/util/string_builder.h"
-#include "pegasus/util/visibility.h"
+#include "common/compiler-util.h"
+#include "util/compare.h"
+#include "util/macros.h"
+#include "util/string_builder.h"
+#include "util/visibility.h"
+#include "util/logging.h"
 
 #ifdef PEGASUS_EXTRA_ERROR_CONTEXT
 
@@ -457,6 +459,43 @@ inline Status GenericToStatus(const Status& st) { return st; }
 
 }  // namespace internal
 
+/// some generally useful macros
+#define RETURN_IF_ERROR(stmt)                          \
+  do {                                                 \
+    const ::pegasus::Status& _status = (stmt);       \
+    if (UNLIKELY(!_status.ok())) return _status; \
+  } while (false)
+
+#define LOG_AND_RETURN_IF_ERROR(stmt) \
+  do { \
+    const ::pegasus::Status& _status = (stmt); \
+    if (UNLIKELY(!_status.ok()))  { \
+      LOG(INFO) << _status.ToString(); \
+      return _status; \
+    } \
+  } while (false)
+
+#define RETURN_VOID_IF_ERROR(stmt)                     \
+  do {                                                 \
+    if (UNLIKELY(!(stmt).ok())) return;                \
+  } while (false)
+  
+#define ABORT_IF_ERROR(stmt) \
+  do { \
+    ::pegasus::Status _status = ::pegasus::internal::GenericToStatus(stmt); \
+    if (UNLIKELY(!_status.ok())) { \
+      ABORT_WITH_ERROR(_status.ToString()); \
+    } \
+  } while (false)
+
+// Log to FATAL and abort process, generating a core dump if enabled. This should be used
+// for unexpected error cases where we want a core dump.
+// LOG(FATAL) will call abort().
+#define ABORT_WITH_ERROR(msg) \
+  do { \
+    LOG(FATAL) << msg << ". Service exiting.\n"; \
+  } while (false)
+  
 /// This macro can be appended to a function definition to generate a compiler warning
 /// if the result is ignored.
 /// TODO: when we upgrade gcc from 4.9.2, we may be able to apply this to the Status

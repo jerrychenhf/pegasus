@@ -1,4 +1,3 @@
-
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -16,5 +15,27 @@
 // specific language governing permissions and limitations
 // under the License.
 
- //    send_Heartbeat(params);
-  //   recv_Heartbeat(_return);
+#ifndef PEGASUS_WORKER_HEARTBEAT_H
+#define PEGASUS_WORKER_HEARTBEAT_H
+
+#include "common/status.h"
+
+using namespace std;
+
+namespace pegasus {
+
+class WorkerHeartbeat {
+ public:
+  WorkerHeartbeat();
+  ~WorkerHeartbeat();
+  
+  Status Init();
+  Status Start();
+
+ private:
+
+};
+
+} // namespace pegasus
+
+#endif  // PEGASUS_WORKER_HEARTBEAT_H
