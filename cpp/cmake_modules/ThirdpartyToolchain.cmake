@@ -407,6 +407,10 @@ macro(build_boost)
 
     "${BOOST_LIB_DIR}/libboost_regex${BOOST_LIBRARY_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}"
     )
+  set(
+    BOOST_STATIC_THREAD_LIBRARY
+    "${BOOST_LIB_DIR}/libboost_thread${BOOST_LIBRARY_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+    )
   set(BOOST_SYSTEM_LIBRARY boost_system_static)
   set(BOOST_FILESYSTEM_LIBRARY boost_filesystem_static)
   set(BOOST_REGEX_LIBRARY boost_regex_static)
@@ -419,7 +423,7 @@ macro(build_boost)
     set(BOOST_CONFIGURE_COMMAND "./bootstrap.sh")
   endif()
   list(APPEND BOOST_CONFIGURE_COMMAND "--prefix=${BOOST_PREFIX}"
-              "--with-libraries=filesystem,regex,system")
+              "--with-libraries=filesystem,regex,system,thread")
   if("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
     set(BOOST_BUILD_VARIANT "debug")
   else()

@@ -98,6 +98,7 @@ enum class StatusCode : char {
   RError = 13,
   ThreadPoolTaskTimeoutError = 14,
   ThreadPoolSubmitFailed = 15,
+  RpcTimeout = 16,
   // Gandiva range of errors
   CodeGenError = 40,
   ExpressionValidationError = 41,

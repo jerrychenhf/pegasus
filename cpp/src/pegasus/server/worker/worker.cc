@@ -21,11 +21,11 @@
 #include <memory>
 #include <string>
 
-#include "pegasus/util/global_flags.h"
-
-#include "pegasus/dataset/dataset_cache_manager.h"
-#include "pegasus/util/logging.h"
-#include "pegasus/server/worker/worker.h"
+#include "util/global_flags.h"
+#include "dataset/dataset_cache_manager.h"
+#include "util/logging.h"
+#include "server/worker/worker.h"
+#include "server/worker/worker_heartbeat.h"
 
 DECLARE_string(worker_hostname);
 DECLARE_int32(worker_port);

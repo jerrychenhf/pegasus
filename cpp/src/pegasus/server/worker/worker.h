@@ -23,11 +23,12 @@
 #include "runtime/exec_env.h"
 #include "storage/storage_plugin.h"
 #include "server/worker/worker_table_api_service.h"
-#include "server/worker/worker_heartbeat.h"
 
 using namespace std;
 
 namespace pegasus {
+  
+class WorkerHeartbeat;
 
 class Worker {
  public:

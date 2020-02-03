@@ -70,6 +70,7 @@ set (PEGASUS_LIBS
   Worker
   StoragePlugin
   Util
+  gutil
 )
 
 set (PEGASUS_LINK_LIBS

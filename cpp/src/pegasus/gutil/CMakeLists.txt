@@ -55,7 +55,7 @@ set(GUTIL_SRCS
   walltime.cc)
 
 set(GUTIL_LIBS
-  glog
+  #glog
   protobuf)
 
 if (NOT APPLE)
