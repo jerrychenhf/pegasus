@@ -18,7 +18,6 @@
 #ifndef PEGASUS_UTIL_CONDITION_VARIABLE_H
 #define PEGASUS_UTIL_CONDITION_VARIABLE_H
 
-#include <boost/thread/pthread/timespec.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread_time.hpp>
 #include <pthread.h>
