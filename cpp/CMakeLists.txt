@@ -52,6 +52,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_mo
 include(FindPegasus)
 include(FindArrow)
 include(FindArrowFlight)
+include(FindParquet)
 
 include(CMakePackageConfigHelpers)
 include(CMakeParseArguments)

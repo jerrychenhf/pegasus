@@ -18,7 +18,7 @@
 # - Find Arrow Flight (arrow/flight/api.h, libarrow_flight.a, libarrow_flight.so)
 #
 # This module requires Arrow from which it uses
-#  arrow_find_package()
+#  pegasus_find_package()
 #
 # This module defines
 #  ARROW_FLIGHT_FOUND, whether Flight has been found
@@ -49,7 +49,7 @@ find_package(Arrow ${find_package_arguments})
 
 set(ARROW_VERSION "1.0.0-SNAPSHOT")
 if(ARROW_FOUND)
-  arrow_find_package(ARROW_FLIGHT
+  pegasus_find_package(ARROW_FLIGHT
                      "${ARROW_HOME}"
                      arrow_flight
                      arrow/flight/api.h
