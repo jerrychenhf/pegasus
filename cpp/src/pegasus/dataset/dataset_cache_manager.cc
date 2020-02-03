@@ -61,7 +61,7 @@ Status DatasetCacheManager::GetDatasetStream(Identity* identity, std::unique_ptr
     } else {
       // partition is cached.
       // Check which column is cached.
-      std::vector<int64_t> col_ids = identity->col_ids();
+      std::vector<int> col_ids = identity->col_ids();
       std::unordered_map<string, std::shared_ptr<CachedColumn>> cached_columns;
       dataset_cache_block_manager_->GetCachedColumns(identity, &cached_columns);
       if (col_ids.size() == cached_columns.size()) {
