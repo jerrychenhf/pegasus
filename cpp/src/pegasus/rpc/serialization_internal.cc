@@ -15,14 +15,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/rpc/serialization_internal.h"
+#include "rpc/serialization_internal.h"
 
 #include <cstdint>
 #include <limits>
 #include <string>
 #include <vector>
 
-#include "pegasus/rpc/platform.h"
+#include "rpc/platform.h"
 
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
@@ -38,7 +38,7 @@
 #endif
 
 #include "arrow/buffer.h"
-#include "pegasus/rpc/server.h"
+#include "rpc/server.h"
 #include "arrow/ipc/writer.h"
 #include "arrow/util/bit_util.h"
 #include "arrow/util/logging.h"

@@ -15,18 +15,11 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# where to put generated libraries
-set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/common")
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
 
-# where to put generated binaries
-set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/common")
-
-add_library(Common
-  status.cc
-  location.cc
-  worker_manager.cc
-  init.cc
-)
-add_dependencies(Common gen-deps)
-
-target_link_libraries(Common Util)
+Name: Apache Pegasus RPC testing
+Description: Library for testing Apache Pegasus RPC related programs.
+Version: @PEGASUS_VERSION@
+Requires: pegasus-rpc pegasus-testing
+Libs: -L${libdir} -lpegasus_rpc_testing

@@ -26,7 +26,7 @@
 #include <utility>
 #include <vector>
 
-#include "pegasus/rpc/visibility.h"
+#include "rpc/visibility.h"
 #include "arrow/ipc/writer.h"
 #include "arrow/buffer.h"
 

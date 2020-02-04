@@ -15,9 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/rpc/internal.h"
-#include "pegasus/rpc/platform.h"
-#include "pegasus/rpc/protocol_internal.h"
+#include "rpc/internal.h"
+#include "rpc/platform.h"
+#include "rpc/protocol_internal.h"
 
 #include <cstddef>
 #include <memory>

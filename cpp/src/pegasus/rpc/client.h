@@ -30,8 +30,8 @@
 #include "arrow/ipc/writer.h"
 #include "arrow/status.h"
 
-#include "pegasus/rpc/types.h"  // IWYU pragma: keep
-#include "pegasus/rpc/visibility.h"
+#include "rpc/types.h"  // IWYU pragma: keep
+#include "rpc/visibility.h"
 
 namespace arrow {
 class Buffer;

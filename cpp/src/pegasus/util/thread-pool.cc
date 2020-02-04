@@ -15,23 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "rpc/server_auth.h"
+#include <string>
 
-namespace pegasus {
-namespace rpc {
-
-ServerAuthHandler::~ServerAuthHandler() {}
-
-NoOpAuthHandler::~NoOpAuthHandler() {}
-arrow::Status NoOpAuthHandler::Authenticate(ServerAuthSender* outgoing,
-                                     ServerAuthReader* incoming) {
-  return arrow::Status::OK();
-}
-
-arrow::Status NoOpAuthHandler::IsValid(const std::string& token, std::string* peer_identity) {
-  *peer_identity = "";
-  return arrow::Status::OK();
-}
-
-}  // namespace rpc
-}  // namespace pegasus
+#include "util/thread-pool.h"

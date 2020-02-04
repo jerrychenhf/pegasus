@@ -38,5 +38,26 @@ add_library(Util
   thread.cc
   error-util.cc
   network-util.cc
+  thread-pool.cc
 )
 add_dependencies(Util gen-deps)
+
+if(PEGASUS_BUILD_TESTS STREQUAL "static")
+  set(PEGASUS_UTIL_TEST_LINK_LIBS 
+      Util
+      gutil
+      ${BOOST_THREAD_LIBRARY}
+      ${PEGASUS_TEST_STATIC_LINK_LIBS})
+else()
+  set(PEGASUS_UTIL_TEST_LINK_LIBS
+      Util
+      gutil
+      ${BOOST_THREAD_LIBRARY}
+      ${PEGASUS_TEST_SHARED_LINK_LIBS})
+endif()
+
+add_pegasus_test(thread-pool-test
+               EXTRA_LINK_LIBS
+               ${PEGASUS_UTIL_TEST_LINK_LIBS})
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")

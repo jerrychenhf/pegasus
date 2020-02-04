@@ -33,7 +33,7 @@ Status DatasetCacheBlockManager::GetCachedDataSet(Identity* identity,
 
   if (entry == cached_datasets_.end()) {
     *dataset = NULL;
-    LOG(WARNING) << "The dataset is NULL";
+    LOG(WARNING) << "The dataset: "<< identity->dataset_path() <<" is NULL.";
     return Status::OK(); 
   }
   auto find_cache_info = entry->second;
@@ -53,7 +53,7 @@ Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity,
 
     if (entry == (*dataset)->cached_partitions_.end()) {
       *partition = NULL;
-      LOG(WARNING) << "The partition is NULL";
+      LOG(WARNING) << "The partition: "<< identity->file_path() <<" is NULL.";
       return Status::OK(); 
     }
     auto find_cache_info = entry->second;
@@ -61,7 +61,8 @@ Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity,
     return Status::OK();
   } else {
     stringstream ss;
-    ss << "Can not get the partition when the dataset is NULL";
+    ss << "Can not get the partition: "<< identity->file_path() 
+      <<"when the dataset: "<< identity->dataset_path() <<" is NULL";
     LOG(ERROR) << ss.str();
     return Status::UnknownError(ss.str());
   }
@@ -84,7 +85,7 @@ Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity,
     return Status::OK();
   } else {
     stringstream ss;
-    ss << "Can not get the column when the partition is NULL";
+    ss << "Can not get the columns when the dataset: "<< identity->dataset_path() <<" is NULL";
     LOG(ERROR) << ss.str();
     return Status::UnknownError(ss.str());
   }
@@ -106,7 +107,7 @@ Status DatasetCacheBlockManager::InsertPartition(Identity* identity,
     (*dataset)->cached_partitions_[partition_path] = new_partition;
   } else {
     stringstream ss;
-    ss << "Can not insert the partition when the dataset is NULL";
+    ss << "Can not insert new partition when the dataset: "<< identity->dataset_path() <<" is NULL";
     LOG(ERROR) << ss.str();
     return Status::UnknownError(ss.str());
   }
@@ -120,7 +121,7 @@ Status DatasetCacheBlockManager::InsertColumn(Identity* identity, string column_
     (*partition)->cached_columns_[column_id] = std::move(new_column);
   } else {
     stringstream ss;
-    ss << "Can not insert the column when the partition is NULL";
+    ss << "Can not insert new column when the partition: "<< identity->file_path() <<" is NULL";
     LOG(ERROR) << ss.str();
     return Status::UnknownError(ss.str());
   }

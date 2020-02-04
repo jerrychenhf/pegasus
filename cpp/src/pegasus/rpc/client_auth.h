@@ -19,12 +19,14 @@
 
 #include <string>
 
-#include "pegasus/rpc/visibility.h"
+#include "rpc/visibility.h"
 #include "arrow/status.h"
 
 namespace pegasus {
 
 namespace rpc {
+
+using Status = arrow::Status;
 
 /// \brief A reader for messages from the server during an
 /// authentication handshake.

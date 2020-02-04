@@ -41,6 +41,20 @@ if(GRPC_HAS_ADDRESS_SORTING)
   list(APPEND PEGASUS_RPC_STATIC_LINK_LIBS gRPC::address_sorting)
 endif()
 
+if(PEGASUS_BUILD_TESTS STREQUAL "static")
+  set(PEGASUS_RPC_TEST_LINK_LIBS pegasus_rpc_static pegasus_rpc_testing_static
+                                  ${ARROW_STATIC_LIB}
+                                  ${ARROW_TESTING_SHARED_LIB}
+                                  ${PEGASUS_TEST_STATIC_LINK_LIBS}
+                                  ${PEGASUS_RPC_STATIC_LINK_LIBS})
+else()
+  set(PEGASUS_RPC_TEST_LINK_LIBS pegasus_rpc_shared pegasus_rpc_testing_shared
+                                  ${ARROW_SHARED_LIB}
+                                  ${ARROW_TESTING_SHARED_LIB}
+                                  ${PEGASUS_TEST_SHARED_LINK_LIBS}
+                                  ${PEGASUS_RPC_STATIC_LINK_LIBS})
+endif()
+
 # TODO(wesm): Protobuf shared vs static linking
 
 set(RPC_PROTO_PATH "${PEGASUS_SOURCE_DIR}/../format")
@@ -103,3 +117,56 @@ add_pegasus_lib(pegasus_rpc
 foreach(LIB_TARGET ${PEGASUS_RPC_LIBRARIES})
   target_compile_definitions(${LIB_TARGET} PRIVATE PEGASUS_RPC_EXPORTING)
 endforeach()
+
+# Define pegasus__testing library
+if(PEGASUS_BUILD_TESTS)
+  add_pegasus_lib(pegasus_rpc_testing
+                CMAKE_PACKAGE_NAME
+                PegasusRPCTesting
+                PKG_CONFIG_NAME
+                pegasus-rpc-testing
+                OUTPUTS
+                PEGASUS_RPC_TESTING_LIBRARIES
+                SOURCES
+                test_util.cc
+                DEPENDENCIES
+                GTest::GTest
+                pegasus_grpc_gen
+                pegasus_dependencies
+                SHARED_LINK_LIBS
+                pegasus_shared
+                pegasus_rpc_shared
+                pegasus_testing_shared
+                ${BOOST_FILESYSTEM_LIBRARY}
+                ${BOOST_SYSTEM_LIBRARY}
+                GTest::GTest
+                STATIC_LINK_LIBS
+                pegasus_static
+                pegasus_rpc_static
+                pegasus_testing_static)
+endif()
+
+foreach(LIB_TARGET ${PEGASUS_RPC_TESTING_LIBRARIES})
+  target_compile_definitions(${LIB_TARGET} PRIVATE PEGASUS_RPC_EXPORTING)
+endforeach()
+
+add_pegasus_test(flight_test
+               EXTRA_LINK_LIBS
+               ${PEGASUS_RPC_TEST_LINK_LIBS}
+               LABELS
+               "pegasus_rpc")
+
+# Build test server for unit tests or benchmarks
+if(PEGASUS_BUILD_TESTS)
+  add_executable(flight-test-server test_server.cc)
+  target_link_libraries(flight-test-server
+                        ${PEGASUS_RPC_TEST_LINK_LIBS}
+                        ${GFLAGS_LIBRARIES}
+                        GTest::GTest)
+
+  if(PEGASUS_BUILD_TESTS)
+    add_dependencies(pegasus-flight-test flight-test-server)
+  endif()
+
+  add_dependencies(pegasus_rpc flight-test-server)
+endif()

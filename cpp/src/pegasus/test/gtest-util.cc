@@ -15,23 +15,36 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "rpc/server_auth.h"
+#include "test/gtest-util.h"
+
+#ifndef _WIN32
+#include <sys/stat.h>  // IWYU pragma: keep
+#include <sys/wait.h>  // IWYU pragma: keep
+#include <unistd.h>    // IWYU pragma: keep
+#endif
+
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
+#include <iostream>
+#include <limits>
+#include <locale>
+#include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+#include "arrow/array.h"
+#include "arrow/buffer.h"
+#include "arrow/compute/kernel.h"
+#include "arrow/ipc/json_simple.h"
+#include "arrow/pretty_print.h"
+#include "arrow/status.h"
+#include "arrow/table.h"
+#include "arrow/type.h"
+#include "arrow/util/logging.h"
 
 namespace pegasus {
-namespace rpc {
 
-ServerAuthHandler::~ServerAuthHandler() {}
-
-NoOpAuthHandler::~NoOpAuthHandler() {}
-arrow::Status NoOpAuthHandler::Authenticate(ServerAuthSender* outgoing,
-                                     ServerAuthReader* incoming) {
-  return arrow::Status::OK();
-}
-
-arrow::Status NoOpAuthHandler::IsValid(const std::string& token, std::string* peer_identity) {
-  *peer_identity = "";
-  return arrow::Status::OK();
-}
-
-}  // namespace rpc
 }  // namespace pegasus

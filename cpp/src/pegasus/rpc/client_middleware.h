@@ -22,8 +22,8 @@
 
 #include <memory>
 
-#include "pegasus/rpc/middleware.h"
-#include "pegasus/rpc/visibility.h"  // IWYU pragma: keep
+#include "rpc/middleware.h"
+#include "rpc/visibility.h"  // IWYU pragma: keep
 #include "arrow/status.h"
 
 namespace pegasus {
