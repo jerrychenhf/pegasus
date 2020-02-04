@@ -20,7 +20,8 @@
 
 #include <vector>
 
-#include "pegasus/common/location.h"
+#include "common/location.h"
+#include "rpc/types.h"
 
 using namespace std;
 
@@ -30,10 +31,10 @@ namespace pegasus {
 class WorkerManager {
  public:
   WorkerManager();
+  
   Status GetWorkerLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations);
-  Status InsertWorkerLocation(Location worker_location);
-  Status RemoveWorkerLocation(Location worker_location);
 
+  Status Heartbeat(const rpc::HeartbeatInfo& request, std::unique_ptr<rpc::HeartbeatResult>* response);
  private:
   std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations;
 };

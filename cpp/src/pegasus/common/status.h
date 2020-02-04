@@ -26,6 +26,8 @@
 #include <string>
 #include <utility>
 
+#include "arrow/status.h"
+
 #include "common/compiler-util.h"
 #include "util/compare.h"
 #include "util/macros.h"
@@ -326,6 +328,16 @@ class PEGASUS_EXPORT Status : public util::EqualityComparable<Status>,
   }
 
   bool IsExecutionError() const { return code() == StatusCode::ExecutionError; }
+  
+  arrow::Status toArrowStatus() {
+    if (ok()){
+      return arrow::Status::OK();
+    }
+    
+    // TO DO
+    // translate other error codes to Arrow Status
+    return arrow::Status::UnknownError(message());
+  }
 
   /// \brief Return a string representation of this status suitable for printing.
   ///

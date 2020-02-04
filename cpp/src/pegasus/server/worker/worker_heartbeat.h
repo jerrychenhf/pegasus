@@ -38,14 +38,25 @@ class WorkerHeartbeat {
 
  private:
  
+  enum class HeartbeatType {
+    REGISTRATION,
+    HEARTBEAT
+  };
+ 
   /// Work item passed to heartbeat thread pool
   struct ScheduledHeartbeat {
+    /// Whether this is a registration heartbeat
+    HeartbeatType heartbeatType;
     /// *Earliest* time (in Unix time) that the next message should be sent.
     int64_t deadline;
 
     ScheduledHeartbeat() {}
-
-    ScheduledHeartbeat(int64_t next_update_time): deadline(next_update_time) {}
+    
+    ScheduledHeartbeat(int64_t next_update_time): heartbeatType(HeartbeatType::HEARTBEAT),
+      deadline(next_update_time) {}
+      
+    ScheduledHeartbeat(HeartbeatType type, int64_t next_update_time): heartbeatType(type),
+      deadline(next_update_time) {}
   };
   
   std::shared_ptr<ThreadPool<ScheduledHeartbeat>> heartbeat_threadpool_;
@@ -61,8 +72,9 @@ class WorkerHeartbeat {
 
   /// Sends a heartbeat message to planner. Returns false if there was some error
   /// performing the RPC.
-  Status SendHeartbeat() WARN_UNUSED_RESULT;
+  Status SendHeartbeat(const ScheduledHeartbeat& heartbeat) WARN_UNUSED_RESULT;
 
+  bool registered_ = false;
 };
 
 } // namespace pegasus

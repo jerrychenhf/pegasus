@@ -22,8 +22,8 @@
 
 #include "pegasus/rpc/server.h"
 
-#include "pegasus/dataset/dataset_service.h"
-#include "pegasus/storage/storage_plugin.h"
+#include "dataset/dataset_service.h"
+#include "storage/storage_plugin.h"
 
 namespace pegasus {
 
@@ -38,6 +38,8 @@ class FlightListing;
 class FlightInfo;
 class Criteria;
 class FlightDescriptor;
+class HeartbeatInfo;
+class HeartbeatResult;
 
 }  //namespace rpc
 
@@ -56,7 +58,10 @@ class PEGASUS_EXPORT PlannerTableAPIService : public rpc::FlightServerBase {
   arrow::Status GetFlightInfo(const rpc::ServerCallContext& context,
                                const rpc::FlightDescriptor& request,
                                std::unique_ptr<rpc::FlightInfo>* info) override;
-
+  
+  arrow::Status Heartbeat(const rpc::ServerCallContext& context,
+                               const rpc::HeartbeatInfo& request,
+                               std::unique_ptr<rpc::HeartbeatResult>* response);
  private:
   std::shared_ptr<DataSetService> dataset_service_;
   std::shared_ptr<WorkerManager> worker_manager_;
