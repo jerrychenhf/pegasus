@@ -99,6 +99,8 @@ enum class StatusCode : char {
   ThreadPoolTaskTimeoutError = 14,
   ThreadPoolSubmitFailed = 15,
   RpcTimeout = 16,
+  GeneralError = 17,
+  
   // Gandiva range of errors
   CodeGenError = 40,
   ExpressionValidationError = 41,
@@ -263,6 +265,11 @@ class PEGASUS_EXPORT Status : public util::EqualityComparable<Status>,
   template <typename... Args>
   static Status ThreadPoolSubmitFailed(Args&&... args) {
     return Status::FromArgs(StatusCode::ThreadPoolSubmitFailed, std::forward<Args>(args)...);
+  }
+  
+  template <typename... Args>
+  static Status GeneralError(Args&&... args) {
+    return Status::FromArgs(StatusCode::GeneralError, std::forward<Args>(args)...);
   }
 
   template <typename... Args>

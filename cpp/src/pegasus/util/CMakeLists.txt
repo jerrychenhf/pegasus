@@ -36,5 +36,7 @@ add_library(Util
   time.cc
   os-info.cc
   thread.cc
+  error-util.cc
+  network-util.cc
 )
 add_dependencies(Util gen-deps)
