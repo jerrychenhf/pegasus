@@ -245,6 +245,19 @@ class PEGASUS_RPC_EXPORT FlightClient {
                std::unique_ptr<FlightMetadataReader>* reader) {
     return DoPut({}, descriptor, schema, stream, reader);
   }
+  
+  /// \brief Heartbeat to the planner
+  /// \param[in] options Per-RPC options
+  /// \param[in] the heartbeat information with hostname and port for registration
+  /// \param[out] the heartbeat result
+  /// \return Status
+  Status Heartbeat(const FlightCallOptions& options,
+                       const HeartbeatInfo& info,
+                       std::unique_ptr<HeartbeatResult>* result);
+  Status Heartbeat(const HeartbeatInfo& info,
+                       std::unique_ptr<HeartbeatResult>* result) {
+    return Heartbeat({}, info, result);
+  }
 
  private:
   FlightClient();

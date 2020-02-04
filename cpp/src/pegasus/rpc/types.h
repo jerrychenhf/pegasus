@@ -502,7 +502,7 @@ struct PEGASUS_RPC_EXPORT HeartbeatInfo {
   /// The heartbeat type
   HeartbeatType type;
 
-  std::string hostname;
+  std::string address;
 
   bool Equals(const HeartbeatInfo& other) const;
 

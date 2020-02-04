@@ -179,6 +179,8 @@ class GrpcClientInterceptorAdapterFactory
       flight_method = FlightMethod::DoAction;
     } else if (method.ends_with("/ListActions")) {
       flight_method = FlightMethod::ListActions;
+     } else if (method.ends_with("/Heartbeat")) {
+      flight_method = FlightMethod::Heartbeat;
     } else {
       DCHECK(false) << "Unknown Flight method: " << info->method();
     }
@@ -719,6 +721,26 @@ class FlightClient::FlightClientImpl {
     return GrpcStreamWriter::Open(descriptor, schema, std::move(rpc), std::move(response),
                                   read_mutex, writer, out);
   }
+  
+  Status Heartbeat(const FlightCallOptions& options,
+                       const HeartbeatInfo& info,
+                       std::unique_ptr<HeartbeatResult>* result) {
+    pb::HeartbeatInfo pb_info;
+    pb::HeartbeatResult pb_response;
+
+    RETURN_NOT_OK(internal::ToProto(info, &pb_info));
+
+    ClientRpc rpc(options);
+    RETURN_NOT_OK(rpc.SetToken(auth_handler_.get()));
+    Status s = internal::FromGrpcStatus(
+        stub_->Heartbeat(&rpc.context, pb_info, &pb_response));
+    RETURN_NOT_OK(s);
+
+    HeartbeatResult r;
+    RETURN_NOT_OK(internal::FromProto(pb_response, &r));
+    result->reset(new HeartbeatResult(std::move(r)));
+    return Status::OK();
+  }
 
  private:
   std::unique_ptr<pb::FlightService::Stub> stub_;
@@ -788,6 +810,12 @@ Status FlightClient::DoPut(const FlightCallOptions& options,
                            std::unique_ptr<FlightStreamWriter>* stream,
                            std::unique_ptr<FlightMetadataReader>* reader) {
   return impl_->DoPut(options, descriptor, schema, stream, reader);
+}
+
+Status FlightClient::Heartbeat(const FlightCallOptions& options,
+                       const HeartbeatInfo& info,
+                       std::unique_ptr<HeartbeatResult>* result) {
+  return impl_->Heartbeat(options, info, result);
 }
 
 }  // namespace rpc

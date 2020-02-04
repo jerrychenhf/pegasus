@@ -377,8 +377,7 @@ arrow::Status ToProto(const SchemaResult& result, pb::SchemaResult* pb_result) {
 arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info) {
   if (pb_info.type() == pb::HeartbeatInfo::REGISTRATION) {
     info->type = HeartbeatInfo::REGISTRATION;
-    info->hostname = pb_info.hostname();
-    
+    info->address = pb_info.address();
   } else if (pb_info.type() == pb::HeartbeatInfo::HEARTBEAT) {
     info->type = HeartbeatInfo::HEARTBEAT;
   } else {
@@ -387,7 +386,30 @@ arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info) {
   return arrow::Status::OK();
 }
 
+arrow::Status ToProto(const HeartbeatInfo& info, pb::HeartbeatInfo* pb_info) {
+  if (info.type == HeartbeatInfo::REGISTRATION) {
+    pb_info->set_type(pb::HeartbeatInfo::REGISTRATION);
+    pb_info->set_address(info.address);
+  } else if (info.type == HeartbeatInfo::HEARTBEAT) {
+    pb_info->set_type(pb::HeartbeatInfo::HEARTBEAT);
+  } else {
+    return arrow::Status::Invalid("UNKNOWN heartbeat type");
+  }
+  return arrow::Status::OK();
+}
+
 // HeartbeatResult
+arrow::Status FromProto(const pb::HeartbeatResult& pb_result, HeartbeatResult* result) {
+  if (pb_result.result_code() == pb::HeartbeatResult::REGISTERED) {
+    result->result_code = HeartbeatResult::REGISTERED;
+  } else if (pb_result.result_code() == pb::HeartbeatResult::HEARTBEATED) {
+    result->result_code = HeartbeatResult::HEARTBEATED;
+  } else {
+    result->result_code = HeartbeatResult::UNKNOWN;
+  }
+  return arrow::Status::OK();
+}
+
 arrow::Status ToProto(const HeartbeatResult& result, pb::HeartbeatResult* pb_result) {
   if (result.result_code == HeartbeatResult::REGISTERED) {
     pb_result->set_result_code(pb::HeartbeatResult::REGISTERED);
