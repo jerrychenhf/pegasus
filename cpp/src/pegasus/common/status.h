@@ -338,6 +338,16 @@ class PEGASUS_EXPORT Status : public util::EqualityComparable<Status>,
     // translate other error codes to Arrow Status
     return arrow::Status::UnknownError(message());
   }
+  
+  static Status fromArrowStatus(arrow::Status status) {
+    if (status.ok()){
+      return Status::OK();
+    }
+    
+    // TO DO
+    // translate other error codes to Status
+    return Status::UnknownError(status.message());
+  }
 
   /// \brief Return a string representation of this status suitable for printing.
   ///

@@ -39,10 +39,7 @@ Location::~Location() {
 
 Status Location::Parse(const std::string& uri_string, Location* location) {
   arrow::Status st = location->uri_->Parse(uri_string);
-  if (!st.ok()) {
-      return Status(StatusCode(st.code()), st.message());
-  }
-  return Status::OK();
+  return Status::fromArrowStatus(st);
 }
 
 Status Location::ForGrpcTcp(const std::string& host, const int port, Location* location) {
@@ -60,6 +57,7 @@ Status Location::ForGrpcUnix(const std::string& path, Location* location) {
 }
 
 std::string Location::ToString() const { return uri_->ToString(); }
+
 std::string Location::scheme() const {
   std::string scheme = uri_->scheme();
   if (scheme.empty()) {

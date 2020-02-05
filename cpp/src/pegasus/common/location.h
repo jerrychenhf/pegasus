@@ -65,6 +65,9 @@ class Location {
 
   /// \brief Get the scheme of this URI.
   std::string scheme() const;
+  
+  std::string host() const { return uri_->host(); }
+  int32_t port() const { return uri_->port(); }
 
   bool Equals(const Location& other) const;
 
