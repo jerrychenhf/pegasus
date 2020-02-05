@@ -52,6 +52,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_mo
 include(cmake_modules/cmake_fns.txt)
 include(FindPegasus)
 include(FindArrow)
+include(FindArrowTesting)
 include(FindArrowFlight)
 include(FindParquet)
 
@@ -454,14 +455,19 @@ if(PEGASUS_BUILD_TESTS)
 endif()
 
 
-set(PEGASUS_TEST_STATIC_LINK_LIBS pegasus_testing_static pegasus_static ${PEGASUS_LINK_LIBS}
-                                ${PEGASUS_TEST_LINK_TOOLCHAIN})
+set(PEGASUS_TEST_STATIC_LINK_LIBS 
+    pegasus_testing_static 
+    pegasus_static 
+    ${BOOST_FILESYSTEM_LIBRARY}
+-   ${BOOST_SYSTEM_LIBRARY}
+    ${PEGASUS_LINK_LIBS}
+    ${PEGASUS_TEST_LINK_TOOLCHAIN})
 
 set(PEGASUS_TEST_SHARED_LINK_LIBS
     pegasus_shared
-    ${PEGASUS_LINK_LIBS}
     ${BOOST_FILESYSTEM_LIBRARY}
     ${BOOST_SYSTEM_LIBRARY}
+    ${PEGASUS_LINK_LIBS}
     ${PEGASUS_TEST_LINK_TOOLCHAIN})
 
 if(NOT MSVC)

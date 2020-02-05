@@ -414,9 +414,11 @@ macro(build_boost)
   set(BOOST_SYSTEM_LIBRARY boost_system_static)
   set(BOOST_FILESYSTEM_LIBRARY boost_filesystem_static)
   set(BOOST_REGEX_LIBRARY boost_regex_static)
+  set(BOOST_THREAD_LIBRARY boost_thread_static)
   set(BOOST_BUILD_PRODUCTS ${BOOST_STATIC_SYSTEM_LIBRARY}
                            ${BOOST_STATIC_FILESYSTEM_LIBRARY}
-                           ${BOOST_STATIC_REGEX_LIBRARY})
+                           ${BOOST_STATIC_REGEX_LIBRARY}
+                           ${BOOST_STATIC_THREAD_LIBRARY})
   if(MSVC)
     set(BOOST_CONFIGURE_COMMAND ".\\\\bootstrap.bat")
   else()
@@ -444,6 +446,8 @@ macro(build_boost)
   add_thirdparty_lib(boost_filesystem STATIC_LIB "${BOOST_STATIC_FILESYSTEM_LIBRARY}")
 
   add_thirdparty_lib(boost_regex STATIC_LIB "${BOOST_STATIC_REGEX_LIBRARY}")
+
+  add_thirdparty_lib(boost_thread STATIC_LIB "${BOOST_STATIC_THREAD_LIBRARY}")
 
   externalproject_add(boost_ep
                       URL ${BOOST_SOURCE_URL}

@@ -72,7 +72,7 @@ PEGASUS_RPC_EXPORT
 extern const char* kGrpcAuthHeader;
 
 PEGASUS_RPC_EXPORT
-arrow::Status SchemaToString(const pegasus::Schema& schema, std::string* out);
+arrow::Status SchemaToString(const arrow::Schema& schema, std::string* out);
 
 PEGASUS_RPC_EXPORT
 arrow::Status FromGrpcStatus(const ::grpc::Status& grpc_status);

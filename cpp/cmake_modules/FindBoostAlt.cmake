@@ -39,7 +39,7 @@ if(PEGASUS_BOOST_USE_SHARED)
   set(BUILD_SHARED_LIBS ON)
 
   find_package(Boost ${BoostAlt_FIND_VERSION_OPTIONS}
-               COMPONENTS regex system filesystem)
+               COMPONENTS regex system filesystem thread)
   set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_KEEP})
   unset(BUILD_SHARED_LIBS_KEEP)
 else()
@@ -47,7 +47,7 @@ else()
   # TODO Differentiate here between release and debug builds
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost ${BoostAlt_FIND_VERSION_OPTIONS}
-               COMPONENTS regex system filesystem)
+               COMPONENTS regex system filesystem thread)
 endif()
 
 if(Boost_FOUND)

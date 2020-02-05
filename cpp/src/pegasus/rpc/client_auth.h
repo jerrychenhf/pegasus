@@ -26,6 +26,8 @@ namespace pegasus {
 
 namespace rpc {
 
+using Status = arrow::Status;
+
 /// \brief A reader for messages from the server during an
 /// authentication handshake.
 class PEGASUS_RPC_EXPORT ClientAuthReader {

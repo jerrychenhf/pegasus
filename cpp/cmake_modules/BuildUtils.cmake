@@ -377,3 +377,140 @@ function(PEGASUS_INSTALL_CMAKE_FIND_MODULE MODULE)
   install(FILES "$PEGASUS_SOURCE_DIR}/cmake_modules/Find${MODULE}.cmake"
           DESTINATION "${PEGASUS_CMAKE_INSTALL_DIR}")
 endfunction()
+
+#
+# Testing
+#
+# Add a new test case, with or without an executable that should be built.
+#
+# REL_TEST_NAME is the name of the test. It may be a single component
+# (e.g. monotime-test) or contain additional components (e.g.
+# net/net_util-test). Either way, the last component must be a globally
+# unique name.
+#
+# If given, SOURCES is the list of C++ source files to compile into the test
+# executable.  Otherwise, "REL_TEST_NAME.cc" is used.
+#
+# The unit test is added with a label of "unittest" to support filtering with
+# ctest.
+#
+# Arguments after the test name will be passed to set_tests_properties().
+#
+# \arg ENABLED if passed, add this unit test even if ARROW_BUILD_TESTS is off
+# \arg PREFIX a string to append to the name of the test executable. For
+# example, if you have src/arrow/foo/bar-test.cc, then PREFIX "foo" will create
+# test executable foo-bar-test
+# \arg LABELS the unit test label or labels to assign the unit tests
+# to. By default, unit tests will go in the "unittest" group, but if we have
+# multiple unit tests in some subgroup, you can assign a test to multiple
+# groups use the syntax unittest;GROUP2;GROUP3. Custom targets for the group
+# names must exist
+function(ADD_TEST_CASE REL_TEST_NAME)
+  set(options NO_VALGRIND ENABLED)
+  set(one_value_args)
+  set(multi_value_args
+      SOURCES
+      STATIC_LINK_LIBS
+      EXTRA_LINK_LIBS
+      EXTRA_INCLUDES
+      EXTRA_DEPENDENCIES
+      LABELS
+      PREFIX)
+  cmake_parse_arguments(ARG
+                        "${options}"
+                        "${one_value_args}"
+                        "${multi_value_args}"
+                        ${ARGN})
+  if(ARG_UNPARSED_ARGUMENTS)
+    message(SEND_ERROR "Error: unrecognized arguments: ${ARG_UNPARSED_ARGUMENTS}")
+  endif()
+
+  if(NO_TESTS AND NOT ARG_ENABLED)
+    return()
+  endif()
+  get_filename_component(TEST_NAME ${REL_TEST_NAME} NAME_WE)
+
+  if(ARG_PREFIX)
+    set(TEST_NAME "${ARG_PREFIX}-${TEST_NAME}")
+  endif()
+
+  if(ARG_SOURCES)
+    set(SOURCES ${ARG_SOURCES})
+  else()
+    set(SOURCES "${REL_TEST_NAME}.cc")
+  endif()
+
+  # Make sure the executable name contains only hyphens, not underscores
+  string(REPLACE "_" "-" TEST_NAME ${TEST_NAME})
+
+  set(TEST_PATH "${EXECUTABLE_OUTPUT_PATH}/${TEST_NAME}")
+  add_executable(${TEST_NAME} ${SOURCES})
+
+  # With OSX and conda, we need to set the correct RPATH so that dependencies
+  # are found. The installed libraries with conda have an RPATH that matches
+  # for executables and libraries lying in $ENV{CONDA_PREFIX}/bin or
+  # $ENV{CONDA_PREFIX}/lib but our test libraries and executables are not
+  # installed there.
+  if(NOT "$ENV{CONDA_PREFIX}" STREQUAL "" AND APPLE)
+    set_target_properties(${TEST_NAME}
+                          PROPERTIES BUILD_WITH_INSTALL_RPATH
+                                     TRUE
+                                     INSTALL_RPATH_USE_LINK_PATH
+                                     TRUE
+                                     INSTALL_RPATH
+                                     "${EXECUTABLE_OUTPUT_PATH};$ENV{CONDA_PREFIX}/lib")
+  endif()
+
+  if(ARG_STATIC_LINK_LIBS)
+    # Customize link libraries
+    target_link_libraries(${TEST_NAME} PRIVATE ${ARG_STATIC_LINK_LIBS})
+  else()
+    target_link_libraries(${TEST_NAME} PRIVATE ${ARROW_TEST_LINK_LIBS})
+  endif()
+
+  if(ARG_EXTRA_LINK_LIBS)
+    target_link_libraries(${TEST_NAME} PRIVATE ${ARG_EXTRA_LINK_LIBS})
+  endif()
+
+  if(ARG_EXTRA_INCLUDES)
+    target_include_directories(${TEST_NAME} SYSTEM PUBLIC ${ARG_EXTRA_INCLUDES})
+  endif()
+
+  if(ARG_EXTRA_DEPENDENCIES)
+    add_dependencies(${TEST_NAME} ${ARG_EXTRA_DEPENDENCIES})
+  endif()
+
+  if(ARROW_TEST_MEMCHECK AND NOT ARG_NO_VALGRIND)
+    set_property(TARGET ${TEST_NAME}
+                 APPEND_STRING
+                 PROPERTY COMPILE_FLAGS " -DARROW_VALGRIND")
+    add_test(
+      ${TEST_NAME} bash -c
+      "cd '${CMAKE_SOURCE_DIR}'; \
+               valgrind --suppressions=valgrind.supp --tool=memcheck --gen-suppressions=all \
+                 --leak-check=full --leak-check-heuristics=stdstring --error-exitcode=1 ${TEST_PATH}"
+      )
+  elseif(WIN32)
+    add_test(${TEST_NAME} ${TEST_PATH})
+  else()
+    add_test(${TEST_NAME}
+             ${BUILD_SUPPORT_DIR}/run-test.sh
+             ${CMAKE_BINARY_DIR}
+             test
+             ${TEST_PATH})
+  endif()
+
+  # Add test as dependency of relevant targets
+  add_dependencies(all-tests ${TEST_NAME})
+  foreach(TARGET ${ARG_LABELS})
+    add_dependencies(${TARGET} ${TEST_NAME})
+  endforeach()
+
+  if(ARG_LABELS)
+    set(ARG_LABELS "unittest;${ARG_LABELS}")
+  else()
+    set(ARG_LABELS unittest)
+  endif()
+
+  set_property(TEST ${TEST_NAME} APPEND PROPERTY LABELS ${ARG_LABELS})
+endfunction()

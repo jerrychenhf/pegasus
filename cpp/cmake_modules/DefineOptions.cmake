@@ -112,7 +112,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
                 ON)
 
   define_option(PEGASUS_USE_GLOG "Build libraries with glog support for pluggable logging"
-                OFF)
+                ON)
 
   define_option(PEGASUS_WITH_SNAPPY "Build with Snappy compression" OFF)
 

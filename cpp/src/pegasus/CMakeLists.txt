@@ -17,6 +17,39 @@
 
 add_custom_target(gen-deps)
 add_custom_target(pegasus)
+add_custom_target(pegasus-tests)
+
+# Adding unit tests part of the "arrow" portion of the test suite
+function(ADD_PEGASUS_TEST REL_TEST_NAME)
+  set(options)
+  set(one_value_args PREFIX)
+  set(multi_value_args LABELS)
+  cmake_parse_arguments(ARG
+                        "${options}"
+                        "${one_value_args}"
+                        "${multi_value_args}"
+                        ${ARGN})
+
+  if(ARG_PREFIX)
+    set(PREFIX ${ARG_PREFIX})
+  else()
+    set(PREFIX "pegasus")
+  endif()
+
+  if(ARG_LABELS)
+    set(LABELS ${ARG_LABELS})
+  else()
+    set(LABELS "pegasus-tests")
+  endif()
+
+  add_test_case(${REL_TEST_NAME}
+                PREFIX
+                ${PREFIX}
+                LABELS
+                ${LABELS}
+                ${ARG_UNPARSED_ARGUMENTS})
+endfunction()
+
 
 set(PEGASUS_SRCS
     vendored/base64.cpp
@@ -154,6 +187,39 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PegasusOptions.cmake
 # For backward compatibility for find_package(arrow)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/pegasus-config.cmake
         DESTINATION "${PEGASUS_CMAKE_INSTALL_DIR}")
+
+set(PEGASUS_TESTING_SRCS
+    test/gtest-util.cc)
+
+if(PEGASUS_BUILD_TESTS)
+  # that depend on gtest
+  add_pegasus_lib(pegasus_testing
+                CMAKE_PACKAGE_NAME
+                PegasusTesting
+                PKG_CONFIG_NAME
+                pegasus-testing
+                SOURCES
+                ${PEGASUS_TESTING_SRCS}
+                OUTPUTS
+                PEGASUS_TESTING_LIBRARIES
+                DEPENDENCIES
+                pegasus_test_dependencies
+                SHARED_LINK_LIBS
+                pegasus_shared
+                GTest::GTest
+                STATIC_LINK_LIBS
+                pegasus_static)
+
+  add_custom_target(pegasus_testing)
+  add_dependencies(pegasus_testing ${PEGASUS_TESTING_LIBRARIES})
+
+  if(ARROW_BUILD_STATIC AND WIN32)
+    target_compile_definitions(pegasus_testing_static PUBLIC PEGASUS_STATIC)
+  endif()
+
+  set(PEGASUS_LIBRARIES ${PEGASUS_LIBRARIES} ${PEGASUS_TESTING_LIBRARIES})
+endif()
+
 
 
 
