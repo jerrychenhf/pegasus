@@ -25,7 +25,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "pegasus/rpc/visibility.h"  // IWYU pragma: keep
+#include "rpc/visibility.h"  // IWYU pragma: keep
 #include "arrow/status.h"
 #include "arrow/util/string_view.h"
 

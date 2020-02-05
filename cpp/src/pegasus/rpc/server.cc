@@ -16,9 +16,9 @@
 // under the License.
 
 // Platform-specific defines
-#include "pegasus/rpc/platform.h"
+#include "rpc/platform.h"
 
-#include "pegasus/rpc/server.h"
+#include "rpc/server.h"
 
 #include <signal.h>
 #include <atomic>
@@ -47,13 +47,13 @@
 #include "arrow/util/logging.h"
 #include "arrow/util/uri.h"
 
-#include "pegasus/rpc/internal.h"
-#include "pegasus/rpc/middleware.h"
-#include "pegasus/rpc/middleware_internal.h"
-#include "pegasus/rpc/serialization_internal.h"
-#include "pegasus/rpc/server_auth.h"
-#include "pegasus/rpc/server_middleware.h"
-#include "pegasus/rpc/types.h"
+#include "rpc/internal.h"
+#include "rpc/middleware.h"
+#include "rpc/middleware_internal.h"
+#include "rpc/serialization_internal.h"
+#include "rpc/server_auth.h"
+#include "rpc/server_middleware.h"
+#include "rpc/types.h"
 
 using FlightService = pegasus::rpc::protocol::FlightService;
 using ServerContext = grpc::ServerContext;

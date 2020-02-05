@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include "pegasus/rpc/visibility.h"
+#include "rpc/visibility.h"
 #include "arrow/status.h"
 
 namespace pegasus {

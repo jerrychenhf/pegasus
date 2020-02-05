@@ -15,13 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/rpc/types.h"
+#include "rpc/types.h"
 
 #include <memory>
 #include <sstream>
 #include <utility>
 
-#include "pegasus/rpc/serialization_internal.h"
+#include "rpc/serialization_internal.h"
 #include "arrow/io/memory.h"
 #include "arrow/ipc/dictionary.h"
 #include "arrow/ipc/reader.h"

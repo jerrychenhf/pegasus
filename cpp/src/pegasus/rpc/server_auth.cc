@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/rpc/server_auth.h"
+#include "rpc/server_auth.h"
 
 namespace pegasus {
 namespace rpc {

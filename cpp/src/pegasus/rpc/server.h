@@ -26,9 +26,9 @@
 #include <utility>
 #include <vector>
 
-#include "pegasus/rpc/server_auth.h"
-#include "pegasus/rpc/types.h"       // IWYU pragma: keep
-#include "pegasus/rpc/visibility.h"  // IWYU pragma: keep
+#include "rpc/server_auth.h"
+#include "rpc/types.h"       // IWYU pragma: keep
+#include "rpc/visibility.h"  // IWYU pragma: keep
 #include "arrow/ipc/dictionary.h"
 #include "arrow/memory_pool.h"
 #include "arrow/record_batch.h"

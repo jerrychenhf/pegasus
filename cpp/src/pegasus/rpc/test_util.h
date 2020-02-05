@@ -25,12 +25,12 @@
 #include "arrow/status.h"
 #include "arrow/testing/util.h"
 
-#include "pegasus/test/gtest-util.h"
-#include "pegasus/rpc/client_auth.h"
-#include "pegasus/rpc/server.h"
-#include "pegasus/rpc/server_auth.h"
-#include "pegasus/rpc/types.h"
-#include "pegasus/rpc/visibility.h"
+#include "test/gtest-util.h"
+#include "rpc/client_auth.h"
+#include "rpc/server.h"
+#include "rpc/server_auth.h"
+#include "rpc/types.h"
+#include "rpc/visibility.h"
 
 namespace boost {
 namespace process {

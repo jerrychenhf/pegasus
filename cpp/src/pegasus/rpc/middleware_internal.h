@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "pegasus/rpc/platform.h"
-#include "pegasus/rpc/visibility.h"  // IWYU pragma: keep
+#include "rpc/platform.h"
+#include "rpc/visibility.h"  // IWYU pragma: keep
 
 #include <map>
 #include <string>
@@ -33,7 +33,7 @@
 #include <grpc++/grpc++.h>
 #endif
 
-#include "pegasus/rpc/middleware.h"
+#include "rpc/middleware.h"
 
 namespace pegasus {
 

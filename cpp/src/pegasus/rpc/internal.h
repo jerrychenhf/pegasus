@@ -20,8 +20,8 @@
 #include <memory>
 #include <string>
 
-#include "pegasus/rpc/protocol_internal.h"  // IWYU pragma: keep
-#include "pegasus/rpc/types.h"
+#include "rpc/protocol_internal.h"  // IWYU pragma: keep
+#include "rpc/types.h"
 #include "arrow/util/macros.h"
 
 namespace grpc {

@@ -20,7 +20,7 @@
 #include <limits>
 #include <memory>
 
-#include "pegasus/rpc/platform.h"
+#include "rpc/platform.h"
 #include "arrow/util/config.h"
 
 // Silence protobuf warnings

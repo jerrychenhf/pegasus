@@ -36,15 +36,15 @@
 #include "arrow/testing/util.h"
 #include "arrow/util/make_unique.h"
 
-#include "pegasus/rpc/api.h"
+#include "rpc/api.h"
 
 #ifdef GRPCPP_GRPCPP_H
 #error "gRPC headers should not be in public API"
 #endif
 
-#include "pegasus/rpc/internal.h"
-#include "pegasus/rpc/middleware_internal.h"
-#include "pegasus/rpc/test_util.h"
+#include "rpc/internal.h"
+#include "rpc/middleware_internal.h"
+#include "rpc/test_util.h"
 
 namespace pb = pegasus::rpc::protocol;
 

@@ -17,11 +17,11 @@
 
 #pragma once
 
-#include "pegasus/rpc/client.h"
-#include "pegasus/rpc/client_auth.h"
-#include "pegasus/rpc/client_middleware.h"
-#include "pegasus/rpc/middleware.h"
-#include "pegasus/rpc/server.h"
-#include "pegasus/rpc/server_auth.h"
-#include "pegasus/rpc/server_middleware.h"
-#include "pegasus/rpc/types.h"
+#include "rpc/client.h"
+#include "rpc/client_auth.h"
+#include "rpc/client_middleware.h"
+#include "rpc/middleware.h"
+#include "rpc/server.h"
+#include "rpc/server_auth.h"
+#include "rpc/server_middleware.h"
+#include "rpc/types.h"

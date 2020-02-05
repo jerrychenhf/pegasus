@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/rpc/platform.h"
+#include "rpc/platform.h"
 
 #ifdef __APPLE__
 #include <limits.h>
@@ -41,9 +41,9 @@
 #include "arrow/testing/gtest_util.h"
 #include "arrow/util/logging.h"
 
-#include "pegasus/rpc/api.h"
-#include "pegasus/rpc/internal.h"
-#include "pegasus/rpc/test_util.h"
+#include "rpc/api.h"
+#include "rpc/internal.h"
+#include "rpc/test_util.h"
 
 namespace pegasus {
 namespace rpc {

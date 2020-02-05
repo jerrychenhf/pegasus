@@ -15,10 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/rpc/client.h"
+#include "rpc/client.h"
 
 // Platform-specific defines
-#include "pegasus/rpc/platform.h"
+#include "rpc/platform.h"
 
 #include <map>
 #include <memory>

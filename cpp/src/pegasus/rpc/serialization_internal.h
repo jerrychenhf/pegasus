@@ -22,8 +22,8 @@
 
 #include <memory>
 
-#include "pegasus/rpc/internal.h"
-#include "pegasus/rpc/types.h"
+#include "rpc/internal.h"
+#include "rpc/types.h"
 #include "arrow/ipc/message.h"
 #include "arrow/status.h"
 
