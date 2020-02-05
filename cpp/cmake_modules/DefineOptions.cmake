@@ -77,7 +77,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
   #----------------------------------------------------------------------
   set_option_category("Test and benchmark")
 
-  define_option(PEGASUS_BUILD_TESTS "Build the Pegasus googletest unit tests" ON)
+  define_option(PEGASUS_BUILD_TESTS "Build the Pegasus googletest unit tests" OFF)
 
   define_option_string(PEGASUS_TEST_LINKAGE
                        "Linkage of Pegasus libraries with unit tests executables."

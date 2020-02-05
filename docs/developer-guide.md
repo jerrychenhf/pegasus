@@ -49,6 +49,16 @@ git clone https://gitlab.devtools.intel.com/intel-bigdata/pegasus.git
 cd pegasus/cpp
 mkdir build
 cd build
-cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPEGASUS_USE_GLOG=ON
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPEGASUS_USE_GLOG=ON ..
 make
+```
+
+### Building C++ unit test
+```
+git clone https://gitlab.devtools.intel.com/intel-bigdata/pegasus.git
+cd pegasus/cpp
+mkdir debug
+cd debug
+cmake -DPEGASUS_BUILD_TESTS ..
+make unittest
 ```
