@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/server/planner/planner_table_api_service.h"
+#include "server/planner/planner_table_api_service.h"
 
 namespace pegasus {
 class Status;
@@ -106,6 +106,13 @@ arrow::Status PlannerTableAPIService::GetFlightInfo(const rpc::ServerCallContext
   } else {
     return arrow::Status::NotImplemented(request.type);
   }
+}
+
+arrow::Status PlannerTableAPIService::Heartbeat(const rpc::ServerCallContext& context,
+  const rpc::HeartbeatInfo& request,
+  std::unique_ptr<rpc::HeartbeatResult>* response) {
+  Status status = worker_manager_->Heartbeat(request, response);
+  return status.toArrowStatus();
 }
 
 }  // namespace pegasus

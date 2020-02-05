@@ -116,7 +116,7 @@ void WorkerHeartbeat::DoHeartbeat(int thread_id,
   
   // Send the heartbeat message, and compute the next deadline
   int64_t deadline_ms = 0;
-  Status status = SendHeartbeat();
+  Status status = SendHeartbeat(heartbeat);
   if (status.ok()) {
     //refresh the last heartbeat timestamp
   } else if (status.code() == StatusCode::RpcTimeout) {
@@ -134,7 +134,21 @@ void WorkerHeartbeat::DoHeartbeat(int thread_id,
   }
 }
 
-Status WorkerHeartbeat::SendHeartbeat() {
+Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
+  /*
+  ClientConnection client(heartbeat_client_cache_.get(),
+      subscriber->network_address(), &status);
+  RETURN_IF_ERROR(status);
+
+  HeartbeatRequest request;
+  RETURN_IF_ERROR(
+      client.WorkerHeartbeat(request));
+  */
+  
+  if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION) {
+    registered_ = true;
+  }
+  
   return Status::OK();
 }
 

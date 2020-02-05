@@ -104,6 +104,10 @@ service FlightService {
    */
   rpc ListActions(Empty) returns (stream ActionType) {}
 
+  /*
+   * Heartbeat between workder and server. 
+   */
+  rpc Heartbeat(HeartbeatInfo) returns (HeartbeatResult) {}
 }
 
 /*
@@ -320,4 +324,58 @@ message FlightData {
  */
 message PutResult {
   bytes app_metadata = 1;
+}
+
+/*
+ * The request that a worker to register or heartbeat to planner
+ */
+message HeartbeatInfo {
+  /*
+   * Describes what kind of heartbeat message
+   */
+  enum HeartbeatType {
+
+    // Protobuf pattern, not used.
+    UNKNOWN = 0;
+
+    /*
+     * Registrtion heartbeat message
+     */
+    REGISTRATION = 1;
+
+    /*
+     * Keep alive heartbeat message.
+     */
+    HEARTBEAT = 2;
+  }
+
+  HeartbeatType type = 1;
+
+  /*
+   * The worker hostname reported in the heartbeat
+   */
+  string hostname = 2;
+}
+
+message HeartbeatResult {
+  /*
+   * Result code of heartbeat
+   */
+  enum HeartbeatResultCode {
+
+    // Protobuf pattern, not used.
+    UNKNOWN = 0;
+
+    /*
+     * registered
+     */
+    REGISTERED = 1;
+
+    /*
+     * Keep alive heartbeat ok.
+     */
+    HEARTBEATED = 2;
+  }
+
+  HeartbeatResultCode result_code = 1;
 }

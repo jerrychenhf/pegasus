@@ -95,6 +95,7 @@ arrow::Status FromProto(const pb::FlightEndpoint& pb_endpoint, FlightEndpoint* e
 arrow::Status FromProto(const pb::FlightInfo& pb_info, FlightInfo::Data* info);
 arrow::Status FromProto(const pb::SchemaResult& pb_result, std::string* result);
 arrow::Status FromProto(const pb::BasicAuth& pb_basic_auth, BasicAuth* info);
+arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info);
 
 arrow::Status ToProto(const FlightDescriptor& descr, pb::FlightDescriptor* pb_descr);
 arrow::Status ToProto(const FlightInfo& info, pb::FlightInfo* pb_info);
@@ -104,7 +105,7 @@ arrow::Status ToProto(const Result& result, pb::Result* pb_result);
 arrow::Status ToProto(const SchemaResult& result, pb::SchemaResult* pb_result);
 void ToProto(const Ticket& ticket, pb::Ticket* pb_ticket);
 arrow::Status ToProto(const BasicAuth& basic_auth, pb::BasicAuth* pb_basic_auth);
-
+arrow::Status ToProto(const HeartbeatResult& result, pb::HeartbeatResult* pb_result);
 }  // namespace internal
 }  // namespace rpc
 }  // namespace pegasus

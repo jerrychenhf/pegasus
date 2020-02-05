@@ -247,7 +247,16 @@ class PEGASUS_RPC_EXPORT FlightServerBase {
   /// \return Status
   virtual arrow::Status ListActions(const ServerCallContext& context,
                              std::vector<ActionType>* actions);
-
+  
+  /// \brief Worker heartbeat to the planner
+  /// descriptor
+  /// \param[in] context The call context.
+  /// \param[in] request may be null
+  /// \param[out] heartbeat result
+  /// \return Status
+  virtual arrow::Status Heartbeat(const ServerCallContext& context,
+                               const HeartbeatInfo& request,
+                               std::unique_ptr<HeartbeatResult>* response);
  private:
   struct Impl;
   std::unique_ptr<Impl> impl_;

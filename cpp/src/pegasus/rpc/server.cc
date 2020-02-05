@@ -573,6 +573,25 @@ class FlightServiceImpl : public FlightService::Service {
     }
     RETURN_WITH_MIDDLEWARE(flight_context, grpc::Status::OK);
   }
+  
+  grpc::Status Heartbeat(ServerContext* context, const pb::HeartbeatInfo* request,
+                             pb::HeartbeatResult* response) {
+    GrpcServerCallContext flight_context;
+    GRPC_RETURN_NOT_GRPC_OK(
+        CheckAuth(FlightMethod::Heartbeat, context, flight_context));
+
+    CHECK_ARG_NOT_NULL(flight_context, request, "HeartbeatInfo cannot be null");
+
+    HeartbeatInfo info;
+    SERVICE_RETURN_NOT_OK(flight_context, internal::FromProto(*request, &info));
+
+    std::unique_ptr<HeartbeatResult> result;
+    SERVICE_RETURN_NOT_OK(flight_context,
+                          server_->Heartbeat(flight_context, info, &result));
+
+    SERVICE_RETURN_NOT_OK(flight_context, internal::ToProto(*result, response));
+    RETURN_WITH_MIDDLEWARE(flight_context, grpc::Status::OK);
+  }
 
  private:
   std::shared_ptr<ServerAuthHandler> auth_handler_;
@@ -783,6 +802,12 @@ arrow::Status FlightServerBase::ListActions(const ServerCallContext& context,
 arrow::Status FlightServerBase::GetSchema(const ServerCallContext& context,
                                    const FlightDescriptor& request,
                                    std::unique_ptr<SchemaResult>* schema) {
+  return arrow::Status::NotImplemented("NYI");
+}
+
+arrow::Status FlightServerBase::Heartbeat(const ServerCallContext& context,
+                                       const HeartbeatInfo& request,
+                                       std::unique_ptr<HeartbeatResult>* response) {
   return arrow::Status::NotImplemented("NYI");
 }
 

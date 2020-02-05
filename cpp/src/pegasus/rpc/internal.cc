@@ -373,6 +373,32 @@ arrow::Status ToProto(const SchemaResult& result, pb::SchemaResult* pb_result) {
   return arrow::Status::OK();
 }
 
+// HeartbeatInfo
+arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info) {
+  if (pb_info.type() == pb::HeartbeatInfo::REGISTRATION) {
+    info->type = HeartbeatInfo::REGISTRATION;
+    info->hostname = pb_info.hostname();
+    
+  } else if (pb_info.type() == pb::HeartbeatInfo::HEARTBEAT) {
+    info->type = HeartbeatInfo::HEARTBEAT;
+  } else {
+    return arrow::Status::Invalid("Client sent UNKNOWN heartbeat type");
+  }
+  return arrow::Status::OK();
+}
+
+// HeartbeatResult
+arrow::Status ToProto(const HeartbeatResult& result, pb::HeartbeatResult* pb_result) {
+  if (result.result_code == HeartbeatResult::REGISTERED) {
+    pb_result->set_result_code(pb::HeartbeatResult::REGISTERED);
+  } else if (result.result_code == HeartbeatResult::HEARTBEATED) {
+    pb_result->set_result_code(pb::HeartbeatResult::HEARTBEATED);
+  } else {
+    pb_result->set_result_code(pb::HeartbeatResult::UNKNOWN);
+  }
+  return arrow::Status::OK();
+}
+
 }  // namespace internal
 }  // namespace rpc
 }  // namespace pegasus

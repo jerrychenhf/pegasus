@@ -491,5 +491,49 @@ class PEGASUS_RPC_EXPORT SimpleResultStream : public ResultStream {
   size_t position_;
 };
 
+/// \brief Worker heartbeat information passed to planner
+struct PEGASUS_RPC_EXPORT HeartbeatInfo {
+  enum HeartbeatType {
+    UNKNOWN = 0,  /// Unused
+    REGISTRATION = 1,
+    HEARTBEAT = 2
+  };
+
+  /// The heartbeat type
+  HeartbeatType type;
+
+  std::string hostname;
+
+  bool Equals(const HeartbeatInfo& other) const;
+
+  friend bool operator==(const HeartbeatInfo& left, const HeartbeatInfo& right) {
+    return left.Equals(right);
+  }
+  friend bool operator!=(const HeartbeatInfo& left, const HeartbeatInfo& right) {
+    return !(left == right);
+  }
+};
+
+/// \brief Worker heartbeat result
+struct PEGASUS_RPC_EXPORT HeartbeatResult {
+  enum HeartbeatResultCode {
+    UNKNOWN = 0,  /// Unused
+    REGISTERED = 1,
+    HEARTBEATED = 2
+  };
+
+  /// The heartbeat type
+  HeartbeatResultCode result_code;
+
+  bool Equals(const HeartbeatResult& other) const;
+
+  friend bool operator==(const HeartbeatResult& left, const HeartbeatResult& right) {
+    return left.Equals(right);
+  }
+  friend bool operator!=(const HeartbeatResult& left, const HeartbeatResult& right) {
+    return !(left == right);
+  }
+};
+
 }  // namespace rpc
 }  // namespace pegasus

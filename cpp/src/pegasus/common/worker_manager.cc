@@ -26,14 +26,10 @@ Status WorkerManager::GetWorkerLocations(std::shared_ptr<std::vector<std::shared
 
 }
 
-Status WorkerManager::InsertWorkerLocation(Location worker_location) {
-
-//std::clock_t current_time = std::clock();
-//const std::clock_t elapsedTime = current_time - lastTime;
-}
-
-Status WorkerManager::RemoveWorkerLocation(Location worker_location) {
-
+Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& request, std::unique_ptr<rpc::HeartbeatResult>* response){
+  // TO DO
+  
+  return Status::OK();
 }
 
 } // namespace pegasus

@@ -298,5 +298,25 @@ arrow::Status BasicAuth::Serialize(const BasicAuth& basic_auth, std::string* out
   *out = pb_result.SerializeAsString();
   return arrow::Status::OK();
 }
+
+bool HeartbeatInfo::Equals(const HeartbeatInfo& other) const {
+  if (type != other.type) {
+    return false;
+  }
+  switch (type) {
+    case REGISTRATION:
+      return hostname == other.hostname;
+    default:
+      return true;
+  }
+}
+
+bool HeartbeatResult::Equals(const HeartbeatResult& other) const {
+  if (result_code != other.result_code) {
+    return false;
+  }
+  return true;
+}
+
 }  // namespace rpc
 }  // namespace pegasus
