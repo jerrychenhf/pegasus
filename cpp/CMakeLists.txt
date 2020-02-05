@@ -52,9 +52,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_mo
 include(cmake_modules/cmake_fns.txt)
 include(FindPegasus)
 include(FindArrow)
-include(FindArrowTesting)
 include(FindArrowFlight)
 include(FindParquet)
+
+if(PEGASUS_BUILD_TESTS)
+  include(FindArrowTesting)
+endif()
 
 include(CMakePackageConfigHelpers)
 include(CMakeParseArguments)
