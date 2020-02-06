@@ -15,13 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
+#ifndef PEGASUS_COMMON_VERSION_H
+#define PEGASUS_COMMON_VERSION_H
 
-#ifndef PEGASUS_COMMON_CONFIG_H
-#define PEGASUS_COMMON_CONFIG_H
-
-/// This is a template that is populated by CMake with config information.
-/// See be/CMakeLists.txt for the definition of the CMake symbols.
-
-#cmakedefine HAVE_SCHED_GETCPU
+const char* GetDaemonBuildVersion();
+const char* GetDaemonBuildHash();
+const char* GetDaemonBuildTime();
 
 #endif

@@ -31,6 +31,7 @@ add_library(Common
   worker_manager.cc
   init.cc
   logging.cc
+  version.cc
 )
 add_dependencies(Common gen-deps)
 
