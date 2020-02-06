@@ -21,17 +21,18 @@
 #include <arrow/status.h>
 #include <arrow/memory_pool.h>
 #include "runtime/exec_env.h"
+#include "dataset/cache_engine.h"
 
 using namespace arrow;
 
 namespace pegasus
 {
 
-class DRAMMemoryPool : public arrow::MemoryPool
+class CacheMemoryPool : public arrow::MemoryPool
 {
 public:
-  DRAMMemoryPool();
-  ~DRAMMemoryPool();
+  CacheMemoryPool(std::shared_ptr<CacheEngine> cache_engine);
+  ~CacheMemoryPool();
 
   arrow::Status Allocate(int64_t size, uint8_t **out) override;
   arrow::Status Reallocate(int64_t old_size, int64_t new_size, uint8_t **ptr) override;
@@ -45,7 +46,8 @@ public:
   std::string backend_name() const override;
 
   private:
-    std::shared_ptr<StoreManager> store_manager_;
+    std::shared_ptr<CacheEngine> cache_engine_;
+    int64_t occupied_size;
 };
 } // namespace pegasus
 

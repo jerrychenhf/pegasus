@@ -23,7 +23,7 @@ namespace pegasus {
 
 LruCacheEngine::LruCacheEngine(long capacity): cache_(capacity), cache_store_manager_(new CacheStoreManager()) {}
 
- Status LruCacheEngine::PutValue(std::string partition_path, int column_id, CacheRegion cache_region) {
+ Status LruCacheEngine::PutValue(std::string partition_path, int column_id, std::shared_ptr<CacheRegion> cache_region) {
    // TODO
    // 1. Get the StoreAllocator by calling DatasetCacheStoreManager#GetStoreAllocator method
    // 2. Call StoreManager#Store#Allocate method to allocate the memory to store the value
@@ -43,7 +43,7 @@ LruCacheEngine::~LruCacheEngine() {}
 NonEvictionCacheEngine::NonEvictionCacheEngine() {}
 NonEvictionCacheEngine:: ~NonEvictionCacheEngine(){}
 
-Status NonEvictionCacheEngine::PutValue(std::string partition_path, int column_id, CacheRegion cache_region) {
+Status NonEvictionCacheEngine::PutValue(std::string partition_path, int column_id, std::shared_ptr<CacheRegion> cache_region) {
  }
 
 } // namespace pegasus
