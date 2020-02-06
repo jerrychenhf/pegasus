@@ -19,6 +19,7 @@
 #define PEGASUS_COMMON_INIT_H
 
 #include "common/status.h"
+#include "util/test-info.h"
 
 // Using the first real-time signal available to initiate graceful shutdown.
 // See "Real-time signals" section under signal(7)'s man page for more info.
@@ -29,7 +30,8 @@ namespace pegasus {
 /// Initialises logging, flags
 /// Callers that want to override default gflags variables should do so before calling
 /// this method. No logging should be performed until after this method returns.
-void InitCommonRuntime(int argc, char** argv);
+void InitCommonRuntime(int argc, char** argv,
+  TestInfo::Mode test_mode);
 
 }
 

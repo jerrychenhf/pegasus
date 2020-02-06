@@ -15,10 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#define PEGASUS_VERSION_MAJOR @PEGASUS_VERSION_MAJOR@
-#define PEGASUS_VERSION_MINOR @PEGASUS_VERSION_MINOR@
-#define PEGASUS_VERSION_PATCH @PEGASUS_VERSION_PATCH@
-#define PEGASUS_VERSION ((PEGASUS_VERSION_MAJOR * 1000) + PEGASUS_VERSION_MINOR) * 1000 + PEGASUS_VERSION_PATCH
+#include "util/test-info.h"
 
-#cmakedefine GRPCPP_PP_INCLUDE
-#cmakedefine HAVE_SCHED_GETCPU
+using namespace pegasus;
+
+TestInfo::Mode TestInfo::mode_ = TestInfo::NON_TEST;

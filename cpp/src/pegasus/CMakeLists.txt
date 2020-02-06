@@ -50,6 +50,9 @@ function(ADD_PEGASUS_TEST REL_TEST_NAME)
                 ${ARG_UNPARSED_ARGUMENTS})
 endfunction()
 
+# Determine what functions are available on the current platform.
+INCLUDE(CheckFunctionExists)
+CHECK_FUNCTION_EXISTS(sched_getcpu HAVE_SCHED_GETCPU)
 
 set(PEGASUS_SRCS
     vendored/base64.cpp
@@ -91,6 +94,7 @@ endif()
 
 # resolve "#include "<subdir>/<name>.h"
 include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 
 set (PEGASUS_LIBS
   Cache

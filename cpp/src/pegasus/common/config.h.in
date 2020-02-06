@@ -15,10 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#define PEGASUS_VERSION_MAJOR @PEGASUS_VERSION_MAJOR@
-#define PEGASUS_VERSION_MINOR @PEGASUS_VERSION_MINOR@
-#define PEGASUS_VERSION_PATCH @PEGASUS_VERSION_PATCH@
-#define PEGASUS_VERSION ((PEGASUS_VERSION_MAJOR * 1000) + PEGASUS_VERSION_MINOR) * 1000 + PEGASUS_VERSION_PATCH
 
-#cmakedefine GRPCPP_PP_INCLUDE
+#ifndef PEGASUS_COMMON_CONFIG_H
+#define PEGASUS_COMMON_CONFIG_H
+
+/// This is a template that is populated by CMake with config information.
+/// See be/CMakeLists.txt for the definition of the CMake symbols.
+
 #cmakedefine HAVE_SCHED_GETCPU
+
+#endif

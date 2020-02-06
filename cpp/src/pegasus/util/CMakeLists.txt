@@ -39,6 +39,10 @@ add_library(Util
   error-util.cc
   network-util.cc
   thread-pool.cc
+  test-info.cc
+  cpu-info.cc
+  disk-info.cc
+  mem-info.cc
 )
 add_dependencies(Util gen-deps)
 

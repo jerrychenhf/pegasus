@@ -15,63 +15,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-
 #ifndef PEGASUS_COMMON_LOGGING_H
 #define PEGASUS_COMMON_LOGGING_H
 
-/// This is a wrapper around the glog header.  When we are compiling to IR,
-/// we don't want to pull in the glog headers.  Pulling them in causes linking
-/// issues when we try to dynamically link the codegen'd functions.
-#ifdef IR_COMPILE
-#include <iostream>
-  #ifdef DCHECK
-  #error "glog header was included from IR code"
-  #endif
-  #define DCHECK(condition) while(false) std::cout
-  #define DCHECK_EQ(a, b) while(false) std::cout
-  #define DCHECK_NE(a, b) while(false) std::cout
-  #define DCHECK_GT(a, b) while(false) std::cout
-  #define DCHECK_LT(a, b) while(false) std::cout
-  #define DCHECK_GE(a, b) while(false) std::cout
-  #define DCHECK_LE(a, b) while(false) std::cout
-  /// DCHECK_NOTNULL evaluates its arguments in all build types. We should usually use
-  /// DCHECK(x != NULL) instead.
-  #define DCHECK_NOTNULL(a) a
-  /// Similar to how glog defines DCHECK for release.
-  #define LOG(level) while(false) std::cout
-  #define VLOG(level) while(false) std::cout
-  #define VLOG_IS_ON(level) (false)
-#else
-  #include <glog/logging.h>
-  #include <gflags/gflags.h>
-#endif
-
-/// Define verbose logging levels.  Per-row logging is more verbose than per-file /
-/// per-rpc logging which is more verbose than per-connection / per-query logging.
-#define VLOG_CONNECTION VLOG(1)
-#define VLOG_RPC        VLOG(2)
-#define VLOG_QUERY      VLOG(1)
-#define VLOG_FILE       VLOG(2)
-#define VLOG_ROW        VLOG(3)
-#define VLOG_PROGRESS   VLOG(2)
-
-#define VLOG_CONNECTION_IS_ON VLOG_IS_ON(1)
-#define VLOG_RPC_IS_ON VLOG_IS_ON(2)
-#define VLOG_QUERY_IS_ON VLOG_IS_ON(1)
-#define VLOG_FILE_IS_ON VLOG_IS_ON(2)
-#define VLOG_ROW_IS_ON VLOG_IS_ON(3)
-#define VLOG_PROGRESS_IS_ON VLOG_IS_ON(2)
+#include <glog/logging.h>
+#include <gflags/gflags.h>
 
 /// Define a wrapper around DCHECK for strongly typed enums that print a useful error
 /// message on failure.
 #define DCHECK_ENUM_EQ(a, b)                                               \
   DCHECK(a == b) << "[ " #a " = " << static_cast<int>(a) << " , " #b " = " \
                  << static_cast<int>(b) << " ]"
-/*
+
 /// IR modules don't use these methods, and can't see the google namespace used in
 /// GetFullLogFilename()'s prototype.
-#ifndef IR_COMPILE
-namespace impala {
+namespace pegasus {
 
 /// glog doesn't allow multiple invocations of InitGoogleLogging(). This method
 /// conditionally calls InitGoogleLogging() only if it hasn't been called before.
@@ -87,17 +45,6 @@ void ShutdownLogging();
 
 /// Writes all command-line flags to the log at level INFO.
 void LogCommandLineFlags();
-
-/// Helper function that checks for the number of logfiles in the log directory and
-/// removes the oldest ones given an upper bound of number of logfiles to keep.
-void CheckAndRotateLogFiles(int max_log_files);
-
-/// Helper function that checks for the number of audit event logfiles in the log
-/// directory and removes the oldest ones given an upper bound of number of audit event
-/// logfiles to keep.
-void CheckAndRotateAuditEventLogFiles(int max_log_files);
 }
 
-#endif // IR_COMPILE
-*/
 #endif
