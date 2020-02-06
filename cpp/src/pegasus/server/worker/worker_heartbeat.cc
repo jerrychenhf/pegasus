@@ -27,8 +27,10 @@
 #include "rpc/client.h"
 #include "rpc/types.h"
 
+DECLARE_string(hostname);
 DECLARE_string(planner_hostname);
 DECLARE_int32(planner_port);
+DECLARE_int32(worker_port);
 
 DEFINE_int32(worker_heartbeat_frequency_ms, 1000, "(Advanced) Frequency (in ms) with"
     " which the worker sends heartbeat to planner.");
@@ -50,6 +52,9 @@ WorkerHeartbeat::WorkerHeartbeat()
         1,
         bind<void>(mem_fn(&WorkerHeartbeat::DoHeartbeat), this,
           _1, _2)));
+          
+  worker_address_ = FLAGS_hostname + ":" 
+    + std::to_string(FLAGS_worker_port);
 }
 
 WorkerHeartbeat::~WorkerHeartbeat() {
@@ -152,12 +157,20 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
   RETURN_IF_ERROR(status);
 
   rpc::HeartbeatInfo info;
+  if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION) {
+    info.type = rpc::HeartbeatInfo::REGISTRATION;
+    info.address = worker_address_;
+  } else {
+    info.type = rpc::HeartbeatInfo::HEARTBEAT;
+  }
+  
   std::unique_ptr<rpc::HeartbeatResult> result;
   arrow::Status arrowStatus = client->Heartbeat(info, &result);
   status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);
       
-  if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION) {
+  if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION &&
+    result->result_code == rpc::HeartbeatResult::REGISTERED) {
     registered_ = true;
   }
   
