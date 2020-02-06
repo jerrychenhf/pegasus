@@ -21,14 +21,18 @@
 
 #include <memory>
 #include <unordered_map>
+#include <boost/thread/locks.hpp>
+#include <boost/thread/shared_mutex.hpp>
 
-#include "pegasus/catalog/pegasus_catalog.h"
-#include "pegasus/catalog/spark_catalog.h"
-#include "pegasus/dataset/dataset_service.h"
-#include "pegasus/dataset/flightinfo_builder.h"
-#include "pegasus/util/consistent_hashing.h"
+#include "catalog/pegasus_catalog.h"
+#include "catalog/spark_catalog.h"
+#include "dataset/dataset_service.h"
+#include "dataset/flightinfo_builder.h"
+#include "util/consistent_hashing.h"
 
 namespace pegasus {
+
+boost::shared_mutex _dssaccess;
 
 DataSetService::DataSetService() {
 
@@ -47,15 +51,31 @@ Status DataSetService::Init() {
 }
 
 Status DataSetService::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
+
+  boost::shared_lock<boost::shared_mutex> rdlock(_dssaccess);
   dataset_store_->GetDataSets(datasets);
   return Status::OK();
 }
 
 Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset) {
 
+  boost::upgrade_lock<boost::shared_mutex> uprdlock(_dssaccess);
   dataset_store_->GetDataSet(dataset_path, dataset);
+
   if (dataset == NULL) {
-    CacheDataSet(dataset_path, dataset, CONHASH);
+    // Begin Write
+    boost::upgrade_to_unique_lock<boost::shared_mutex> wrlock(uprdlock);
+    // read again to avoid duplicated write
+    dataset_store_->GetDataSet(dataset_path, dataset);
+    if (dataset == NULL) {
+      // === CacheDataSet(dataset_path, dataset, CONHASH);
+      // build the dataset and insert it to dataset store.
+      auto dsbuilder = std::make_shared<DataSetBuilder>(metadata_manager_);
+      // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
+      dsbuilder->BuildDataset(dataset_path, dataset, CONHASH);
+      dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));
+    }
+    // End Write
   }
 
   return Status::OK();
@@ -63,6 +83,7 @@ Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<Data
 
 Status DataSetService::CacheDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy) {
 
+  boost::unique_lock<boost::shared_mutex> wrlock(_dssaccess);
   // build the dataset and insert it to dataset store.
   auto dsbuilder = std::make_shared<DataSetBuilder>(metadata_manager_);
   // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
