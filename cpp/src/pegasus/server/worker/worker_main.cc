@@ -21,15 +21,13 @@
 #include "common/status.h"
 #include "runtime/exec_env.h"
 #include "server/worker/worker.h"
-
+#include "util/test-info.h"
 
 using namespace std;
 using namespace pegasus;
 
 int main(int argc, char** argv) {
-  InitCommonRuntime(argc, argv);
-  
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
+  InitCommonRuntime(argc, argv, TestInfo::NON_TEST);
 
   std::unique_ptr<Worker> worker(new Worker());
   

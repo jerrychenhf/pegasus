@@ -15,10 +15,27 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#define PEGASUS_VERSION_MAJOR @PEGASUS_VERSION_MAJOR@
-#define PEGASUS_VERSION_MINOR @PEGASUS_VERSION_MINOR@
-#define PEGASUS_VERSION_PATCH @PEGASUS_VERSION_PATCH@
-#define PEGASUS_VERSION ((PEGASUS_VERSION_MAJOR * 1000) + PEGASUS_VERSION_MINOR) * 1000 + PEGASUS_VERSION_PATCH
+#ifndef PEGASUS_UTIL_TEST_INFO_H
+#define PEGASUS_UTIL_TEST_INFO_H
 
-#cmakedefine GRPCPP_PP_INCLUDE
-#cmakedefine HAVE_SCHED_GETCPU
+namespace pegasus {
+
+/// Provides global access to whether this binary is running as part of the tests
+class TestInfo {
+ public:
+  enum Mode {
+    NON_TEST, // Not a test, one of the main daemons
+    TEST,
+  };
+
+  /// Called in InitCommonRuntime().
+  static void Init(Mode mode) { mode_ = mode; }
+
+  static bool is_test() { return mode_ == TEST; }
+
+ private:
+  static Mode mode_;
+};
+
+}
+#endif
