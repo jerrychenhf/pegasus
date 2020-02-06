@@ -63,18 +63,14 @@ Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<Data
   dataset_store_->GetDataSet(dataset_path, dataset);
 
   if (dataset == NULL) {
+    // === CacheDataSet(dataset_path, dataset, CONHASH);
+    // build the dataset and insert it to dataset store.
+    auto dsbuilder = std::make_shared<DataSetBuilder>(metadata_manager_);
+    // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
+    dsbuilder->BuildDataset(dataset_path, dataset, CONHASH);
     // Begin Write
     boost::upgrade_to_unique_lock<boost::shared_mutex> wrlock(uprdlock);
-    // read again to avoid duplicated write
-    dataset_store_->GetDataSet(dataset_path, dataset);
-    if (dataset == NULL) {
-      // === CacheDataSet(dataset_path, dataset, CONHASH);
-      // build the dataset and insert it to dataset store.
-      auto dsbuilder = std::make_shared<DataSetBuilder>(metadata_manager_);
-      // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
-      dsbuilder->BuildDataset(dataset_path, dataset, CONHASH);
-      dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));
-    }
+    dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));
     // End Write
   }
 
@@ -83,12 +79,14 @@ Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<Data
 
 Status DataSetService::CacheDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy) {
 
-  boost::unique_lock<boost::shared_mutex> wrlock(_dssaccess);
   // build the dataset and insert it to dataset store.
   auto dsbuilder = std::make_shared<DataSetBuilder>(metadata_manager_);
   // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
   dsbuilder->BuildDataset(dataset_path, dataset, distpolicy);
+  // Begin Write
+  boost::unique_lock<boost::shared_mutex> wrlock(_dssaccess);
   dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));
+  // End Write
 
   return Status::OK();
 }

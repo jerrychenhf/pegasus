@@ -49,7 +49,7 @@ Status DataSetStore::GetDataSet(std::string dataset_path, std::shared_ptr<DataSe
 Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset) {
    
   std::string key = dataset->dataset_path();
-  planner_metadata_[key] = std::move(dataset);
+  planner_metadata_[key] = std::move(dataset);  // why use move here while dataset is a shared_ptr?
   return Status::OK();
 }
 
