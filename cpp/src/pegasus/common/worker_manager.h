@@ -18,7 +18,12 @@
 #ifndef PEGASUS_WORKER_MANAGER_H
 #define PEGASUS_WORKER_MANAGER_H
 
+#include <atomic>
 #include <vector>
+
+#include <boost/thread/mutex.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/unordered_map.hpp>
 
 #include "common/location.h"
 #include "rpc/types.h"
@@ -26,6 +31,34 @@
 using namespace std;
 
 namespace pegasus {
+  
+/// A SubscriberId uniquely identifies a single subscriber, and is
+/// provided by the subscriber at registration time.
+typedef std::string WorkerId;
+    
+class WorkerRegistration {
+public:
+  enum WorkerState {
+    UNKNOWN = 0,  /// Unused
+    ACTIVE = 1,
+    DEAD = 2
+  };
+  
+  WorkerRegistration(const WorkerId& id)
+    : id_(id), state_(WorkerState::UNKNOWN), last_heartbeat_time_(0) {
+  }
+  
+  const WorkerId& id() const { return id_; }
+  const rpc::Location& address() const { return address_; }
+  WorkerState state() const { return state_; }
+
+public:
+  WorkerId id_;
+  rpc::Location address_;
+  WorkerState state_;
+  
+  int64_t last_heartbeat_time_;
+};
 
 // Get the worker locations
 class WorkerManager {
@@ -34,9 +67,22 @@ class WorkerManager {
   
   Status GetWorkerLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations);
 
-  Status Heartbeat(const rpc::HeartbeatInfo& request, std::unique_ptr<rpc::HeartbeatResult>* response);
+  Status Heartbeat(const rpc::HeartbeatInfo& info, std::unique_ptr<rpc::HeartbeatResult>* result);
+  
  private:
   std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations;
+  
+  Status RegisterWorker(const rpc::HeartbeatInfo& info);
+  Status HeartbeatWorker(const rpc::HeartbeatInfo& info);
+  
+  Status UnregisterWorker(WorkerRegistration* worker);
+  
+  typedef boost::unordered_map<WorkerId, std::shared_ptr<WorkerRegistration>>
+    WorkerRegistrationMap;
+  WorkerRegistrationMap workers_;
+  
+  /// Protects access to workers
+  boost::mutex workers_lock_;
 };
 
 } // namespace pegasus

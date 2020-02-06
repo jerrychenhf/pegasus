@@ -502,7 +502,13 @@ struct PEGASUS_RPC_EXPORT HeartbeatInfo {
   /// The heartbeat type
   HeartbeatType type;
 
-  std::string address;
+  /// The identifier
+  std::string hostname;
+  
+  /// The address to contact the worker for RPC
+  Location address;
+  
+  const Location& get_address() const { return address; }
 
   bool Equals(const HeartbeatInfo& other) const;
 

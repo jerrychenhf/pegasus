@@ -23,6 +23,8 @@
 #include "util/os-info.h"
 #include "util/test-info.h"
 #include "util/network-util.h"
+#include "util/thread.h"
+#include "util/debug-util.h"
 
 using namespace pegasus;
 
@@ -49,9 +51,12 @@ void pegasus::InitCommonRuntime(int argc, char** argv,
   // Set the default hostname. The user can override this with the hostname flag.
   ABORT_IF_ERROR(GetHostname(&FLAGS_hostname));
   
+  google::SetVersionString(pegasus::GetBuildVersion());
   google::ParseCommandLineFlags(&argc, &argv, true);
   
   pegasus::InitGoogleLoggingSafe(argv[0]);
+  
+  pegasus::InitThreading();
   
   LOG(INFO) << "Using hostname: " << FLAGS_hostname;
   pegasus::LogCommandLineFlags();

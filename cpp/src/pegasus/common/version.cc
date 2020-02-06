@@ -1,3 +1,4 @@
+//
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
 // distributed with this work for additional information
@@ -15,25 +16,27 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "dataset/cache_engine.h"
+// This is a generated file, DO NOT EDIT IT.
+// To change this file, see impala/bin/gen_build_version.py
 
-using namespace std;
+#include "common/version.h"
+#include "common/config.h"
 
-namespace pegasus {
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
 
-LruCacheEngine::LruCacheEngine(long capacity): cache_(capacity), cache_store_manager_(new CacheStoreManager()) {}
+#define PEGASUS_BUILD_VERSION STR(PEGASUS_VERSION_MAJOR) "." STR(PEGASUS_VERSION_MINOR) "." STR(PEGASUS_VERSION_PATCH)
+#define PEGASUS_BUILD_HASH "8dcff3aa41e7f252aa27c6ab1275712103ed5d2c"
+#define PEGASUS_BUILD_TIME "Fri Mar  9 06:41:18 CST 2018"
 
- Status LruCacheEngine::PutValue(std::string partition_path, int column_id, std::shared_ptr<CacheRegion> cache_region) {
-  CacheEntryKey key = CacheEntryKey(partition_path, column_id);
-  cache_.insert(key, cache_region);
- }
+const char* GetDaemonBuildVersion() {
+  return PEGASUS_BUILD_VERSION;
+}
 
-LruCacheEngine::~LruCacheEngine() {}
+const char* GetDaemonBuildHash() {
+  return PEGASUS_BUILD_HASH;
+}
 
-NonEvictionCacheEngine::NonEvictionCacheEngine() {}
-NonEvictionCacheEngine:: ~NonEvictionCacheEngine(){}
-
-Status NonEvictionCacheEngine::PutValue(std::string partition_path, int column_id, std::shared_ptr<CacheRegion> cache_region) {
- }
-
-} // namespace pegasus
+const char* GetDaemonBuildTime() {
+  return PEGASUS_BUILD_TIME;
+}

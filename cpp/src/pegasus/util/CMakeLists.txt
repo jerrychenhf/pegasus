@@ -43,6 +43,7 @@ add_library(Util
   cpu-info.cc
   disk-info.cc
   mem-info.cc
+  debug-util.cc
 )
 add_dependencies(Util gen-deps)
 

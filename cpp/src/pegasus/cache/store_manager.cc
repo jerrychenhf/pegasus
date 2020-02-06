@@ -24,14 +24,15 @@ StoreManager::~StoreManager(){}
 StoreManager::StoreManager() {
   ExecEnv* env =  ExecEnv::GetInstance();
   std::shared_ptr<Store> store;
-  std::vector<Store::StoreType> store_types = env->GetStoreTypes();
-  for(std::vector<Store::StoreType>::iterator it = store_types.begin(); it != store_types.end(); ++it) {
+  std::unordered_map<string, long> stores_info = env->GetStoresInfo();
+  for(std::unordered_map<string, long>::iterator it = stores_info.begin(); it != stores_info.end(); ++it) {
+
     std::shared_ptr<Store> store;
-    if (*it == Store::StoreType::MEMORY) {
-      store = std::shared_ptr<MemoryStore>(new MemoryStore());
+    if (it->first == "MEMORY") {
+      store = std::shared_ptr<MemoryStore>(new MemoryStore(it->second));
       stores_.insert(std::make_pair("MEMORY", store));
-    } else if (*it == Store::StoreType::DCPMM) {
-      store = std::shared_ptr<DCPMMStore>(new DCPMMStore());
+    } else if (it->first == "DCPMM") {
+      store = std::shared_ptr<DCPMMStore>(new DCPMMStore(it->second));
       stores_.insert(std::make_pair("DCPMM", store));
     } 
   }

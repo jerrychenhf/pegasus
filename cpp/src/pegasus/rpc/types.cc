@@ -303,6 +303,11 @@ bool HeartbeatInfo::Equals(const HeartbeatInfo& other) const {
   if (type != other.type) {
     return false;
   }
+  
+  if (hostname != other.hostname) {
+    return false;
+  }
+  
   switch (type) {
     case REGISTRATION:
       return address == other.address;

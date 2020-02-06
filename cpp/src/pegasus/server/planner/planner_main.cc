@@ -15,16 +15,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/common/location.h"
-#include "pegasus/util/global_flags.h"
-#include "pegasus/runtime/exec_env.h"
-#include "pegasus/server/planner/planner.h"
+#include "common/init.h"
+#include "common/location.h"
+#include "runtime/exec_env.h"
+#include "server/planner/planner.h"
 
 using namespace std;
 using namespace pegasus;
 
 int main(int argc, char** argv) {
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
+  InitCommonRuntime(argc, argv, TestInfo::NON_TEST);
 
   std::unique_ptr<Planner> planner_server(new Planner());
   planner_server->Start();
