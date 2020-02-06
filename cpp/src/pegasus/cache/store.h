@@ -27,6 +27,7 @@ class Store {
  public:
 
   virtual Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) = 0;
+  virtual Status Free(uint8_t* buffer, int64_t size) = 0;
   virtual Status GetTotalSize(long& total_size) = 0;
   virtual Status GetUsedSize(long& used_size) = 0;
   virtual std::string GetStoreName() = 0;
@@ -49,21 +50,30 @@ class Store {
 
 class MemoryStore : public Store {
  public:
-  MemoryStore();
+  MemoryStore(long total_size);
   Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) override;
+  Status Free(uint8_t* buffer, int64_t size) override;
   Status GetTotalSize(long& total_size) override;
   Status GetUsedSize(long& used_size) override;
   std::string GetStoreName() override;
 
+  private:
+  long total_size_;
+  long used_size_;
 };
 
 class DCPMMStore : public Store {
  public:
-  DCPMMStore();
+  DCPMMStore(long total_size);
   Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) override;
+  Status Free(uint8_t* buffer, int64_t size) override;
   Status GetTotalSize(long& total_size) override;
   Status GetUsedSize(long& used_size) override;
   std::string GetStoreName() override;
+
+private:
+  long total_size_;
+  long used_size_;
 };
 
 // class FileStore : public Store {

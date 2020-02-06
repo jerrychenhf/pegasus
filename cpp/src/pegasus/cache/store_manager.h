@@ -15,8 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include <vector>
-
 #include "cache/store.h"
 
 namespace pegasus {

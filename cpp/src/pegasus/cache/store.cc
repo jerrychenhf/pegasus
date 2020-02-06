@@ -19,32 +19,44 @@
 
 namespace pegasus {
 
-MemoryStore::MemoryStore() {
+MemoryStore::MemoryStore(long total_size): total_size_(total_size) {
 
 }
 
 Status MemoryStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) {
   uint8_t* address = reinterpret_cast<uint8_t*>(std::malloc(size));
   *cache_region = std::shared_ptr<CacheRegion>(new CacheRegion(&address, size, 0));
+  total_size_ = total_size_ - size;
+  used_size_ = used_size_ + size;
+}
+
+Status MemoryStore::Free(uint8_t* buffer, int64_t size) {
+  std::free(buffer);
+  total_size_ = total_size_ + size;
+  used_size_ = used_size_ - size;
 }
 
 Status MemoryStore::GetTotalSize(long& total_size) {
-    
+  total_size = total_size_; 
 }
 
 Status MemoryStore::GetUsedSize(long& used_size) {
-    
+  used_size = used_size_;
 }
 
 std::string MemoryStore::GetStoreName() {
     return "MEMORY";
 }
 
-DCPMMStore::DCPMMStore() {
+DCPMMStore::DCPMMStore(long total_size): total_size_(total_size) {
 
 }
 
 Status DCPMMStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) {
+
+}
+
+Status DCPMMStore::Free(uint8_t* buffer, int64_t size) {
 
 }
 
