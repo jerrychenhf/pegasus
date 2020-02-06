@@ -18,7 +18,9 @@
 #ifndef PEGASUS_WORKER_HEARTBEAT_H
 #define PEGASUS_WORKER_HEARTBEAT_H
 
+#include <boost/scoped_ptr.hpp>
 #include "common/status.h"
+#include "runtime/client-cache-types.h"
 
 using namespace std;
 
@@ -26,6 +28,8 @@ namespace pegasus {
 
 template <typename T>
 class ThreadPool;
+
+typedef ClientCache<rpc::FlightClient> FlightClientCache;
 
 class WorkerHeartbeat {
  public:
@@ -75,6 +79,9 @@ class WorkerHeartbeat {
   Status SendHeartbeat(const ScheduledHeartbeat& heartbeat) WARN_UNUSED_RESULT;
 
   bool registered_ = false;
+  
+  /// Cache of subscriber clients used for Heartbeat() RPCs.
+  boost::scoped_ptr<FlightClientCache> heartbeat_client_cache_;
 };
 
 } // namespace pegasus

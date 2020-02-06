@@ -16,11 +16,16 @@
 // under the License.
 
 #include "server/worker/worker_heartbeat.h"
+
+#include <string>
 #include "gutil/strings/substitute.h"
 #include "util/global_flags.h"
 #include "util/time.h"
 #include "util/logging.h"
 #include "util/thread-pool.h"
+#include "runtime/client_cache.h"
+#include "rpc/client.h"
+#include "rpc/types.h"
 
 DECLARE_string(planner_hostname);
 DECLARE_int32(planner_port);
@@ -33,7 +38,11 @@ const uint32_t DEADLINE_MISS_THRESHOLD_MS = 2000;
 
 namespace pegasus {
 
-WorkerHeartbeat::WorkerHeartbeat(){
+typedef ClientConnection<rpc::FlightClient> FlightClientConnection;
+
+WorkerHeartbeat::WorkerHeartbeat()
+  : heartbeat_client_cache_(new FlightClientCache())
+{
   heartbeat_threadpool_ = std::unique_ptr<ThreadPool<ScheduledHeartbeat>>(
     new ThreadPool<ScheduledHeartbeat>("worker-heartbeat",
         "worker-heartbeat",
@@ -135,16 +144,19 @@ void WorkerHeartbeat::DoHeartbeat(int thread_id,
 }
 
 Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
-  /*
-  ClientConnection client(heartbeat_client_cache_.get(),
-      subscriber->network_address(), &status);
+  Status status;
+  std::string planner_address = FLAGS_planner_hostname + ":" 
+    + std::to_string(FLAGS_planner_port);
+  FlightClientConnection client(heartbeat_client_cache_.get(),
+      planner_address, &status);
   RETURN_IF_ERROR(status);
 
-  HeartbeatRequest request;
-  RETURN_IF_ERROR(
-      client.WorkerHeartbeat(request));
-  */
-  
+  rpc::HeartbeatInfo info;
+  std::unique_ptr<rpc::HeartbeatResult> result;
+  arrow::Status arrowStatus = client->Heartbeat(info, &result);
+  status = Status::fromArrowStatus(arrowStatus);
+  RETURN_IF_ERROR(status);
+      
   if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION) {
     registered_ = true;
   }
