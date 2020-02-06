@@ -377,9 +377,11 @@ arrow::Status ToProto(const SchemaResult& result, pb::SchemaResult* pb_result) {
 arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info) {
   if (pb_info.type() == pb::HeartbeatInfo::REGISTRATION) {
     info->type = HeartbeatInfo::REGISTRATION;
-    info->address = pb_info.address();
+    info->hostname = pb_info.hostname();
+    FromProto(pb_info.address(), &info->address);
   } else if (pb_info.type() == pb::HeartbeatInfo::HEARTBEAT) {
     info->type = HeartbeatInfo::HEARTBEAT;
+    info->hostname = pb_info.hostname();
   } else {
     return arrow::Status::Invalid("Client sent UNKNOWN heartbeat type");
   }
@@ -389,9 +391,11 @@ arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info) {
 arrow::Status ToProto(const HeartbeatInfo& info, pb::HeartbeatInfo* pb_info) {
   if (info.type == HeartbeatInfo::REGISTRATION) {
     pb_info->set_type(pb::HeartbeatInfo::REGISTRATION);
-    pb_info->set_address(info.address);
+    pb_info->set_hostname(info.hostname);
+    ToProto(info.address, pb_info->mutable_address());
   } else if (info.type == HeartbeatInfo::HEARTBEAT) {
     pb_info->set_type(pb::HeartbeatInfo::HEARTBEAT);
+    pb_info->set_hostname(info.hostname);
   } else {
     return arrow::Status::Invalid("UNKNOWN heartbeat type");
   }

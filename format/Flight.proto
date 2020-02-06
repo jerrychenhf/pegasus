@@ -352,9 +352,14 @@ message HeartbeatInfo {
   HeartbeatType type = 1;
 
   /*
-   * The worker address (hostname:port) reported in the heartbeat
+   * The worker hostname as identifer reported in the heartbeat
    */
-  string address = 2;
+  string hostname = 2;
+   
+  /*
+   * The worker address reported in the heartbeat
+   */
+  Location address = 3;
 }
 
 message HeartbeatResult {

@@ -102,6 +102,7 @@ enum class StatusCode : char {
   ThreadPoolSubmitFailed = 15,
   RpcTimeout = 16,
   GeneralError = 17,
+  ObjectNotFound = 18,
   
   // Gandiva range of errors
   CodeGenError = 40,
@@ -272,6 +273,11 @@ class PEGASUS_EXPORT Status : public util::EqualityComparable<Status>,
   template <typename... Args>
   static Status GeneralError(Args&&... args) {
     return Status::FromArgs(StatusCode::GeneralError, std::forward<Args>(args)...);
+  }
+  
+  template <typename... Args>
+  static Status ObjectNotFound(Args&&... args) {
+    return Status::FromArgs(StatusCode::ObjectNotFound, std::forward<Args>(args)...);
   }
 
   template <typename... Args>

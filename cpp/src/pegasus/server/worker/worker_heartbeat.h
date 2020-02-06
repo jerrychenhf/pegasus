@@ -82,8 +82,6 @@ class WorkerHeartbeat {
   
   /// Cache of subscriber clients used for Heartbeat() RPCs.
   boost::scoped_ptr<FlightClientCache> heartbeat_client_cache_;
-  
-  std::string worker_address_;
 };
 
 } // namespace pegasus

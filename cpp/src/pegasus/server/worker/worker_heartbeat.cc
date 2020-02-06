@@ -52,9 +52,6 @@ WorkerHeartbeat::WorkerHeartbeat()
         1,
         bind<void>(mem_fn(&WorkerHeartbeat::DoHeartbeat), this,
           _1, _2)));
-          
-  worker_address_ = FLAGS_hostname + ":" 
-    + std::to_string(FLAGS_worker_port);
 }
 
 WorkerHeartbeat::~WorkerHeartbeat() {
@@ -157,12 +154,14 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
   RETURN_IF_ERROR(status);
 
   rpc::HeartbeatInfo info;
+  
   if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION) {
     info.type = rpc::HeartbeatInfo::REGISTRATION;
-    info.address = worker_address_;
   } else {
     info.type = rpc::HeartbeatInfo::HEARTBEAT;
   }
+  info.hostname = FLAGS_hostname;
+  rpc::Location::ForGrpcTcp(FLAGS_hostname, FLAGS_worker_port, &info.address);
   
   std::unique_ptr<rpc::HeartbeatResult> result;
   arrow::Status arrowStatus = client->Heartbeat(info, &result);
