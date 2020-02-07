@@ -27,11 +27,20 @@ WorkerManager::WorkerManager() {
 
 }
 
-Status WorkerManager::GetWorkerLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations) {
-
+Status WorkerManager::GetWorkerRegistrations(
+  std::vector<std::shared_ptr<WorkerRegistration>>& registrations) {
+  {
+    lock_guard<mutex> l(workers_lock_);
+    for(WorkerRegistrationMap::iterator it = workers_.begin();
+      it != workers_.end(); ++it) {
+      registrations.push_back(it->second);
+    }
+  }
+  return Status::OK();
 }
 
-Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info, std::unique_ptr<rpc::HeartbeatResult>* result){
+Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info,
+  std::unique_ptr<rpc::HeartbeatResult>* result){
   Status status = Status::OK();
   if(info.type == rpc::HeartbeatInfo::REGISTRATION) {
     status = RegisterWorker(info);
@@ -40,7 +49,8 @@ Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info, std::unique_ptr<
   }
   RETURN_IF_ERROR(status);
   
-  std::unique_ptr<rpc::HeartbeatResult> r = std::unique_ptr<rpc::HeartbeatResult>(new rpc::HeartbeatResult());
+  std::unique_ptr<rpc::HeartbeatResult> r =
+    std::unique_ptr<rpc::HeartbeatResult>(new rpc::HeartbeatResult());
   if(info.type == rpc::HeartbeatInfo::REGISTRATION) {
     r->result_code = rpc::HeartbeatResult::REGISTERED;
   } else  if(info.type == rpc::HeartbeatInfo::HEARTBEAT) {

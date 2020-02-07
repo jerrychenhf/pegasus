@@ -66,7 +66,7 @@ class WorkerManager {
  public:
   WorkerManager();
   
-  Status GetWorkerLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations);
+  Status GetWorkerRegistrations(std::vector<std::shared_ptr<WorkerRegistration>>& registrations);
 
   Status Heartbeat(const rpc::HeartbeatInfo& info, std::unique_ptr<rpc::HeartbeatResult>* result);
   
