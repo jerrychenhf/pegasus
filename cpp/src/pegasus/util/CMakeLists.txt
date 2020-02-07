@@ -31,7 +31,6 @@ add_library(Util
   util_rbtree.c
   md5.c
   global_flags.cc
-  logging.cc
   string_builder.cc
   time.cc
   os-info.cc

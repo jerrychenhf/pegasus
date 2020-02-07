@@ -23,7 +23,7 @@
 
 #include "util/global_flags.h"
 #include "dataset/dataset_cache_manager.h"
-#include "util/logging.h"
+#include "common/logging.h"
 #include "server/worker/worker.h"
 #include "server/worker/worker_heartbeat.h"
 

@@ -18,10 +18,11 @@
 #ifndef PEGASUS_PLANNER_H
 #define PEGASUS_PLANNER_H
 
-#include "pegasus/dataset/dataset_service.h"
-#include "pegasus/common/worker_manager.h"
-#include "pegasus/storage/storage_plugin.h"
-#include "pegasus/server/planner/planner_table_api_service.h"
+#include "common/logging.h"
+#include "common/worker_manager.h"
+#include "dataset/dataset_service.h"
+#include "storage/storage_plugin.h"
+#include "server/planner/planner_table_api_service.h"
 
 using namespace std;
 
@@ -34,7 +35,9 @@ class Planner {
  public:
   Planner();
   ~Planner();
-  void Start();
+
+  Status Init();
+  Status Start();
 
  private:
   ExecEnv* exec_env_;
