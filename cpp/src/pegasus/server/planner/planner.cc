@@ -26,7 +26,7 @@
 #include "server/planner/planner.h"
 #include "storage/storage_plugin.h"
 
-DECLARE_string(planner_hostname);
+DECLARE_string(hostname);
 DECLARE_int32(planner_port);
 
 namespace pegasus {
@@ -43,12 +43,12 @@ Planner::~Planner() {
 
 Status Planner::Init() {
   RETURN_IF_ERROR(planner_table_api_service_->Init());
-  
+
   return Status::OK();
 }
 
 Status Planner::Start() {
-  std::cout << "Planner listening on:" << FLAGS_planner_hostname << ":" << FLAGS_planner_port << std::endl;
+  std::cout << "Planner listening on:" << FLAGS_hostname << ":" << FLAGS_planner_port << std::endl;
   RETURN_IF_ERROR(planner_table_api_service_->Serve());
 
   return Status::OK();

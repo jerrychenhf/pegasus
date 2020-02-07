@@ -27,7 +27,7 @@
 #include "server/worker/worker.h"
 #include "server/worker/worker_heartbeat.h"
 
-DECLARE_string(worker_hostname);
+DECLARE_string(hostname);
 DECLARE_int32(worker_port);
 
 namespace pegasus {
@@ -51,7 +51,7 @@ Status Worker::Init() {
 }
 
 Status Worker::Start() {
-  std::cout << "Worker listening on:" << FLAGS_worker_hostname << ":" << FLAGS_worker_port << std::endl;
+  std::cout << "Worker listening on:" << FLAGS_hostname << ":" << FLAGS_worker_port << std::endl;
   RETURN_IF_ERROR(worker_table_api_service_->Serve());
   
   return Status::OK();

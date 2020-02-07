@@ -32,8 +32,7 @@ class ExecEnv {
  public:
   ExecEnv();
 
-  ExecEnv(const std::string& planner_hostname, int32_t planner_port,
-      const std::string& worker_hostname, int32_t worker_port,
+  ExecEnv(const std::string& hostname, int32_t planner_port, int32_t worker_port,
       const std::string& storage_plugin_type, const std::string& store_types);
 
   static ExecEnv* GetInstance() { return exec_env_; }
