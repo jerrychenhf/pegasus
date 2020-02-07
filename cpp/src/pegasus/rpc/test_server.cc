@@ -28,7 +28,7 @@
 #include "rpc/server.h"
 #include "rpc/test_util.h"
 #include "rpc/types.h"
-#include "pegasus/util/logging.h"
+#include "arrow/util/logging.h"
 
 DEFINE_int32(port, 31337, "Server port to listen on");
 

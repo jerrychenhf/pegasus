@@ -29,11 +29,11 @@
 #include "arrow/status.h"
 
 #include "common/compiler-util.h"
+#include "common/logging.h"
 #include "util/compare.h"
 #include "util/macros.h"
 #include "util/string_builder.h"
 #include "util/visibility.h"
-#include "util/logging.h"
 
 #ifdef PEGASUS_EXTRA_ERROR_CONTEXT
 

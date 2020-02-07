@@ -22,7 +22,7 @@
 #include "runtime/exec_env.h"
 #include "parquet/parquet_reader.h"
 #include "cache/cache_memory_pool.h"
-#include "util/logging.h"
+#include "common/logging.h"
 
 namespace pegasus {
 

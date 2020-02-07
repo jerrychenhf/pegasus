@@ -20,8 +20,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "pegasus/common/status.h"
-#include "pegasus/util/logging.h"
+#include "common/status.h"
 
 namespace pegasus {
 
@@ -29,7 +28,7 @@ Status::Status(StatusCode code, const std::string& msg)
     : Status::Status(code, msg, nullptr) {}
 
 Status::Status(StatusCode code, std::string msg, std::shared_ptr<StatusDetail> detail) {
-  PEGASUS_CHECK_NE(code, StatusCode::OK) << "Cannot construct ok status with message";
+  DCHECK(code != StatusCode::OK) << "Cannot construct ok status with message";
   state_ = new State;
   state_->code = code;
   state_->msg = std::move(msg);
@@ -131,7 +130,7 @@ void Status::Abort(const std::string& message) const {
 
 #ifdef PEGASUS_EXTRA_ERROR_CONTEXT
 void Status::AddContextLine(const char* filename, int line, const char* expr) {
-  PEGASUS_CHECK(!ok()) << "Cannot add context line to ok status";
+  DCHECK(!ok()) << "Cannot add context line to ok status";
   std::stringstream ss;
   ss << "\nIn " << filename << ", line " << line << ", code: " << expr;
   state_->msg += ss.str();

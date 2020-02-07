@@ -21,7 +21,7 @@
 #include "gutil/strings/substitute.h"
 #include "util/global_flags.h"
 #include "util/time.h"
-#include "util/logging.h"
+#include "common/logging.h"
 #include "util/thread-pool.h"
 #include "runtime/client_cache.h"
 #include "rpc/client.h"
