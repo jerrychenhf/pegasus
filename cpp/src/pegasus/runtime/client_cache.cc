@@ -30,18 +30,19 @@
 namespace pegasus {
   
   pegasus::Status ClientWrapper::Open(uint32_t num_tries, uint64_t wait_ms) {
-    Location location;
-    RETURN_IF_ERROR(Location::Parse(address_, &location));
-    
-    std::string host = location.host();
-    int32_t port = location.port();
-    
-    rpc::Location rlocation;
-    rpc::Status status = rpc::Location::ForGrpcTcp(host, port, &rlocation);
+    rpc::Location location;
+    rpc::Status status = Location::Parse(address_, &location);
     if(!status.ok())
       return pegasus::Status::fromArrowStatus(status);
       
-    status = rpc::FlightClient::Connect(rlocation, &client_);
+    std::string host = location.host();
+    int32_t port = location.port();
+    
+    status = rpc::Location::ForGrpcTcp(host, port, &location);
+    if(!status.ok())
+      return pegasus::Status::fromArrowStatus(status);
+      
+    status = rpc::FlightClient::Connect(location, &client_);
     if(!status.ok())
       return pegasus::Status::fromArrowStatus(status);
       
