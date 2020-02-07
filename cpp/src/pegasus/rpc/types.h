@@ -290,7 +290,9 @@ struct PEGASUS_RPC_EXPORT Location {
 
   /// \brief Get the scheme of this URI.
   std::string scheme() const;
-
+  std::string host() const ;
+  int32_t port() const ;
+  
   bool Equals(const Location& other) const;
 
   friend bool operator==(const Location& left, const Location& right) {

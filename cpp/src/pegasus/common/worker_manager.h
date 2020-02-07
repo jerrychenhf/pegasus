@@ -25,6 +25,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/unordered_map.hpp>
 
+#include "common/status.h"
 #include "common/location.h"
 #include "rpc/types.h"
 

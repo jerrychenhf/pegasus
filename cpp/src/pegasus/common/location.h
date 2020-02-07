@@ -17,79 +17,11 @@
 
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
-
-#include "pegasus/common/status.h"
-#include "arrow/util/uri.h"
-
-using namespace std;
+#include "rpc/types.h"
 
 namespace pegasus {
-/// \brief A host location (a URI)
-class Location {
- public:
-  /// \brief Initialize a blank location.
-  Location();
-  Location(const Location &loc);
-  ~Location();
-  /// \brief Initialize a location by parsing a URI string
-  static Status Parse(const std::string& uri_string, Location* location);
-
-  /// \brief Initialize a location for a non-TLS, gRPC-based Flight
-  /// service from a host and port
-  /// \param[in] host The hostname to connect to
-  /// \param[in] port The port
-  /// \param[out] location The resulting location
-  static Status ForGrpcTcp(const std::string& host, const int port, Location* location);
-
-  /// \brief Initialize a location for a TLS-enabled, gRPC-based Flight
-  /// service from a host and port
-  /// \param[in] host The hostname to connect to
-  /// \param[in] port The port
-  /// \param[out] location The resulting location
-  static Status ForGrpcTls(const std::string& host, const int port, Location* location);
-
-  /// \brief Initialize a location for a domain socket-based Flight
-  /// service
-  /// \param[in] path The path to the domain socket
-  /// \param[out] location The resulting location
-  static Status ForGrpcUnix(const std::string& path, Location* location);
-
-  /// \brief Get a representation of this URI as a string.
-  std::string ToString() const;
-
-  /// \brief Get the scheme of this URI.
-  std::string scheme() const;
   
-  std::string host() const { return uri_->host(); }
-  int32_t port() const { return uri_->port(); }
+typedef rpc::Location Location;
 
-  bool Equals(const Location& other) const;
-
-  uint32_t GetCacheSize()
-  {
-    return cachesizegb_;
-  }
-
-  void SetCacheSize(uint32_t cachesizeinGB)
-  {
-    cachesizegb_ = cachesizeinGB;
-  }
-
-  friend bool operator==(const Location& left, const Location& right) {
-    return left.Equals(right);
-  }
-  friend bool operator!=(const Location& left, const Location& right) {
-    return !(left == right);
-  }
- private:
-  std::shared_ptr<arrow::internal::Uri> uri_;
-  uint32_t cachesizegb_;
-};
 
 } // namespace pegasus

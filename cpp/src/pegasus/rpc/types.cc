@@ -233,6 +233,14 @@ std::string Location::scheme() const {
   return scheme;
 }
 
+std::string Location::host() const {
+  return uri_->host(); 
+}
+
+int32_t Location::port() const {
+  return uri_->port(); 
+}
+
 bool Location::Equals(const Location& other) const {
   return ToString() == other.ToString();
 }

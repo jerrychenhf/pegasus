@@ -65,7 +65,9 @@ void ConsistentHashRing::SetupDist()
 
 void ConsistentHashRing::AddLocation(Location location)
 {
-	int num_vn = location.GetCacheSize()/10;
+  //TO CORRECT: get from worker registation instead of Location
+  uint32_t cacheSize = 512; //GB
+	int num_vn = cacheSize / 10;
 	num_vn = std::max(MIN_VIRT_NODE_NUM, num_vn);
 	num_vn = std::min(MAX_VIRT_NODE_NUM, num_vn);
 	AddLocation(location, num_vn);
