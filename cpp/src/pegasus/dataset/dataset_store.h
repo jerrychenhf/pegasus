@@ -19,7 +19,11 @@
 #define PEGASUS_DATASET_STORE_H
 
 #include <unordered_map>
-
+#include <atomic>
+#include <boost/thread/locks.hpp>
+#include <boost/thread/shared_mutex.hpp>
+#include <boost/smart_ptr/detail/spinlock.hpp>
+//#include <util/spinlock.h>
 #include "pegasus/common/status.h"
 #include "pegasus/dataset/dataset.h"
 
@@ -32,9 +36,13 @@ class DataSetStore {
   Status GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets);
   Status GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset);
   Status InsertDataSet(std::shared_ptr<DataSet> dataset);
-  Status InsertEndPoint(std::string dataset_path, std::shared_ptr<Partition> new_partition);
+  Status RemoveDataSet(std::shared_ptr<DataSet> dataset);
+//  Status InsertEndPoint(std::string dataset_path, std::shared_ptr<Partition> new_partition);
 
  private:
+//  boost::shared_mutex dssmtx;
+  boost::detail::spinlock dssspl;
+//  SpinLock dssspl;
   std::unordered_map<std::string, std::shared_ptr<DataSet>> planner_metadata_;
 };
 

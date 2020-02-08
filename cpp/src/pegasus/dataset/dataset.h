@@ -20,11 +20,73 @@
 
 #include <string>
 #include <vector>
-
+#include <boost/thread/shared_mutex.hpp>
 #include "pegasus/dataset/partition.h"
 #include "pegasus/util/visibility.h"
 
 namespace pegasus {
+
+class rwlock
+{
+public:
+    rwlock() 
+        : readCount(0), 
+          writeCount(0) 
+    {
+    }
+
+    void lockread()
+    {   
+        internal.lock();
+        if (readCount == 0)
+        {   
+            content.lock();
+        }
+        ++readCount;
+        assert(readCount > 0);
+        assert(writeCount == 0);
+//        std::cout << "readCount = " << readCount << "\n";
+        internal.unlock();
+    }
+    
+    void lockwrite()
+    {   
+        content.lock();
+        ++writeCount;
+        assert(writeCount == 1);
+        assert(readCount == 0);
+//        std::cout << "writeCount = " << writeCount << "\n";
+    }
+
+    void unlockread()
+    {   
+        internal.lock();
+        --readCount;
+        assert(readCount >= 0);
+        assert(writeCount == 0);
+//        std::cout << "readCount = " << readCount << "\n";
+        if (readCount == 0)
+        {   
+            content.unlock();
+        }
+        internal.unlock();
+    }
+
+    void unlockwrite()
+    {   
+        --writeCount;
+        assert(writeCount == 0);
+        assert(readCount == 0);
+//        std::cout << "writeCount = " << writeCount << "\n";
+        content.unlock();
+    }
+
+private:
+    boost::mutex content;
+    boost::mutex internal;
+    int readCount;
+    int writeCount;
+};
 
 /// \brief The access coordinates for retireval of a dataset
 class PEGASUS_EXPORT DataSet {
@@ -44,7 +106,7 @@ class PEGASUS_EXPORT DataSet {
       : data_(std::move(data)) {}
 
   /// Get the data_
-//  Data GetData() {return data_;}
+  const Data& GetData() {return data_;}
 
   /// The path of the dataset
   const std::string& dataset_path() const { return data_.dataset_path; }
@@ -58,7 +120,13 @@ class PEGASUS_EXPORT DataSet {
   /// The total number of bytes in the dataset. If unknown, set to -1
   int64_t total_bytes() const { return data_.total_bytes; }
 
+  void lockread() { dslock.lockread(); }
+  void unlockread() { dslock.unlockread(); }
+  void lockwrite() { dslock.lockwrite(); }
+  void unlockwrite() { dslock.unlockwrite(); }
+
  private:
+  rwlock dslock;
   Data data_;
 };
 

@@ -21,8 +21,6 @@
 
 #include <memory>
 #include <unordered_map>
-#include <boost/thread/locks.hpp>
-#include <boost/thread/shared_mutex.hpp>
 
 #include "catalog/pegasus_catalog.h"
 #include "catalog/spark_catalog.h"
@@ -31,8 +29,6 @@
 #include "util/consistent_hashing.h"
 
 namespace pegasus {
-
-boost::shared_mutex _dssaccess;
 
 DataSetService::DataSetService() {
 
@@ -52,26 +48,44 @@ Status DataSetService::Init() {
 
 Status DataSetService::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
 
-  boost::shared_lock<boost::shared_mutex> rdlock(_dssaccess);
   dataset_store_->GetDataSets(datasets);
   return Status::OK();
 }
 
 Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset) {
 
-  boost::upgrade_lock<boost::shared_mutex> uprdlock(_dssaccess);
-  dataset_store_->GetDataSet(dataset_path, dataset);
+  std::shared_ptr<DataSet> pds = NULL;
+  dataset_store_->GetDataSet(dataset_path, &pds);
 
-  if (dataset == NULL) {
+  if (pds == NULL) {
     // === CacheDataSet(dataset_path, dataset, CONHASH);
     // build the dataset and insert it to dataset store.
     auto dsbuilder = std::make_shared<DataSetBuilder>(metadata_manager_);
     // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
     dsbuilder->BuildDataset(dataset_path, dataset, CONHASH);
     // Begin Write
-    boost::upgrade_to_unique_lock<boost::shared_mutex> wrlock(uprdlock);
+    (*dataset)->lockwrite();
+#if 1
+    // read again to avoid duplicated write
+    dataset_store_->GetDataSet(dataset_path, &pds);
+    if (pds != NULL)
+    {
+      (*dataset)->unlockwrite();  // drop this prepared dataset
+      *dataset = std::make_shared<DataSet>(pds->GetData()); // fill dataset from pds
+      pds->unlockread();
+      return Status::OK();
+    }
+#endif
+    // do the write
     dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));
+    (*dataset)->unlockwrite();
     // End Write
+  }
+  else
+  {
+//    *dataset = std::shared_ptr<DataSet>(new DataSet(*pds));
+    *dataset = std::make_shared<DataSet>(pds->GetData());
+    pds->unlockread();
   }
 
   return Status::OK();
@@ -84,17 +98,19 @@ Status DataSetService::CacheDataSet(std::string dataset_path, std::shared_ptr<Da
   // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
   dsbuilder->BuildDataset(dataset_path, dataset, distpolicy);
   // Begin Write
-  boost::unique_lock<boost::shared_mutex> wrlock(_dssaccess);
+  (*dataset)->lockwrite();
   dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));
+  (*dataset)->unlockwrite();
   // End Write
 
   return Status::OK();
 }
 
 /// Build FlightInfo from DataSet.
-Status DataSetService::GetFlightInfo(std::string dataset_path, std::vector<Filter>* parttftrs, std::unique_ptr<rpc::FlightInfo>* flight_info) {
+Status DataSetService::GetFlightInfo(std::string dataset_path, 
+                      std::vector<Filter>* parttftrs, std::unique_ptr<rpc::FlightInfo>* flight_info) {
 
-  std::shared_ptr<DataSet> dataset;
+  std::shared_ptr<DataSet> dataset = nullptr;
   Status st = GetDataSet(dataset_path, &dataset);
   if (!st.ok()) {
     return st;
@@ -102,6 +118,7 @@ Status DataSetService::GetFlightInfo(std::string dataset_path, std::vector<Filte
   std::shared_ptr<ResultDataSet> rdataset;
   // Filter dataset
   st = FilterDataSet(parttftrs, dataset, &rdataset);
+  // Note: we can also release the dataset readlock here, the benefit is it avoids dataset mem copy.
   if (!st.ok()) {
     return st;
   }
@@ -109,9 +126,11 @@ Status DataSetService::GetFlightInfo(std::string dataset_path, std::vector<Filte
   return flightinfo_builder_->BuildFlightInfo(flight_info);
 }
 
-Status DataSetService::FilterDataSet(std::vector<Filter>* parttftr, std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet>* resultdataset)
+Status DataSetService::FilterDataSet(std::vector<Filter>* parttftr, std::shared_ptr<DataSet> dataset,
+                                     std::shared_ptr<ResultDataSet>* resultdataset)
 {
-  //TODO: filter the dataset 
+  //TODO: filter the dataset
+//  resultdataset = std::make_shared<ResultDataSet>(dataset->GetData());
   return Status::OK();
 }
 

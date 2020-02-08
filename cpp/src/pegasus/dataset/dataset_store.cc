@@ -28,33 +28,63 @@ DataSetStore::~DataSetStore() {
 
 Status DataSetStore::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
   
+//  boost::shared_lock<boost::shared_mutex> rdlock(dssmtx);
+  boost::lock_guard<boost::detail::spinlock> l(dssspl);
+//  boost::lock_guard<SpinLock> l(dssspl);
   datasets->get()->reserve(planner_metadata_.size());
   for(auto entry : planner_metadata_) {
+    //TODO: lockread for each dataset
     datasets->get()->push_back(entry.second);
   } 
   return Status::OK();
 }
 
 Status DataSetStore::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset) {
-  
+
+//  boost::shared_lock<boost::shared_mutex> rdlock(dssmtx);
+  boost::lock_guard<boost::detail::spinlock> l(dssspl);
+//  boost::lock_guard<SpinLock> l(dssspl);
   auto entry = planner_metadata_.find(dataset_path);
   if (entry == planner_metadata_.end()) {
     return Status::KeyError("Could not find dataset.", dataset_path);
   }
-  auto find_dataset = entry->second;
-  *dataset = std::shared_ptr<DataSet>(new DataSet(*find_dataset));
+  else
+  {
+    //TODO: lock entry->second
+    entry->second->lockread();
+    *dataset = entry->second;
+//  auto find_dataset = entry->second;
+//  *dataset = std::shared_ptr<DataSet>(new DataSet(*find_dataset));
+  }
+
   return Status::OK();
 }
 
 Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset) {
-   
+
   std::string key = dataset->dataset_path();
+//  boost::unique_lock<boost::shared_mutex> wrlock(dssmtx);
+  boost::lock_guard<boost::detail::spinlock> l(dssspl);
+//  boost::lock_guard<SpinLock> l(dssspl);
   planner_metadata_[key] = std::move(dataset);  // why use move here while dataset is a shared_ptr?
   return Status::OK();
 }
 
+Status DataSetStore::RemoveDataSet(std::shared_ptr<DataSet> dataset) {
+
+  // TODO: lock the whole dataset_store first?
+  std::string key = dataset->dataset_path();
+//  boost::unique_lock<boost::shared_mutex> wrlock(dssmtx);
+  boost::lock_guard<boost::detail::spinlock> l(dssspl);
+//  boost::lock_guard<SpinLock> l(dssspl);
+  planner_metadata_.erase(key);
+  return Status::OK();
+}
+
+//TODO: this interface is no longer needed.
+#if 0
+//if it is needed in future, its logic should be updated for concurrence
 Status DataSetStore::InsertEndPoint(std::string dataset_path, std::shared_ptr<Partition> new_partition) {
-   
   std::shared_ptr<DataSet>* dataset;
   GetDataSet(dataset_path, dataset);
   std::vector<Partition> partitions = (*dataset)->partitions();
@@ -69,5 +99,5 @@ Status DataSetStore::InsertEndPoint(std::string dataset_path, std::shared_ptr<Pa
 
   planner_metadata_[dataset_path] = std::unique_ptr<DataSet>(new DataSet(value));
 }
-
+#endif
 } // namespace pegasus
