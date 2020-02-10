@@ -62,13 +62,13 @@
   PEGASUS_RETURN_IF_(condition, status, PEGASUS_STRINGIFY(status))
 
 /// \brief Propagate any non-successful Status to the caller
-#define PEGASUS_RETURN_NOT_OK(status)                                   \
+#define RETURN_IF_ERROR_STATUS(status)                                   \
   do {                                                                \
     ::pegasus::Status __s = ::pegasus::internal::GenericToStatus(status); \
     PEGASUS_RETURN_IF_(!__s.ok(), __s, PEGASUS_STRINGIFY(status));        \
   } while (false)
 
-#define RETURN_NOT_OK_ELSE(s, else_)                            \
+#define RETURN_IF_EROR_ELSE(s, else_)                            \
   do {                                                          \
     ::pegasus::Status _s = ::pegasus::internal::GenericToStatus(s); \
     if (!_s.ok()) {                                             \
@@ -77,11 +77,48 @@
     }                                                           \
   } while (false)
 
-// This is an internal-use macro and should not be used in public headers.
-#ifndef RETURN_NOT_OK
-#define RETURN_NOT_OK(s) PEGASUS_RETURN_NOT_OK(s)
-#endif
+/// some generally useful macros
+#define RETURN_IF_ERROR(stmt)                          \
+  do {                                                 \
+    const ::pegasus::Status& _status = (stmt);       \
+    if (UNLIKELY(!_status.ok())) return _status; \
+  } while (false)
 
+#define LOG_AND_RETURN_IF_ERROR(stmt) \
+  do { \
+    const ::pegasus::Status& _status = (stmt); \
+    if (UNLIKELY(!_status.ok()))  { \
+      LOG(INFO) << _status.ToString(); \
+      return _status; \
+    } \
+  } while (false)
+
+#define RETURN_VOID_IF_ERROR(stmt)                     \
+  do {                                                 \
+    if (UNLIKELY(!(stmt).ok())) return;                \
+  } while (false)
+  
+#define ABORT_IF_ERROR(stmt) \
+  do { \
+    ::pegasus::Status _status = ::pegasus::internal::GenericToStatus(stmt); \
+    if (UNLIKELY(!_status.ok())) { \
+      ABORT_WITH_ERROR(_status.ToString()); \
+    } \
+  } while (false)
+
+// Log to FATAL and abort process, generating a core dump if enabled. This should be used
+// for unexpected error cases where we want a core dump.
+// LOG(FATAL) will call abort().
+#define ABORT_WITH_ERROR(msg) \
+  do { \
+    LOG(FATAL) << msg << ". Service exiting.\n"; \
+  } while (false)
+  
+/// This macro can be appended to a function definition to generate a compiler warning
+/// if the result is ignored.
+/// TODO: when we upgrade gcc from 4.9.2, we may be able to apply this to the Status
+/// type to get this automatically for all Status-returning functions.
+#define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 namespace pegasus {
 
 enum class StatusCode : char {
@@ -494,49 +531,6 @@ namespace internal {
 inline Status GenericToStatus(const Status& st) { return st; }
 
 }  // namespace internal
-
-/// some generally useful macros
-#define RETURN_IF_ERROR(stmt)                          \
-  do {                                                 \
-    const ::pegasus::Status& _status = (stmt);       \
-    if (UNLIKELY(!_status.ok())) return _status; \
-  } while (false)
-
-#define LOG_AND_RETURN_IF_ERROR(stmt) \
-  do { \
-    const ::pegasus::Status& _status = (stmt); \
-    if (UNLIKELY(!_status.ok()))  { \
-      LOG(INFO) << _status.ToString(); \
-      return _status; \
-    } \
-  } while (false)
-
-#define RETURN_VOID_IF_ERROR(stmt)                     \
-  do {                                                 \
-    if (UNLIKELY(!(stmt).ok())) return;                \
-  } while (false)
-  
-#define ABORT_IF_ERROR(stmt) \
-  do { \
-    ::pegasus::Status _status = ::pegasus::internal::GenericToStatus(stmt); \
-    if (UNLIKELY(!_status.ok())) { \
-      ABORT_WITH_ERROR(_status.ToString()); \
-    } \
-  } while (false)
-
-// Log to FATAL and abort process, generating a core dump if enabled. This should be used
-// for unexpected error cases where we want a core dump.
-// LOG(FATAL) will call abort().
-#define ABORT_WITH_ERROR(msg) \
-  do { \
-    LOG(FATAL) << msg << ". Service exiting.\n"; \
-  } while (false)
-  
-/// This macro can be appended to a function definition to generate a compiler warning
-/// if the result is ignored.
-/// TODO: when we upgrade gcc from 4.9.2, we may be able to apply this to the Status
-/// type to get this automatically for all Status-returning functions.
-#define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 
 }  // namespace pegasus
 
