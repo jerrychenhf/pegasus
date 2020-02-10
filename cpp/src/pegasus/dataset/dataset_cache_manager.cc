@@ -70,10 +70,28 @@ Status InsertColumnsToBlockManager(Identity* identity,
       RETURN_IF_ERROR(dataset_cache_block_manager->InsertColumn(identity, iter->first, iter->second));
     }
 }
-// method name action
-Status RetrieveAndCacheAndInsertColumns(Identity* identity, std::shared_ptr<StoragePluginFactory> storage_plugin_factory,
+
+Status WrapDatasetStream(std::unique_ptr<rpc::FlightDataStream>* data_stream,
+ std::shared_ptr<DatasetCacheBlockManager> dataset_cache_block_manager_, Identity* identity) {
+
+  std::unordered_map<string, std::shared_ptr<CachedColumn>> cached_columns;
+  RETURN_IF_ERROR(dataset_cache_block_manager_->GetCachedColumns(identity, &cached_columns));
+
+  std::shared_ptr<Table> table;
+  for(auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
+    std::shared_ptr<CachedColumn> cache_column = iter->second;
+    std::shared_ptr<CacheRegion> cache_region = cache_column->cache_region_;
+    std::shared_ptr<arrow::ChunkedArray> chunked_out(cache_region->chunked_array());
+    RETURN_IF_ERROR(Status::fromArrowStatus(Table::FromChunkedStructArray(chunked_out, &table)));
+  }
+  *data_stream = std::unique_ptr<rpc::FlightDataStream>(
+    new rpc::RecordBatchStream(std::shared_ptr<RecordBatchReader>(new TableBatchReader(*table))));
+}
+
+Status HandleMissedColumns(Identity* identity, std::shared_ptr<StoragePluginFactory> storage_plugin_factory,
  std::vector<int> col_ids, std::shared_ptr<DatasetCacheBlockManager> dataset_cache_block_manager,
-  std::shared_ptr<DatasetCacheEngineManager> dataset_cache_engine_manager) {
+  std::shared_ptr<DatasetCacheEngineManager> dataset_cache_engine_manager,
+   std::unique_ptr<rpc::FlightDataStream>* data_stream) {
     std::string partition_path = identity->file_path();
     std::shared_ptr<StoragePlugin> storage_plugin;
 
@@ -107,42 +125,19 @@ Status RetrieveAndCacheAndInsertColumns(Identity* identity, std::shared_ptr<Stor
       RETURN_IF_ERROR(cache_engine->PutValue(partition_path, *iter, cache_region));
     }
     InsertColumnsToBlockManager(identity, dataset_cache_block_manager, retrieved_columns);
+    WrapDatasetStream(data_stream, dataset_cache_block_manager, identity);
 }
 
-std::vector<int> GetUnCachedColumnsIds(std::vector<int> col_ids,
+std::vector<int> GetMissedColumnsIds(std::vector<int> col_ids,
   std::unordered_map<string, std::shared_ptr<CachedColumn>> cached_columns) {
-   std::vector<int> uncached_columns;
+   std::vector<int> missed_col_ids;
     for(auto iter = col_ids.begin(); iter != col_ids.end(); iter ++) {
         auto entry = cached_columns.find(std::to_string(*iter));
         if (entry == cached_columns.end()) {
-            uncached_columns.push_back(*iter);
+            missed_col_ids.push_back(*iter);
         }
     }
-    return uncached_columns;
-}
-
-Status WrapDatasetStream(std::unique_ptr<rpc::FlightDataStream>* data_stream,
- std::shared_ptr<DatasetCacheBlockManager> dataset_cache_block_manager_, Identity* identity) {
-
-  std::unordered_map<string, std::shared_ptr<CachedColumn>> cached_columns;
-  RETURN_IF_ERROR(dataset_cache_block_manager_->GetCachedColumns(identity, &cached_columns));
-
-  std::shared_ptr<Table> table;
-  for(auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
-    std::shared_ptr<CachedColumn> cache_column = iter->second;
-    std::shared_ptr<CacheRegion> cache_region = cache_column->cache_region_;
-    std::shared_ptr<arrow::ChunkedArray> chunked_out(cache_region->chunked_array());
-    RETURN_IF_ERROR(Status::fromArrowStatus(Table::FromChunkedStructArray(chunked_out, &table)));
-  }
-  *data_stream = std::unique_ptr<rpc::FlightDataStream>(
-    new rpc::RecordBatchStream(std::shared_ptr<RecordBatchReader>(new TableBatchReader(*table))));
-}
-
-Status RetrieveAndCacheAndInsertAndWrapStream(Identity* identity, std::shared_ptr<StoragePluginFactory> storage_plugin_factory,
- std::vector<int> col_ids, std::shared_ptr<DatasetCacheBlockManager> dataset_cache_block_manager,
-  std::unique_ptr<rpc::FlightDataStream>* data_stream, std::shared_ptr<DatasetCacheEngineManager> dataset_cache_engine_manager) {
-    RETURN_IF_ERROR(RetrieveAndCacheAndInsertColumns(identity, storage_plugin_factory, col_ids, dataset_cache_block_manager, dataset_cache_engine_manager));
-    RETURN_IF_ERROR(WrapDatasetStream(data_stream, dataset_cache_block_manager, identity));
+    return missed_col_ids;
 }
 
 // Wrap the data to flight data stream.
@@ -161,8 +156,8 @@ Status DatasetCacheManager::GetDatasetStream(Identity* identity,
   if (dataset == NULL) {
     LOG(WARNING) << "The dataset "<< identity->dataset_path() 
     <<" is NULL. We will get all the columns from storage and then insert the column into dataset cache block manager";
-    RetrieveAndCacheAndInsertAndWrapStream(identity, storage_plugin_factory_, col_ids,
-     dataset_cache_block_manager_, data_stream, dataset_cache_engine_manager_);
+    HandleMissedColumns(identity, storage_plugin_factory_, col_ids,
+     dataset_cache_block_manager_, dataset_cache_engine_manager_, data_stream);
   } else {
     // dataset is cached
     std::shared_ptr<CachedPartition> partition;
@@ -170,8 +165,8 @@ Status DatasetCacheManager::GetDatasetStream(Identity* identity,
     if (partition == NULL) {
       LOG(WARNING) << "The partition "<< identity->file_path() 
       <<" is NULL. We will get all the columns from storage and then insert the column into dataset cache block manager";
-      RetrieveAndCacheAndInsertAndWrapStream(identity, storage_plugin_factory_, col_ids,
-       dataset_cache_block_manager_, data_stream, dataset_cache_engine_manager_);
+      HandleMissedColumns(identity, storage_plugin_factory_, col_ids,
+       dataset_cache_block_manager_, dataset_cache_engine_manager_, data_stream);
     } else {
       // partition is cached.
       // Check which column is cached.
@@ -183,9 +178,9 @@ Status DatasetCacheManager::GetDatasetStream(Identity* identity,
       } else {
         // Not all columns cached.
         // Get the not cached col_ids.
-        std::vector<int> uncached_col_ids = GetUnCachedColumnsIds(col_ids, cached_columns);
-        RetrieveAndCacheAndInsertAndWrapStream(identity, storage_plugin_factory_, uncached_col_ids,
-         dataset_cache_block_manager_, data_stream, dataset_cache_engine_manager_);
+        std::vector<int> missed_col_ids = GetMissedColumnsIds(col_ids, cached_columns);
+        HandleMissedColumns(identity, storage_plugin_factory_, missed_col_ids,
+         dataset_cache_block_manager_, dataset_cache_engine_manager_, data_stream);
       }
    }
   }
