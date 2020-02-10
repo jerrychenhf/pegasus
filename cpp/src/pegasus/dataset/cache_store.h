@@ -33,6 +33,7 @@ class CacheStore {
    Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_region);
    Status Free(uint8_t *buffer, int64_t size);
    Status GetUsedSize(long& used_size);
+   Status GetStore(std::shared_ptr<Store>* store);
 
   private:
   std::shared_ptr<Store> store_;

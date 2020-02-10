@@ -23,16 +23,19 @@
 #include <utility>
 
 #include <boost/optional.hpp>
+#include "dataset/cache_engine.h"
+#include "cache/cache_region.h"
+#include "cache/store.h"
 
 // modified from boost LRU cache -> the boost cache supported only an
 // ordered map.
 namespace pegasus {
 // a cache which evicts the least recently used item when it is full
-template <class Key, class Value>
+template <class CacheEntryKey, class CacheRegion>
 class LruCache {
  public:
-  using key_type = Key;
-  using value_type = Value;
+  using key_type = CacheEntryKey;
+  using value_type = CacheRegion;
   using list_type = std::list<key_type>;
   struct hasher {
     template <typename I>
@@ -43,7 +46,7 @@ class LruCache {
   using map_type =
       std::unordered_map<key_type, std::pair<value_type, typename list_type::iterator>,
                          hasher>;
-
+                
   explicit LruCache(size_t capacity) : cache_capacity_(capacity) {}
 
   ~LruCache() {}
@@ -56,7 +59,7 @@ class LruCache {
 
   bool contains(const key_type& key) { return map_.find(key) != map_.end(); }
 
-  void insert(const key_type& key, const value_type& value) {
+  void insert(const key_type& key, const value_type& value, std::shared_ptr<Store> store) {
     typename map_type::iterator i = map_.find(key);
     if (i == map_.end()) {
       // insert item into the cache, but first check if it is full
@@ -68,6 +71,7 @@ class LruCache {
       // insert the new item
       lru_list_.push_front(key);
       map_[key] = std::make_pair(value, lru_list_.begin());
+      evict_map_[key] = store;
     }
   }
 
@@ -109,6 +113,12 @@ class LruCache {
  private:
   void evict() {
     // evict item from the end of most recently used list
+    key_type evict_key = lru_list_.back();
+    // TODO concurrently free and access
+    value_type evict_value = map_.find(evict_key)->second.first;
+    std::shared_ptr<Store> store = evict_map_.find(evict_key)->second;
+    store->Free(evict_value->address(), evict_value->length());
+
     typename list_type::iterator i = --lru_list_.end();
     map_.erase(*i);
     lru_list_.erase(i);
@@ -116,6 +126,7 @@ class LruCache {
 
  private:
   map_type map_;
+  std::unordered_map<key_type, std::shared_ptr<Store>, hasher> evict_map_;
   list_type lru_list_;
   size_t cache_capacity_;
 };

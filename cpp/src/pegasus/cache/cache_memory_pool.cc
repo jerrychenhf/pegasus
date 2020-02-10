@@ -32,9 +32,10 @@ arrow::Status CacheMemoryPool::Allocate(int64_t size, uint8_t** out) {
   LruCacheEngine *lru_cache_engine = dynamic_cast<LruCacheEngine *>(cache_engine_.get());
   std::shared_ptr<CacheStore> cache_store;
   lru_cache_engine->cache_store_manager_->GetCacheStore(&cache_store);
+  cache_store->GetStore(&store_);
   std::shared_ptr<CacheRegion> cache_region;
   cache_store->Allocate(size, &cache_region);
-  out = cache_region->address();
+  out = reinterpret_cast<uint8_t**>(cache_region->address());
   occupied_size = size + occupied_size;
   return arrow::Status::OK();
 }
@@ -63,6 +64,10 @@ int64_t CacheMemoryPool::max_memory() const {return 100;}
 std::string CacheMemoryPool::backend_name() const {
   // can get the store type (MEMORY, DCPMM...)
   return "cache memory pool";
+}
+
+Status CacheMemoryPool::GetStore(std::shared_ptr<Store>* store) {
+  store = &store_;
 }
 
 } // namespace pegasus

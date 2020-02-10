@@ -23,9 +23,10 @@ namespace pegasus {
 
 LruCacheEngine::LruCacheEngine(long capacity): cache_(capacity), cache_store_manager_(new CacheStoreManager()) {}
 
- Status LruCacheEngine::PutValue(std::string partition_path, int column_id, std::shared_ptr<CacheRegion> cache_region) {
+ Status LruCacheEngine::PutValue(std::string partition_path, int column_id,
+  std::shared_ptr<CacheRegion> cache_region, std::shared_ptr<Store> store) {
   CacheEntryKey key = CacheEntryKey(partition_path, column_id);
-  cache_.insert(key, cache_region);
+  cache_.insert(key, cache_region, store);
  }
 
 LruCacheEngine::~LruCacheEngine() {}
@@ -33,7 +34,8 @@ LruCacheEngine::~LruCacheEngine() {}
 NonEvictionCacheEngine::NonEvictionCacheEngine() {}
 NonEvictionCacheEngine:: ~NonEvictionCacheEngine(){}
 
-Status NonEvictionCacheEngine::PutValue(std::string partition_path, int column_id, std::shared_ptr<CacheRegion> cache_region) {
+Status NonEvictionCacheEngine::PutValue(std::string partition_path, int column_id,
+ std::shared_ptr<CacheRegion> cache_region, std::shared_ptr<Store> store) {
  }
 
 } // namespace pegasus

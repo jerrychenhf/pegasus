@@ -22,6 +22,7 @@
 #include <arrow/memory_pool.h>
 #include "runtime/exec_env.h"
 #include "dataset/cache_engine.h"
+#include "cache/store.h"
 
 using namespace arrow;
 
@@ -45,8 +46,11 @@ public:
 
   std::string backend_name() const override;
 
+  Status GetStore(std::shared_ptr<Store>* store);
+
   private:
     std::shared_ptr<CacheEngine> cache_engine_;
+    std::shared_ptr<Store> store_;
     int64_t occupied_size;
 };
 } // namespace pegasus

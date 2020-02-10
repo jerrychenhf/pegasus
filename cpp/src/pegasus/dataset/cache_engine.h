@@ -21,7 +21,7 @@
 #include "common/status.h"
 #include "dataset/dataset.h"
 #include <boost/compute/detail/lru_cache.hpp>
-#include "util/lru_cache.h"
+#include "cache/lru_cache.h"
 #include "cache/cache_region.h"
 #include "boost/functional/hash.hpp"
 #include "dataset/cache_store_manager.h"
@@ -32,7 +32,8 @@ namespace pegasus {
 
 class CacheEngine {
  public:
- virtual Status PutValue(std::string partition_path, int column_id, std::shared_ptr<CacheRegion> cache_region) = 0;
+ virtual Status PutValue(std::string partition_path, int column_id,
+  std::shared_ptr<CacheRegion> cache_region, std::shared_ptr<Store> store) = 0;
 
   enum CachePolicy {
     LRU,
@@ -45,7 +46,8 @@ class CacheEngine {
 
 class CacheEntryKey {
  public:
-  explicit CacheEntryKey(std::string partition_path, int column_id) : partition_path_(partition_path), column_id_(column_id) {
+  explicit CacheEntryKey(std::string partition_path, int column_id)
+   : partition_path_(partition_path), column_id_(column_id) {
     static const int kSeedValue = 4;
     size_t result = kSeedValue;
 
@@ -82,7 +84,8 @@ class LruCacheEngine : public CacheEngine {
   LruCacheEngine(long capacity);
   ~LruCacheEngine();
 
-  Status PutValue(std::string partition_path, int column_id, std::shared_ptr<CacheRegion> cache_region) override;
+  Status PutValue(std::string partition_path, int column_id,
+   std::shared_ptr<CacheRegion> cache_region, std::shared_ptr<Store> store) override;
 // on evict event; call back
  public:
   std::shared_ptr<CacheStoreManager> cache_store_manager_;
@@ -95,7 +98,8 @@ class NonEvictionCacheEngine : public CacheEngine {
   NonEvictionCacheEngine();
   ~NonEvictionCacheEngine();
 
-  Status PutValue(std::string partition_path, int column_id, std::shared_ptr<CacheRegion> cache_region) override;
+  Status PutValue(std::string partition_path, int column_id,
+   std::shared_ptr<CacheRegion> cache_region, std::shared_ptr<Store> store) override;
 };
 } // namespace pegasus                              
 

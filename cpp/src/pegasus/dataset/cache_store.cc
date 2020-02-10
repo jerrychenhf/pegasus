@@ -35,4 +35,8 @@ namespace pegasus {
     store_->Free(buffer, size);
   }
 
+  Status CacheStore::GetStore(std::shared_ptr<Store>* store) {
+     store = &store_;
+  }
+
 } // namespace pegasus

@@ -29,15 +29,15 @@ namespace pegasus {
 class CacheRegion {
  public:
   CacheRegion();
-  CacheRegion(uint8_t** address, long length, long occupied_size, arrow::ChunkedArray* chunked_array = NULL);
-  uint8_t** address();
+  CacheRegion(uint8_t* address, long length, long occupied_size, arrow::ChunkedArray* chunked_array = NULL);
+  uint8_t* address();
   long length();
   long occupies_size();
   arrow::ChunkedArray* chunked_array();
   ~CacheRegion();
 
  private:
-  uint8_t** address_;
+  uint8_t* address_;
   arrow::ChunkedArray* chunked_array_;
   long length_;
   long occupied_size_; 
