@@ -50,8 +50,6 @@ Status DataSetStore::GetDataSet(std::string dataset_path, std::shared_ptr<DataSe
   }
   else
   {
-    //TODO: lock entry->second
-    entry->second->lockread();
     *dataset = entry->second;
 //  auto find_dataset = entry->second;
 //  *dataset = std::shared_ptr<DataSet>(new DataSet(*find_dataset));

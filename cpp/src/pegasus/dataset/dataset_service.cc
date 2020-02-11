@@ -65,7 +65,7 @@ Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<Data
     dsbuilder->BuildDataset(dataset_path, dataset, CONHASH);
     // Begin Write
     (*dataset)->lockwrite();
-#if 1
+#if 0
     // read again to avoid duplicated write
     dataset_store_->GetDataSet(dataset_path, &pds);
     if (pds != NULL)
@@ -83,6 +83,7 @@ Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<Data
   }
   else
   {
+    pds->lockread();
 //    *dataset = std::shared_ptr<DataSet>(new DataSet(*pds));
     *dataset = std::make_shared<DataSet>(pds->GetData());
     pds->unlockread();
@@ -117,7 +118,9 @@ Status DataSetService::GetFlightInfo(std::string dataset_path,
   }
   std::shared_ptr<ResultDataSet> rdataset;
   // Filter dataset
+  dataset->lockread();
   st = FilterDataSet(parttftrs, dataset, &rdataset);
+  dataset->unlockread();
   // Note: we can also release the dataset readlock here, the benefit is it avoids dataset mem copy.
   if (!st.ok()) {
     return st;
