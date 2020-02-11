@@ -44,6 +44,7 @@ Status DatasetCacheEngineManager::Init() {
     }
     cached_engines_.insert(std::make_pair(cache_policy_type, cache_engine));
   }
+  return Status::OK();
 }
 
 // Get the specific cache engine based on the available capacity.
