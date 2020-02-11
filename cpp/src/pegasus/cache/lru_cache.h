@@ -115,9 +115,9 @@ class LruCache {
     // evict item from the end of most recently used list
     key_type evict_key = lru_list_.back();
     // TODO concurrently free and access
-    value_type evict_value = map_.find(evict_key)->second.first;
+    CacheRegion evict_value = map_.find(evict_key)->second.first;
     std::shared_ptr<Store> store = evict_map_.find(evict_key)->second;
-    store->Free(evict_value->address(), evict_value->length());
+    store->Free(evict_value);
 
     typename list_type::iterator i = --lru_list_.end();
     map_.erase(*i);
