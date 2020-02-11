@@ -16,6 +16,7 @@
 // under the License.
 
 #include "cache/cache_memory_pool.h"
+#include "common/logging.h"
 
 namespace pegasus {
     
@@ -25,27 +26,44 @@ CacheMemoryPool::CacheMemoryPool(std::shared_ptr<CacheEngine> cache_engine) {
 }
 CacheMemoryPool::~CacheMemoryPool() {}
 
+Status GetCacheRegion(std::shared_ptr<CacheEngine> cache_engine,
+ std::shared_ptr<Store> store, int64_t size, std::shared_ptr<CacheRegion>* cache_region) {
+  std::shared_ptr<CacheStore> cache_store;
+  LruCacheEngine *lru_cache_engine = dynamic_cast<LruCacheEngine *>(cache_engine.get());
+  RETURN_IF_ERROR(lru_cache_engine->cache_store_manager_->GetCacheStore(&cache_store));
+  RETURN_IF_ERROR(cache_store->GetStore(&store));
+  RETURN_IF_ERROR(cache_store->Allocate(size, cache_region));
+  return Status::OK();
+}
+
 arrow::Status CacheMemoryPool::Allocate(int64_t size, uint8_t** out) {
   if (size < 0) {
     return arrow::Status::Invalid("negative malloc size");
   }
-  LruCacheEngine *lru_cache_engine = dynamic_cast<LruCacheEngine *>(cache_engine_.get());
-  std::shared_ptr<CacheStore> cache_store;
-  lru_cache_engine->cache_store_manager_->GetCacheStore(&cache_store);
-  cache_store->GetStore(&store_);
   std::shared_ptr<CacheRegion> cache_region;
-  cache_store->Allocate(size, &cache_region);
-  out = reinterpret_cast<uint8_t**>(cache_region->address());
-  occupied_size = size + occupied_size;
-  return arrow::Status::OK();
+  Status status = GetCacheRegion(cache_engine_, store_, size, &cache_region);
+  if (status == Status::OK()) {
+    out = reinterpret_cast<uint8_t**>(cache_region->address());
+    occupied_size = size + occupied_size;
+    return arrow::Status::OK();
+  } else {
+    return arrow::Status::UnknownError("Failed to allocate cache region in cache memory pool");
+  }
 }
 
 void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
   LruCacheEngine *lru_cache_engine = dynamic_cast<LruCacheEngine *>(cache_engine_.get());
   std::shared_ptr<CacheStore> cache_store;
-  lru_cache_engine->cache_store_manager_->GetCacheStore(&cache_store);
-  std::shared_ptr<CacheRegion> cache_region = std::shared_ptr<CacheRegion>(new CacheRegion(buffer, size, size));
-  cache_store->Free(cache_region);
+  Status status = lru_cache_engine->cache_store_manager_->GetCacheStore(&cache_store);
+  if (status == Status::OK()) {
+    std::shared_ptr<CacheRegion> cache_region = std::shared_ptr<CacheRegion>(
+      new CacheRegion(buffer, size, size));
+    cache_store->Free(cache_region);
+  } else {
+    stringstream ss;
+    ss << "Failed to free cache region in cache memory pool.";
+    LOG(ERROR) << ss.str();
+  }
 }
 
 arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
@@ -64,11 +82,23 @@ int64_t CacheMemoryPool::max_memory() const {return 100;}
 
 std::string CacheMemoryPool::backend_name() const {
   // can get the store type (MEMORY, DCPMM...)
-  return "cache memory pool";
+  if (store_ != NULL) {
+    return store_->GetStoreName();
+  } else {
+    return "MEMORY";
+  } 
 }
 
 Status CacheMemoryPool::GetStore(std::shared_ptr<Store>* store) {
-  store = &store_;
+  if (store_ != NULL) {
+    store = &store_;
+    return Status::OK();
+  } else {
+    stringstream ss;
+    ss << "Failed to get the store.";
+    LOG(ERROR) << ss.str();
+    return Status::UnknownError(ss.str());
+  }
 }
 
 } // namespace pegasus
