@@ -30,10 +30,10 @@ Status MemoryStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_regi
   used_size_ = used_size_ + size;
 }
 
-Status MemoryStore::Free(uint8_t* buffer, long size) {
-  std::free(buffer);
-  total_size_ = total_size_ + size;
-  used_size_ = used_size_ - size;
+Status MemoryStore::Free(std::shared_ptr<CacheRegion> cache_region) {
+  std::free(cache_region->chunked_array());
+  total_size_ = total_size_ + cache_region->length();
+  used_size_ = used_size_ - cache_region->length();
 }
 
 Status MemoryStore::GetTotalSize(long& total_size) {
@@ -56,7 +56,7 @@ Status DCPMMStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_regio
 
 }
 
-Status DCPMMStore::Free(uint8_t* buffer, long size) {
+Status DCPMMStore::Free(std::shared_ptr<CacheRegion> cache_region) {
 
 }
 

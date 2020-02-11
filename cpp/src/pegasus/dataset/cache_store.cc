@@ -31,8 +31,8 @@ namespace pegasus {
       store_->Allocate(size, cache_region);
   }
 
-  Status CacheStore::Free(uint8_t *buffer, int64_t size) {
-    store_->Free(buffer, size);
+  Status CacheStore::Free(std::shared_ptr<CacheRegion> cache_region) {
+    store_->Free(cache_region);
   }
 
   Status CacheStore::GetStore(std::shared_ptr<Store>* store) {

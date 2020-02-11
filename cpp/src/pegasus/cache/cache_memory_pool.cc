@@ -44,7 +44,8 @@ void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
   LruCacheEngine *lru_cache_engine = dynamic_cast<LruCacheEngine *>(cache_engine_.get());
   std::shared_ptr<CacheStore> cache_store;
   lru_cache_engine->cache_store_manager_->GetCacheStore(&cache_store);
-  cache_store->Free(buffer, size);
+  std::shared_ptr<CacheRegion> cache_region = std::shared_ptr<CacheRegion>(new CacheRegion(buffer, size, size));
+  cache_store->Free(cache_region);
 }
 
 arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
