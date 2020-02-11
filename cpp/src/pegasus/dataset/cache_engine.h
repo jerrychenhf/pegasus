@@ -86,7 +86,7 @@ class LruCacheEngine : public CacheEngine {
 
   Status PutValue(std::string partition_path, int column_id,
    std::shared_ptr<CacheRegion> cache_region, std::shared_ptr<Store> store) override;
-// on evict event; call back
+
  public:
   std::shared_ptr<CacheStoreManager> cache_store_manager_;
   LruCache<CacheEntryKey, std::shared_ptr<CacheRegion>> cache_;

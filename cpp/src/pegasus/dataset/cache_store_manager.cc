@@ -17,6 +17,7 @@
 
 #include "runtime/exec_env.h"
 #include "dataset/cache_store_manager.h"
+#include "common/logging.h"
 
 using namespace std;
 
@@ -44,7 +45,7 @@ namespace pegasus {
         return Status::Invalid("Invalid store type!");
       }
 
-      store_manager_->GetStore(store_type_, &store);
+      RETURN_IF_ERROR(store_manager_->GetStore(store_type_, &store));
       std::shared_ptr<CacheStore> cache_store = std::shared_ptr<CacheStore>(new CacheStore(capacity, store));
       cached_stores_.insert(std::make_pair(store_type, cache_store));
     }
@@ -54,9 +55,13 @@ namespace pegasus {
     // MEMORY > DCPMM > FILE
     auto entry = cached_stores_.find("MEMORY");
     if (entry == cached_stores_.end()) {
-      return Status::KeyError("Could not find  cache store.");
+      stringstream ss;
+      ss << "Failed to get the cache store in cache store manager.";
+       LOG(ERROR) << ss.str();
+      return Status::UnknownError(ss.str());
+    } else {
+      *cache_store = entry->second;
+      return Status::OK();
     }
-    *cache_store = entry->second;
-    return Status::OK();
   }
 } // namespace pegasus

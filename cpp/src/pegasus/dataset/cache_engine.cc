@@ -27,6 +27,7 @@ LruCacheEngine::LruCacheEngine(long capacity): cache_(capacity), cache_store_man
   std::shared_ptr<CacheRegion> cache_region, std::shared_ptr<Store> store) {
   CacheEntryKey key = CacheEntryKey(partition_path, column_id);
   cache_.insert(key, cache_region, store);
+  return Status::OK();
  }
 
 LruCacheEngine::~LruCacheEngine() {}
