@@ -60,5 +60,17 @@ cd pegasus/cpp
 mkdir debug
 cd debug
 cmake -DPEGASUS_BUILD_TESTS ..
-make unittest
+make
+```
+
+### Run unit tests
+To run all the tests:
+```
+cd pegasus/cpp/debug/
+ctest
+```
+To run just one test:
+```
+cd pegasus/cpp/debug/release/util/
+./pegasus-thread-pool-test
 ```

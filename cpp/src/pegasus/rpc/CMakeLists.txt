@@ -165,9 +165,7 @@ if(PEGASUS_BUILD_TESTS)
                         ${GFLAGS_LIBRARIES}
                         GTest::GTest)
 
-  if(PEGASUS_BUILD_TESTS)
-    add_dependencies(pegasus-flight-test flight-test-server)
-  endif()
+  add_dependencies(pegasus-flight-test flight-test-server)
 
   add_dependencies(pegasus_rpc flight-test-server)
 endif()

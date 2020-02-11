@@ -37,7 +37,6 @@ add_library(Util
   thread.cc
   error-util.cc
   network-util.cc
-  thread-pool.cc
   test-info.cc
   cpu-info.cc
   disk-info.cc
@@ -46,25 +45,45 @@ add_library(Util
 )
 add_dependencies(Util gen-deps)
 
+target_link_libraries(Util
+                      ${BOOST_STATIC_FILESYSTEM_LIBRARY}
+                      ${GFLAGS_LIBRARIES})
+
+if(PEGASUS_TEST_LINKAGE STREQUAL "static")
+  set(PEGASUS_UTIL_TEST_LINK_LIBS 
+      Util
+      gutil
+      ${BOOST_THREAD_LIBRARY}
+      ${PEGASUS_TEST_STATIC_LINK_LIBS})
+else()
+  set(PEGASUS_UTIL_TEST_LINK_LIBS
+      Util
+      gutil
+      ${BOOST_THREAD_LIBRARY}
+      ${PEGASUS_TEST_SHARED_LINK_LIBS})
+endif()
+
+# Adding unit tests part of the "util" portion of the test suite
+function(ADD_PEGASUS_UTIL_TEST REL_TEST_NAME)
+  set(options)
+  set(one_value_args PREFIX)
+  set(multi_value_args LABELS)
+  cmake_parse_arguments(ARG
+                        "${options}"
+                        "${one_value_args}"
+                        "${multi_value_args}"
+                        ${ARGN})
+
+  add_pegasus_test(${REL_TEST_NAME}
+                 EXTRA_LINK_LIBS
+                 ${PEGASUS_UTIL_TEST_LINK_LIBS})
+endfunction()
+
 if(PEGASUS_BUILD_TESTS)
 
-  if(PEGASUS_TEST_LINKAGE STREQUAL "static")
-    set(PEGASUS_UTIL_TEST_LINK_LIBS 
-        Util
-        gutil
-        ${BOOST_THREAD_LIBRARY}
-        ${PEGASUS_TEST_STATIC_LINK_LIBS})
-  else()
-    set(PEGASUS_UTIL_TEST_LINK_LIBS
-        Util
-        gutil
-        ${BOOST_THREAD_LIBRARY}
-        ${PEGASUS_TEST_SHARED_LINK_LIBS})
-  endif()
+  add_pegasus_util_test(thread-pool-test)
 
-  add_pegasus_test(thread-pool-test
-                   EXTRA_LINK_LIBS
-                  ${PEGASUS_UTIL_TEST_LINK_LIBS})
+  add_pegasus_util_test(pretty-printer-test)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 

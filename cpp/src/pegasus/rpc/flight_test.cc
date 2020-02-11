@@ -840,6 +840,5 @@ class TestPropagatingMiddleware : public ::testing::Test {
   std::shared_ptr<PropagatingClientMiddlewareFactory> client_middleware_;
 };
 
-
 }  // namespace rpc
 }  // namespace pegasus

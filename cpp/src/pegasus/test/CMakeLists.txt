@@ -15,25 +15,14 @@
 # specific language governing permissions and limitations
 # under the License.
 
+
 # where to put generated libraries
-set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/common")
+set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/test")
 
 # where to put generated binaries
-set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/common")
+set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/test")
 
-# Generate config.h from config.h.in, filling in variables from CMake
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-    
-add_library(Common
-  status.cc
-  worker_manager.cc
-  init.cc
-  logging.cc
-  version.cc
+add_library(Test
+  gtest_util.cc
 )
-add_dependencies(Common gen-deps)
-
-target_link_libraries(Common
-                      Util
-                      ${GLOG_STATIC_LIB})
+add_dependencies(Test gen-deps)

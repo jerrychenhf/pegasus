@@ -15,8 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef IMPALA_UTIL_PRETTY_PRINTER_H
-#define IMPALA_UTIL_PRETTY_PRINTER_H
+#ifndef PEGASUS_UTIL_PRETTY_PRINTER_H
+#define PEGASUS_UTIL_PRETTY_PRINTER_H
 
 #include <boost/algorithm/string.hpp>
 #include <cmath>

@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 #include "common/init.h"
 #include "common/status.h"
+#include "util/test-info.h"
 
 namespace peasus {
 
@@ -60,7 +61,7 @@ namespace peasus {
 #define PEGASUS_TEST_MAIN() \
   int main(int argc, char** argv) { \
     ::testing::InitGoogleTest(&argc, argv); \
-    pegasus::InitCommonRuntime(argc, argv); \
+    pegasus::InitCommonRuntime(argc, argv, pegasus::TestInfo::TEST); \
     return RUN_ALL_TESTS(); \
   } \
 
