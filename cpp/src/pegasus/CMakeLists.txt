@@ -176,7 +176,7 @@ if(PEGASUS_WITH_BACKTRACE)
 
   foreach(LIB_TARGET ${PEGASUS_LIBRARIES})
     target_compile_definitions(${LIB_TARGET} PRIVATE PEGASUS_EXPORTING)
-    if(Backtrace_FOUND AND ARROW_WITH_BACKTRACE)
+    if(Backtrace_FOUND AND PEGASUS_WITH_BACKTRACE)
       target_compile_definitions(${LIB_TARGET} PRIVATE PEGASUS_WITH_BACKTRACE)
     endif()
   endforeach()
@@ -217,7 +217,7 @@ if(PEGASUS_BUILD_TESTS)
   add_custom_target(pegasus_testing)
   add_dependencies(pegasus_testing ${PEGASUS_TESTING_LIBRARIES})
 
-  if(ARROW_BUILD_STATIC AND WIN32)
+  if(PEGASUS_BUILD_STATIC AND WIN32)
     target_compile_definitions(pegasus_testing_static PUBLIC PEGASUS_STATIC)
   endif()
 

@@ -17,16 +17,16 @@
 #
 # This config sets the following variables in your project::
 #
-#   ARROW_FULL_SO_VERSION - full shared library version of the found Arrow
-#   ARROW_SO_VERSION - shared library version of the found Arrow
-#   ARROW_VERSION - version of the found Arrow
-#   ARROW_* - options used when the found Arrow is build such as ARROW_COMPUTE
-#   Arrow_FOUND - true if Arrow found on the system
+#   PEGASUS_FULL_SO_VERSION - full shared library version of the found Pegasus
+#   PEGASUS_SO_VERSION - shared library version of the found Pegasus
+#   PEGASUS_VERSION - version of the found Pegasus
+#   PEGASUS_* - options used when the found Pegasus is build such as PEGASUS_COMPUTE
+#   Pegasus_FOUND - true if Pegasus found on the system
 #
 # This config sets the following targets in your project::
 #
-#   arrow_shared - for linked as shared library if shared library is built
-#   arrow_static - for linked as static library if static library is built
+#   pegasus_shared - for linked as shared library if shared library is built
+#   pegasus_static - for linked as static library if static library is built
 
 @PACKAGE_INIT@
 

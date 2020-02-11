@@ -52,14 +52,10 @@ target_link_libraries(Util
 if(PEGASUS_TEST_LINKAGE STREQUAL "static")
   set(PEGASUS_UTIL_TEST_LINK_LIBS 
       Util
-      gutil
-      ${BOOST_THREAD_LIBRARY}
       ${PEGASUS_TEST_STATIC_LINK_LIBS})
 else()
   set(PEGASUS_UTIL_TEST_LINK_LIBS
       Util
-      gutil
-      ${BOOST_THREAD_LIBRARY}
       ${PEGASUS_TEST_SHARED_LINK_LIBS})
 endif()
 
@@ -84,7 +80,5 @@ if(PEGASUS_BUILD_TESTS)
   add_pegasus_util_test(thread-pool-test)
 
   add_pegasus_util_test(pretty-printer-test)
-
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
 endif()

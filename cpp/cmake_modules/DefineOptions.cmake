@@ -111,6 +111,8 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
   define_option(PEGASUS_GFLAGS_USE_SHARED "Rely on GFlags shared libraries where relevant"
                 ON)
 
+  define_option(PEGASUS_WITH_BACKTRACE "Build with backtrace support" ON)
+
   define_option(PEGASUS_USE_GLOG "Build libraries with glog support for pluggable logging"
                 ON)
 
