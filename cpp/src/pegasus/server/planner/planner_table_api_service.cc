@@ -40,9 +40,10 @@ Status PlannerTableAPIService::Init() {
 
   std::string hostname = env_->GetPlannerGrpcHost();
   int32_t port = env_->GetPlannerGrpcPort();
-  rpc::Location location;
-  rpc::Location::ForGrpcTcp(hostname, port, &location);
+  Location location;
+  Location::ForGrpcTcp(hostname, port, &location);
   rpc::FlightServerOptions options(location);
+
   arrow::Status st = rpc::FlightServerBase::Init(options);
   if (!st.ok()) {
     return Status(StatusCode(st.code()), st.message());

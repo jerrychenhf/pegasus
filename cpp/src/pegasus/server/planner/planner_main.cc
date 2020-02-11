@@ -24,6 +24,7 @@ using namespace std;
 using namespace pegasus;
 
 int main(int argc, char** argv) {
+
   InitCommonRuntime(argc, argv, TestInfo::NON_TEST);
 
   std::unique_ptr<Planner> planner(new Planner());

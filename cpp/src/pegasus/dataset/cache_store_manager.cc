@@ -28,7 +28,7 @@ namespace pegasus {
     ExecEnv* env =  ExecEnv::GetInstance();
     std::shared_ptr<Store> store;
     std::unordered_map<string, long> cache_stores_info = env->GetCacheStoresInfo();
-    store_manager_ = env->get_store_manager();
+    std::shared_ptr<StoreManager> store_manager_(new StoreManager());
 
     Store::StoreType store_type_;
     for(std::unordered_map<string, long>::iterator it = cache_stores_info.begin(); it != cache_stores_info.end(); ++it) {

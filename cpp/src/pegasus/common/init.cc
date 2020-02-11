@@ -39,7 +39,8 @@ void pegasus::InitCommonRuntime(int argc, char** argv,
   // TO DO
   // do common initialize tasks such as logging and flags
   CpuInfo::Init();
-  DiskInfo::Init();
+  // TODO: at least gcc 4.9 to make regexps work with gcc
+  //DiskInfo::Init();
   MemInfo::Init();
   OsInfo::Init();
   TestInfo::Init(test_mode);

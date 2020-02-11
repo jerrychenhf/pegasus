@@ -53,6 +53,7 @@ Status WorkerTableAPIService::Serve() {
   if (!st.ok()) {
     return Status(StatusCode(st.code()), st.message());
   }
+  return Status::OK();
 }
 
 /// \brief Get a stream of IPC payloads to put on the wire

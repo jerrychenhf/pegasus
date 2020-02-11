@@ -43,7 +43,7 @@ Planner::~Planner() {
 
 Status Planner::Init() {
   RETURN_IF_ERROR(planner_table_api_service_->Init());
-
+  
   return Status::OK();
 }
 

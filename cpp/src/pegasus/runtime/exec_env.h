@@ -47,10 +47,6 @@ class ExecEnv {
     return storage_plugin_factory_; 
   }
 
-  std::shared_ptr<StoreManager> get_store_manager() {
-    return store_manager_;
-  }
-
   std::string GetPlannerGrpcHost();
 
   int32_t GetPlannerGrpcPort();
@@ -86,7 +82,6 @@ class ExecEnv {
   std::vector<Store::StoreType> store_types_;
   std::unordered_map<string, long> cache_stores_info_; // string: store type
   std::vector<CacheEngine::CachePolicy> cache_policies_;
-  std::shared_ptr<StoreManager> store_manager_;
 
   std::string namenode_hostname_;
   int32_t namenode_port_;

@@ -40,7 +40,6 @@ class Planner {
   Status Start();
 
  private:
-  ExecEnv* exec_env_;
   std::shared_ptr<WorkerManager> worker_manager_;
   std::shared_ptr<PlannerTableAPIService> planner_table_api_service_;
   std::shared_ptr<DataSetService> dataset_service_;

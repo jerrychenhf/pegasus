@@ -38,7 +38,7 @@ ExecEnv::ExecEnv()
 ExecEnv::ExecEnv(const std::string& hostname, int32_t planner_port, int32_t worker_port,
     const std::string& storage_plugin_type, const std::string& store_types)
   : storage_plugin_factory_(new StoragePluginFactory()), 
-    worker_manager_(new WorkerManager()), store_manager_(new StoreManager()) {
+    worker_manager_(new WorkerManager()) {
       
   planner_grpc_hostname_ = hostname;
   planner_grpc_port_ = planner_port;
