@@ -23,23 +23,24 @@ namespace pegasus {
 
 CacheRegion::CacheRegion(){}
 
-CacheRegion::CacheRegion(uint8_t* base_offset, long length, long occupied_size, arrow::ChunkedArray* chunked_array)
-    : address_(base_offset), length_(length), occupied_size_(occupied_size), chunked_array_(chunked_array) {}
+CacheRegion::CacheRegion(uint8_t* base_offset, long length, long occupied_size,
+ arrow::ChunkedArray* chunked_array): address_(base_offset), length_(length),
+  occupied_size_(occupied_size), chunked_array_(chunked_array) {}
 
  CacheRegion::~CacheRegion () {}  
- uint8_t* CacheRegion::address() {
+ uint8_t* CacheRegion::address() const {
    return address_;
  }
 
- long CacheRegion::length() {
-     return length_;
+ long CacheRegion::length() const {
+    return length_;
  }
- long CacheRegion::occupies_size() {
-     return occupied_size_;
+ long CacheRegion::occupies_size() const {
+    return occupied_size_;
  }
 
- arrow::ChunkedArray* CacheRegion::chunked_array() {
-     return chunked_array_;
+ arrow::ChunkedArray* CacheRegion::chunked_array() const {
+    return chunked_array_;
  }
 
 } // namespace pegasus

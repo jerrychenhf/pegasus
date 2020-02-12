@@ -51,7 +51,7 @@ class CachedPartition {
 
 class CachedDataset {
   public:
-   explicit CachedDataset(string dataset_path): dataset_path_(dataset_path_) {}
+   explicit CachedDataset(string dataset_path): dataset_path_(dataset_path) {}
 
   public:
    string dataset_path_;

@@ -30,17 +30,17 @@ class CacheRegion {
  public:
   CacheRegion();
   CacheRegion(uint8_t* address, long length, long occupied_size, arrow::ChunkedArray* chunked_array = NULL);
-  uint8_t* address();
-  long length();
-  long occupies_size();
-  arrow::ChunkedArray* chunked_array();
+  uint8_t* address() const;
+  long length() const;
+  long occupies_size() const;
+  arrow::ChunkedArray* chunked_array() const;
   ~CacheRegion();
 
  private:
   uint8_t* address_;
-  arrow::ChunkedArray* chunked_array_;
   long length_;
-  long occupied_size_; 
+  long occupied_size_;
+  arrow::ChunkedArray* chunked_array_; 
 };
 
 } // namespace pegasus

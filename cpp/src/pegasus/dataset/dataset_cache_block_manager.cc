@@ -16,6 +16,7 @@
 // under the License.
 
 #include "dataset/dataset_cache_block_manager.h"
+#include "common/logging.h"
 
 using namespace pegasus;
 
@@ -46,12 +47,12 @@ Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity,
  std::shared_ptr<CachedPartition>* partition) {
   std::string dataset_path = identity->dataset_path();
   std::string partition_path = identity->file_path();
-  std::shared_ptr<CachedDataset>* dataset;
-  GetCachedDataSet(identity, dataset);
+  std::shared_ptr<CachedDataset> dataset;
+  RETURN_IF_ERROR(GetCachedDataSet(identity, &dataset));
   if (dataset != NULL) {
-    auto entry = (*dataset)->cached_partitions_.find(partition_path);
+    auto entry = dataset->cached_partitions_.find(partition_path);
 
-    if (entry == (*dataset)->cached_partitions_.end()) {
+    if (entry == dataset->cached_partitions_.end()) {
       *partition = NULL;
       LOG(WARNING) << "The partition: "<< identity->file_path() <<" is NULL.";
       return Status::OK(); 
@@ -70,14 +71,14 @@ Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity,
 
  Status DatasetCacheBlockManager::GetCachedColumns(Identity* identity,
   std::unordered_map<string, std::shared_ptr<CachedColumn>>* columns) {
-  std::shared_ptr<CachedPartition>* partition;
-  GetCachedPartition(identity, partition);
+  std::shared_ptr<CachedPartition> partition;
+  RETURN_IF_ERROR(GetCachedPartition(identity, &partition));
   if (partition != NULL) {
     std::vector<int> col_ids = identity->col_ids();
     for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++)
   	{
-		  auto entry = (*partition)->cached_columns_.find(std::to_string(*iter));
-      if (entry != (*partition)->cached_columns_.end()) {
+		  auto entry = partition->cached_columns_.find(std::to_string(*iter));
+      if (entry != partition->cached_columns_.end()) {
         auto find_column = entry->second;
         columns->insert(std::make_pair(std::to_string(*iter), find_column));
       }
@@ -95,16 +96,18 @@ Status DatasetCacheBlockManager::InsertDataSet(Identity* identity,
  std::shared_ptr<CachedDataset> new_dataset) {
   std::string dataset_path = identity->dataset_path();
   cached_datasets_.insert(std::make_pair(dataset_path, new_dataset));
+  return Status::OK();
 }
 
 Status DatasetCacheBlockManager::InsertPartition(Identity* identity,
  std::shared_ptr<CachedPartition> new_partition) {
   std::string dataset_path = identity->dataset_path();
-  std::shared_ptr<CachedDataset>* dataset;
-  GetCachedDataSet(identity, dataset);
+  std::shared_ptr<CachedDataset> dataset;
+  RETURN_IF_ERROR(GetCachedDataSet(identity, &dataset));
   if (dataset != NULL) {
     string partition_path = identity->file_path();
-    (*dataset)->cached_partitions_[partition_path] = new_partition;
+    dataset->cached_partitions_[partition_path] = new_partition;
+    return Status::OK();
   } else {
     stringstream ss;
     ss << "Can not insert new partition when the dataset: "<< identity->dataset_path() <<" is NULL";
@@ -115,10 +118,11 @@ Status DatasetCacheBlockManager::InsertPartition(Identity* identity,
 
 Status DatasetCacheBlockManager::InsertColumn(Identity* identity, string column_id,
  std::shared_ptr<CachedColumn> new_column) {
-  std::shared_ptr<CachedPartition>* partition;
-  GetCachedPartition(identity, partition);
+  std::shared_ptr<CachedPartition> partition;
+  RETURN_IF_ERROR(GetCachedPartition(identity, &partition));
   if (partition != NULL) {
-    (*partition)->cached_columns_[column_id] = std::move(new_column);
+    partition->cached_columns_[column_id] = std::move(new_column);
+    return Status::OK();
   } else {
     stringstream ss;
     ss << "Can not insert new column when the partition: "<< identity->file_path() <<" is NULL";

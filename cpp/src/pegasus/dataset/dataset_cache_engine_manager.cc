@@ -52,17 +52,25 @@ Status DatasetCacheEngineManager::GetCacheEngine(CacheEngine::CachePolicy cache_
     if (cache_policy == CacheEngine::CachePolicy::LRU) {
       auto entry = cached_engines_.find("LRU");
       if (entry == cached_engines_.end()) {
-        return Status::KeyError("Could not find cache store.");
+        stringstream ss;
+        ss << "Could not find LRU cache engine.";
+        LOG(ERROR) << ss.str();
+        return Status::UnknownError(ss.str());
       }
       *cache_engine = entry->second;
+      return Status::OK();
     } else if (cache_policy == CacheEngine::CachePolicy::NonEvict) {
       auto entry = cached_engines_.find("NonEvict");
       if (entry == cached_engines_.end()) {
-        return Status::KeyError("Could not find cache store.");
+        stringstream ss;
+        ss << "Could not find NonEvict cache engine.";
+        LOG(ERROR) << ss.str();
+        return Status::UnknownError(ss.str());
       }
       *cache_engine = entry->second;
+      return Status::OK();
     } else {
-        return Status::Invalid("Invalid cache engine type!");
+      return Status::Invalid("Invalid cache engine type!");
     }
 }
 } // namespace pegasus
