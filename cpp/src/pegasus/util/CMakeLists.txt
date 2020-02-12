@@ -47,10 +47,11 @@ add_dependencies(Util gen-deps)
 
 target_link_libraries(Util
                       ${BOOST_STATIC_FILESYSTEM_LIBRARY}
+                      ${BOOST_STATIC_THREAD_LIBRARY}
                       ${GFLAGS_LIBRARIES})
 
 if(PEGASUS_TEST_LINKAGE STREQUAL "static")
-  set(PEGASUS_UTIL_TEST_LINK_LIBS 
+  set(PEGASUS_UTIL_TEST_LINK_LIBS
       Util
       ${PEGASUS_TEST_STATIC_LINK_LIBS})
 else()

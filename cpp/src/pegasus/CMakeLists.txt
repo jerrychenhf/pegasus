@@ -108,6 +108,7 @@ set (PEGASUS_LIBS
   StoragePlugin
   Util
   gutil
+  Test
 )
 
 set (PEGASUS_LINK_LIBS
@@ -129,6 +130,7 @@ add_subdirectory(runtime)
 add_subdirectory(server/planner)
 add_subdirectory(server/worker)
 add_subdirectory(plasma)
+add_subdirectory(test)
 
 if(NOT APPLE AND NOT MSVC)
   # Localize thirdparty symbols using a linker version script. This hides them

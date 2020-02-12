@@ -23,6 +23,6 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/test")
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/test")
 
 add_library(Test
-  gtest_util.cc
+  gtest-util.cc
 )
 add_dependencies(Test gen-deps)

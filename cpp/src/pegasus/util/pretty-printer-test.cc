@@ -203,3 +203,5 @@ TEST(PrettyPrinterTest, StringList) {
 }
 
 }
+
+PEGASUS_TEST_MAIN();
