@@ -59,7 +59,7 @@ git clone https://gitlab.devtools.intel.com/intel-bigdata/pegasus.git
 cd pegasus/cpp
 mkdir debug
 cd debug
-cmake -DPEGASUS_BUILD_TESTS ..
+cmake -DPEGASUS_BUILD_TESTS=ON ..
 make
 ```
 
