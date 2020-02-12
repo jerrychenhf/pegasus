@@ -39,18 +39,23 @@ StoreManager::StoreManager() {
 }
 
 Status StoreManager::GetStore(Store::StoreType store_type, std::shared_ptr<Store>* store) {
-
   if (store_type == Store::StoreType::MEMORY) {
     auto  entry = stores_.find("MEMORY");
     if (entry == stores_.end()) {
-      return Status::KeyError("Could not find  DRAM store.");
+      stringstream ss;
+      ss << "Failed to get the memory store in store manager.";
+      LOG(ERROR) << ss.str();
+      return Status::UnknownError(ss.str());
     }
     *store = entry->second;
     return Status::OK();
   } else if (store_type == Store::StoreType::DCPMM) {
     auto  entry = stores_.find("DCPMM");
     if (entry == stores_.end()) {
-      return Status::KeyError("Could not find  DCPMM store.");
+      stringstream ss;
+      ss << "Failed to get the DCPMM store in store manager.";
+      LOG(ERROR) << ss.str();
+      return Status::UnknownError(ss.str());
     }
     *store = entry->second;
     return Status::OK();

@@ -25,23 +25,30 @@ MemoryStore::MemoryStore(long total_size): total_size_(total_size) {
 
 Status MemoryStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) {
   uint8_t* address = reinterpret_cast<uint8_t*>(std::malloc(size));
+  if (address == NULL) {
+    return Status::OutOfMemory("""allocate of size ", size, " failed""");
+  }
   *cache_region = std::shared_ptr<CacheRegion>(new CacheRegion(address, size, 0));
   total_size_ = total_size_ - size;
   used_size_ = used_size_ + size;
+  return Status::OK();
 }
 
 Status MemoryStore::Free(std::shared_ptr<CacheRegion> cache_region) {
   std::free(cache_region->chunked_array());
   total_size_ = total_size_ + cache_region->length();
   used_size_ = used_size_ - cache_region->length();
+  return Status::OK();
 }
 
 Status MemoryStore::GetTotalSize(long& total_size) {
-  total_size = total_size_; 
+  total_size = total_size_;
+  return Status::OK(); 
 }
 
 Status MemoryStore::GetUsedSize(long& used_size) {
   used_size = used_size_;
+  return Status::OK();
 }
 
 std::string MemoryStore::GetStoreName() {
@@ -53,19 +60,19 @@ DCPMMStore::DCPMMStore(long total_size): total_size_(total_size) {
 }
 
 Status DCPMMStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) {
-
+  return Status::OK();
 }
 
 Status DCPMMStore::Free(std::shared_ptr<CacheRegion> cache_region) {
-
+  return Status::OK();
 }
 
 Status DCPMMStore::GetTotalSize(long& total_size) {
-    
+  return Status::OK();
 }
 
 Status DCPMMStore::GetUsedSize(long& used_size) {
-    
+  return Status::OK();
 }
 
 std::string DCPMMStore::GetStoreName() {

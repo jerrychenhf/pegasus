@@ -69,6 +69,7 @@ Status InsertColumnsToBlockManager(Identity* identity,
     for(auto iter = retrieved_columns.begin(); iter != retrieved_columns.end(); iter ++) {
       RETURN_IF_ERROR(dataset_cache_block_manager->InsertColumn(identity, iter->first, iter->second));
     }
+    return Status::OK();
 }
 
 Status WrapDatasetStream(std::unique_ptr<rpc::FlightDataStream>* data_stream,
@@ -86,6 +87,7 @@ Status WrapDatasetStream(std::unique_ptr<rpc::FlightDataStream>* data_stream,
   }
   *data_stream = std::unique_ptr<rpc::FlightDataStream>(
     new rpc::RecordBatchStream(std::shared_ptr<RecordBatchReader>(new TableBatchReader(*table))));
+  return Status::OK();
 }
 
 Status HandleMissedColumns(Identity* identity, std::shared_ptr<StoragePluginFactory> storage_plugin_factory,
@@ -129,6 +131,7 @@ Status HandleMissedColumns(Identity* identity, std::shared_ptr<StoragePluginFact
     }
     InsertColumnsToBlockManager(identity, dataset_cache_block_manager, retrieved_columns);
     WrapDatasetStream(data_stream, dataset_cache_block_manager, identity);
+    return Status::OK();
 }
 
 std::vector<int> GetMissedColumnsIds(std::vector<int> col_ids,
@@ -187,6 +190,7 @@ Status DatasetCacheManager::GetDatasetStream(Identity* identity,
       }
    }
   }
+  return Status::OK();
 }
 
 } // namespace pegasus

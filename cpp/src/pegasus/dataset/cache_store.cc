@@ -16,6 +16,7 @@
 // under the License.
 
 #include "dataset/cache_store.h"
+#include "common/logging.h"
 
 using namespace std;
 
@@ -25,18 +26,44 @@ namespace pegasus {
   
   Status CacheStore::GetUsedSize(long& size) {
     size = used_size_;
+    return Status::OK();
   }
 
   Status CacheStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) {
+    if (store_ != NULL) {
       store_->Allocate(size, cache_region);
+      return Status::OK();
+    } else {
+      stringstream ss;
+      ss << "Failed to allocate cache region in current cache store. Because the store is NULL";
+      LOG(ERROR) << ss.str();
+      return Status::UnknownError(ss.str());
+    }
+    
   }
 
   Status CacheStore::Free(std::shared_ptr<CacheRegion> cache_region) {
-    store_->Free(cache_region);
+    if (store_ != NULL) {
+      store_->Free(cache_region);
+      return Status::OK();
+    } else {
+      stringstream ss;
+      ss << "Failed to free cache region in current cache store. Because the store is NULL";
+      LOG(ERROR) << ss.str();
+      return Status::UnknownError(ss.str());
+    }
+   
   }
 
   Status CacheStore::GetStore(std::shared_ptr<Store>* store) {
-     store = &store_;
+    if (store_ != NULL) {
+      store = &store_;
+      return Status::OK();
+    } else {
+      stringstream ss;
+      ss << "Failed to get the store in current cache store. Because the store is NULL";
+      LOG(ERROR) << ss.str();
+      return Status::UnknownError(ss.str());
+    }
   }
-
 } // namespace pegasus

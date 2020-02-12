@@ -81,7 +81,6 @@ int64_t CacheMemoryPool::bytes_allocated() const  { return occupied_size; }
 int64_t CacheMemoryPool::max_memory() const {return 100;}
 
 std::string CacheMemoryPool::backend_name() const {
-  // can get the store type (MEMORY, DCPMM...)
   if (store_ != NULL) {
     return store_->GetStoreName();
   } else {
