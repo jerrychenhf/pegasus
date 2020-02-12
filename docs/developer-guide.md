@@ -32,7 +32,7 @@ cd arrow/cpp
 mkdir build-arrow
 cd build-arrow
 yum install openssl-devel flex bison -y
-cmake -DARROW_FLIGHT=ON -DARROW_PARQUET=ON -DARROW_HDFS=ON ..
+cmake -DARROW_FLIGHT=ON -DARROW_PARQUET=ON -DARROW_HDFS=ON -DARROW_BUILD_TESTS=ON ..
 make
 make install
 ```
