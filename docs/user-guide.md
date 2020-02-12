@@ -1,5 +1,10 @@
 # User Guide
 
+### Export PEGASUS_HOME
+```
+export PEGASUS_HOME=/PATH/TO/pegasus/cpp
+```
+
 ## Start Planner
 
 ```
