@@ -173,4 +173,6 @@ TEST(ThreadPoolTest, SynchronousThreadPoolTimeouts) {
 
 }
 
+PEGASUS_TEST_MAIN();
+
 

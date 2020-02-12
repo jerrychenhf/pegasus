@@ -283,7 +283,7 @@ class SynchronousWorkItem {
     if (timed_out) {
       // IMPALA-7946: Always throw an error using the original timeout, not the
       // timeout remaining.
-      Status timeout_status = Status::ThreadPoolSubmitFailed(
+      Status timeout_status = Status::ThreadPoolTaskTimeoutError(
           GetDescription(), timeout_millis / MILLIS_PER_SEC);
       LOG(WARNING) << timeout_status.ToString();
       return timeout_status;
