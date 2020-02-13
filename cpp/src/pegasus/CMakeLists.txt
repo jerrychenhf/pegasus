@@ -108,7 +108,6 @@ set (PEGASUS_LIBS
   StoragePlugin
   Util
   gutil
-  Test
 )
 
 set (PEGASUS_LINK_LIBS
