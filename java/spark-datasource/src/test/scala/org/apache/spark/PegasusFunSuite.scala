@@ -20,43 +20,46 @@ package org.apache.spark
 // scalastyle:off
 import java.io.File
 
-import org.apache.log4j.{Appender, Level, Logger}
-import org.apache.spark.internal.Logging
-import org.scalatest._
+import org.apache.log4j.spi.LoggingEvent
 
 import scala.annotation.tailrec
+import org.apache.log4j.{Appender, AppenderSkeleton, Level, Logger}
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, BeforeAndAfterEach, FunSuite, Outcome}
+import org.apache.spark.internal.Logging
+import org.apache.spark.util.Utils
+
+import scala.collection.mutable.ArrayBuffer
 
 /**
- * Base abstract class for all unit tests in Pegasus for handling common functionality.
- *
- * Thread audit happens normally here automatically when a new test suite created.
- * The only prerequisite for that is that the test class must extend [[PegasusFunSuite]].
- *
- * It is possible to override the default thread audit behavior by setting enableAutoThreadAudit
- * to false and manually calling the audit methods, if desired. For example:
- *
- * class MyTestSuite extends SparkFunSuite {
- *
- *   override val enableAutoThreadAudit = false
- *
- *   protected override def beforeAll(): Unit = {
- *     doThreadPreAudit()
- *     super.beforeAll()
- *   }
- *
- *   protected override def afterAll(): Unit = {
- *     super.afterAll()
- *     doThreadPostAudit()
- *   }
- * }
- */
+  * Base abstract class for all unit tests in Spark for handling common functionality.
+  *
+  * Thread audit happens normally here automatically when a new test suite created.
+  * The only prerequisite for that is that the test class must extend [[PegasusFunSuite]].
+  *
+  * It is possible to override the default thread audit behavior by setting enableAutoThreadAudit
+  * to false and manually calling the audit methods, if desired. For example:
+  *
+  * class MyTestSuite extends SparkFunSuite {
+  *
+  *   override val enableAutoThreadAudit = false
+  *
+  *   protected override def beforeAll(): Unit = {
+  *     doThreadPreAudit()
+  *     super.beforeAll()
+  *   }
+  *
+  *   protected override def afterAll(): Unit = {
+  *     super.afterAll()
+  *     doThreadPostAudit()
+  *   }
+  * }
+  */
 abstract class PegasusFunSuite
   extends FunSuite
-  with BeforeAndAfterAll
-  with BeforeAndAfterEach
-  with Logging {
-// scalastyle:on
-
+    with BeforeAndAfterAll
+    with BeforeAndAfterEach
+    with Logging {
+  // scalastyle:on
 
   // helper function
   protected final def getTestResourceFile(file: String): File = {
@@ -68,9 +71,9 @@ abstract class PegasusFunSuite
   }
 
   /**
-   * Note: this method doesn't support `BeforeAndAfter`. You must use `BeforeAndAfterEach` to
-   * set up and tear down resources.
-   */
+    * Note: this method doesn't support `BeforeAndAfter`. You must use `BeforeAndAfterEach` to
+    * set up and tear down resources.
+    */
   def testRetry(s: String, n: Int = 2)(body: => Unit): Unit = {
     test(s) {
       retry(n) {
@@ -80,9 +83,9 @@ abstract class PegasusFunSuite
   }
 
   /**
-   * Note: this method doesn't support `BeforeAndAfter`. You must use `BeforeAndAfterEach` to
-   * set up and tear down resources.
-   */
+    * Note: this method doesn't support `BeforeAndAfter`. You must use `BeforeAndAfterEach` to
+    * set up and tear down resources.
+    */
   def retry[T](n: Int)(body: => T): T = {
     if (this.isInstanceOf[BeforeAndAfter]) {
       throw new UnsupportedOperationException(
@@ -109,12 +112,12 @@ abstract class PegasusFunSuite
   }
 
   /**
-   * Log the suite name and the test name before and after each test.
-   *
-   * Subclasses should never override this method. If they wish to run
-   * custom code before and after each test, they should mix in the
-   * {{org.scalatest.BeforeAndAfter}} trait instead.
-   */
+    * Log the suite name and the test name before and after each test.
+    *
+    * Subclasses should never override this method. If they wish to run
+    * custom code before and after each test, they should mix in the
+    * {{org.scalatest.BeforeAndAfter}} trait instead.
+    */
   final protected override def withFixture(test: NoArgTest): Outcome = {
     val testName = test.text
     val suiteName = this.getClass.getName
@@ -128,15 +131,26 @@ abstract class PegasusFunSuite
   }
 
   /**
-   * Adds a log appender and optionally sets a log level to the root logger or the logger with
-   * the specified name, then executes the specified function, and in the end removes the log
-   * appender and restores the log level if necessary.
-   */
+    * Creates a temporary directory, which is then passed to `f` and will be deleted after `f`
+    * returns.
+    */
+  protected def withTempDir(f: File => Unit): Unit = {
+    val dir = Utils.createTempDir()
+    try f(dir) finally {
+      Utils.deleteRecursively(dir)
+    }
+  }
+
+  /**
+    * Adds a log appender and optionally sets a log level to the root logger or the logger with
+    * the specified name, then executes the specified function, and in the end removes the log
+    * appender and restores the log level if necessary.
+    */
   protected def withLogAppender(
-      appender: Appender,
-      loggerName: Option[String] = None,
-      level: Option[Level] = None)(
-      f: => Unit): Unit = {
+                                 appender: Appender,
+                                 loggerName: Option[String] = None,
+                                 level: Option[Level] = None)(
+                                 f: => Unit): Unit = {
     val logger = loggerName.map(Logger.getLogger).getOrElse(Logger.getRootLogger)
     val restoreLevel = logger.getLevel
     logger.addAppender(appender)
@@ -144,10 +158,25 @@ abstract class PegasusFunSuite
       logger.setLevel(level.get)
     }
     try f finally {
+      logger.removeAppender(appender)
       if (level.isDefined) {
         logger.setLevel(restoreLevel)
       }
     }
   }
 
+  class LogAppender(msg: String = "", maxEvents: Int = 1000) extends AppenderSkeleton {
+    val loggingEvents = new ArrayBuffer[LoggingEvent]()
+
+    override def append(loggingEvent: LoggingEvent): Unit = {
+      if (loggingEvents.size >= maxEvents) {
+        val loggingInfo = if (msg == "") "." else s" while logging $msg."
+        throw new IllegalStateException(
+          s"Number of events reached the limit of $maxEvents$loggingInfo")
+      }
+      loggingEvents.append(loggingEvent)
+    }
+    override def close(): Unit = {}
+    override def requiresLayout(): Boolean = false
+  }
 }

@@ -29,7 +29,6 @@
     <target.gen.source.path>${project.basedir}/target/generated-sources</target.gen.source.path>
     <dep.junit.platform.version>1.4.0</dep.junit.platform.version>
     <dep.junit.jupiter.version>5.4.0</dep.junit.jupiter.version>
-    <dep.slf4j.version>1.7.25</dep.slf4j.version>
     <dep.guava.version>20.0</dep.guava.version>
     <dep.netty.version>4.1.27.Final</dep.netty.version>
     <dep.jackson.version>2.9.8</dep.jackson.version>
@@ -46,6 +45,8 @@
     <scalafmt.parameters>--diff --test</scalafmt.parameters>
     <!-- for now, not running scalafmt as part of default verify pipeline -->
     <scalafmt.skip>true</scalafmt.skip>
+    <log4j.version>1.2.17</log4j.version>
+    <slf4j.version>1.7.16</slf4j.version>
   </properties>
 
   <repositories>
@@ -513,7 +514,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>${dep.slf4j.version}</version>
+        <version>${slf4j.version}</version>
       </dependency>
       <dependency>
         <groupId>javax.annotation</groupId>
@@ -596,25 +597,32 @@
     <!-- Test Dependencies -->
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>jul-to-slf4j</artifactId>
-      <version>${dep.slf4j.version}</version>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
-      <version>${dep.slf4j.version}</version>
-      <scope>test</scope>
+      <version>${slf4j.version}</version>
+      <!-- runtime scope is appropriate, but causes SBT build problems -->
     </dependency>
-
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>log4j-over-slf4j</artifactId>
-      <version>${dep.slf4j.version}</version>
-      <scope>test</scope>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>${log4j.version}</version>
     </dependency>
-
 
     <dependency>
       <groupId>org.junit.platform</groupId>
