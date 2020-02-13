@@ -17,7 +17,6 @@
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
 import scala.collection.JavaConverters._
-
 import org.apache.pegasus.rpc.FlightEndpoint
 import org.apache.spark.Partition
 import org.apache.spark.sql.connector.read.InputPartition

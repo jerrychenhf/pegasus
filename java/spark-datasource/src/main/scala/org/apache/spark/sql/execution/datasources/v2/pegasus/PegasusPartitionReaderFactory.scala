@@ -23,6 +23,7 @@ import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 import org.apache.spark.sql.vectorized.ColumnarBatch
 
+
 /**
   * A factory used to create Pegasus Partition readers.
   *

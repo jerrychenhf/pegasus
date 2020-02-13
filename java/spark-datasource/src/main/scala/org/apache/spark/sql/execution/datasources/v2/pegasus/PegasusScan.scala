@@ -19,6 +19,7 @@ package org.apache.spark.sql.execution.datasources.v2.pegasus
 import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
+
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.read.{Batch, InputPartition, PartitionReaderFactory, Scan}
