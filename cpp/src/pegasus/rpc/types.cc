@@ -307,6 +307,15 @@ arrow::Status BasicAuth::Serialize(const BasicAuth& basic_auth, std::string* out
   return arrow::Status::OK();
 }
 
+bool NodeInfo::Equals(const NodeInfo& other) const {
+  if (cache_capacity != other.cache_capacity ||
+    cache_free != other.cache_free) {
+    return false;
+  }
+  
+  return true;
+}
+
 bool HeartbeatInfo::Equals(const HeartbeatInfo& other) const {
   if (type != other.type) {
     return false;
@@ -319,6 +328,14 @@ bool HeartbeatInfo::Equals(const HeartbeatInfo& other) const {
   switch (type) {
     case REGISTRATION:
       return address == other.address;
+    case HEARTBEAT: {
+      if (node_info == nullptr && other.node_info == nullptr)
+        return true;
+      else if(node_info == nullptr || other.node_info == nullptr)
+        return false;
+      
+      return *(node_info.get()) == *(other.node_info.get());
+    }
     default:
       return true;
   }

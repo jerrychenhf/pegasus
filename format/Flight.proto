@@ -326,6 +326,12 @@ message PutResult {
   bytes app_metadata = 1;
 }
 
+message NodeInfo {
+  // Set these to -1 if unknown.
+  int64 cache_capacity = 1;
+  int64 cache_free = 2;
+}
+
 /*
  * The request that a worker to register or heartbeat to planner
  */
@@ -357,9 +363,14 @@ message HeartbeatInfo {
   string hostname = 2;
    
   /*
-   * The worker address reported in the heartbeat
+   * The worker address reported in the registration
    */
   Location address = 3;
+  
+  /*
+   * Other worker node information reported in the heartbeat
+   */
+  NodeInfo node_info = 4;
 }
 
 message HeartbeatResult {

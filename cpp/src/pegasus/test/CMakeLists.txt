@@ -22,7 +22,3 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/test")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/test")
 
-add_library(Test
-  gtest-util.cc
-)
-add_dependencies(Test gen-deps)

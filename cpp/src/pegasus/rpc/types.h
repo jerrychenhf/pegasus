@@ -493,6 +493,24 @@ class PEGASUS_RPC_EXPORT SimpleResultStream : public ResultStream {
   size_t position_;
 };
 
+struct PEGASUS_RPC_EXPORT NodeInfo {
+  
+  int64_t cache_capacity;
+  int64_t cache_free;
+  
+  int64_t get_cache_capacity() const { return cache_capacity; }
+  int64_t get_cache_free() const { return cache_free; }
+
+  bool Equals(const NodeInfo& other) const;
+
+  friend bool operator==(const NodeInfo& left, const NodeInfo& right) {
+    return left.Equals(right);
+  }
+  friend bool operator!=(const NodeInfo& left, const NodeInfo& right) {
+    return !(left == right);
+  }
+};
+
 /// \brief Worker heartbeat information passed to planner
 struct PEGASUS_RPC_EXPORT HeartbeatInfo {
   enum HeartbeatType {
@@ -510,7 +528,10 @@ struct PEGASUS_RPC_EXPORT HeartbeatInfo {
   /// The address to contact the worker for RPC
   Location address;
   
+  std::shared_ptr<NodeInfo> node_info;
+  
   const Location& get_address() const { return address; }
+  std::shared_ptr<NodeInfo> get_node_info() { return node_info; }
 
   bool Equals(const HeartbeatInfo& other) const;
 

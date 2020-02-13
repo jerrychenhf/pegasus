@@ -373,6 +373,20 @@ arrow::Status ToProto(const SchemaResult& result, pb::SchemaResult* pb_result) {
   return arrow::Status::OK();
 }
 
+//NodeInfo
+
+arrow::Status FromProto(const pb::NodeInfo& pb_info, NodeInfo* info) {
+  info->cache_capacity = pb_info.cache_capacity();
+  info->cache_free = pb_info.cache_free();
+  return arrow::Status::OK();
+}
+
+arrow::Status ToProto(const NodeInfo& info, pb::NodeInfo* pb_info) {
+  pb_info->set_cache_capacity(info.cache_capacity);
+  pb_info->set_cache_free(info.cache_free);
+  return arrow::Status::OK();
+}
+
 // HeartbeatInfo
 arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info) {
   if (pb_info.type() == pb::HeartbeatInfo::REGISTRATION) {
@@ -382,6 +396,14 @@ arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info) {
   } else if (pb_info.type() == pb::HeartbeatInfo::HEARTBEAT) {
     info->type = HeartbeatInfo::HEARTBEAT;
     info->hostname = pb_info.hostname();
+    
+    // node info
+    if (pb_info.has_node_info()) {
+      info->node_info.reset(new NodeInfo());
+      FromProto(pb_info.node_info(), info->node_info.get());
+    } else {
+      info->node_info = nullptr;
+    }
   } else {
     return arrow::Status::Invalid("Client sent UNKNOWN heartbeat type");
   }
@@ -396,6 +418,14 @@ arrow::Status ToProto(const HeartbeatInfo& info, pb::HeartbeatInfo* pb_info) {
   } else if (info.type == HeartbeatInfo::HEARTBEAT) {
     pb_info->set_type(pb::HeartbeatInfo::HEARTBEAT);
     pb_info->set_hostname(info.hostname);
+    
+    // node info
+    if (info.node_info != nullptr) {
+      ToProto(*(info.node_info.get()), pb_info->mutable_node_info());
+    } else {
+      pb_info->clear_node_info();
+    }
+    
   } else {
     return arrow::Status::Invalid("UNKNOWN heartbeat type");
   }
