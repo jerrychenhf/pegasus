@@ -26,6 +26,9 @@
 #include "runtime/client_cache.h"
 #include "rpc/client.h"
 #include "rpc/types.h"
+#include <boost/thread/lock_guard.hpp>
+
+using namespace boost;
 
 DECLARE_string(hostname);
 DECLARE_string(planner_hostname);
@@ -43,7 +46,10 @@ namespace pegasus {
 typedef ClientConnection<rpc::FlightClient> FlightClientConnection;
 
 WorkerHeartbeat::WorkerHeartbeat()
-  : heartbeat_client_cache_(new FlightClientCache())
+  : heartbeat_client_cache_(new FlightClientCache()),
+    node_info_update_timestamp_(0),
+    node_info_heartbeat_timestamp_(0),
+    node_info_changed_(0)
 {
   heartbeat_threadpool_ = std::unique_ptr<ThreadPool<ScheduledHeartbeat>>(
     new ThreadPool<ScheduledHeartbeat>("worker-heartbeat",
@@ -78,6 +84,53 @@ Status WorkerHeartbeat::Stop() {
   heartbeat_threadpool_->Shutdown();
   heartbeat_threadpool_->Join();
   return Status::OK();
+}
+
+bool WorkerHeartbeat::UpdateNodeInfo(const rpc::NodeInfo& node_info) {
+  int64_t ts = UnixMillis();
+  {
+    lock_guard<mutex> l(node_info_lock_);
+    
+    if (node_info == node_info_) {
+      // no change
+      return false;
+    }
+    
+    node_info_ = node_info;
+    node_info_update_timestamp_ = ts;
+    node_info_changed_ = 1;
+  }
+  
+  return true;
+}
+
+bool WorkerHeartbeat::GetNodeInfo(rpc::NodeInfo* node_info, int64_t& ts) {
+  if(!node_info)
+    return false;
+    
+  {
+    lock_guard<mutex> l(node_info_lock_);
+    
+    if (node_info_changed_ == 0)
+      return false;
+    
+    *node_info = node_info_;
+    ts = node_info_update_timestamp_;
+  }
+  
+  return true;
+}
+
+bool WorkerHeartbeat::HeartbeatedNodeInfo(int64_t ts) {
+  {
+    lock_guard<mutex> l(node_info_lock_);
+    
+    // node info updated after this heartbeat
+    if(ts != node_info_update_timestamp_)
+      return false;
+      
+    node_info_changed_ = 0;
+  }
 }
 
 Status WorkerHeartbeat::OfferHeartbeat(const ScheduledHeartbeat& heartbeat) {
@@ -167,6 +220,15 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
   
   // check whether node info has changed for the last update
   // If yes, pass the node info
+  bool has_node_info = false;
+  int64_t ts = 0;
+  if(node_info_changed_ != 0) {
+    has_node_info = GetNodeInfo(info.mutable_node_info(), ts);
+  }
+  
+  if(!has_node_info) {
+    info.node_info.reset();
+  }
   
   std::unique_ptr<rpc::HeartbeatResult> result;
   arrow::Status arrowStatus = client->Heartbeat(info, &result);
@@ -176,6 +238,12 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
   if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION &&
     result->result_code == rpc::HeartbeatResult::REGISTERED) {
     registered_ = true;
+  }
+  
+  if (has_node_info) {
+    // update
+    HeartbeatedNodeInfo(ts);
+    node_info_heartbeat_timestamp_ = ts;
   }
   
   return Status::OK();

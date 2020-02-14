@@ -394,8 +394,7 @@ arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info) {
     info->type = HeartbeatInfo::REGISTRATION;
     
     if (pb_info.has_address()) {
-      info->address.reset(new Location());
-      FromProto(pb_info.address(), info->address.get());
+      FromProto(pb_info.address(), info->mutable_address());
     } else {
       return arrow::Status::Invalid("Address is required for registration.");
     }
@@ -407,8 +406,7 @@ arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info) {
   
   // node info
   if (pb_info.has_node_info()) {
-    info->node_info.reset(new NodeInfo());
-    FromProto(pb_info.node_info(), info->node_info.get());
+    FromProto(pb_info.node_info(), info->mutable_node_info());
   } else {
     info->node_info = nullptr;
   }

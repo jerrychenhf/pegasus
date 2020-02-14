@@ -534,7 +534,17 @@ struct PEGASUS_RPC_EXPORT HeartbeatInfo {
   std::shared_ptr<NodeInfo> node_info;
   
   std::shared_ptr<Location> get_address() const { return address; }
+  Location* mutable_address() {
+    address.reset(new Location());
+    return address.get();
+  }
+  
   std::shared_ptr<NodeInfo> get_node_info() const { return node_info; }
+  
+  NodeInfo* mutable_node_info() {
+    node_info.reset(new NodeInfo());
+    return node_info.get();
+  }
 
   bool Equals(const HeartbeatInfo& other) const;
 
