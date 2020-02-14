@@ -28,6 +28,7 @@
 #include "rpc/types.h"
 
 DECLARE_string(hostname);
+DECLARE_string(planner_hostname);
 DECLARE_int32(planner_port);
 DECLARE_int32(worker_port);
 
@@ -60,16 +61,15 @@ WorkerHeartbeat::~WorkerHeartbeat() {
 Status WorkerHeartbeat::Init() {
   RETURN_IF_ERROR(heartbeat_threadpool_->Init());
 
-  // Offer with an immediate schedule.
-  ScheduledHeartbeat heartbeat(0);
-  RETURN_IF_ERROR(OfferHeartbeat(heartbeat));
-
   return Status::OK();
 }
 
 Status WorkerHeartbeat::Start() {
   //TO DO INFO LOG
   //std::cout << "Worker listening on:" << FLAGS_hostname << ":" << FLAGS_worker_port << std::endl;
+  // Offer with an immediate schedule.
+  ScheduledHeartbeat heartbeat(0);
+  RETURN_IF_ERROR(OfferHeartbeat(heartbeat));
   
   return Status::OK();
 }
@@ -146,7 +146,7 @@ void WorkerHeartbeat::DoHeartbeat(int thread_id,
 
 Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
   Status status;
-  std::string planner_address = FLAGS_hostname + ":" 
+  std::string planner_address = FLAGS_planner_hostname + ":" 
     + std::to_string(FLAGS_planner_port);
   FlightClientConnection client(heartbeat_client_cache_.get(),
       planner_address, &status);
