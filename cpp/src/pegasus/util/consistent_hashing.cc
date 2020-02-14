@@ -16,6 +16,8 @@
 // under the License.
 
 #include "pegasus/util/consistent_hashing.h"
+#include "pegasus/runtime/exec_env.h"
+#include "common/worker_manager.h"
 
 namespace pegasus {
 
@@ -44,10 +46,15 @@ void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<std::
 	}
 	else
 	{
-		//TODO: get worker_manager first
-		std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations;
-//		worker_manager_->GetWorkerLocations(worker_locations);
-		validlocations_ = worker_locations;
+		std::shared_ptr<WorkerManager> worker_manager = ExecEnv::GetInstance()->GetInstance()->get_worker_manager();
+//		std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations;
+		//Status WorkerManager::GetWorkerRegistrations(std::vector<std::shared_ptr<WorkerRegistration>>& registrations)
+		std::vector<std::shared_ptr<WorkerRegistration>> wregs;
+		worker_manager->GetWorkerRegistrations(wregs);
+		for (auto it:wregs)
+		{
+			validlocations_->push_back(std::make_shared<Location>(it->address()));
+		}
 	}
 }
 
