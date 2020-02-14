@@ -122,9 +122,9 @@ if(PEGASUS_BUILD_TESTS)
                 SHARED_LINK_LIBS
                 pegasus_shared
                 pegasus_rpc_shared
-                pegasus_testing_shared
                 ${BOOST_FILESYSTEM_LIBRARY}
                 ${BOOST_SYSTEM_LIBRARY}
+                ${GTEST_SHARED_LIB}
                 GTest::GTest
                 STATIC_LINK_LIBS
                 pegasus_static

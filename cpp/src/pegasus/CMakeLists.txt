@@ -129,7 +129,6 @@ add_subdirectory(runtime)
 add_subdirectory(server/planner)
 add_subdirectory(server/worker)
 add_subdirectory(plasma)
-add_subdirectory(test)
 
 if(NOT APPLE AND NOT MSVC)
   # Localize thirdparty symbols using a linker version script. This hides them
@@ -193,37 +192,6 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/PegasusOptions.cmake
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/pegasus-config.cmake
         DESTINATION "${PEGASUS_CMAKE_INSTALL_DIR}")
 
-set(PEGASUS_TESTING_SRCS
-    test/gtest-util.cc)
-
-if(PEGASUS_BUILD_TESTS)
-  # that depend on gtest
-  add_pegasus_lib(pegasus_testing
-                CMAKE_PACKAGE_NAME
-                PegasusTesting
-                PKG_CONFIG_NAME
-                pegasus-testing
-                SOURCES
-                ${PEGASUS_TESTING_SRCS}
-                OUTPUTS
-                PEGASUS_TESTING_LIBRARIES
-                DEPENDENCIES
-                pegasus_test_dependencies
-                SHARED_LINK_LIBS
-                pegasus_shared
-                GTest::GTest
-                STATIC_LINK_LIBS
-                pegasus_static)
-
-  add_custom_target(pegasus_testing)
-  add_dependencies(pegasus_testing ${PEGASUS_TESTING_LIBRARIES})
-
-  if(PEGASUS_BUILD_STATIC AND WIN32)
-    target_compile_definitions(pegasus_testing_static PUBLIC PEGASUS_STATIC)
-  endif()
-
-  set(PEGASUS_LIBRARIES ${PEGASUS_LIBRARIES} ${PEGASUS_TESTING_LIBRARIES})
-endif()
 
 
 

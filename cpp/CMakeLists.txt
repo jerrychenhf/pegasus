@@ -458,8 +458,7 @@ if(PEGASUS_BUILD_TESTS)
 endif()
 
 
-set(PEGASUS_TEST_STATIC_LINK_LIBS 
-    pegasus_testing_static 
+set(PEGASUS_TEST_STATIC_LINK_LIBS  
     pegasus_static 
     gutil
     ${BOOST_FILESYSTEM_LIBRARY}
