@@ -154,13 +154,19 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
 
   rpc::HeartbeatInfo info;
   
+  // identifier
+  info.hostname = FLAGS_hostname;
+  
   if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION) {
     info.type = rpc::HeartbeatInfo::REGISTRATION;
+    info.address.reset(new rpc::Location());
+    rpc::Location::ForGrpcTcp(FLAGS_hostname, FLAGS_worker_port, info.address.get());
   } else {
     info.type = rpc::HeartbeatInfo::HEARTBEAT;
   }
-  info.hostname = FLAGS_hostname;
-  rpc::Location::ForGrpcTcp(FLAGS_hostname, FLAGS_worker_port, &info.address);
+  
+  // check whether node info has changed for the last update
+  // If yes, pass the node info
   
   std::unique_ptr<rpc::HeartbeatResult> result;
   arrow::Status arrowStatus = client->Heartbeat(info, &result);

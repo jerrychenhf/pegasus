@@ -389,45 +389,54 @@ arrow::Status ToProto(const NodeInfo& info, pb::NodeInfo* pb_info) {
 
 // HeartbeatInfo
 arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info) {
+  info->hostname = pb_info.hostname();
   if (pb_info.type() == pb::HeartbeatInfo::REGISTRATION) {
     info->type = HeartbeatInfo::REGISTRATION;
-    info->hostname = pb_info.hostname();
-    FromProto(pb_info.address(), &info->address);
+    
+    if (pb_info.has_address()) {
+      info->address.reset(new Location());
+      FromProto(pb_info.address(), info->address.get());
+    } else {
+      return arrow::Status::Invalid("Address is required for registration.");
+    }
   } else if (pb_info.type() == pb::HeartbeatInfo::HEARTBEAT) {
     info->type = HeartbeatInfo::HEARTBEAT;
-    info->hostname = pb_info.hostname();
-    
-    // node info
-    if (pb_info.has_node_info()) {
-      info->node_info.reset(new NodeInfo());
-      FromProto(pb_info.node_info(), info->node_info.get());
-    } else {
-      info->node_info = nullptr;
-    }
   } else {
     return arrow::Status::Invalid("Client sent UNKNOWN heartbeat type");
+  }
+  
+  // node info
+  if (pb_info.has_node_info()) {
+    info->node_info.reset(new NodeInfo());
+    FromProto(pb_info.node_info(), info->node_info.get());
+  } else {
+    info->node_info = nullptr;
   }
   return arrow::Status::OK();
 }
 
 arrow::Status ToProto(const HeartbeatInfo& info, pb::HeartbeatInfo* pb_info) {
+  pb_info->set_hostname(info.hostname);
   if (info.type == HeartbeatInfo::REGISTRATION) {
     pb_info->set_type(pb::HeartbeatInfo::REGISTRATION);
-    pb_info->set_hostname(info.hostname);
-    ToProto(info.address, pb_info->mutable_address());
+    
+    // Address must be specified
+    if (info.address != nullptr) {
+      ToProto(*(info.address.get()), pb_info->mutable_address());
+    } else {
+      return arrow::Status::Invalid("Address must be specified for registration.");
+    }
   } else if (info.type == HeartbeatInfo::HEARTBEAT) {
     pb_info->set_type(pb::HeartbeatInfo::HEARTBEAT);
-    pb_info->set_hostname(info.hostname);
-    
-    // node info
-    if (info.node_info != nullptr) {
-      ToProto(*(info.node_info.get()), pb_info->mutable_node_info());
-    } else {
-      pb_info->clear_node_info();
-    }
-    
   } else {
     return arrow::Status::Invalid("UNKNOWN heartbeat type");
+  }
+  
+  // node info
+  if (info.node_info != nullptr) {
+    ToProto(*(info.node_info.get()), pb_info->mutable_node_info());
+  } else {
+    pb_info->clear_node_info();
   }
   return arrow::Status::OK();
 }

@@ -76,7 +76,12 @@ Status WorkerManager::RegisterWorker(const rpc::HeartbeatInfo& info) {
     
     std::shared_ptr<WorkerRegistration> current_registration(
         new WorkerRegistration(id));
-    current_registration->address_ = info.get_address();
+    std::shared_ptr<Location> address = info.get_address();
+    if(address == nullptr) {
+      return Status::Invalid("Address is not specified for registration");
+    }
+    
+    current_registration->address_ = *(address.get());
     current_registration->state_ = WorkerRegistration::ACTIVE;
     current_registration->last_heartbeat_time_ = UnixMillis();
     workers_.emplace(id, current_registration);

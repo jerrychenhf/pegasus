@@ -326,19 +326,27 @@ bool HeartbeatInfo::Equals(const HeartbeatInfo& other) const {
   }
   
   switch (type) {
-    case REGISTRATION:
-      return address == other.address;
-    case HEARTBEAT: {
-      if (node_info == nullptr && other.node_info == nullptr)
+    case REGISTRATION: {
+      if (address == nullptr && other.address == nullptr)
         return true;
-      else if(node_info == nullptr || other.node_info == nullptr)
+      else if(address == nullptr || other.address == nullptr)
         return false;
-      
-      return *(node_info.get()) == *(other.node_info.get());
+    
+      return *(address.get()) == *(other.address.get());
+    }
+    case HEARTBEAT: {
+      break;
     }
     default:
       return true;
   }
+  
+  if (node_info == nullptr && other.node_info == nullptr)
+    return true;
+  else if(node_info == nullptr || other.node_info == nullptr)
+    return false;
+
+  return *(node_info.get()) == *(other.node_info.get());
 }
 
 bool HeartbeatResult::Equals(const HeartbeatResult& other) const {

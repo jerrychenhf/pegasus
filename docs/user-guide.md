@@ -16,5 +16,5 @@ sh start_planner.sh --hostname=localhost --planner_port=30001
 
 ```
 cd pegasus/bin
-sh start_worker.sh --hostname=localhost --worker_port=30002
+sh start_worker.sh --hostname=localhost --worker_port=30002 --planner_hostname=localhost --planner_port=30001
 ```

@@ -525,13 +525,16 @@ struct PEGASUS_RPC_EXPORT HeartbeatInfo {
   /// The identifier
   std::string hostname;
   
-  /// The address to contact the worker for RPC
-  Location address;
+  /// The address to contact the worker for RPC. 
+  /// Valid for registration
+  std::shared_ptr<Location> address;
   
+  /// The node information passed to planner.
+  /// Valid for both registration and heartbeat
   std::shared_ptr<NodeInfo> node_info;
   
-  const Location& get_address() const { return address; }
-  std::shared_ptr<NodeInfo> get_node_info() { return node_info; }
+  std::shared_ptr<Location> get_address() const { return address; }
+  std::shared_ptr<NodeInfo> get_node_info() const { return node_info; }
 
   bool Equals(const HeartbeatInfo& other) const;
 
