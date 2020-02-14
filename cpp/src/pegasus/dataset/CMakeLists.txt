@@ -42,4 +42,44 @@ add_dependencies(DataSet gen-deps)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++0x")
 
+if(PEGASUS_TEST_LINKAGE STREQUAL "static")
+  set(PEGASUS_DATASET_TEST_LINK_LIBS
+      DataSet
+      ${PARQUET_SHARED_LIB}
+      pegasus_rpc_shared
+      ${ARROW_STATIC_LIB}
+      ${ARROW_TESTING_SHARED_LIB}
+      ${PEGASUS_TEST_STATIC_LINK_LIBS})
+else()
+  set(PEGASUS_DATASET_TEST_LINK_LIBS
+      DataSet
+      ${PARQUET_SHARED_LIB}
+      pegasus_rpc_shared
+      ${ARROW_SHARED_LIB}
+      ${ARROW_TESTING_SHARED_LIB}
+      ${PEGASUS_TEST_SHARED_LINK_LIBS})
+endif()
+
+# Adding unit tests part of the "util" portion of the test suite
+function(ADD_PEGASUS_DATASET_TEST REL_TEST_NAME)
+  set(options --allow-shlib-undefined)
+  set(one_value_args PREFIX)
+  set(multi_value_args LABELS)
+  cmake_parse_arguments(ARG
+                        "${options}"
+                        "${one_value_args}"
+                        "${multi_value_args}"
+                        ${ARGN})
+
+  add_pegasus_test(${REL_TEST_NAME}
+                 EXTRA_LINK_LIBS
+                 ${PEGASUS_DATASET_TEST_LINK_LIBS})
+endfunction()
+
+if(PEGASUS_BUILD_TESTS)
+
+  add_pegasus_dataset_test(dataset_cache_manager_test)
+
+endif()
+
 
