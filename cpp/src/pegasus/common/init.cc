@@ -63,7 +63,7 @@ void pegasus::InitCommonRuntime(int argc, char** argv,
   pegasus::LogCommandLineFlags();
   
   LOG(INFO) << CpuInfo::DebugString();
-  LOG(INFO) << DiskInfo::DebugString();
+  //LOG(INFO) << DiskInfo::DebugString();
   LOG(INFO) << MemInfo::DebugString();
   LOG(INFO) << OsInfo::DebugString();
   LOG(INFO) << "Process ID: " << getpid();
