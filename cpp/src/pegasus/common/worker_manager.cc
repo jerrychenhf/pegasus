@@ -109,6 +109,12 @@ Status WorkerManager::HeartbeatWorker(const rpc::HeartbeatInfo& info) {
     WorkerRegistration* current_registration = worker_it->second.get();
     current_registration->state_ = WorkerRegistration::ACTIVE;
     current_registration->last_heartbeat_time_ = UnixMillis();
+    
+    if (info.node_info != nullptr) {
+      // there are node info update
+      current_registration->node_info_ = info.node_info;
+    }
+    
   }
   
   return Status::OK();

@@ -92,13 +92,13 @@ class WorkerHeartbeat {
   
   rpc::NodeInfo node_info_;
   int64_t node_info_update_timestamp_;
-  int64_t node_info_heartbeat_timestamp_;
-  
   std::atomic<int> node_info_changed_;
   
   //protect the node info update and heartbeat
   boost::mutex node_info_lock_;
   
+  int64_t node_info_heartbeat_timestamp_;
+    
   bool GetNodeInfo(rpc::NodeInfo* node_info, int64_t& ts);
   bool HeartbeatedNodeInfo(int64_t ts);
 };

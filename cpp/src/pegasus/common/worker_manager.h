@@ -52,13 +52,18 @@ public:
   const WorkerId& id() const { return id_; }
   const rpc::Location& address() const { return address_; }
   WorkerState state() const { return state_; }
+  std::shared_ptr<rpc::NodeInfo> node_info() const { return node_info_; }
 
 public:
   WorkerId id_;
   rpc::Location address_;
-  WorkerState state_;
   
+  WorkerState state_;
   int64_t last_heartbeat_time_;
+  
+  // concurrent update and access
+  // the internal pointer may be updated
+  std::shared_ptr<rpc::NodeInfo> node_info_;
 };
 
 // Get the worker locations
