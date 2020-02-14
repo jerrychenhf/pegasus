@@ -25,6 +25,9 @@ DEFINE_string(hostname, "", "Hostname to use for this daemon, also used as part 
               "the Kerberos principal, if enabled. If not set, the system default will be"
               " used");
 
+// This is used by worker to heartbeat with planner
+DEFINE_string(planner_hostname, "", "Hostname of the planner to register with");              
+
 DEFINE_int32(planner_port, 30001, "port on which planner is exported");
 DEFINE_int32(worker_port, 30002, "port on which worker is exported");
 
