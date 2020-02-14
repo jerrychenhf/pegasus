@@ -120,17 +120,18 @@ Status Thread::StartThread(const std::string& category, const std::string& name,
   DCHECK(thread_manager.get() != nullptr)
       << "Thread created before InitThreading called";
   DCHECK(thread->get() == nullptr);
-
+#if 0 // disable it temporarily for debug build
 #ifndef NDEBUG
   if (fault_injection_eligible && FLAGS_thread_creation_fault_injection) {
     // Fail roughly 1% of the time on eligible codepaths.
     if ((rand() % 100) == 1) {
-      return Status(Substitute("Fake thread creation failure (category: $0, name: $1)",
-          category, name));
+//      return Status(Substitute("Fake thread creation failure (category: $0, name: $1)",
+//          category, name));
+      return Status::ThreadCreationFailed(name, category, "Fake thread creation failure");
     }
   }
 #endif
-
+#endif
   unique_ptr<Thread> t(new Thread(category, name));
   Promise<int64_t> thread_started;
   try {

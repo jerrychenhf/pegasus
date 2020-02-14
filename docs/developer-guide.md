@@ -49,7 +49,7 @@ git clone https://gitlab.devtools.intel.com/intel-bigdata/pegasus.git
 cd pegasus/cpp
 mkdir build
 cd build
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DPEGASUS_USE_GLOG=ON ..
+cmake -DPEGASUS_USE_GLOG=ON ..
 make
 ```
 
@@ -61,6 +61,15 @@ mkdir debug
 cd debug
 cmake -DPEGASUS_BUILD_TESTS=ON ..
 make
+```
+#### Debug build:
+```
+cmake -DPEGASUS_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_WARNING_LEVEL=production ..
+```
+Note: Set BUILD_WARNING_LEVEL=production to disable -Werror ("treat warning as an error") temporarily for debug build.
+#### Release build with debug info:
+```
+cmake -DPEGASUS_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 ```
 
 ### Run unit tests
