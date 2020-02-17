@@ -46,3 +46,10 @@ DEFINE_bool(redirect_stdout_stderr, true,
 DEFINE_int32(max_log_files, 10, "Maximum number of log files to retain per severity "
     "level. The most recent log files are retained. If set to 0, all log files are "
     "retained.");
+
+DEFINE_int32(worker_heartbeat_frequency_ms, 1000, "(Advanced) Frequency (in ms) with"
+    " which the worker sends heartbeat to planner.");
+
+DEFINE_int32(planner_max_missed_heartbeats, 10, "Maximum number of consecutive "
+    "heartbeat messages a worker can miss before being declared failed by the "
+    "planner.");      

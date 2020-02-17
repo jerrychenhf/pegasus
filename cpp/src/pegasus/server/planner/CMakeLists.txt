@@ -25,6 +25,8 @@ add_library(Planner
   planner_table_api_service.cc
   planner.cc
   worker_manager.cc
+  worker_failure_detector.cc
+  failure-detector.cc
 )
 add_dependencies(Planner gen-deps)
 

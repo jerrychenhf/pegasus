@@ -19,12 +19,16 @@
 #include "util/time.h"
 #include <boost/thread/lock_guard.hpp>
 #include "gutil/strings/substitute.h"
+#include "server/planner/worker_failure_detector.h"
 
 using namespace boost;
 
 namespace pegasus {
 WorkerManager::WorkerManager() {
+  worker_failure_detector_.reset(new WorkerFailureDetector(this));
+}
 
+Status WorkerManager::Init() { 
 }
 
 Status WorkerManager::GetWorkerRegistrations(
@@ -71,7 +75,7 @@ Status WorkerManager::RegisterWorker(const rpc::HeartbeatInfo& info) {
     lock_guard<mutex> l(workers_lock_);
     WorkerRegistrationMap::iterator worker_it = workers_.find(id);
     if (worker_it != workers_.end()) {
-      UnregisterWorker(worker_it->second.get());
+      UnregisterWorker(id);
     }
     
     std::shared_ptr<WorkerRegistration> current_registration(
@@ -86,8 +90,7 @@ Status WorkerManager::RegisterWorker(const rpc::HeartbeatInfo& info) {
     current_registration->last_heartbeat_time_ = UnixMillis();
     workers_.emplace(id, current_registration);
     
-    // TO DO : handle failing workers
-    //failure_detector_->UpdateHeartbeat(subscriber_id, true);
+    worker_failure_detector_->UpdateHeartbeat(id);
   }
 
   LOG(INFO) << "Worker '" << id << "' registered.";
@@ -115,24 +118,35 @@ Status WorkerManager::HeartbeatWorker(const rpc::HeartbeatInfo& info) {
       current_registration->node_info_ = info.node_info;
     }
     
+    worker_failure_detector_->UpdateHeartbeat(id);
+    
   }
   
   return Status::OK();
 }
 
-Status WorkerManager::UnregisterWorker(WorkerRegistration* worker) {
+Status WorkerManager::UnregisterWorker(const WorkerId& id) {
   // already in lock
-  WorkerRegistrationMap::const_iterator it = workers_.find(worker->id());
+  WorkerRegistrationMap::const_iterator it = workers_.find(id);
   if (it == workers_.end()) {
     // Already failed and / or replaced with a new registration
     return Status::OK();
   }
 
-  // TO DO : failure dectector
   // Prevent the failure detector from growing without bound
-  //failure_detector_->EvictPeer(worker->id());
+  worker_failure_detector_->EvictPeer(id);
 
-  workers_.erase(worker->id());
+  workers_.erase(id);
+  return Status::OK();
+}
+
+Status WorkerManager::OnWorkerFailed(const WorkerId& id) {
+  LOG(INFO) << "Worker failure: " << id;
+  {
+    lock_guard<mutex> l(workers_lock_);
+    UnregisterWorker(id);
+  }
+  
   return Status::OK();
 }
 

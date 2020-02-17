@@ -28,11 +28,14 @@
 #include "common/status.h"
 #include "common/location.h"
 #include "rpc/types.h"
+#include "server/planner/worker_failure_detector.h"
 
 using namespace std;
 
 namespace pegasus {
-  
+
+class WorkerFailureDetector;
+
 /// A SubscriberId uniquely identifies a single subscriber, and is
 /// provided by the subscriber at registration time.
 typedef std::string WorkerId;
@@ -71,9 +74,14 @@ class WorkerManager {
  public:
   WorkerManager();
   
+  Status Init();
+  
   Status GetWorkerRegistrations(std::vector<std::shared_ptr<WorkerRegistration>>& registrations);
 
   Status Heartbeat(const rpc::HeartbeatInfo& info, std::unique_ptr<rpc::HeartbeatResult>* result);
+  
+  // Notified by failure detector that the worker failed
+  Status OnWorkerFailed(const WorkerId& id);
   
  private:
   std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations;
@@ -81,7 +89,7 @@ class WorkerManager {
   Status RegisterWorker(const rpc::HeartbeatInfo& info);
   Status HeartbeatWorker(const rpc::HeartbeatInfo& info);
   
-  Status UnregisterWorker(WorkerRegistration* worker);
+  Status UnregisterWorker(const WorkerId& id);
   
   typedef boost::unordered_map<WorkerId, std::shared_ptr<WorkerRegistration>>
     WorkerRegistrationMap;
@@ -89,6 +97,8 @@ class WorkerManager {
   
   /// Protects access to workers
   boost::mutex workers_lock_;
+  
+  boost::scoped_ptr<WorkerFailureDetector> worker_failure_detector_;
 };
 
 } // namespace pegasus

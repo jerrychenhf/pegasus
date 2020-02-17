@@ -35,8 +35,7 @@ DECLARE_string(planner_hostname);
 DECLARE_int32(planner_port);
 DECLARE_int32(worker_port);
 
-DEFINE_int32(worker_heartbeat_frequency_ms, 1000, "(Advanced) Frequency (in ms) with"
-    " which the worker sends heartbeat to planner.");
+DECLARE_int32(worker_heartbeat_frequency_ms);
 
 // Heartbeats that miss their deadline by this much are logged.
 const uint32_t DEADLINE_MISS_THRESHOLD_MS = 2000;
