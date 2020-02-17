@@ -2,7 +2,8 @@
 
 ### Export PEGASUS_HOME
 ```
-export PEGASUS_HOME=/PATH/TO/pegasus/cpp
+cd pegasus/cpp
+export PEGASUS_HOME=`pwd`
 ```
 
 ## Start Planner
