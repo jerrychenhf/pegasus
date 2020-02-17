@@ -49,7 +49,7 @@ Status InsertColumnsToBlockManager(Identity* identity,
     // Before insert into the column, check whether the dataset is inserted.
     std::shared_ptr<CachedDataset> dataset;
     RETURN_IF_ERROR(dataset_cache_block_manager->GetCachedDataSet(identity, &dataset));
-    if (dataset == NULL) {
+    if (dataset == nullptr) {
       // Insert new dataset.
       std::shared_ptr<CachedDataset> new_dataset = std::shared_ptr<CachedDataset>(
         new CachedDataset(identity->dataset_path()));
@@ -59,7 +59,7 @@ Status InsertColumnsToBlockManager(Identity* identity,
     // After check the dataset, continue to check whether the partition is inserted.
     std::shared_ptr<CachedPartition> partition;
     RETURN_IF_ERROR(dataset_cache_block_manager->GetCachedPartition(identity, &partition));
-    if (partition == NULL) {
+    if (partition == nullptr) {
       std::shared_ptr<CachedPartition> new_partition = std::shared_ptr<CachedPartition>(
         new CachedPartition(identity->dataset_path(), identity->file_path()));
       RETURN_IF_ERROR(dataset_cache_block_manager->InsertPartition(identity, new_partition));
@@ -159,18 +159,18 @@ Status DatasetCacheManager::GetDatasetStream(Identity* identity,
   dataset_cache_block_manager_->GetCachedDataSet(identity, &dataset);
   std::vector<int> col_ids = identity->col_ids();
   std::unordered_map<string, std::shared_ptr<CachedColumn>> get_columns;
-  if (dataset == NULL) {
+  if (dataset == nullptr) {
     LOG(WARNING) << "The dataset "<< identity->dataset_path() 
-    <<" is NULL. We will get all the columns from storage and then insert the column into dataset cache block manager";
+    <<" is nullptr. We will get all the columns from storage and then insert the column into dataset cache block manager";
     HandleMissedColumns(identity, storage_plugin_factory_, col_ids,
      dataset_cache_block_manager_, dataset_cache_engine_manager_, data_stream);
   } else {
     // dataset is cached
     std::shared_ptr<CachedPartition> partition;
     dataset_cache_block_manager_->GetCachedPartition(identity, &partition);
-    if (partition == NULL) {
+    if (partition == nullptr) {
       LOG(WARNING) << "The partition "<< identity->file_path() 
-      <<" is NULL. We will get all the columns from storage and then insert the column into dataset cache block manager";
+      <<" is nullptr. We will get all the columns from storage and then insert the column into dataset cache block manager";
       HandleMissedColumns(identity, storage_plugin_factory_, col_ids,
        dataset_cache_block_manager_, dataset_cache_engine_manager_, data_stream);
     } else {

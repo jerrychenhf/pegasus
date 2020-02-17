@@ -33,7 +33,7 @@ Status DatasetCacheBlockManager::GetCachedDataSet(Identity* identity,
   auto entry = cached_datasets_.find(dataset_path);
 
   if (entry == cached_datasets_.end()) {
-    *dataset = NULL;
+    *dataset = nullptr;
     LOG(WARNING) << "The dataset: "<< identity->dataset_path() <<" is NULL.";
     return Status::OK(); 
   }
@@ -49,11 +49,11 @@ Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity,
   std::string partition_path = identity->file_path();
   std::shared_ptr<CachedDataset> dataset;
   RETURN_IF_ERROR(GetCachedDataSet(identity, &dataset));
-  if (dataset != NULL) {
+  if (dataset != nullptr) {
     auto entry = dataset->cached_partitions_.find(partition_path);
 
     if (entry == dataset->cached_partitions_.end()) {
-      *partition = NULL;
+      *partition = nullptr;
       LOG(WARNING) << "The partition: "<< identity->file_path() <<" is NULL.";
       return Status::OK(); 
     }
@@ -73,7 +73,7 @@ Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity,
   std::unordered_map<string, std::shared_ptr<CachedColumn>>* columns) {
   std::shared_ptr<CachedPartition> partition;
   RETURN_IF_ERROR(GetCachedPartition(identity, &partition));
-  if (partition != NULL) {
+  if (partition != nullptr) {
     std::vector<int> col_ids = identity->col_ids();
     for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++)
   	{
@@ -104,7 +104,7 @@ Status DatasetCacheBlockManager::InsertPartition(Identity* identity,
   std::string dataset_path = identity->dataset_path();
   std::shared_ptr<CachedDataset> dataset;
   RETURN_IF_ERROR(GetCachedDataSet(identity, &dataset));
-  if (dataset != NULL) {
+  if (dataset != nullptr) {
     string partition_path = identity->file_path();
     dataset->cached_partitions_[partition_path] = new_partition;
     return Status::OK();
@@ -120,7 +120,7 @@ Status DatasetCacheBlockManager::InsertColumn(Identity* identity, string column_
  std::shared_ptr<CachedColumn> new_column) {
   std::shared_ptr<CachedPartition> partition;
   RETURN_IF_ERROR(GetCachedPartition(identity, &partition));
-  if (partition != NULL) {
+  if (partition != nullptr) {
     partition->cached_columns_[column_id] = std::move(new_column);
     return Status::OK();
   } else {
