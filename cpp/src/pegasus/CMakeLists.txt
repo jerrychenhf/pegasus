@@ -15,7 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
-add_custom_target(gen-deps ALL DEPENDS boost_ep gflags_ep)
+add_custom_target(gen-deps)
+#add_custom_target(gen-deps ALL DEPENDS boost_ep gflags_ep)
 add_custom_target(pegasus)
 add_custom_target(pegasus-tests)
 
