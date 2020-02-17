@@ -22,12 +22,13 @@
 #include <gtest/gtest.h>
 #include "test/gtest-util.h"
 #include "dataset/dataset_cache_manager.h"
+#include "pegasus/runtime/exec_env.h"
 
 namespace pegasus {
 
 TEST(DatasetCacheManagerTest, Unit) {
+  std::unique_ptr<ExecEnv> exec_env_(new ExecEnv());
   std::shared_ptr<DatasetCacheManager> dataset_cache_manager_ = std::unique_ptr<DatasetCacheManager>(new DatasetCacheManager());
-  // printf("successfully init DatasetCacheManager");
 }
 
 }
