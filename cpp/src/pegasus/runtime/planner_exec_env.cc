@@ -18,50 +18,39 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
-#include "runtime/exec_env.h"
+#include "runtime/planner_exec_env.h"
 #include "util/global_flags.h"
 
+DECLARE_string(hostname);
+DECLARE_int32(planner_port);
 DECLARE_string(storage_plugin_type);
-DECLARE_string(namenode_hostname);
-DECLARE_int32(namenode_port);
 
 namespace pegasus {
 
-ExecEnv* ExecEnv::exec_env_ = nullptr;
+PlannerExecEnv* PlannerExecEnv::exec_env_ = nullptr;
 
-ExecEnv::ExecEnv()
-  : ExecEnv(FLAGS_storage_plugin_type, FLAGS_namenode_hostname, FLAGS_namenode_port) {}
+PlannerExecEnv::PlannerExecEnv()
+  : PlannerExecEnv(FLAGS_hostname, FLAGS_planner_port) {}
 
-ExecEnv::ExecEnv(const std::string& storage_plugin_type,
-    const std::string& namenode_hostname, int32_t namenode_port)
-  : storage_plugin_factory_(new StoragePluginFactory()) {
-
-  namenode_hostname_ = namenode_hostname;
-  namenode_port_ = namenode_port;    
-  
-  if(storage_plugin_type == "HDFS") {
-    storage_plugin_type_ = StoragePlugin::HDFS;
-  } else if(storage_plugin_type == "S3") {
-    storage_plugin_type_ = StoragePlugin::S3;
-  }
+PlannerExecEnv::PlannerExecEnv(const std::string& hostname, int32_t planner_port)
+  : worker_manager_(new WorkerManager()) {
+      
+  planner_grpc_hostname_ = hostname;
+  planner_grpc_port_ = planner_port;
 
   exec_env_ = this;
 }
 
-std::shared_ptr<StoragePluginFactory> ExecEnv::get_storage_plugin_factory() {
-  return storage_plugin_factory_; 
+std::shared_ptr<WorkerManager> PlannerExecEnv::get_worker_manager() {
+  return worker_manager_; 
 }
 
-StoragePlugin::StoragePluginType const ExecEnv::GetStoragePluginType() {
-  return storage_plugin_type_;
+std::string PlannerExecEnv::GetPlannerGrpcHost() {
+  return planner_grpc_hostname_;
 }
 
-std::string ExecEnv::GetNameNodeHost() {
-  return namenode_hostname_;
-}
-
-int32_t ExecEnv::GetNameNodePort() {
-  return namenode_port_;
+int32_t PlannerExecEnv::GetPlannerGrpcPort() {
+  return planner_grpc_port_;
 }
 
 } // namespace pegasus

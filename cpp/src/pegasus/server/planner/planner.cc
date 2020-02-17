@@ -32,7 +32,7 @@ DECLARE_int32(planner_port);
 namespace pegasus {
 
 Planner::Planner() {
-  std::unique_ptr<ExecEnv> exec_env_(new ExecEnv());
+  std::unique_ptr<PlannerExecEnv> exec_env_(new PlannerExecEnv());
   worker_manager_ = exec_env_->get_worker_manager();
   dataset_service_ = std::unique_ptr<DataSetService>(new DataSetService());
   planner_table_api_service_ = std::unique_ptr<PlannerTableAPIService>(new PlannerTableAPIService(dataset_service_));

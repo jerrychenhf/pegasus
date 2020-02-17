@@ -39,7 +39,7 @@ DataSetService::~DataSetService() {
 }
 
 Status DataSetService::Init() {
-  ExecEnv* env =  ExecEnv::GetInstance();
+  PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
   dataset_store_ = std::unique_ptr<DataSetStore>(new DataSetStore);
   worker_manager_ = env->GetInstance()->get_worker_manager();
   metadata_manager_ = std::make_shared<MetadataManager>();

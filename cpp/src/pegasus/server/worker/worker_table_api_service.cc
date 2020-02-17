@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/runtime/exec_env.h"
+#include "pegasus/runtime/worker_exec_env.h"
 #include "pegasus/server/worker/worker_table_api_service.h"
 
 namespace pegasus {
@@ -27,7 +27,7 @@ class Location;
 }  //namespace rpc
 
 WorkerTableAPIService::WorkerTableAPIService() {
-  env_ =  ExecEnv::GetInstance();
+  env_ =  WorkerExecEnv::GetInstance();
 }
 
 WorkerTableAPIService::~WorkerTableAPIService() {

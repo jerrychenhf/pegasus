@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 #include "dataset/dataset_cache_engine_manager.h"
-#include "runtime/exec_env.h"
+#include "runtime/worker_exec_env.h"
 
 using namespace pegasus;
 
@@ -29,7 +29,7 @@ DatasetCacheEngineManager::~DatasetCacheEngineManager() {}
 
 Status DatasetCacheEngineManager::Init() {
   // Initialize all configurated cache engines.
-  ExecEnv* env =  ExecEnv::GetInstance();
+  WorkerExecEnv* env =  WorkerExecEnv::GetInstance();
   
   std::vector<CacheEngine::CachePolicy> cache_policies = env->GetCachePolicies();
   std::shared_ptr<CacheEngine> cache_engine;

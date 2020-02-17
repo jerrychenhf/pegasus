@@ -16,7 +16,7 @@
 // under the License.
 
 #include "util/consistent_hashing.h"
-#include "runtime/exec_env.h"
+#include "runtime/planner_exec_env.h"
 #include "server/planner/worker_manager.h"
 
 namespace pegasus {
@@ -46,7 +46,7 @@ void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<std::
 	}
 	else
 	{
-		std::shared_ptr<WorkerManager> worker_manager = ExecEnv::GetInstance()->GetInstance()->get_worker_manager();
+		std::shared_ptr<WorkerManager> worker_manager = PlannerExecEnv::GetInstance()->GetInstance()->get_worker_manager();
 //		std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations;
 		//Status WorkerManager::GetWorkerRegistrations(std::vector<std::shared_ptr<WorkerRegistration>>& registrations)
 		std::vector<std::shared_ptr<WorkerRegistration>> wregs;

@@ -19,7 +19,7 @@
 #include "common/location.h"
 #include "util/global_flags.h"
 #include "common/status.h"
-#include "runtime/exec_env.h"
+#include "runtime/worker_exec_env.h"
 #include "server/worker/worker.h"
 #include "util/test-info.h"
 

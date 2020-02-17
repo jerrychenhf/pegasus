@@ -27,7 +27,7 @@ class Location;
 }  //namespace rpc
 
 PlannerTableAPIService::PlannerTableAPIService(std::shared_ptr<DataSetService> dataset_service) {
-  env_ =  ExecEnv::GetInstance();
+  env_ =  PlannerExecEnv::GetInstance();
   dataset_service_= dataset_service;
   worker_manager_ = env_->get_worker_manager();
 }

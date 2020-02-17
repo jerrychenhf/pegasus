@@ -15,14 +15,14 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "runtime/exec_env.h"
+#include "runtime/worker_exec_env.h"
 
 namespace pegasus {
 
 StoreManager::~StoreManager(){}
 
 StoreManager::StoreManager() {
-  ExecEnv* env =  ExecEnv::GetInstance();
+  WorkerExecEnv* env =  WorkerExecEnv::GetInstance();
   std::shared_ptr<Store> store;
   std::unordered_map<string, long> stores_info = env->GetStoresInfo();
   for(std::unordered_map<string, long>::iterator it = stores_info.begin(); it != stores_info.end(); ++it) {

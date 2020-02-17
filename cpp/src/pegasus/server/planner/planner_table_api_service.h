@@ -65,7 +65,7 @@ class PEGASUS_EXPORT PlannerTableAPIService : public rpc::FlightServerBase {
  private:
   std::shared_ptr<DataSetService> dataset_service_;
   std::shared_ptr<WorkerManager> worker_manager_;
-  ExecEnv* env_;
+  PlannerExecEnv* env_;
 };
 
 }  // namespace pegasus

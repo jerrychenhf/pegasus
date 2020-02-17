@@ -15,43 +15,42 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_EXEC_ENV_H
-#define PEGASUS_EXEC_ENV_H
+#ifndef PEGASUS_PLANNER_EXEC_ENV_H
+#define PEGASUS_PLANNER_EXEC_ENV_H
 
-#include "storage/storage_plugin_factory.h"
+#include "server/planner/worker_manager.h"
+#include "runtime/exec_env.h"
 
 using namespace std;
 
 namespace pegasus {
 
-/// There should only be one ExecEnv instance. It should always be accessed by calling ExecEnv::GetInstance().
-class ExecEnv {
+/// There should only be one ExecEnv instance.
+/// It should always be accessed by calling PlannerExecEnv::GetInstance().
+class PlannerExecEnv : public ExecEnv {
  public:
-  ExecEnv();
+  PlannerExecEnv();
 
-  ExecEnv(const std::string& storage_plugin_type, const std::string& namenode_hostname, int32_t port);
+  PlannerExecEnv(const std::string& hostname, int32_t port);
 
-  static ExecEnv* GetInstance() { return exec_env_; }
+  static PlannerExecEnv* GetInstance() { return exec_env_; }
 
   Status Init();
 
-  std::shared_ptr<StoragePluginFactory> get_storage_plugin_factory();
+  std::shared_ptr<WorkerManager> get_worker_manager();
 
-  StoragePlugin::StoragePluginType const GetStoragePluginType();
+  std::string GetPlannerGrpcHost();
 
-  std::string GetNameNodeHost();
-
-  int32_t GetNameNodePort();
+  int32_t GetPlannerGrpcPort();
 
  private:
-  static ExecEnv* exec_env_;
-  std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
-  StoragePlugin::StoragePluginType storage_plugin_type_;
+  static PlannerExecEnv* exec_env_;
 
-  std::string namenode_hostname_;
-  int32_t namenode_port_;
+  std::shared_ptr<WorkerManager> worker_manager_;
+  std::string planner_grpc_hostname_;
+  int32_t planner_grpc_port_;
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_EXEC_ENV_H
+#endif  // PEGASUS_PLANNER_EXEC_ENV_H

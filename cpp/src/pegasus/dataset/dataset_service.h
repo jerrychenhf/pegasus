@@ -25,7 +25,7 @@
 #include "dataset/dataset_store.h"
 #include "dataset/dataset_builder.h"
 #include "dataset/flightinfo_builder.h"
-#include "runtime/exec_env.h"
+#include "runtime/planner_exec_env.h"
 #include "server/planner/worker_manager.h"
 
 using namespace std;

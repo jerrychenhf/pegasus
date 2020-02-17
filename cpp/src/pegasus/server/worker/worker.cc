@@ -33,7 +33,7 @@ DECLARE_int32(worker_port);
 namespace pegasus {
 
 Worker::Worker() {
-  std::unique_ptr<ExecEnv> exec_env_(new ExecEnv());
+  std::unique_ptr<WorkerExecEnv> exec_env_(new WorkerExecEnv());
   worker_table_api_service_ = std::unique_ptr<WorkerTableAPIService>(new WorkerTableAPIService());
   dataset_cache_manager_ = std::unique_ptr<DatasetCacheManager>(new DatasetCacheManager());
   worker_heartbeat_ = std::unique_ptr<WorkerHeartbeat>(new WorkerHeartbeat());

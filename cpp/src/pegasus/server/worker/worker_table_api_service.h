@@ -60,7 +60,7 @@ class WorkerTableAPIService : public rpc::FlightServerBase {
 
 private:
   std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
-  ExecEnv* env_;
+  WorkerExecEnv* env_;
 };
     
 }  // namespace pegasus

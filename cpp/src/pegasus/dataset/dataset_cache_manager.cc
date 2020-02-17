@@ -19,7 +19,7 @@
 #include <unordered_map>
 
 #include "dataset/dataset_cache_manager.h"
-#include "runtime/exec_env.h"
+#include "runtime/worker_exec_env.h"
 #include "parquet/parquet_reader.h"
 #include "cache/cache_memory_pool.h"
 #include "common/logging.h"
@@ -31,7 +31,7 @@ DatasetCacheManager::DatasetCacheManager() {
      new DatasetCacheBlockManager());
    dataset_cache_engine_manager_ = std::shared_ptr<DatasetCacheEngineManager>
    (new DatasetCacheEngineManager());
-   ExecEnv* env =  ExecEnv::GetInstance();
+   WorkerExecEnv* env =  WorkerExecEnv::GetInstance();
    storage_plugin_factory_ = env->get_storage_plugin_factory();
 }
 

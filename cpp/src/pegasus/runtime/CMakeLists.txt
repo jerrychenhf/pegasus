@@ -24,6 +24,8 @@ set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/runtime")
 
 add_library(Runtime
   exec_env.cc
+  planner_exec_env.cc
+  worker_exec_env.cc
   client_cache.cc
 )
 add_dependencies(Runtime gen-deps)

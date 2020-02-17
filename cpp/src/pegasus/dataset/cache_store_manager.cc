@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "runtime/exec_env.h"
+#include "runtime/worker_exec_env.h"
 #include "dataset/cache_store_manager.h"
 #include "common/logging.h"
 
@@ -26,7 +26,7 @@ namespace pegasus {
   CacheStoreManager::~CacheStoreManager(){}
 
   Status CacheStoreManager::Init() {
-    ExecEnv* env =  ExecEnv::GetInstance();
+    WorkerExecEnv* env =  WorkerExecEnv::GetInstance();
     std::shared_ptr<Store> store;
     std::unordered_map<string, long> cache_stores_info = env->GetCacheStoresInfo();
     std::shared_ptr<StoreManager> store_manager_(new StoreManager());

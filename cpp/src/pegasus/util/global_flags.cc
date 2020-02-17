@@ -35,7 +35,7 @@ DEFINE_string(storage_plugin_type, "HDFS", "StoragePluginType");
 DEFINE_string(store_types, "MEMORY", "StoreType");
 
 DEFINE_string(namenode_hostname, "localhost", "NameNode hostname. If not set, the system default will be used");
-DEFINE_string(namenode_port, "50070", "NameNode port. If not set, the system default will be used");
+DEFINE_int32(namenode_port, 50070, "NameNode port. If not set, the system default will be used");
 
 // log
 DEFINE_string(log_filename, "",

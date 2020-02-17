@@ -19,13 +19,13 @@
 
 #include "pegasus/dataset/partition.h"
 #include "pegasus/parquet/parquet_metadata.h"
-#include "pegasus/runtime/exec_env.h"
+#include "pegasus/runtime/planner_exec_env.h"
 #include "pegasus/util/consistent_hashing.h"
 
 namespace pegasus {
 
 DataSetBuilder::DataSetBuilder(std::shared_ptr<MetadataManager> metadata_manager) : metadata_manager_(metadata_manager) {
-  ExecEnv* env =  ExecEnv::GetInstance();
+  PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
   std::shared_ptr<StoragePluginFactory> storage_plugin_factory_ = env->get_storage_plugin_factory();
 }
 

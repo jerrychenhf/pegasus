@@ -17,7 +17,7 @@
 
 #include "common/init.h"
 #include "common/location.h"
-#include "runtime/exec_env.h"
+#include "runtime/planner_exec_env.h"
 #include "server/planner/planner.h"
 
 using namespace std;

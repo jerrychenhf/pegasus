@@ -20,7 +20,7 @@
 
 #include <arrow/status.h>
 #include <arrow/memory_pool.h>
-#include "runtime/exec_env.h"
+#include "runtime/worker_exec_env.h"
 #include "dataset/cache_engine.h"
 #include "cache/store.h"
 
