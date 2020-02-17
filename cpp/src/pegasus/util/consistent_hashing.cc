@@ -15,9 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/util/consistent_hashing.h"
-#include "pegasus/runtime/exec_env.h"
-#include "common/worker_manager.h"
+#include "util/consistent_hashing.h"
+#include "runtime/exec_env.h"
+#include "server/planner/worker_manager.h"
 
 namespace pegasus {
 

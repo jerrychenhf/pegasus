@@ -18,10 +18,10 @@
 #ifndef PEGASUS_EXEC_ENV_H
 #define PEGASUS_EXEC_ENV_H
 
-#include "pegasus/common/worker_manager.h"
-#include "pegasus/dataset/dataset_store.h"
-#include "pegasus/storage/storage_plugin_factory.h"
-#include "pegasus/dataset/cache_engine.h"
+#include "server/planner/worker_manager.h"
+#include "dataset/dataset_store.h"
+#include "storage/storage_plugin_factory.h"
+#include "dataset/cache_engine.h"
 
 using namespace std;
 

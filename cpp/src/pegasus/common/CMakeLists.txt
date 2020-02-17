@@ -27,7 +27,6 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
     
 add_library(Common
   status.cc
-  worker_manager.cc
   init.cc
   logging.cc
   version.cc

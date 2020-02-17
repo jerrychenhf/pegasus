@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "common/worker_manager.h"
+#include "server/planner/worker_manager.h"
 #include "util/time.h"
 #include <boost/thread/lock_guard.hpp>
 #include "gutil/strings/substitute.h"

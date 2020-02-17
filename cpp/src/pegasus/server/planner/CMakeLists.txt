@@ -24,6 +24,7 @@ set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/planner")
 add_library(Planner
   planner_table_api_service.cc
   planner.cc
+  worker_manager.cc
 )
 add_dependencies(Planner gen-deps)
 

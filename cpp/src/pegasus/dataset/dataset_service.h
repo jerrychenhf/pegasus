@@ -20,13 +20,13 @@
 
 #include <string>
 
-#include "pegasus/catalog/metadata_manager.h"
-#include "pegasus/dataset/dataset.h"
-#include "pegasus/dataset/dataset_store.h"
-#include "pegasus/dataset/dataset_builder.h"
-#include "pegasus/dataset/flightinfo_builder.h"
-#include "pegasus/runtime/exec_env.h"
-#include "pegasus/common/worker_manager.h"
+#include "catalog/metadata_manager.h"
+#include "dataset/dataset.h"
+#include "dataset/dataset_store.h"
+#include "dataset/dataset_builder.h"
+#include "dataset/flightinfo_builder.h"
+#include "runtime/exec_env.h"
+#include "server/planner/worker_manager.h"
 
 using namespace std;
 
