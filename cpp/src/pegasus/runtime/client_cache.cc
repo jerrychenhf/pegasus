@@ -21,6 +21,7 @@
 #include <memory>
 
 #include <boost/thread/lock_guard.hpp>
+#include "gutil/strings/substitute.h"
 #include "common/logging.h"
 #include "common/location.h"
 #include "common/names.h"
@@ -30,22 +31,25 @@
 namespace pegasus {
   
   pegasus::Status ClientWrapper::Open(uint32_t num_tries, uint64_t wait_ms) {
-    rpc::Location location;
-    rpc::Status status = Location::Parse(address_, &location);
-    if(!status.ok())
-      return pegasus::Status::fromArrowStatus(status);
-      
-    std::string host = location.host();
-    int32_t port = location.port();
+    std::string host;
+    int32_t port = 0;
     
-    status = rpc::Location::ForGrpcTcp(host, port, &location);
+    if (!pegasus::ParseAddress(address_, &host, &port))
+      return Status::Invalid(strings::Substitute(
+          "Address: $0 is invalid.",
+          address_));
+    
+    rpc::Location location;
+    rpc::Status status = rpc::Location::ForGrpcTcp(host, port, &location);
     if(!status.ok())
       return pegasus::Status::fromArrowStatus(status);
-      
+    
+    LOG(INFO) << "Trying to connect address: " << address_;
     status = rpc::FlightClient::Connect(location, &client_);
-    if(!status.ok())
+    if(!status.ok()) {
       return pegasus::Status::fromArrowStatus(status);
-      
+    }
+    
     return pegasus::Status::OK();
   }
   
@@ -122,7 +126,6 @@ pegasus::Status ClientCacheHelper::CreateClient(const ClientAddress& address,
   // Set the TSocket's send and receive timeouts.
   //client_impl->setRecvTimeout(recv_timeout_ms_);
   //client_impl->setSendTimeout(send_timeout_ms_);
-
   pegasus::Status status = client_impl->Open(num_tries_, wait_ms_);
   if (!status.ok()) {
     *client_key = nullptr;
@@ -132,6 +135,8 @@ pegasus::Status ClientCacheHelper::CreateClient(const ClientAddress& address,
   // Because the client starts life 'checked out', we don't add it to its host cache.
   {
     lock_guard<mutex> lock(client_map_lock_);
+    // Note: MakeClient doesn't set the client_key beause it is only set when open is called.
+    *client_key = client_impl->client();
     client_map_[*client_key] = client_impl;
   }
 

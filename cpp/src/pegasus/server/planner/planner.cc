@@ -48,7 +48,7 @@ Status Planner::Init() {
 }
 
 Status Planner::Start() {
-  std::cout << "Planner listening on:" << FLAGS_hostname << ":" << FLAGS_planner_port << std::endl;
+  LOG(INFO) << "Planner listening on:" << FLAGS_hostname << ":" << FLAGS_planner_port << std::endl;
   RETURN_IF_ERROR(planner_table_api_service_->Serve());
 
   return Status::OK();

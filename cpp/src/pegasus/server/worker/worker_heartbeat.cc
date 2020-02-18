@@ -57,6 +57,10 @@ WorkerHeartbeat::WorkerHeartbeat()
         1,
         bind<void>(mem_fn(&WorkerHeartbeat::DoHeartbeat), this,
           _1, _2)));
+
+  planner_address_ = FLAGS_planner_hostname + ":" 
+    + std::to_string(FLAGS_planner_port);
+  LOG(INFO) << "Planner address to heartbeat: " << planner_address_;
 }
 
 WorkerHeartbeat::~WorkerHeartbeat() {
@@ -65,13 +69,13 @@ WorkerHeartbeat::~WorkerHeartbeat() {
 
 Status WorkerHeartbeat::Init() {
   RETURN_IF_ERROR(heartbeat_threadpool_->Init());
-
+  
+  LOG(INFO) << "Worker heartbeat thread pool initialized.";
   return Status::OK();
 }
 
 Status WorkerHeartbeat::Start() {
-  //TO DO INFO LOG
-  //std::cout << "Worker listening on:" << FLAGS_hostname << ":" << FLAGS_worker_port << std::endl;
+  LOG(INFO) << "Worker heartbeat start.";
   // Offer with an immediate schedule.
   ScheduledHeartbeat heartbeat(0);
   RETURN_IF_ERROR(OfferHeartbeat(heartbeat));
@@ -181,14 +185,16 @@ void WorkerHeartbeat::DoHeartbeat(int thread_id,
   Status status = SendHeartbeat(heartbeat);
   if (status.ok()) {
     //refresh the last heartbeat timestamp
-  } else if (status.code() == StatusCode::RpcTimeout) {
-    // Add details to status to make it more useful, while preserving the stack
+  } else {
+    // Add details to status to make it more useful
+    LOG(WARNING) << "Heartbeat to planner: " << planner_address_
+                  << " failed. Error: " << status.message();
   }
 
   deadline_ms = UnixMillis() + FLAGS_worker_heartbeat_frequency_ms;
   
   // Schedule the next message.
-  LOG(INFO) << "Next heartbeat deadlineis in " << deadline_ms << "ms";
+  LOG(INFO) << "Next heartbeat deadline is in " << deadline_ms << "ms";
   status = OfferHeartbeat(ScheduledHeartbeat(deadline_ms));
   if (!status.ok()) {
     LOG(WARNING) << "Unable to send next heartbeat message: "
@@ -198,10 +204,8 @@ void WorkerHeartbeat::DoHeartbeat(int thread_id,
 
 Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
   Status status;
-  std::string planner_address = FLAGS_planner_hostname + ":" 
-    + std::to_string(FLAGS_planner_port);
   FlightClientConnection client(heartbeat_client_cache_.get(),
-      planner_address, &status);
+      planner_address_, &status);
   RETURN_IF_ERROR(status);
 
   rpc::HeartbeatInfo info;
@@ -216,7 +220,7 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
   } else {
     info.type = rpc::HeartbeatInfo::HEARTBEAT;
   }
-  
+
   // check whether node info has changed for the last update
   // If yes, pass the node info
   bool has_node_info = false;
@@ -229,11 +233,13 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
     info.node_info.reset();
   }
   
+  LOG(INFO) << "Sending heartbeat to " << planner_address_;
+
   std::unique_ptr<rpc::HeartbeatResult> result;
   arrow::Status arrowStatus = client->Heartbeat(info, &result);
   status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);
-      
+  
   if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION &&
     result->result_code == rpc::HeartbeatResult::REGISTERED) {
     registered_ = true;

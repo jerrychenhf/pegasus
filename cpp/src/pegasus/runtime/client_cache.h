@@ -218,7 +218,9 @@ class ClientConnection {
       client_is_unrecoverable_(false) {
     // TODO: Inject fault here to exercise IMPALA-5576.
     *status = client_cache_->GetClient(address, &client_);
-    if (status->ok()) DCHECK(client_ != NULL);
+    if (status->ok()) {
+      DCHECK(client_ != NULL);
+    }
   }
 
   ~ClientConnection() {

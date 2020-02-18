@@ -29,9 +29,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "util/error-util.h"
-//#include "exec/kudu-util.h"
-//#include "kudu/util/net/sockaddr.h"
-//#include <util/string-parser.h>
+#include "gutil/strings/split.h"
 
 #include "common/names.h"
 
@@ -153,6 +151,21 @@ int FindUnusedEphemeralPort() {
   }
   close(sockfd);
   return -1;
+}
+
+bool ParseAddress(const std::string& address, std::string* hostname, int32_t* port) {
+  if (address.empty())
+    return false;
+  
+  std::vector<string> parts = strings::Split(address, ":");
+  if(parts.size() != 2)
+    return false;
+  
+  if(parts[0].empty() || parts[1].empty())
+    return false;
+    
+  *hostname = parts[0];
+  return safe_strto32(parts[1].c_str(), port);
 }
 
 }
