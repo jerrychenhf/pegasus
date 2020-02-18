@@ -69,7 +69,7 @@ void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
 arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
   *ptr = reinterpret_cast<uint8_t*>(std::realloc(*ptr, new_size));
 
-  if (*ptr == NULL) {
+  if (*ptr == nullptr) {
     return arrow::Status::OutOfMemory("realloc of size ", new_size, " failed");
   }
 
@@ -81,7 +81,7 @@ int64_t CacheMemoryPool::bytes_allocated() const  { return occupied_size; }
 int64_t CacheMemoryPool::max_memory() const {return 100;}
 
 std::string CacheMemoryPool::backend_name() const {
-  if (store_ != NULL) {
+  if (store_ != nullptr) {
     return store_->GetStoreName();
   } else {
     return "MEMORY";
@@ -89,7 +89,7 @@ std::string CacheMemoryPool::backend_name() const {
 }
 
 Status CacheMemoryPool::GetStore(std::shared_ptr<Store>* store) {
-  if (store_ != NULL) {
+  if (store_ != nullptr) {
     store = &store_;
     return Status::OK();
   } else {
