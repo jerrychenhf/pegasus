@@ -68,9 +68,9 @@ Status DataSetBuilder::BuildDataset(std::string dataset_path, std::shared_ptr<Da
     metadata_manager_->GetTableMeta(dataset_path, &table_meta);
     std::string table_location = table_meta->location_uri;
     storage_plugin_factory_->GetStoragePlugin(table_location, &storage_plugin_);
-    std::shared_ptr<std::vector<std::string>> file_list;
+    std::vector<std::string> file_list;
     storage_plugin_->ListFiles(dataset_path, &file_list);
-    for (auto filepath : *file_list) {
+    for (auto filepath : file_list) {
       partitions->push_back(Partition(Identity(dataset_path, filepath, 0, 0, 0)));
     }
   }

@@ -15,7 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/storage/storage_plugin_factory.h"
+#include "storage/storage_plugin_factory.h"
+
+#include "arrow/util/uri.h"
 
 namespace pegasus {
 
@@ -23,12 +25,27 @@ StoragePluginFactory::StoragePluginFactory() { }
 
 StoragePluginFactory::~StoragePluginFactory() { }
 
-Status StoragePluginFactory::GetStoragePlugin(std::string url, std::shared_ptr<StoragePlugin>* storage_plugin) {
+Status StoragePluginFactory::GetStoragePlugin(std::string url,
+    std::shared_ptr<StoragePlugin>* storage_plugin) {
 
   StoragePlugin::StoragePluginType storage_plugin_type;
+
+  arrow::internal::Uri uri;
+  uri.Parse(url);
+  std::string host = uri.host();
+  int32_t port = uri.port();
+  // if (url.find("hdfs://") != std::string::npos) {
+  if (uri.scheme() == "hdfs") {
+    storage_plugin_type = StoragePlugin::HDFS;
+  } else {
+    return Status::Invalid("Invalid storage plugin type!");
+  }
+
   switch (storage_plugin_type) {
     case StoragePlugin::HDFS:
       *storage_plugin = std::shared_ptr<StoragePlugin>(new HDFSStoragePlugin());
+      RETURN_IF_ERROR(storage_plugin->get()->Init(host, port));
+      RETURN_IF_ERROR(storage_plugin->get()->Connect());
       return Status::OK();
     default:
       return Status::Invalid("Invalid storage plugin type!");
