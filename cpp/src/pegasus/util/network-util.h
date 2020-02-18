@@ -47,6 +47,8 @@ bool IsWildcardAddress(const std::string& ipaddress);
 /// a free ephemeral port can't be found after 100 tries.
 int FindUnusedEphemeralPort();
 
+bool ParseAddress(const std::string& address, std::string* hostname, int32_t* port);
+
 extern const std::string LOCALHOST_IP_STR;
 
 } // namespace pegasus

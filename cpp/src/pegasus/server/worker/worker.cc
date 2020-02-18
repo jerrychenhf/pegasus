@@ -51,7 +51,9 @@ Status Worker::Init() {
 }
 
 Status Worker::Start() {
-  std::cout << "Worker listening on:" << FLAGS_hostname << ":" << FLAGS_worker_port << std::endl;
+  RETURN_IF_ERROR(worker_heartbeat_->Start());
+  
+  LOG(INFO) << "Worker listening on:" << FLAGS_hostname << ":" << FLAGS_worker_port;
   RETURN_IF_ERROR(worker_table_api_service_->Serve());
   
   return Status::OK();

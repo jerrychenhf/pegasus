@@ -101,6 +101,8 @@ class WorkerHeartbeat {
     
   bool GetNodeInfo(rpc::NodeInfo* node_info, int64_t& ts);
   bool HeartbeatedNodeInfo(int64_t ts);
+  
+  std::string planner_address_;
 };
 
 } // namespace pegasus
