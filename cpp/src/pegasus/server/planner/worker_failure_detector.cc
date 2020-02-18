@@ -66,8 +66,8 @@ Status WorkerFailureDetector::Init() {
 }
 
 Status WorkerFailureDetector::Start() {
-  //TO DO INFO LOG
-  //std::cout << "Worker listening on:" << FLAGS_hostname << ":" << FLAGS_worker_port << std::endl;
+  LOG(INFO) << "Failure detector for works started.";
+  
   // Offer with an immediate schedule.
   ScheduledDetect detect(0);
   RETURN_IF_ERROR(OfferDetect(detect));

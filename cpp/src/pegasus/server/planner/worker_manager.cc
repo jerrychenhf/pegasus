@@ -28,7 +28,10 @@ WorkerManager::WorkerManager() {
   worker_failure_detector_.reset(new WorkerFailureDetector(this));
 }
 
-Status WorkerManager::Init() { 
+Status WorkerManager::Init() {
+  RETURN_IF_ERROR(worker_failure_detector_->Init());
+  RETURN_IF_ERROR(worker_failure_detector_->Start());
+  return Status::OK();
 }
 
 Status WorkerManager::GetWorkerRegistrations(

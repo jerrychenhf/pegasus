@@ -26,8 +26,11 @@ using namespace pegasus;
 int main(int argc, char** argv) {
 
   InitCommonRuntime(argc, argv, TestInfo::NON_TEST);
+  
+  PlannerExecEnv exec_env;
+  ABORT_IF_ERROR(exec_env.Init());
 
-  std::unique_ptr<Planner> planner(new Planner());
+  std::unique_ptr<Planner> planner(new Planner(&exec_env));
 
   ABORT_IF_ERROR(planner->Init());
   ABORT_IF_ERROR(planner->Start());

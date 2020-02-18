@@ -41,6 +41,12 @@ PlannerExecEnv::PlannerExecEnv(const std::string& hostname, int32_t planner_port
   exec_env_ = this;
 }
 
+Status PlannerExecEnv::Init() {
+  RETURN_IF_ERROR(worker_manager_->Init());
+  
+  return Status::OK();
+}
+
 std::shared_ptr<WorkerManager> PlannerExecEnv::get_worker_manager() {
   return worker_manager_; 
 }

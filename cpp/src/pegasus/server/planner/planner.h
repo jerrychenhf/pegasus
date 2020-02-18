@@ -29,17 +29,19 @@ using namespace std;
 namespace pegasus {
 
 class PlannerTableAPIService;
-
+class PlannerExecEnv;
 
 class Planner {
  public:
-  Planner();
+  Planner(PlannerExecEnv* exec_env);
   ~Planner();
 
   Status Init();
   Status Start();
 
  private:
+  PlannerExecEnv* exec_env_;
+  
   std::shared_ptr<WorkerManager> worker_manager_;
   std::shared_ptr<PlannerTableAPIService> planner_table_api_service_;
   std::shared_ptr<DataSetService> dataset_service_;
