@@ -58,6 +58,11 @@ WorkerExecEnv::WorkerExecEnv(const std::string& hostname, int32_t worker_port,
   exec_env_ = this;
 }
 
+Status WorkerExecEnv::Init() {
+  RETURN_IF_ERROR(ExecEnv::Init());
+  return Status::OK();
+}
+
 std::string WorkerExecEnv::GetWorkerGrpcHost() {
   return worker_grpc_hostname_;
 }

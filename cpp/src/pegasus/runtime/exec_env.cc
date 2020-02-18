@@ -33,6 +33,10 @@ ExecEnv::ExecEnv()
   exec_env_ = this;
 }
 
+Status ExecEnv::Init() {
+  return Status::OK();
+}
+
 std::shared_ptr<StoragePluginFactory> ExecEnv::get_storage_plugin_factory() {
   return storage_plugin_factory_; 
 }

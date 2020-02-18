@@ -26,17 +26,15 @@
 #include "common/logging.h"
 #include "server/worker/worker.h"
 #include "server/worker/worker_heartbeat.h"
+#include "runtime/worker_exec_env.h"
 
 DECLARE_string(hostname);
 DECLARE_int32(worker_port);
 
 namespace pegasus {
 
-Worker::Worker() {
-  std::unique_ptr<WorkerExecEnv> exec_env_(new WorkerExecEnv());
-  worker_table_api_service_ = std::unique_ptr<WorkerTableAPIService>(new WorkerTableAPIService());
-  dataset_cache_manager_ = std::unique_ptr<DatasetCacheManager>(new DatasetCacheManager());
-  worker_heartbeat_ = std::unique_ptr<WorkerHeartbeat>(new WorkerHeartbeat());
+Worker::Worker(WorkerExecEnv* exec_env)
+  : exec_env_(exec_env) {
 }
 
 Worker::~Worker() {
@@ -44,6 +42,13 @@ Worker::~Worker() {
 }
 
 Status Worker::Init() {
+  worker_heartbeat_ =
+    std::unique_ptr<WorkerHeartbeat>(new WorkerHeartbeat());
+  dataset_cache_manager_ =
+    std::unique_ptr<DatasetCacheManager>(new DatasetCacheManager());
+  worker_table_api_service_ =
+    std::unique_ptr<WorkerTableAPIService>(new WorkerTableAPIService());
+  
   RETURN_IF_ERROR(worker_heartbeat_->Init());
   RETURN_IF_ERROR(worker_table_api_service_->Init());
   

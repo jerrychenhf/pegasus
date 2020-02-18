@@ -29,7 +29,10 @@ using namespace pegasus;
 int main(int argc, char** argv) {
   InitCommonRuntime(argc, argv, TestInfo::NON_TEST);
 
-  std::unique_ptr<Worker> worker(new Worker());
+  WorkerExecEnv exec_env;
+  ABORT_IF_ERROR(exec_env.Init());
+  
+  std::unique_ptr<Worker> worker(new Worker(&exec_env));
   
   ABORT_IF_ERROR(worker->Init());
   ABORT_IF_ERROR(worker->Start());
