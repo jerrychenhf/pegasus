@@ -28,26 +28,13 @@ namespace pegasus {
 ExecEnv* ExecEnv::exec_env_ = nullptr;
 
 ExecEnv::ExecEnv()
-  : ExecEnv(FLAGS_storage_plugin_type) {}
-
-ExecEnv::ExecEnv(const std::string& storage_plugin_type)
   : storage_plugin_factory_(new StoragePluginFactory()) {
-  
-  if(storage_plugin_type == "HDFS") {
-    storage_plugin_type_ = StoragePlugin::HDFS;
-  } else if(storage_plugin_type == "S3") {
-    storage_plugin_type_ = StoragePlugin::S3;
-  }
 
   exec_env_ = this;
 }
 
 std::shared_ptr<StoragePluginFactory> ExecEnv::get_storage_plugin_factory() {
   return storage_plugin_factory_; 
-}
-
-StoragePlugin::StoragePluginType const ExecEnv::GetStoragePluginType() {
-  return storage_plugin_type_;
 }
 
 } // namespace pegasus

@@ -37,12 +37,9 @@ class ExecEnv {
 
   std::shared_ptr<StoragePluginFactory> get_storage_plugin_factory();
 
-  StoragePlugin::StoragePluginType const GetStoragePluginType();
-
  private:
   static ExecEnv* exec_env_;
   std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
-  StoragePlugin::StoragePluginType storage_plugin_type_;
 };
 
 } // namespace pegasus
