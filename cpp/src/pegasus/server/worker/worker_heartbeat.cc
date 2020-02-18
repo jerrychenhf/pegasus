@@ -77,7 +77,7 @@ Status WorkerHeartbeat::Init() {
 Status WorkerHeartbeat::Start() {
   LOG(INFO) << "Worker heartbeat start.";
   // Offer with an immediate schedule.
-  ScheduledHeartbeat heartbeat(0);
+  ScheduledHeartbeat heartbeat(HeartbeatType::REGISTRATION, 0);
   RETURN_IF_ERROR(OfferHeartbeat(heartbeat));
   
   return Status::OK();
@@ -194,8 +194,13 @@ void WorkerHeartbeat::DoHeartbeat(int thread_id,
   deadline_ms = UnixMillis() + FLAGS_worker_heartbeat_frequency_ms;
   
   // Schedule the next message.
-  LOG(INFO) << "Next heartbeat deadline is in " << deadline_ms << "ms";
-  status = OfferHeartbeat(ScheduledHeartbeat(deadline_ms));
+  HeartbeatType next_type = HeartbeatType::HEARTBEAT;
+  if (!registered_) {
+    next_type = HeartbeatType::REGISTRATION;
+  }
+  
+  LOG(INFO) << "Next heartbeat deadline is at " << deadline_ms << "ms";
+  status = OfferHeartbeat(ScheduledHeartbeat(next_type, deadline_ms));
   if (!status.ok()) {
     LOG(WARNING) << "Unable to send next heartbeat message: "
                   << status.message();
@@ -215,8 +220,10 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
   
   if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION) {
     info.type = rpc::HeartbeatInfo::REGISTRATION;
-    info.address.reset(new rpc::Location());
-    rpc::Location::ForGrpcTcp(FLAGS_hostname, FLAGS_worker_port, info.address.get());
+    rpc::Location::ForGrpcTcp(FLAGS_hostname, FLAGS_worker_port, info.mutable_address());
+    
+    LOG(INFO) << "Registering worker with hostname: " << FLAGS_hostname
+                << " and address: " << FLAGS_hostname << ":" << FLAGS_worker_port;
   } else {
     info.type = rpc::HeartbeatInfo::HEARTBEAT;
   }
@@ -243,6 +250,7 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
   if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION &&
     result->result_code == rpc::HeartbeatResult::REGISTERED) {
     registered_ = true;
+    LOG(INFO) << "Worker registered successfully.";
   }
   
   if (has_node_info) {

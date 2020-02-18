@@ -69,6 +69,7 @@ Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info,
 
 Status WorkerManager::RegisterWorker(const rpc::HeartbeatInfo& info) {
   WorkerId id = info.hostname;
+  std::string address_str;
   
   LOG(INFO) << "Registering worker: " << id;
   {
@@ -84,7 +85,8 @@ Status WorkerManager::RegisterWorker(const rpc::HeartbeatInfo& info) {
     if(address == nullptr) {
       return Status::Invalid("Address is not specified for registration");
     }
-    
+
+    address_str = address->ToString();
     current_registration->address_ = *(address.get());
     current_registration->state_ = WorkerRegistration::ACTIVE;
     current_registration->last_heartbeat_time_ = UnixMillis();
@@ -93,7 +95,7 @@ Status WorkerManager::RegisterWorker(const rpc::HeartbeatInfo& info) {
     worker_failure_detector_->UpdateHeartbeat(id);
   }
 
-  LOG(INFO) << "Worker '" << id << "' registered.";
+  LOG(INFO) << "Worker '" << id << "' registered with address: " << address_str;
   return Status::OK();
 }
 
@@ -106,7 +108,7 @@ Status WorkerManager::HeartbeatWorker(const rpc::HeartbeatInfo& info) {
     WorkerRegistrationMap::iterator worker_it = workers_.find(id);
     if (worker_it == workers_.end()) {
       // worker not found
-      return Status::ObjectNotFound(strings::Substitute("Worker $0 not found."));
+      return Status::ObjectNotFound(strings::Substitute("Worker $0 not found.", id));
     }
     
     WorkerRegistration* current_registration = worker_it->second.get();
