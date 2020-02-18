@@ -19,8 +19,8 @@
 #define PEGASUS_STORAGE_PLUGIN_H
 
 #include "arrow/io/hdfs.h"
-#include "pegasus/common/status.h"
-#include "pegasus/dataset/dataset.h"
+#include "common/status.h"
+#include "dataset/dataset.h"
 
 namespace pegasus {
 using HadoopFileSystem = arrow::io::HadoopFileSystem;
@@ -29,10 +29,9 @@ using HdfsReadableFile = arrow::io::HdfsReadableFile;
 
 class StoragePlugin {
  public:
-  Status Init();
-  Status Connect();
-  Status Auth(std::string passwd);
-  virtual Status ListFiles(std::string dataset_path, std::shared_ptr<std::vector<std::string>>* file_list) = 0;
+  virtual Status Init(std::string host, int32_t port) = 0;
+  virtual Status Connect() = 0;
+  virtual Status ListFiles(std::string dataset_path, std::vector<std::string>* file_list) = 0;
   virtual Status GetReadableFile(std::string file_path, std::shared_ptr<HdfsReadableFile>* file) = 0;
     
   enum StoragePluginType {
@@ -40,7 +39,7 @@ class StoragePlugin {
     S3,
   };
 
-  StoragePluginType GetPluginType();
+  virtual StoragePluginType GetPluginType() = 0;
 
  private:
   StoragePluginType storage_plugin_type_;
@@ -50,11 +49,11 @@ class HDFSStoragePlugin : public StoragePlugin {
  public:
   HDFSStoragePlugin();
   ~HDFSStoragePlugin();
-  Status Init();
-  Status Connect();
-  Status ListFiles(std::string dataset_path, std::shared_ptr<std::vector<std::string>>* file_list) override;
-  StoragePluginType GetPluginType();
-  Status GetReadableFile(std::string file_path, std::shared_ptr<HdfsReadableFile>* file);
+  Status Init(std::string host, int32_t port) override;
+  Status Connect() override;
+  Status ListFiles(std::string dataset_path, std::vector<std::string>* file_list) override;
+  Status GetReadableFile(std::string file_path, std::shared_ptr<HdfsReadableFile>* file) override;
+  StoragePluginType GetPluginType() override;
 
  private:
   std::shared_ptr<HadoopFileSystem> client_;

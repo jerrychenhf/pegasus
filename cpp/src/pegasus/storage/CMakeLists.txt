@@ -27,3 +27,49 @@ add_library(StoragePlugin
   storage_plugin_factory.cc
 )
 add_dependencies(StoragePlugin gen-deps)
+
+if(PEGASUS_TEST_LINKAGE STREQUAL "static")
+  set(PEGASUS_STORAGE_TEST_LINK_LIBS
+      StoragePlugin
+      Runtime
+      Common
+      Util
+      Planner
+      pegasus_rpc_shared
+      ${ARROW_STATIC_LIB}
+      ${PEGASUS_TEST_STATIC_LINK_LIBS})
+else()
+  set(PEGASUS_STORAGE_TEST_LINK_LIBS
+      StoragePlugin
+      Runtime
+      Common
+      Util
+      Planner
+      pegasus_rpc_shared
+      ${ARROW_SHARED_LIB}
+      ${PEGASUS_TEST_SHARED_LINK_LIBS})
+endif()
+
+# Adding unit tests part of the "storage" portion of the test suite
+function(ADD_PEGASUS_STORAGE_TEST REL_TEST_NAME)
+  set(options)
+  set(one_value_args PREFIX)
+  set(multi_value_args LABELS)
+  cmake_parse_arguments(ARG
+                        "${options}"
+                        "${one_value_args}"
+                        "${multi_value_args}"
+                        ${ARGN})
+
+  add_pegasus_test(${REL_TEST_NAME}
+                 EXTRA_LINK_LIBS
+                 ${PEGASUS_STORAGE_TEST_LINK_LIBS})
+endfunction()
+
+if(PEGASUS_BUILD_TESTS)
+
+  add_pegasus_storage_test(storage_plugin_test)
+
+endif()
+
+

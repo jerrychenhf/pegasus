@@ -22,8 +22,10 @@
 #include "arrow/status.h"
 #include "arrow/util/uri.h"
 
-#include "pegasus/storage/storage_plugin.h"
-#include "pegasus/util/consistent_hashing.h"
+#include "storage/storage_plugin.h"
+#include "util/consistent_hashing.h"
+
+#include <boost/algorithm/string.hpp>
 
 DECLARE_string(namenode_hostname);
 DECLARE_int32(namenode_port);
@@ -35,6 +37,7 @@ namespace pegasus {
 using HdfsDriver = arrow::io::HdfsDriver;
 using HdfsPathInfo = arrow::io::HdfsPathInfo;
 using ObjectType = arrow::io::ObjectType;
+using FileStats = arrow::fs::FileStats;
 
 
 HDFSStoragePlugin::HDFSStoragePlugin() {
@@ -45,39 +48,48 @@ HDFSStoragePlugin::~HDFSStoragePlugin() {
 
 }
 
-Status HDFSStoragePlugin::Init() {
-  conf_.host = FLAGS_namenode_hostname;
-  conf_.port = FLAGS_namenode_port;
+Status HDFSStoragePlugin::Init(std::string host, int32_t port) {
+  if (host.empty()) {
+    conf_.host = FLAGS_namenode_hostname;
+  } else {
+    conf_.host = host;
+  }
+  if (port == -1) {
+    conf_.port = FLAGS_namenode_port;;
+  } else {
+    conf_.port = port;
+  }
   conf_.driver = HdfsDriver::LIBHDFS;
+
+  return Status::OK();
 }
 
 Status HDFSStoragePlugin::Connect() {
 
-  arrow::Status st = HadoopFileSystem::Connect(&conf_, &client_);
-  if (!st.ok()) {
-      return Status(StatusCode(st.code()), st.message());
-  }
-  return Status::OK();
+  arrow::Status arrowStatus = HadoopFileSystem::Connect(&conf_, &client_);
+  return Status::fromArrowStatus(arrowStatus);
 }
 
-Status HDFSStoragePlugin::ListFiles(std::string dataset_path, std::shared_ptr<std::vector<std::string>>* file_list) {
-
+Status HDFSStoragePlugin::ListFiles(std::string dataset_path, std::vector<std::string>* file_list) {
+  
+  Status status;
   std::vector<HdfsPathInfo> children;
-  arrow::Status st = client_->ListDirectory(dataset_path, &children);
+  arrow::Status arrowStatus = client_->ListDirectory(dataset_path, &children);
 
-  if (!st.ok()) {
-    return Status(StatusCode(st.code()), st.message());
-  }
+  status = Status::fromArrowStatus(arrowStatus);
+  RETURN_IF_ERROR(status);
+
   for (const auto& child_info : children) {
+
     arrow::internal::Uri uri;
     uri.Parse(child_info.name);
     std::string child_path = uri.path();
 
     if(child_info.kind == ObjectType::DIRECTORY) {
       ListFiles(child_path, file_list);
-    } else if (child_info.kind == ObjectType::FILE)
-    {
-      file_list->get()->push_back(child_path);
+    } else if (child_info.kind == ObjectType::FILE &&
+        !boost::algorithm::ends_with(child_path, "_SUCCESS")) {
+      file_list->push_back(child_info.name);
     }
   }
   return Status::OK();
@@ -85,11 +97,12 @@ Status HDFSStoragePlugin::ListFiles(std::string dataset_path, std::shared_ptr<st
 
 Status HDFSStoragePlugin::GetReadableFile(std::string file_path, std::shared_ptr<HdfsReadableFile>* file) {
 
-  client_->OpenReadable(file_path, file);
+  arrow::Status arrowStatus = client_->OpenReadable(file_path, file);
+  return Status::fromArrowStatus(arrowStatus);
 }
 
 StoragePlugin::StoragePluginType HDFSStoragePlugin::GetPluginType() {
-
+   return StoragePlugin::HDFS;
 }
 
 } // namespace pegasus
