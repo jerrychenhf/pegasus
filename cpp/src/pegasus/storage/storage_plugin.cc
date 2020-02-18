@@ -22,9 +22,11 @@
 #include "arrow/status.h"
 #include "arrow/util/uri.h"
 
-#include "pegasus/runtime/exec_env.h"
 #include "pegasus/storage/storage_plugin.h"
 #include "pegasus/util/consistent_hashing.h"
+
+DECLARE_string(namenode_hostname);
+DECLARE_int32(namenode_port);
 
 using namespace std;
 
@@ -44,9 +46,8 @@ HDFSStoragePlugin::~HDFSStoragePlugin() {
 }
 
 Status HDFSStoragePlugin::Init() {
-  ExecEnv* env =  ExecEnv::GetInstance();
-  conf_.host = env->GetNameNodeHost();
-  conf_.port = env->GetNameNodePort();
+  conf_.host = FLAGS_namenode_hostname;
+  conf_.port = FLAGS_namenode_port;
   conf_.driver = HdfsDriver::LIBHDFS;
 }
 

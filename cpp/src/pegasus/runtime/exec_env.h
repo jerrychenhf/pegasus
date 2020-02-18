@@ -29,7 +29,7 @@ class ExecEnv {
  public:
   ExecEnv();
 
-  ExecEnv(const std::string& storage_plugin_type, const std::string& namenode_hostname, int32_t port);
+  ExecEnv(const std::string& storage_plugin_type);
 
   static ExecEnv* GetInstance() { return exec_env_; }
 
@@ -39,17 +39,10 @@ class ExecEnv {
 
   StoragePlugin::StoragePluginType const GetStoragePluginType();
 
-  std::string GetNameNodeHost();
-
-  int32_t GetNameNodePort();
-
  private:
   static ExecEnv* exec_env_;
   std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
   StoragePlugin::StoragePluginType storage_plugin_type_;
-
-  std::string namenode_hostname_;
-  int32_t namenode_port_;
 };
 
 } // namespace pegasus

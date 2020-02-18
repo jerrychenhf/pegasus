@@ -22,22 +22,16 @@
 #include "util/global_flags.h"
 
 DECLARE_string(storage_plugin_type);
-DECLARE_string(namenode_hostname);
-DECLARE_int32(namenode_port);
 
 namespace pegasus {
 
 ExecEnv* ExecEnv::exec_env_ = nullptr;
 
 ExecEnv::ExecEnv()
-  : ExecEnv(FLAGS_storage_plugin_type, FLAGS_namenode_hostname, FLAGS_namenode_port) {}
+  : ExecEnv(FLAGS_storage_plugin_type) {}
 
-ExecEnv::ExecEnv(const std::string& storage_plugin_type,
-    const std::string& namenode_hostname, int32_t namenode_port)
+ExecEnv::ExecEnv(const std::string& storage_plugin_type)
   : storage_plugin_factory_(new StoragePluginFactory()) {
-
-  namenode_hostname_ = namenode_hostname;
-  namenode_port_ = namenode_port;    
   
   if(storage_plugin_type == "HDFS") {
     storage_plugin_type_ = StoragePlugin::HDFS;
@@ -54,14 +48,6 @@ std::shared_ptr<StoragePluginFactory> ExecEnv::get_storage_plugin_factory() {
 
 StoragePlugin::StoragePluginType const ExecEnv::GetStoragePluginType() {
   return storage_plugin_type_;
-}
-
-std::string ExecEnv::GetNameNodeHost() {
-  return namenode_hostname_;
-}
-
-int32_t ExecEnv::GetNameNodePort() {
-  return namenode_port_;
 }
 
 } // namespace pegasus
