@@ -36,7 +36,7 @@ ConsistentHashRing::~ConsistentHashRing()
 	}
 }
 
-//
+// TODO: decouple it with workermanager
 void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations)
 {
 	// If the locations are not provided, get the worker locations from worker_manager

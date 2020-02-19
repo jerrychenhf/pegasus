@@ -29,7 +29,7 @@ DataSetStore::~DataSetStore() {
 Status DataSetStore::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
   
 //  boost::shared_lock<boost::shared_mutex> rdlock(dssmtx);
-  boost::lock_guard<boost::detail::spinlock> l(dssspl);
+//  boost::lock_guard<boost::detail::spinlock> l(dssspl); //TODO: temporarily disable it for unit test
 //  boost::lock_guard<SpinLock> l(dssspl);
   datasets->get()->reserve(planner_metadata_.size());
   for(auto entry : planner_metadata_) {

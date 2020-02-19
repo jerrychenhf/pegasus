@@ -55,6 +55,7 @@ Status DataSetBuilder::BuildDataset(std::string dataset_path, std::shared_ptr<Da
 //  distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<ConsistentHashRing>()); //error: is an inaccessible base of
 //  DSDistributor* distributor(new ConsistentHashRing); //error: is an inaccessible base of
   auto distributor = std::make_shared<ConsistentHashRing>(); 
+  // TODO: get locations here to decouple distributor from workermanager
   distributor->PrepareValidLocations(nullptr);
   distributor->SetupDist();
 

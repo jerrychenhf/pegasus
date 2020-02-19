@@ -79,6 +79,7 @@ endfunction()
 if(PEGASUS_BUILD_TESTS)
 
   add_pegasus_dataset_test(dataset_cache_manager_test)
+  add_pegasus_dataset_test(dataset_service_test)
 
 endif()
 
