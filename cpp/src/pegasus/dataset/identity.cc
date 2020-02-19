@@ -21,31 +21,19 @@
 
 namespace pegasus {
 
-Identity::Identity(std::string dataset_path, std::string file_path, /*std::vector<int64_t> col_ids,*/ int64_t row_group_id, int64_t num_rows, int64_t bytes)
-    : dataset_path_(dataset_path), file_path_(file_path), /*col_ids_(col_ids),*/ row_group_id_(row_group_id), num_rows_(num_rows), bytes_(bytes) {}
+Identity::Identity(std::string dataset_path, std::string partition_id)
+    : dataset_path_(dataset_path), partition_id_(partition_id) {}
   
 std::string Identity::dataset_path() const {
     return dataset_path_;
   }
 
 std::string Identity::file_path() const {
-    return file_path_;
+    return partition_id_;
   }
 
 std::vector<int> Identity::col_ids() const { 
     return col_ids_;
-  }
-
-int64_t Identity::row_group_id() const { 
-    return row_group_id_;
-  }
-
-int64_t Identity::num_rows() const {
-    return num_rows_;
-  }
-
-int64_t Identity::bytes() const {
-    return bytes_;
   }
   
 bool Identity::Equals(const Identity& other) const {
@@ -53,8 +41,8 @@ bool Identity::Equals(const Identity& other) const {
 }
 
 Status Identity::SerializeToString(std::string* out) const {
-//	out->assign(file_path_ + std::to_string(row_group_id_));
-	out->assign(file_path_);
+//	out->assign(partition_id_ + std::to_string(row_group_id_));
+	out->assign(partition_id_);
 	return Status::OK();
 }
 
