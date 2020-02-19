@@ -22,14 +22,15 @@
 using namespace std;
 
 namespace pegasus {
-  CacheStoreManager::CacheStoreManager(){}
+  CacheStoreManager::CacheStoreManager(): store_manager_(new StoreManager()){}
   CacheStoreManager::~CacheStoreManager(){}
 
   Status CacheStoreManager::Init() {
+    RETURN_IF_ERROR(store_manager_->Init());
+
     WorkerExecEnv* env =  WorkerExecEnv::GetInstance();
     std::shared_ptr<Store> store;
     std::unordered_map<string, long> cache_stores_info = env->GetCacheStoresInfo();
-    std::shared_ptr<StoreManager> store_manager_(new StoreManager());
 
     Store::StoreType store_type_;
     for(std::unordered_map<string, long>::iterator it = cache_stores_info.begin(); it != cache_stores_info.end(); ++it) {

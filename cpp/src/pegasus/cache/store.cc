@@ -19,11 +19,11 @@
 
 namespace pegasus {
 
-MemoryStore::MemoryStore(long total_size): total_size_(total_size) {
+MemoryStore::MemoryStore(int64_t total_size): total_size_(total_size) {
 
 }
 
-Status MemoryStore::Allocate(long size, CacheRegion* cache_region) {
+Status MemoryStore::Allocate(int64_t size, CacheRegion* cache_region) {
   DCHECK(cache_region != NULL);
   
   uint8_t* address = reinterpret_cast<uint8_t*>(std::malloc(size));
@@ -46,25 +46,23 @@ Status MemoryStore::Free(CacheRegion* cache_region) {
   return Status::OK();
 }
 
-Status MemoryStore::GetTotalSize(long& total_size) {
-  total_size = total_size_;
-  return Status::OK(); 
+int64_t MemoryStore::GetTotalSize() {
+  return total_size_; 
 }
 
-Status MemoryStore::GetUsedSize(long& used_size) {
-  used_size = used_size_;
-  return Status::OK();
+int64_t MemoryStore::GetUsedSize() {
+  return used_size_;
 }
 
 std::string MemoryStore::GetStoreName() {
     return "MEMORY";
 }
 
-DCPMMStore::DCPMMStore(long total_size): total_size_(total_size) {
+DCPMMStore::DCPMMStore(int64_t total_size): total_size_(total_size) {
 
 }
 
-Status DCPMMStore::Allocate(long size, CacheRegion* cache_region) {
+Status DCPMMStore::Allocate(int64_t size, CacheRegion* cache_region) {
   return Status::OK();
 }
 
@@ -72,12 +70,12 @@ Status DCPMMStore::Free(CacheRegion* cache_region) {
   return Status::OK();
 }
 
-Status DCPMMStore::GetTotalSize(long& total_size) {
-  return Status::OK();
+int64_t DCPMMStore::GetTotalSize() {
+  return total_size_;
 }
 
-Status DCPMMStore::GetUsedSize(long& used_size) {
-  return Status::OK();
+int64_t DCPMMStore::GetUsedSize() {
+  return used_size_;
 }
 
 std::string DCPMMStore::GetStoreName() {

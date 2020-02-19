@@ -21,7 +21,7 @@ using namespace std;
 
 namespace pegasus {
 
-LruCacheEngine::LruCacheEngine(long capacity): cache_(capacity), cache_store_manager_(new CacheStoreManager()) {}
+LruCacheEngine::LruCacheEngine(int64_t capacity): cache_(capacity), cache_store_manager_(new CacheStoreManager()) {}
 
  Status LruCacheEngine::PutValue(std::string partition_path, int column_id,
   std::shared_ptr<CacheRegion> cache_region, CacheStore* cache_store) {

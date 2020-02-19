@@ -28,10 +28,10 @@ namespace pegasus {
 
 class CacheStore {
   public:
-   CacheStore(long capacity, Store* store);
+   CacheStore(int64_t capacity, Store* store);
    ~CacheStore();
    
-   Status Allocate(long size, CacheRegion* cache_region);
+   Status Allocate(int64_t size, CacheRegion* cache_region);
    Status Free(CacheRegion* cache_region);
    
    Store* GetStore() { return store_; }

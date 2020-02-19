@@ -26,11 +26,11 @@ namespace pegasus {
 class Store {
  public:
 
-  virtual Status Allocate(long size, CacheRegion* cache_region) = 0;
+  virtual Status Allocate(int64_t size, CacheRegion* cache_region) = 0;
   virtual Status Free(CacheRegion* cache_region) = 0;
   
-  virtual Status GetTotalSize(long& total_size) = 0;
-  virtual Status GetUsedSize(long& used_size) = 0;
+  virtual int64_t GetTotalSize() = 0;
+  virtual int64_t GetUsedSize() = 0;
   
   virtual std::string GetStoreName() = 0;
 
@@ -39,48 +39,43 @@ class Store {
     DCPMM,
     FILE
   };
-    
-  enum CacheReplacePolicy {
-    LRU,
-    MRU
-  };
 
  private:
-  long total_size_;
-  long used_size_;
+  int64_t total_size_;
+  int64_t used_size_;
 };
 
 class MemoryStore : public Store {
  public:
-  MemoryStore(long total_size);
-  Status Allocate(long size, CacheRegion* cache_region) override;
+  MemoryStore(int64_t total_size);
+  Status Allocate(int64_t size, CacheRegion* cache_region) override;
   Status Free(CacheRegion* cache_region) override;
   
-  Status GetTotalSize(long& total_size) override;
-  Status GetUsedSize(long& used_size) override;
+  int64_t GetTotalSize() override;
+  int64_t GetUsedSize() override;
   
   std::string GetStoreName() override;
 
   private:
-  long total_size_;
-  long used_size_;
+  int64_t total_size_;
+  int64_t used_size_;
 };
 
 class DCPMMStore : public Store {
  public:
-  DCPMMStore(long total_size);
+  DCPMMStore(int64_t total_size);
   
-  Status Allocate(long size, CacheRegion* cache_region) override;
+  Status Allocate(int64_t size, CacheRegion* cache_region) override;
   Status Free(CacheRegion* cache_region) override;
   
-  Status GetTotalSize(long& total_size) override;
-  Status GetUsedSize(long& used_size) override;
+  int64_t GetTotalSize() override;
+  int64_t GetUsedSize() override;
   
   std::string GetStoreName() override;
 
 private:
-  long total_size_;
-  long used_size_;
+  int64_t total_size_;
+  int64_t used_size_;
 };
 
 } // namespace pegasus

@@ -24,6 +24,8 @@ class StoreManager {
   StoreManager();
   ~StoreManager();
 
+  Status Init();
+
   Status GetStore(Store::StoreType cache_type, Store** store);
 
  private:

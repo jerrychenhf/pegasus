@@ -50,7 +50,7 @@ arrow::Status CacheMemoryPool::Allocate(int64_t size, uint8_t** out) {
   }
   
   *out = reinterpret_cast<uint8_t*>(cache_region.address());
-  occupied_size = size + occupied_size;
+  occupied_size += size;
   return arrow::Status::OK();
 }
 
@@ -60,6 +60,7 @@ void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
     
   CacheRegion cacheRegion(buffer, size, size);
   cache_store_->Free(&cacheRegion);
+  occupied_size -= size;
 }
 
 arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
@@ -68,6 +69,8 @@ arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, ui
   if (*ptr == nullptr) {
     return arrow::Status::OutOfMemory("realloc of size ", new_size, " failed");
   }
+
+  occupied_size += new_size;
 
   return arrow::Status::OK();
 }
