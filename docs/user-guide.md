@@ -5,11 +5,9 @@
 `lib/native/libhdfs.so`.
 * `JAVA_HOME`: the location of your Java SDK installation.
 * `CLASSPATH`: must contain the Hadoop jars. You can set these using:
-
 ```shell
 export CLASSPATH=`$HADOOP_HOME/bin/hadoop classpath --glob`
 ```
-
 * `ARROW_LIBHDFS_DIR`: explicit location of `libhdfs.so` if it is
 installed somewhere other than `$HADOOP_HOME/lib/native`
 

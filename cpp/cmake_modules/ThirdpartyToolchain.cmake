@@ -1599,6 +1599,27 @@ if(PEGASUS_WITH_GRPC)
   endif()
 endif()
 
+#
+# HDFS thirdparty setup
+
+if(DEFINED ENV{HADOOP_HOME})
+  set(HADOOP_HOME $ENV{HADOOP_HOME})
+  if(NOT EXISTS "${HADOOP_HOME}/include/hdfs.h")
+    message(STATUS "Did not find hdfs.h in expected location, using vendored one")
+    set(HADOOP_HOME "${THIRDPARTY_DIR}/hadoop")
+  endif()
+else()
+  set(HADOOP_HOME "${THIRDPARTY_DIR}/hadoop")
+endif()
+
+set(HDFS_H_PATH "${HADOOP_HOME}/include/hdfs.h")
+if(NOT EXISTS ${HDFS_H_PATH})
+  message(FATAL_ERROR "Did not find hdfs.h at ${HDFS_H_PATH}")
+endif()
+message(STATUS "Found hdfs.h at: " ${HDFS_H_PATH})
+
+include_directories(SYSTEM "${HADOOP_HOME}/include")
+
 macro(build_arrow)
   message(STATUS "Building Arrow from source")
 
