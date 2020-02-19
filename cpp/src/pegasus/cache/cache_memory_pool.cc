@@ -30,11 +30,11 @@ Status CacheMemoryPool::Create() {
   return Status::OK();
 }
 
-Status CacheMemoryPool::GetCacheRegion(int64_t size, CacheRegion* cache_region) {
+Status CacheMemoryPool::GetCacheRegion(int64_t size, StoreRegion* store_region) {
   if (cache_store_ == nullptr)
     return Status::Invalid("Cache store is not correctly initialized.");
   
-  RETURN_IF_ERROR(cache_store_->Allocate(size, cache_region));
+  RETURN_IF_ERROR(cache_store_->Allocate(size, store_region));
   return Status::OK();
 }
 
@@ -43,13 +43,13 @@ arrow::Status CacheMemoryPool::Allocate(int64_t size, uint8_t** out) {
     return arrow::Status::Invalid("negative malloc size");
   }
   
-  CacheRegion cache_region;
-  Status status = GetCacheRegion(size, &cache_region);
+  StoreRegion store_region;
+  Status status = GetCacheRegion(size, &store_region);
   if(!status.ok()) {
     return arrow::Status::OutOfMemory("Failed to allocate cache region in cache memory pool");
   }
   
-  *out = reinterpret_cast<uint8_t*>(cache_region.address());
+  *out = reinterpret_cast<uint8_t*>(store_region.address());
   occupied_size += size;
   return arrow::Status::OK();
 }

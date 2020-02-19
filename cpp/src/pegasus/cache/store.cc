@@ -23,14 +23,14 @@ MemoryStore::MemoryStore(int64_t total_size): total_size_(total_size) {
 
 }
 
-Status MemoryStore::Allocate(int64_t size, CacheRegion* cache_region) {
-  DCHECK(cache_region != NULL);
+Status MemoryStore::Allocate(int64_t size, StoreRegion* store_region) {
+  DCHECK(store_region != NULL);
   
   uint8_t* address = reinterpret_cast<uint8_t*>(std::malloc(size));
   if (address == NULL) {
     return Status::OutOfMemory("Allocate of size ", size, " failed");
   }
-  cache_region->reset_address(address, size);
+  store_region->reset_address(address, size);
   total_size_ -= size;
   used_size_ += size;
   return Status::OK();
@@ -62,7 +62,7 @@ DCPMMStore::DCPMMStore(int64_t total_size): total_size_(total_size) {
 
 }
 
-Status DCPMMStore::Allocate(int64_t size, CacheRegion* cache_region) {
+Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
   return Status::OK();
 }
 

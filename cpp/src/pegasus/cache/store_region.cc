@@ -15,35 +15,28 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_CACHE_STORE_H
-#define PEGASUS_CACHE_STORE_H
-
-#include <vector>
-
-#include "common/status.h"
-#include "cache/store.h"
-#include "cache/cache_region.h"
+/// \brief Data structure providing an opaque identifier or credential to use
+/// when requesting a data stream with the DoGet RPC
+#include "cache/store_region.h"
 
 namespace pegasus {
 
-class CacheStore {
-  public:
-   CacheStore(int64_t capacity, Store* store);
-   ~CacheStore();
-   
-   Status Allocate(int64_t size, StoreRegion* store_region);
-   Status Free(CacheRegion* cache_region);
-   
-   Store* GetStore() { return store_; }
-   
-   int64_t GetUsedSize() const { return used_size_; }
-   int64_t GetCapacity() const { return capacity_; }
-   
-  private:
-  Store* store_;
-  int64_t capacity_;
-  int64_t used_size_;
-};
-} // namespace pegasus                              
+StoreRegion::StoreRegion(){}
 
-#endif  // PEGASUS_CACHE_STORE_H
+StoreRegion::StoreRegion(uint8_t* base_offset, int64_t length,
+ int64_t occupied_size): address_(base_offset), length_(length),
+  occupied_size_(occupied_size) {}
+
+ StoreRegion::~StoreRegion () {}  
+ uint8_t* StoreRegion::address() const {
+   return address_;
+ }
+
+ int64_t StoreRegion::length() const {
+    return length_;
+ }
+ int64_t StoreRegion::occupies_size() const {
+    return occupied_size_;
+ }
+
+} // namespace pegasus

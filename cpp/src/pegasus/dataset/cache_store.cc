@@ -25,7 +25,7 @@ namespace pegasus {
   CacheStore::~CacheStore(){}
   
 
-  Status CacheStore::Allocate(int64_t size, CacheRegion* cache_region) {
+  Status CacheStore::Allocate(int64_t size, StoreRegion* store_region) {
     if (store_ == nullptr) {
       stringstream ss;
       ss << "Failed to allocate cache region in current cache store. Because the store is NULL";
@@ -33,7 +33,7 @@ namespace pegasus {
       return Status::UnknownError(ss.str());
     }
     
-    Status status = store_->Allocate(size, cache_region);
+    Status status = store_->Allocate(size, store_region);
     if (!status.ok()) {
       stringstream ss;
       ss << "Failed to allocate cache region in current cache store";

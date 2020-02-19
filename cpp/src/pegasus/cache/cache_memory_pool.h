@@ -55,7 +55,7 @@ public:
     CacheStore* cache_store_;
     int64_t occupied_size;
     
-    Status GetCacheRegion(int64_t size, CacheRegion* cache_region);
+    Status GetCacheRegion(int64_t size, StoreRegion* store_region);
 };
 } // namespace pegasus
 

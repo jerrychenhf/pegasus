@@ -15,35 +15,39 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_CACHE_STORE_H
-#define PEGASUS_CACHE_STORE_H
+#ifndef PEGASUS_STORE_REGION_H
+#define PEGASUS_STORE_REGION_H
 
-#include <vector>
+#include <string>
+#include "arrow/table.h"
 
-#include "common/status.h"
-#include "cache/store.h"
-#include "cache/cache_region.h"
+using namespace std;
+using namespace arrow;
 
 namespace pegasus {
 
-class CacheStore {
-  public:
-   CacheStore(int64_t capacity, Store* store);
-   ~CacheStore();
-   
-   Status Allocate(int64_t size, StoreRegion* store_region);
-   Status Free(CacheRegion* cache_region);
-   
-   Store* GetStore() { return store_; }
-   
-   int64_t GetUsedSize() const { return used_size_; }
-   int64_t GetCapacity() const { return capacity_; }
-   
-  private:
-  Store* store_;
-  int64_t capacity_;
-  int64_t used_size_;
-};
-} // namespace pegasus                              
+class StoreRegion {
+ public:
+  StoreRegion();
+  StoreRegion(uint8_t* address, long length, long occupied_size);
+  
+  ~StoreRegion();
+  
+  void reset_address(uint8_t* address, int64_t length) {
+    address_ = address;
+    length_ = length;
+  }
+  
+  uint8_t* address() const;
+  int64_t length() const;
+  int64_t occupies_size() const;
 
-#endif  // PEGASUS_CACHE_STORE_H
+ private:
+  uint8_t* address_;
+  int64_t length_;
+  int64_t occupied_size_;
+};
+
+} // namespace pegasus
+
+#endif  // PEGASUS_STORE_REGION_H

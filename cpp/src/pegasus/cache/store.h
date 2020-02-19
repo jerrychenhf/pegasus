@@ -19,6 +19,7 @@
 #define PEGASUS_STORE_H
 
 #include "common/status.h"
+#include "cache/store_region.h"
 #include "cache/cache_region.h"
 
 namespace pegasus {
@@ -26,7 +27,7 @@ namespace pegasus {
 class Store {
  public:
 
-  virtual Status Allocate(int64_t size, CacheRegion* cache_region) = 0;
+  virtual Status Allocate(int64_t size, StoreRegion* store_region) = 0;
   virtual Status Free(CacheRegion* cache_region) = 0;
   
   virtual int64_t GetTotalSize() = 0;
@@ -48,7 +49,7 @@ class Store {
 class MemoryStore : public Store {
  public:
   MemoryStore(int64_t total_size);
-  Status Allocate(int64_t size, CacheRegion* cache_region) override;
+  Status Allocate(int64_t size, StoreRegion* store_region) override;
   Status Free(CacheRegion* cache_region) override;
   
   int64_t GetTotalSize() override;
@@ -65,7 +66,7 @@ class DCPMMStore : public Store {
  public:
   DCPMMStore(int64_t total_size);
   
-  Status Allocate(int64_t size, CacheRegion* cache_region) override;
+  Status Allocate(int64_t size, StoreRegion* store_region) override;
   Status Free(CacheRegion* cache_region) override;
   
   int64_t GetTotalSize() override;
