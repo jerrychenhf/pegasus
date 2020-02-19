@@ -15,20 +15,24 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "runtime/worker_exec_env.h"
+
 #include "dataset/cache_store_manager.h"
+#include "runtime/worker_exec_env.h"
+#include "cache/store_manager.h"
 #include "common/logging.h"
 
 using namespace std;
 
 namespace pegasus {
-  CacheStoreManager::CacheStoreManager(): store_manager_(new StoreManager()){}
-  CacheStoreManager::~CacheStoreManager(){}
+  CacheStoreManager::CacheStoreManager(){
+  }
+  
+  CacheStoreManager::~CacheStoreManager(){
+  }
 
   Status CacheStoreManager::Init() {
-    RETURN_IF_ERROR(store_manager_->Init());
-
     WorkerExecEnv* env =  WorkerExecEnv::GetInstance();
+    
     std::shared_ptr<Store> store;
     std::unordered_map<string, long> cache_stores_info = env->GetCacheStoresInfo();
 
@@ -46,7 +50,7 @@ namespace pegasus {
         return Status::Invalid("Invalid store type!");
       }
 
-      RETURN_IF_ERROR(store_manager_->GetStore(store_type_, &store));
+      RETURN_IF_ERROR(env->GetStoreManager()->GetStore(store_type_, &store));
       std::shared_ptr<CacheStore> cache_store =
         std::shared_ptr<CacheStore>(new CacheStore(store, capacity));
       cached_stores_.insert(std::make_pair(store_type, cache_store));

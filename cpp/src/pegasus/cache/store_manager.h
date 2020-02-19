@@ -15,6 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
+#ifndef PEGASUS_STORE_MANAGER_H
+#define PEGASUS_STORE_MANAGER_H
+
+#include <unordered_map>
 #include "cache/store.h"
 
 namespace pegasus {
@@ -33,3 +37,5 @@ class StoreManager {
 };
 
 } // namespace pegasus
+
+#endif  // PEGASUS_STORE_MANAGER_H

@@ -20,6 +20,7 @@
 
 #include "runtime/worker_exec_env.h"
 #include "util/global_flags.h"
+#include "cache/store_manager.h"
 
 DECLARE_string(hostname);
 DECLARE_int32(worker_port);
@@ -33,11 +34,11 @@ WorkerExecEnv* WorkerExecEnv::exec_env_ = nullptr;
 WorkerExecEnv::WorkerExecEnv()
   : WorkerExecEnv(FLAGS_hostname, FLAGS_worker_port, FLAGS_store_types) {}
 
-WorkerExecEnv::WorkerExecEnv(const std::string& hostname, int32_t worker_port,
-    const std::string& store_types) {
-      
-  worker_grpc_hostname_ = hostname;
-  worker_grpc_port_ = worker_port;
+WorkerExecEnv::WorkerExecEnv(const std::string& hostname,
+  int32_t worker_port, const std::string& store_types)
+  : worker_grpc_hostname_(hostname),
+    worker_grpc_port_(worker_port),
+    store_manager_(new StoreManager()) {
 
   std::vector<std::string> types;
   boost::split(types, store_types, boost::is_any_of(", "), boost::token_compress_on);
@@ -60,6 +61,8 @@ WorkerExecEnv::WorkerExecEnv(const std::string& hostname, int32_t worker_port,
 
 Status WorkerExecEnv::Init() {
   RETURN_IF_ERROR(ExecEnv::Init());
+  RETURN_IF_ERROR(store_manager_->Init());
+  
   return Status::OK();
 }
 

@@ -19,10 +19,8 @@
 #define PEGASUS_CACHE_STORE_MANAGER_H
 
 #include <vector>
-
+#include <unordered_map>
 #include "common/status.h"
-#include "cache/store.h"
-#include "cache/store_manager.h"
 #include "dataset/cache_store.h"
 
 namespace pegasus {
@@ -37,7 +35,6 @@ class CacheStoreManager {
 
   private:
    std::unordered_map<std::string, std::shared_ptr<CacheStore>> cached_stores_;
-   std::shared_ptr<StoreManager> store_manager_;
 };
 } // namespace pegasus                              
 

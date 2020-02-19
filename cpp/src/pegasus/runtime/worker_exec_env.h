@@ -24,6 +24,8 @@
 using namespace std;
 
 namespace pegasus {
+  
+class StoreManager;
 
 /// There should only be one ExecEnv instance.
 /// It should always be accessed by calling WorkerExecEnv::GetInstance().
@@ -46,6 +48,10 @@ class WorkerExecEnv : public ExecEnv {
   std::vector<CacheEngine::CachePolicy> GetCachePolicies();
 
   std::unordered_map<string, long>  GetCacheStoresInfo();
+  
+  std::shared_ptr<StoreManager> GetStoreManager() {
+    return store_manager_;
+  }
 
  private:
   static WorkerExecEnv* exec_env_;
@@ -56,6 +62,8 @@ class WorkerExecEnv : public ExecEnv {
   std::vector<Store::StoreType> store_types_;
   std::unordered_map<string, long> cache_stores_info_; // string: store type
   std::vector<CacheEngine::CachePolicy> cache_policies_;
+  
+  std::shared_ptr<StoreManager> store_manager_;
 };
 
 } // namespace pegasus

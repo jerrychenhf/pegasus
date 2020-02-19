@@ -15,11 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
+#include "cache/store_manager.h"
 #include "runtime/worker_exec_env.h"
 
 namespace pegasus {
 
-StoreManager::~StoreManager(){}
+StoreManager::~StoreManager(){
+}
 
 StoreManager::StoreManager() {
 }
