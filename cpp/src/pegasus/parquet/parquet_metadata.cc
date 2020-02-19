@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/parquet/parquet_metadata.h"
+#include "parquet/parquet_metadata.h"
 
 namespace pegasus {
 

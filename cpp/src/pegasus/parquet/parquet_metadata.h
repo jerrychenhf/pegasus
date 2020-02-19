@@ -20,7 +20,7 @@
 
 #include "parquet/api/reader.h"
 
-#include "pegasus/common/status.h"
+#include "common/status.h"
 
 namespace pegasus {
 

@@ -21,7 +21,7 @@
 #include "arrow/io/interfaces.h"
 #include "parquet/arrow/reader.h"
 
-#include "pegasus/common/status.h"
+#include "common/status.h"
 
 namespace pegasus {
 
