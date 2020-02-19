@@ -36,6 +36,7 @@ DEFINE_string(store_types, "MEMORY", "StoreType");
 
 DEFINE_string(namenode_hostname, "localhost", "NameNode hostname. If not set, the system default will be used");
 DEFINE_int32(namenode_port, 50070, "NameNode port. If not set, the system default will be used");
+DEFINE_string(hdfs_driver, "libhdfs", "HdfsClient driver to choose between libhdfs and libhdfs3 at runtime");
 
 // log
 DEFINE_string(log_filename, "",

@@ -37,7 +37,7 @@ TEST(StoragePluginTest, Unit) {
   std::shared_ptr<StoragePlugin> planner_storage_plugin;
   //TODO: create a test file.
   std::string table_location = "hdfs://10.239.47.55:9000/genData2/customer/";
-  planner_storage_plugin_factory->GetStoragePlugin(table_location, &planner_storage_plugin);
+  ASSERT_OK(planner_storage_plugin_factory->GetStoragePlugin(table_location, &planner_storage_plugin));
 
   ASSERT_NE(nullptr, planner_storage_plugin);
   ASSERT_EQ(StoragePlugin::HDFS, planner_storage_plugin->GetPluginType());
@@ -57,7 +57,7 @@ TEST(StoragePluginTest, Unit) {
   std::shared_ptr<StoragePlugin> worker_storage_plugin;
   for(auto partition : *partitions) {
     std::string partition_path = partition.GetIdentPath();
-    worker_storage_plugin_factory->GetStoragePlugin(partition_path, &worker_storage_plugin);
+    ASSERT_OK(worker_storage_plugin_factory->GetStoragePlugin(partition_path, &worker_storage_plugin));
     ASSERT_NE(nullptr, worker_storage_plugin);
     ASSERT_EQ(StoragePlugin::HDFS, worker_storage_plugin->GetPluginType());
     arrow::internal::Uri uri;

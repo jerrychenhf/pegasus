@@ -34,7 +34,6 @@ Status StoragePluginFactory::GetStoragePlugin(std::string url,
   uri.Parse(url);
   std::string host = uri.host();
   int32_t port = uri.port();
-  // if (url.find("hdfs://") != std::string::npos) {
   if (uri.scheme() == "hdfs") {
     storage_plugin_type = StoragePlugin::HDFS;
   } else {

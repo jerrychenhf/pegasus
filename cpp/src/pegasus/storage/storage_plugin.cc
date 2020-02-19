@@ -29,6 +29,7 @@
 
 DECLARE_string(namenode_hostname);
 DECLARE_int32(namenode_port);
+DECLARE_string(hdfs_driver);
 
 using namespace std;
 
@@ -59,7 +60,20 @@ Status HDFSStoragePlugin::Init(std::string host, int32_t port) {
   } else {
     conf_.port = port;
   }
-  conf_.driver = HdfsDriver::LIBHDFS;
+  std::string driver_ = FLAGS_hdfs_driver;
+  if (driver_ == "libhdfs") {
+    conf_.driver = HdfsDriver::LIBHDFS;
+    arrow::Status arrowStatus = arrow::io::HaveLibHdfs();
+    Status status = Status::fromArrowStatus(arrowStatus);
+    RETURN_IF_ERROR(status);
+  } else if (driver_ == "libhdfs3") {
+    conf_.driver = HdfsDriver::LIBHDFS3;
+    arrow::Status arrowStatus = arrow::io::HaveLibHdfs3();
+    Status status = Status::fromArrowStatus(arrowStatus);
+    RETURN_IF_ERROR(status);
+  } else {
+    return Status::Invalid("Invalid HDFS driver type!");
+  }
 
   return Status::OK();
 }
@@ -67,7 +81,10 @@ Status HDFSStoragePlugin::Init(std::string host, int32_t port) {
 Status HDFSStoragePlugin::Connect() {
 
   arrow::Status arrowStatus = HadoopFileSystem::Connect(&conf_, &client_);
-  return Status::fromArrowStatus(arrowStatus);
+  Status status = Status::fromArrowStatus(arrowStatus);
+  RETURN_IF_ERROR(status);
+
+  return Status::OK();
 }
 
 Status HDFSStoragePlugin::ListFiles(std::string dataset_path, std::vector<std::string>* file_list) {
@@ -75,7 +92,6 @@ Status HDFSStoragePlugin::ListFiles(std::string dataset_path, std::vector<std::s
   Status status;
   std::vector<HdfsPathInfo> children;
   arrow::Status arrowStatus = client_->ListDirectory(dataset_path, &children);
-
   status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);
 
