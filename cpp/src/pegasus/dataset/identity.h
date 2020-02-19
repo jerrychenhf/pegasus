@@ -28,6 +28,7 @@ namespace pegasus {
 
 class Identity {
 public:
+  Identity() {}
   Identity(std::string dataset_path, std::string file_path, /*std::vector<int64_t> col_ids,*/ int64_t row_group_id, int64_t num_rows, int64_t bytes);
   
   std::string dataset_path() const;

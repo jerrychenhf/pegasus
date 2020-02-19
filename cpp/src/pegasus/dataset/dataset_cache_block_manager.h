@@ -62,6 +62,9 @@ class DatasetCacheBlockManager {
  public:
   DatasetCacheBlockManager();
   ~DatasetCacheBlockManager();
+  
+  Status Init();
+  
   Status GetCachedDataSet(Identity* identity, std::shared_ptr<CachedDataset>* dataset);
   Status GetCachedPartition(Identity* identity, std::shared_ptr<CachedPartition>* partitios);
   Status GetCachedColumns(Identity* identity, std::unordered_map<string, std::shared_ptr<CachedColumn>>* cached_columns);

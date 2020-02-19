@@ -25,7 +25,12 @@ namespace pegasus {
 DatasetCacheBlockManager::DatasetCacheBlockManager() {
 }
 
-DatasetCacheBlockManager::~DatasetCacheBlockManager() {}
+DatasetCacheBlockManager::~DatasetCacheBlockManager() {
+}
+
+Status DatasetCacheBlockManager::Init() {   
+  return Status::OK();
+}
 
 Status DatasetCacheBlockManager::GetCachedDataSet(Identity* identity,
  std::shared_ptr<CachedDataset>* dataset) {
