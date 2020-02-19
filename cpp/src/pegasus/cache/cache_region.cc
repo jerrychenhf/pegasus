@@ -32,10 +32,10 @@ CacheRegion::CacheRegion(uint8_t* base_offset, long length, long occupied_size,
    return address_;
  }
 
- long CacheRegion::length() const {
+ int64_t CacheRegion::length() const {
     return length_;
  }
- long CacheRegion::occupies_size() const {
+ int64_t CacheRegion::occupies_size() const {
     return occupied_size_;
  }
 

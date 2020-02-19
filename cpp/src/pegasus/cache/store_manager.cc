@@ -22,11 +22,14 @@ namespace pegasus {
 StoreManager::~StoreManager(){}
 
 StoreManager::StoreManager() {
+}
+
+Status StoreManager::Init() {
   WorkerExecEnv* env =  WorkerExecEnv::GetInstance();
   std::shared_ptr<Store> store;
   std::unordered_map<string, long> stores_info = env->GetStoresInfo();
-  for(std::unordered_map<string, long>::iterator it = stores_info.begin(); it != stores_info.end(); ++it) {
-
+  for(std::unordered_map<string, long>::iterator it = stores_info.begin();
+   it != stores_info.end(); ++it) {
     std::shared_ptr<Store> store;
     if (it->first == "MEMORY") {
       store = std::shared_ptr<MemoryStore>(new MemoryStore(it->second));

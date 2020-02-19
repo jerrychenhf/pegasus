@@ -82,7 +82,7 @@ class CacheEntryKey {
 
 class LruCacheEngine : public CacheEngine {
  public:
-  LruCacheEngine(long capacity);
+  LruCacheEngine(int64_t capacity);
   ~LruCacheEngine();
   
   Status GetCacheStore(CacheStore** cache_store) {

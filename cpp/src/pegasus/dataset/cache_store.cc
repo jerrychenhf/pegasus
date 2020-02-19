@@ -21,11 +21,11 @@
 using namespace std;
 
 namespace pegasus {
-  CacheStore::CacheStore(long capacity, Store* store): capacity_(capacity), store_(store) {}
+  CacheStore::CacheStore(int64_t capacity, Store* store): capacity_(capacity), store_(store) {}
   CacheStore::~CacheStore(){}
   
 
-  Status CacheStore::Allocate(long size, CacheRegion* cache_region) {
+  Status CacheStore::Allocate(int64_t size, CacheRegion* cache_region) {
     if (store_ == nullptr) {
       stringstream ss;
       ss << "Failed to allocate cache region in current cache store. Because the store is NULL";
@@ -33,9 +33,13 @@ namespace pegasus {
       return Status::UnknownError(ss.str());
     }
     
-    store_->Allocate(size, cache_region);
-    //TODO
-    // check status
+    Status status = store_->Allocate(size, cache_region);
+    if (!status.ok()) {
+      stringstream ss;
+      ss << "Failed to allocate cache region in current cache store";
+      LOG(ERROR) << ss.str();
+      return Status::UnknownError(ss.str());
+    }
     
     used_size_ += size;
     return Status::OK();
@@ -50,7 +54,13 @@ namespace pegasus {
     }
     
     int64_t size = cache_region->length();
-    store_->Free(cache_region);
+    Status status = store_->Free(cache_region);
+    if (!status.ok()) {
+      stringstream ss;
+      ss << "Failed to free cache region in current cache store";
+      LOG(ERROR) << ss.str();
+      return Status::UnknownError(ss.str());
+    }
     used_size_ -= size;
     return Status::OK();
   }
