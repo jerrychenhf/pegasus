@@ -47,7 +47,7 @@ TEST(StoragePluginTest, Unit) {
   std::vector<std::string> file_list;
   ASSERT_OK(planner_storage_plugin->ListFiles(table_location, &file_list));
   for (auto filepath : file_list) {
-    partitions->push_back(Partition(Identity(table_location, filepath, 0, 0, 0)));
+    partitions->push_back(Partition(Identity(table_location, filepath)));
   }
   
   std::unique_ptr<WorkerExecEnv> worker_exec_env_(new WorkerExecEnv());

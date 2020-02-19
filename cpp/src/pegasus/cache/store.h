@@ -26,10 +26,12 @@ namespace pegasus {
 class Store {
  public:
 
-  virtual Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) = 0;
-  virtual Status Free(std::shared_ptr<CacheRegion> cache_region) = 0;
+  virtual Status Allocate(long size, CacheRegion* cache_region) = 0;
+  virtual Status Free(CacheRegion* cache_region) = 0;
+  
   virtual Status GetTotalSize(long& total_size) = 0;
   virtual Status GetUsedSize(long& used_size) = 0;
+  
   virtual std::string GetStoreName() = 0;
 
   enum StoreType {
@@ -51,10 +53,12 @@ class Store {
 class MemoryStore : public Store {
  public:
   MemoryStore(long total_size);
-  Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) override;
-  Status Free(std::shared_ptr<CacheRegion> cache_region) override;
+  Status Allocate(long size, CacheRegion* cache_region) override;
+  Status Free(CacheRegion* cache_region) override;
+  
   Status GetTotalSize(long& total_size) override;
   Status GetUsedSize(long& used_size) override;
+  
   std::string GetStoreName() override;
 
   private:
@@ -65,25 +69,19 @@ class MemoryStore : public Store {
 class DCPMMStore : public Store {
  public:
   DCPMMStore(long total_size);
-  Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) override;
-  Status Free(std::shared_ptr<CacheRegion> cache_region) override;
+  
+  Status Allocate(long size, CacheRegion* cache_region) override;
+  Status Free(CacheRegion* cache_region) override;
+  
   Status GetTotalSize(long& total_size) override;
   Status GetUsedSize(long& used_size) override;
+  
   std::string GetStoreName() override;
 
 private:
   long total_size_;
   long used_size_;
 };
-
-// class FileStore : public Store {
-//  public:
-//   FileStore();
-//   // Status Allocate(long size) override;
-//   // Status GetTotalSize(long& total_size) override;
-//   // Status GetUsedSize(long& used_size) override;
-//   // std::string GetStoreName() override;
-// };
 
 } // namespace pegasus
 

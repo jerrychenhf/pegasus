@@ -36,13 +36,33 @@ class DatasetCacheManager {
  public:
   DatasetCacheManager();
   ~DatasetCacheManager();
+  
+  Status Init();
 
   Status GetDatasetStream(Identity* identity, std::unique_ptr<rpc::FlightDataStream>* data_stream);
   
  private: 
-  std::shared_ptr<DatasetCacheBlockManager> dataset_cache_block_manager_;
-  std::shared_ptr<DatasetCacheEngineManager> dataset_cache_engine_manager_;
+  std::shared_ptr<DatasetCacheBlockManager> cache_block_manager_;
+  std::shared_ptr<DatasetCacheEngineManager> cache_engine_manager_;
   std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
+  
+  CacheEngine::CachePolicy GetCachePolicy(Identity* identity);
+  
+  Status AddNewColumns(Identity* identity,
+    std::unordered_map<string, std::shared_ptr<CachedColumn>> retrieved_columns);
+  Status WrapDatasetStream(Identity* identity,
+    std::unique_ptr<rpc::FlightDataStream>* data_stream);
+  Status GetDatasetStreamWithMissedColumns(Identity* identity,
+    std::vector<int> col_ids,
+    std::unique_ptr<rpc::FlightDataStream>* data_stream);
+  std::vector<int> GetMissedColumnsIds(std::vector<int> col_ids,
+    std::unordered_map<string, std::shared_ptr<CachedColumn>> cached_columns);
+    
+  Status RetrieveColumns(Identity* identity,
+    const std::vector<int>& col_ids,
+    std::shared_ptr<CacheEngine> cache_engine,
+    std::unordered_map<string, std::shared_ptr<CachedColumn>>& retrieved_columns
+    );
 };
 
 } // namespace pegasus

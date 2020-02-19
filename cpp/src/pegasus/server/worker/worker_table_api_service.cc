@@ -15,8 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/runtime/worker_exec_env.h"
-#include "pegasus/server/worker/worker_table_api_service.h"
+#include "runtime/worker_exec_env.h"
+#include "server/worker/worker_table_api_service.h"
+#include "dataset/dataset_cache_manager.h"
 
 namespace pegasus {
 
@@ -26,7 +27,8 @@ class Location;
 
 }  //namespace rpc
 
-WorkerTableAPIService::WorkerTableAPIService() {
+WorkerTableAPIService::WorkerTableAPIService(std::shared_ptr<DatasetCacheManager> dataset_cache_manager)
+  : dataset_cache_manager_(dataset_cache_manager) {
   env_ =  WorkerExecEnv::GetInstance();
 }
 
@@ -43,7 +45,7 @@ Status WorkerTableAPIService::Init() {
   pegasus::rpc::FlightServerOptions options(location);
   arrow::Status st = rpc::FlightServerBase::Init(options);
   if (!st.ok()) {
-    return Status(StatusCode(st.code()), st.message());
+    return Status::fromArrowStatus(st);
   }
   return Status::OK();
 }
@@ -51,7 +53,7 @@ Status WorkerTableAPIService::Init() {
 Status WorkerTableAPIService::Serve() {
   arrow::Status st = rpc::FlightServerBase::Serve();
   if (!st.ok()) {
-    return Status(StatusCode(st.code()), st.message());
+    return Status::fromArrowStatus(st);
   }
   return Status::OK();
 }
@@ -61,13 +63,15 @@ Status WorkerTableAPIService::Serve() {
 /// \param[in] request an opaque ticket+
 /// \param[out] stream the returned stream provider
 /// \return Status
-arrow::Status WorkerTableAPIService::DoGet(const rpc::ServerCallContext& context, const rpc::Ticket& request,
-               std::unique_ptr<rpc::FlightDataStream>* data_stream) {
-
-  //TODO Ticket=>Identity
-  // request => identity
-
-  //cache_manager_.GetFlightDataStream(identity, data_stream);
+arrow::Status WorkerTableAPIService::DoGet(const rpc::ServerCallContext& context,
+  const rpc::Ticket& request, std::unique_ptr<rpc::FlightDataStream>* data_stream) {
+  DataRequest dataRequest;
+  arrow::Status st = CreateDataRequest(request, &dataRequest);
+  if(!st.ok());
+    return st;
+  
+  Status status = dataset_cache_manager_->GetDatasetStream(&dataRequest, data_stream);
+  return status.toArrowStatus();
 }
 
 /// \brief Process a stream of IPC payloads sent from a client
@@ -80,6 +84,13 @@ arrow::Status WorkerTableAPIService::DoPut(const rpc::ServerCallContext& context
                std::unique_ptr<rpc::FlightMetadataWriter> writer) {
 
 //TODO
+  return arrow::Status::OK();
+}
+
+arrow::Status WorkerTableAPIService::CreateDataRequest(const rpc::Ticket& request,
+  DataRequest* dataRequest) {
+  // TO DO
+  // convert Ticket request to data request
   return arrow::Status::OK();
 }
 

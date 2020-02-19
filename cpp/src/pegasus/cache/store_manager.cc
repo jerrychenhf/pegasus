@@ -38,7 +38,7 @@ StoreManager::StoreManager() {
   }
 }
 
-Status StoreManager::GetStore(Store::StoreType store_type, std::shared_ptr<Store>* store) {
+Status StoreManager::GetStore(Store::StoreType store_type, Store** store) {
   if (store_type == Store::StoreType::MEMORY) {
     auto  entry = stores_.find("MEMORY");
     if (entry == stores_.end()) {
@@ -47,7 +47,7 @@ Status StoreManager::GetStore(Store::StoreType store_type, std::shared_ptr<Store
       LOG(ERROR) << ss.str();
       return Status::UnknownError(ss.str());
     }
-    *store = entry->second;
+    *store = entry->second.get();
     return Status::OK();
   } else if (store_type == Store::StoreType::DCPMM) {
     auto  entry = stores_.find("DCPMM");
@@ -57,7 +57,7 @@ Status StoreManager::GetStore(Store::StoreType store_type, std::shared_ptr<Store
       LOG(ERROR) << ss.str();
       return Status::UnknownError(ss.str());
     }
-    *store = entry->second;
+    *store = entry->second.get();
     return Status::OK();
   } else {
     return Status::Invalid("Invalid store type!");

@@ -20,19 +20,21 @@
 
 namespace pegasus {
     
-CacheMemoryPool::CacheMemoryPool(std::shared_ptr<CacheEngine> cache_engine) {
-  cache_engine_ = cache_engine;
-  occupied_size = 0;
+CacheMemoryPool::CacheMemoryPool(std::shared_ptr<CacheEngine> cache_engine)
+  : cache_engine_(cache_engine), occupied_size(0) {
 }
 CacheMemoryPool::~CacheMemoryPool() {}
 
-Status GetCacheRegion(std::shared_ptr<CacheEngine> cache_engine,
- std::shared_ptr<Store> store, int64_t size, std::shared_ptr<CacheRegion>* cache_region) {
-  std::shared_ptr<CacheStore> cache_store;
-  LruCacheEngine *lru_cache_engine = dynamic_cast<LruCacheEngine *>(cache_engine.get());
-  RETURN_IF_ERROR(lru_cache_engine->cache_store_manager_->GetCacheStore(&cache_store));
-  RETURN_IF_ERROR(cache_store->GetStore(&store));
-  RETURN_IF_ERROR(cache_store->Allocate(size, cache_region));
+Status CacheMemoryPool::Create() {
+  RETURN_IF_ERROR(cache_engine_->GetCacheStore(&cache_store_));
+  return Status::OK();
+}
+
+Status CacheMemoryPool::GetCacheRegion(int64_t size, CacheRegion* cache_region) {
+  if (cache_store_ == nullptr)
+    return Status::Invalid("Cache store is not correctly initialized.");
+  
+  RETURN_IF_ERROR(cache_store_->Allocate(size, cache_region));
   return Status::OK();
 }
 
@@ -40,30 +42,24 @@ arrow::Status CacheMemoryPool::Allocate(int64_t size, uint8_t** out) {
   if (size < 0) {
     return arrow::Status::Invalid("negative malloc size");
   }
-  std::shared_ptr<CacheRegion> cache_region;
-  Status status = GetCacheRegion(cache_engine_, store_, size, &cache_region);
-  if (status == Status::OK()) {
-    out = reinterpret_cast<uint8_t**>(cache_region->address());
-    occupied_size = size + occupied_size;
-    return arrow::Status::OK();
-  } else {
-    return arrow::Status::UnknownError("Failed to allocate cache region in cache memory pool");
+  
+  CacheRegion cache_region;
+  Status status = GetCacheRegion(size, &cache_region);
+  if(!status.ok()) {
+    return arrow::Status::OutOfMemory("Failed to allocate cache region in cache memory pool");
   }
+  
+  *out = reinterpret_cast<uint8_t*>(cache_region.address());
+  occupied_size = size + occupied_size;
+  return arrow::Status::OK();
 }
 
 void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
-  LruCacheEngine *lru_cache_engine = dynamic_cast<LruCacheEngine *>(cache_engine_.get());
-  std::shared_ptr<CacheStore> cache_store;
-  Status status = lru_cache_engine->cache_store_manager_->GetCacheStore(&cache_store);
-  if (status == Status::OK()) {
-    std::shared_ptr<CacheRegion> cache_region = std::shared_ptr<CacheRegion>(
-      new CacheRegion(buffer, size, size));
-    cache_store->Free(cache_region);
-  } else {
-    stringstream ss;
-    ss << "Failed to free cache region in cache memory pool.";
-    LOG(ERROR) << ss.str();
-  }
+  if (cache_store_ == nullptr)
+    return;
+    
+  CacheRegion cacheRegion(buffer, size, size);
+  cache_store_->Free(&cacheRegion);
 }
 
 arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
@@ -76,28 +72,20 @@ arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, ui
   return arrow::Status::OK();
 }
 
-int64_t CacheMemoryPool::bytes_allocated() const  { return occupied_size; }
+int64_t CacheMemoryPool::bytes_allocated() const  {
+  return occupied_size;
+}
   
-int64_t CacheMemoryPool::max_memory() const {return 100;}
+int64_t CacheMemoryPool::max_memory() const {
+  return cache_store_->GetCapacity();
+}
 
 std::string CacheMemoryPool::backend_name() const {
-  if (store_ != nullptr) {
-    return store_->GetStoreName();
+  if (cache_store_ != nullptr) {
+    return cache_store_->GetStore()->GetStoreName();
   } else {
     return "MEMORY";
   } 
-}
-
-Status CacheMemoryPool::GetStore(std::shared_ptr<Store>* store) {
-  if (store_ != nullptr) {
-    store = &store_;
-    return Status::OK();
-  } else {
-    stringstream ss;
-    ss << "Failed to get the store.";
-    LOG(ERROR) << ss.str();
-    return Status::UnknownError(ss.str());
-  }
 }
 
 } // namespace pegasus

@@ -18,10 +18,8 @@
 #ifndef PEGASUS_WORKER_TABLE_API_SERVICE_H
 #define PEGASUS_WORKER_TABLE_API_SERVICE_H
 
-#include "pegasus/rpc/server.h"
-
-#include "pegasus/dataset/dataset_cache_manager.h"
-
+#include "rpc/server.h"
+#include "dataset/data_request.h"
 
 namespace arrow {
 
@@ -38,13 +36,16 @@ class FlightServerBase;
 class FlightMessageReader;
 class FlightMetadataWriter;
 class FlightDataStream;
+
 struct Ticket;
 
 }  //namespace rpc
 
+class DatasetCacheManager;
+
 class WorkerTableAPIService : public rpc::FlightServerBase {
  public:
-  WorkerTableAPIService();
+  WorkerTableAPIService(std::shared_ptr<DatasetCacheManager> dataset_cache_manager);
   ~WorkerTableAPIService();
 
   Status Init();
@@ -61,6 +62,8 @@ class WorkerTableAPIService : public rpc::FlightServerBase {
 private:
   std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
   WorkerExecEnv* env_;
+  
+  arrow::Status CreateDataRequest(const rpc::Ticket& request, DataRequest* dataRequest);
 };
     
 }  // namespace pegasus

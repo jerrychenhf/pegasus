@@ -25,7 +25,7 @@
 #include <boost/optional.hpp>
 #include "dataset/cache_engine.h"
 #include "cache/cache_region.h"
-#include "cache/store.h"
+#include "dataset/cache_store.h"
 
 // modified from boost LRU cache -> the boost cache supported only an
 // ordered map.
@@ -59,7 +59,7 @@ class LruCache {
 
   bool contains(const key_type& key) { return map_.find(key) != map_.end(); }
 
-  void insert(const key_type& key, const value_type& value, std::shared_ptr<Store> store) {
+  void insert(const key_type& key, const value_type& value, CacheStore* cache_store) {
     typename map_type::iterator i = map_.find(key);
     if (i == map_.end()) {
       // insert item into the cache, but first check if it is full
@@ -71,7 +71,7 @@ class LruCache {
       // insert the new item
       lru_list_.push_front(key);
       map_[key] = std::make_pair(value, lru_list_.begin());
-      evict_map_[key] = store;
+      evict_map_[key] = cache_store;
     }
   }
 
@@ -116,8 +116,8 @@ class LruCache {
     key_type evict_key = lru_list_.back();
     // TODO concurrently free and access
     value_type evict_value = map_.find(evict_key)->second.first;
-    std::shared_ptr<Store> store = evict_map_.find(evict_key)->second;
-    store->Free(evict_value);
+    CacheStore* cache_store = evict_map_.find(evict_key)->second;
+    cache_store->Free(evict_value.get());
 
     typename list_type::iterator i = --lru_list_.end();
     map_.erase(*i);
@@ -126,7 +126,7 @@ class LruCache {
 
  private:
   map_type map_;
-  std::unordered_map<key_type, std::shared_ptr<Store>, hasher> evict_map_;
+  std::unordered_map<key_type, CacheStore*, hasher> evict_map_;
   list_type lru_list_;
   size_t cache_capacity_;
 };

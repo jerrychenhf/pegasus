@@ -22,10 +22,11 @@ using namespace pegasus;
 namespace pegasus {
 
 DatasetCacheEngineManager::DatasetCacheEngineManager() {
-  Init();
+
 }
 
-DatasetCacheEngineManager::~DatasetCacheEngineManager() {}
+DatasetCacheEngineManager::~DatasetCacheEngineManager() {
+}
 
 Status DatasetCacheEngineManager::Init() {
   // Initialize all configurated cache engines.

@@ -33,7 +33,7 @@ class CacheStoreManager {
    ~CacheStoreManager();
 
    Status Init();
-   Status GetCacheStore(std::shared_ptr<CacheStore>* cache_store);
+   Status GetCacheStore(CacheStore** cache_store);
 
   private:
    std::unordered_map<std::string, std::shared_ptr<CacheStore>> cached_stores_;

@@ -28,17 +28,21 @@ namespace pegasus {
 
 class CacheStore {
   public:
-   CacheStore(long capacity, std::shared_ptr<Store> store);
+   CacheStore(long capacity, Store* store);
    ~CacheStore();
-   Status Allocate(long size, std::shared_ptr<CacheRegion>* cache_region);
-   Status Free(std::shared_ptr<CacheRegion> cache_region);
-   Status GetUsedSize(long& used_size);
-   Status GetStore(std::shared_ptr<Store>* store);
-
+   
+   Status Allocate(long size, CacheRegion* cache_region);
+   Status Free(CacheRegion* cache_region);
+   
+   Store* GetStore() { return store_; }
+   
+   int64_t GetUsedSize() const { return used_size_; }
+   int64_t GetCapacity() const { return capacity_; }
+   
   private:
-  std::shared_ptr<Store> store_;
-  long capacity_;
-  long used_size_;
+  Store* store_;
+  int64_t capacity_;
+  int64_t used_size_;
 };
 } // namespace pegasus                              
 

@@ -15,19 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "cache/store.h"
+/// \brief Data structure providing an identifier to use when requesting a table chunk
+#pragma once
+
+#include "dataset/identity.h"
 
 namespace pegasus {
-
-class StoreManager {
- public:
-  StoreManager();
-  ~StoreManager();
-
-  Status GetStore(Store::StoreType cache_type, Store** store);
-
- private:
-  std::unordered_map<std::string, std::shared_ptr<Store>> stores_;
-};
-
+  typedef Identity DataRequest;
 } // namespace pegasus
