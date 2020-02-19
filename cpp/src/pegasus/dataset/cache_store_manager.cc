@@ -47,7 +47,8 @@ namespace pegasus {
       }
 
       RETURN_IF_ERROR(store_manager_->GetStore(store_type_, &store));
-      std::shared_ptr<CacheStore> cache_store = std::shared_ptr<CacheStore>(new CacheStore(capacity, store));
+      std::shared_ptr<CacheStore> cache_store =
+        std::shared_ptr<CacheStore>(new CacheStore(store, capacity));
       cached_stores_.insert(std::make_pair(store_type, cache_store));
     }
     return Status::OK();

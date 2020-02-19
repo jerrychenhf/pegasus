@@ -134,6 +134,8 @@ bool WorkerHeartbeat::HeartbeatedNodeInfo(int64_t ts) {
       
     node_info_changed_ = 0;
   }
+  
+  return true;
 }
 
 Status WorkerHeartbeat::OfferHeartbeat(const ScheduledHeartbeat& heartbeat) {
@@ -159,8 +161,8 @@ void WorkerHeartbeat::DoHeartbeat(int thread_id,
     }
     
     diff_ms = std::abs(diff_ms);
-    LOG(INFO) << "Sending heartbeat message to: "
-      << " (deadline accuracy: " << diff_ms << "ms)";
+    //LOG(INFO) << "Sending heartbeat message to: "
+    //  << " (deadline accuracy: " << diff_ms << "ms)";
 
     if (diff_ms > DEADLINE_MISS_THRESHOLD_MS) {
       const string& msg = strings::Substitute(
@@ -251,6 +253,8 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
     result->result_code == rpc::HeartbeatResult::REGISTERED) {
     registered_ = true;
     LOG(INFO) << "Worker registered successfully.";
+  } else {
+    LOG(INFO) << "Worker heartbeat to " << planner_address_ << " successfully.";
   }
   
   if (has_node_info) {

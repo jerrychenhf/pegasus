@@ -21,7 +21,7 @@
 using namespace std;
 
 namespace pegasus {
-  CacheStore::CacheStore(int64_t capacity, Store* store): capacity_(capacity), store_(store) {}
+  CacheStore::CacheStore(Store* store, int64_t capacity): store_(store), capacity_(capacity) {}
   CacheStore::~CacheStore(){}
   
 

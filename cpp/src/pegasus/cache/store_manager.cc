@@ -39,6 +39,8 @@ Status StoreManager::Init() {
       stores_.insert(std::make_pair("DCPMM", store));
     } 
   }
+  
+  return Status::OK();
 }
 
 Status StoreManager::GetStore(Store::StoreType store_type, Store** store) {
