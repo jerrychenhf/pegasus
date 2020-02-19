@@ -19,19 +19,28 @@
 
 namespace pegasus {
 
-MemoryStore::MemoryStore(int64_t total_size): total_size_(total_size) {
+MemoryStore::MemoryStore(int64_t capacity)
+  : capacity_(capacity),
+    free_size_(capacity),
+    used_size_(0) {
+}
 
+Status MemoryStore::Init() {
+  return Status::OK();
 }
 
 Status MemoryStore::Allocate(int64_t size, StoreRegion* store_region) {
   DCHECK(store_region != NULL);
+  
+  //TODO
+  //check the free size. If no free size available, fail
   
   uint8_t* address = reinterpret_cast<uint8_t*>(std::malloc(size));
   if (address == NULL) {
     return Status::OutOfMemory("Allocate of size ", size, " failed");
   }
   store_region->reset_address(address, size);
-  total_size_ -= size;
+  free_size_ -= size;
   used_size_ += size;
   return Status::OK();
 }
@@ -41,13 +50,13 @@ Status MemoryStore::Free(CacheRegion* cache_region) {
   
   std::free(cache_region->chunked_array());
   
-  total_size_  += cache_region->length();
+  free_size_  += cache_region->length();
   used_size_ -= cache_region->length();
   return Status::OK();
 }
 
-int64_t MemoryStore::GetTotalSize() {
-  return total_size_; 
+int64_t MemoryStore::GetFreeSize() {
+  return free_size_; 
 }
 
 int64_t MemoryStore::GetUsedSize() {
@@ -58,8 +67,16 @@ std::string MemoryStore::GetStoreName() {
     return "MEMORY";
 }
 
-DCPMMStore::DCPMMStore(int64_t total_size): total_size_(total_size) {
+DCPMMStore::DCPMMStore(int64_t capacity)
+  : capacity_(capacity),
+    free_size_(capacity),
+    used_size_(0) {
+}
 
+Status DCPMMStore::Init() {
+  //TODO
+  // initialize the DCPMM
+  return Status::OK();
 }
 
 Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
@@ -70,8 +87,8 @@ Status DCPMMStore::Free(CacheRegion* cache_region) {
   return Status::OK();
 }
 
-int64_t DCPMMStore::GetTotalSize() {
-  return total_size_;
+int64_t DCPMMStore::GetFreeSize() {
+  return free_size_;
 }
 
 int64_t DCPMMStore::GetUsedSize() {

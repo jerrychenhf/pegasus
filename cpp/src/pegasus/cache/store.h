@@ -26,11 +26,14 @@ namespace pegasus {
 
 class Store {
  public:
+ 
+  virtual Status Init() = 0;
 
   virtual Status Allocate(int64_t size, StoreRegion* store_region) = 0;
   virtual Status Free(CacheRegion* cache_region) = 0;
   
-  virtual int64_t GetTotalSize() = 0;
+  virtual int64_t GetCapacity() = 0;
+  virtual int64_t GetFreeSize() = 0;
   virtual int64_t GetUsedSize() = 0;
   
   virtual std::string GetStoreName() = 0;
@@ -41,41 +44,47 @@ class Store {
     FILE
   };
 
- private:
-  int64_t total_size_;
-  int64_t used_size_;
 };
 
 class MemoryStore : public Store {
  public:
-  MemoryStore(int64_t total_size);
-  Status Allocate(int64_t size, StoreRegion* store_region) override;
-  Status Free(CacheRegion* cache_region) override;
+  MemoryStore(int64_t capacity);
   
-  int64_t GetTotalSize() override;
-  int64_t GetUsedSize() override;
+  virtual Status Init();
   
-  std::string GetStoreName() override;
+  virtual Status Allocate(int64_t size, StoreRegion* store_region) override;
+  virtual Status Free(CacheRegion* cache_region) override;
+  
+  virtual int64_t GetCapacity()override { return capacity_; } 
+  virtual int64_t GetFreeSize() override;
+  virtual int64_t GetUsedSize() override;
+  
+  virtual std::string GetStoreName() override;
 
-  private:
-  int64_t total_size_;
+ private:
+  int64_t capacity_;
+  int64_t free_size_;
   int64_t used_size_;
 };
 
 class DCPMMStore : public Store {
  public:
-  DCPMMStore(int64_t total_size);
+  DCPMMStore(int64_t capacity);
   
-  Status Allocate(int64_t size, StoreRegion* store_region) override;
-  Status Free(CacheRegion* cache_region) override;
+  virtual Status Init();
   
-  int64_t GetTotalSize() override;
-  int64_t GetUsedSize() override;
+  virtual Status Allocate(int64_t size, StoreRegion* store_region) override;
+  virtual Status Free(CacheRegion* cache_region) override;
   
-  std::string GetStoreName() override;
+  virtual int64_t GetCapacity()override { return capacity_; }
+  virtual int64_t GetFreeSize() override;
+  virtual int64_t GetUsedSize() override;
+  
+  virtual std::string GetStoreName() override;
 
-private:
-  int64_t total_size_;
+ private:
+  int64_t capacity_;
+  int64_t free_size_;
   int64_t used_size_;
 };
 

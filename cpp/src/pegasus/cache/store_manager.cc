@@ -35,11 +35,14 @@ Status StoreManager::Init() {
     std::shared_ptr<Store> store;
     if (it->first == "MEMORY") {
       store = std::shared_ptr<MemoryStore>(new MemoryStore(it->second));
-      stores_.insert(std::make_pair("MEMORY", store));
     } else if (it->first == "DCPMM") {
       store = std::shared_ptr<DCPMMStore>(new DCPMMStore(it->second));
-      stores_.insert(std::make_pair("DCPMM", store));
-    } 
+    } else {
+      return Status::Invalid("Invalid store type specified.");
+    }
+    
+    RETURN_IF_ERROR(store->Init());
+    stores_.insert(std::make_pair(it->first, store));
   }
   
   return Status::OK();
