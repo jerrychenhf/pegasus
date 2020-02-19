@@ -35,7 +35,7 @@ namespace pegasus {
     for(std::unordered_map<string, long>::iterator it = cache_stores_info.begin(); it != cache_stores_info.end(); ++it) {
       string store_type = it->first;
       long capacity = it->second;
-      std::shared_ptr<Store> store;
+      Store* store = NULL;
 
       if (store_type == "MEMORY") {
         store_type_ = Store::StoreType::MEMORY;
@@ -52,7 +52,7 @@ namespace pegasus {
     return Status::OK();
   }
 
-  Status CacheStoreManager::GetCacheStore(std::shared_ptr<CacheStore>* cache_store){
+  Status CacheStoreManager::GetCacheStore(CacheStore** cache_store){
     // MEMORY > DCPMM > FILE
     auto entry = cached_stores_.find("MEMORY");
     if (entry == cached_stores_.end()) {
@@ -60,9 +60,9 @@ namespace pegasus {
       ss << "Failed to get the cache store in cache store manager.";
        LOG(ERROR) << ss.str();
       return Status::UnknownError(ss.str());
-    } else {
-      *cache_store = entry->second;
-      return Status::OK();
     }
+    
+    *cache_store = entry->second.get();
+    return Status::OK();
   }
 } // namespace pegasus

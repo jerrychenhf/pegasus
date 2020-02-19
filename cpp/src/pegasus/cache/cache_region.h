@@ -30,16 +30,24 @@ class CacheRegion {
  public:
   CacheRegion();
   CacheRegion(uint8_t* address, long length, long occupied_size, arrow::ChunkedArray* chunked_array = NULL);
-  uint8_t* address() const;
-  long length() const;
-  long occupies_size() const;
-  arrow::ChunkedArray* chunked_array() const;
+  
   ~CacheRegion();
+  
+  void reset_address(uint8_t* address, int64_t length) {
+    address_ = address;
+    length_ = length;
+  }
+  
+  uint8_t* address() const;
+  int64_t length() const;
+  int64_t occupies_size() const;
+  arrow::ChunkedArray* chunked_array() const;
+  
 
  private:
   uint8_t* address_;
-  long length_;
-  long occupied_size_;
+  int64_t length_;
+  int64_t occupied_size_;
   arrow::ChunkedArray* chunked_array_; 
 };
 

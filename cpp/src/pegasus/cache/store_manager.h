@@ -24,7 +24,7 @@ class StoreManager {
   StoreManager();
   ~StoreManager();
 
-  Status GetStore(Store::StoreType cache_type, std::shared_ptr<Store>* store);
+  Status GetStore(Store::StoreType cache_type, Store** store);
 
  private:
   std::unordered_map<std::string, std::shared_ptr<Store>> stores_;

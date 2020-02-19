@@ -34,6 +34,8 @@ class CacheMemoryPool : public arrow::MemoryPool
 public:
   CacheMemoryPool(std::shared_ptr<CacheEngine> cache_engine);
   ~CacheMemoryPool();
+  
+  Status Create();
 
   arrow::Status Allocate(int64_t size, uint8_t **out) override;
   arrow::Status Reallocate(int64_t old_size, int64_t new_size, uint8_t **ptr) override;
@@ -46,12 +48,14 @@ public:
 
   std::string backend_name() const override;
 
-  Status GetStore(std::shared_ptr<Store>* store);
-
+  CacheStore* GetCacheStore() { return cache_store_; }
+  
   private:
     std::shared_ptr<CacheEngine> cache_engine_;
-    std::shared_ptr<Store> store_;
+    CacheStore* cache_store_;
     int64_t occupied_size;
+    
+    Status GetCacheRegion(int64_t size, CacheRegion* cache_region);
 };
 } // namespace pegasus
 

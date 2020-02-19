@@ -21,49 +21,37 @@
 using namespace std;
 
 namespace pegasus {
-  CacheStore::CacheStore(long capacity, std::shared_ptr<Store> store): capacity_(capacity), store_(store) {}
+  CacheStore::CacheStore(long capacity, Store* store): capacity_(capacity), store_(store) {}
   CacheStore::~CacheStore(){}
   
-  Status CacheStore::GetUsedSize(long& size) {
-    size = used_size_;
-    return Status::OK();
-  }
 
-  Status CacheStore::Allocate(long size, std::shared_ptr<CacheRegion>* cache_region) {
-    if (store_ != NULL) {
-      store_->Allocate(size, cache_region);
-      return Status::OK();
-    } else {
+  Status CacheStore::Allocate(long size, CacheRegion* cache_region) {
+    if (store_ == nullptr) {
       stringstream ss;
       ss << "Failed to allocate cache region in current cache store. Because the store is NULL";
       LOG(ERROR) << ss.str();
       return Status::UnknownError(ss.str());
     }
     
+    store_->Allocate(size, cache_region);
+    //TODO
+    // check status
+    
+    used_size_ += size;
+    return Status::OK();
   }
 
-  Status CacheStore::Free(std::shared_ptr<CacheRegion> cache_region) {
-    if (store_ != NULL) {
-      store_->Free(cache_region);
-      return Status::OK();
-    } else {
+  Status CacheStore::Free(CacheRegion* cache_region) {
+    if (store_ == nullptr) {
       stringstream ss;
       ss << "Failed to free cache region in current cache store. Because the store is NULL";
       LOG(ERROR) << ss.str();
       return Status::UnknownError(ss.str());
     }
-   
-  }
-
-  Status CacheStore::GetStore(std::shared_ptr<Store>* store) {
-    if (store_ != NULL) {
-      store = &store_;
-      return Status::OK();
-    } else {
-      stringstream ss;
-      ss << "Failed to get the store in current cache store. Because the store is NULL";
-      LOG(ERROR) << ss.str();
-      return Status::UnknownError(ss.str());
-    }
+    
+    int64_t size = cache_region->length();
+    store_->Free(cache_region);
+    used_size_ -= size;
+    return Status::OK();
   }
 } // namespace pegasus
