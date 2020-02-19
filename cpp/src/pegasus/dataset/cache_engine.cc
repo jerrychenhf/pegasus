@@ -21,23 +21,21 @@ using namespace std;
 
 namespace pegasus {
 
-LruCacheEngine::LruCacheEngine(int64_t capacity): cache_(capacity), cache_store_manager_(new CacheStoreManager()) {}
+LruCacheEngine::LruCacheEngine(int64_t capacity)
+  : cache_(capacity), cache_store_manager_(new CacheStoreManager()) {
+}
 
- Status LruCacheEngine::PutValue(std::string partition_path, int column_id,
+Status LruCacheEngine::Init() {
+  RETURN_IF_ERROR(cache_store_manager_->Init());
+  return Status::OK();
+}
+
+Status LruCacheEngine::PutValue(std::string partition_path, int column_id,
   std::shared_ptr<CacheRegion> cache_region, CacheStore* cache_store) {
   CacheEntryKey key = CacheEntryKey(partition_path, column_id);
   cache_.insert(key, cache_region, cache_store);
   return Status::OK();
- }
-
-LruCacheEngine::~LruCacheEngine() {}
-
-NonEvictionCacheEngine::NonEvictionCacheEngine() {}
-NonEvictionCacheEngine:: ~NonEvictionCacheEngine(){}
-
-Status NonEvictionCacheEngine::PutValue(std::string partition_path, int column_id,
- std::shared_ptr<CacheRegion> cache_region, CacheStore* cache_store) {
-  return Status::NotImplemented("Not yet implemented.");
 }
+
 
 } // namespace pegasus

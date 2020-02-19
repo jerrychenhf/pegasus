@@ -43,6 +43,8 @@ Status DatasetCacheEngineManager::Init() {
       cache_policy_type = "NonEvict";
       cache_engine = std::shared_ptr<CacheEngine>(new NonEvictionCacheEngine());
     }
+    
+    RETURN_IF_ERROR(cache_engine->Init());
     cached_engines_.insert(std::make_pair(cache_policy_type, cache_engine));
   }
   return Status::OK();

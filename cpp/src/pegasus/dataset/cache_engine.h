@@ -32,6 +32,7 @@ namespace pegasus {
 
 class CacheEngine {
  public:
+ virtual Status Init() = 0;
  virtual Status GetCacheStore(CacheStore** cache_store) = 0;
  virtual Status PutValue(std::string partition_path, int column_id,
   std::shared_ptr<CacheRegion> cache_region, CacheStore* cache_store) = 0;
@@ -83,9 +84,11 @@ class CacheEntryKey {
 class LruCacheEngine : public CacheEngine {
  public:
   LruCacheEngine(int64_t capacity);
-  ~LruCacheEngine();
+  ~LruCacheEngine() {};
   
-  Status GetCacheStore(CacheStore** cache_store) {
+  virtual Status Init();
+  
+  Status GetCacheStore(CacheStore** cache_store) override {
     return cache_store_manager_->GetCacheStore(cache_store);
   }
 
@@ -100,14 +103,20 @@ class LruCacheEngine : public CacheEngine {
 //NonEvictCacheEngine 
 class NonEvictionCacheEngine : public CacheEngine {
  public:
-  NonEvictionCacheEngine();
-  ~NonEvictionCacheEngine();
+  NonEvictionCacheEngine() {};
+  ~NonEvictionCacheEngine() {};
 
-  Status GetCacheStore(CacheStore** cache_store) {
+  virtual Status Init() {
+    return Status::OK();
+  }
+  
+  Status GetCacheStore(CacheStore** cache_store) override {
     return Status::NotImplemented("Not yet implemented.");
   }
   Status PutValue(std::string partition_path, int column_id,
-   std::shared_ptr<CacheRegion> cache_region, CacheStore* cache_store) override;
+   std::shared_ptr<CacheRegion> cache_region, CacheStore* cache_store) override {
+    return Status::NotImplemented("Not yet implemented.");
+  }
 };
 } // namespace pegasus                              
 
