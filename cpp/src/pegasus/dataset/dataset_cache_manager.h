@@ -57,6 +57,12 @@ class DatasetCacheManager {
     std::unique_ptr<rpc::FlightDataStream>* data_stream);
   std::vector<int> GetMissedColumnsIds(std::vector<int> col_ids,
     std::unordered_map<string, std::shared_ptr<CachedColumn>> cached_columns);
+    
+  Status RetrieveColumns(Identity* identity,
+    const std::vector<int>& col_ids,
+    std::shared_ptr<CacheEngine> cache_engine,
+    std::unordered_map<string, std::shared_ptr<CachedColumn>>& retrieved_columns
+    );
 };
 
 } // namespace pegasus

@@ -98,6 +98,22 @@ Status DatasetCacheManager::WrapDatasetStream(Identity* identity,
 Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(Identity* identity,
   std::vector<int> col_ids,
   std::unique_ptr<rpc::FlightDataStream>* data_stream) {
+     // Get cache engine.
+    std::shared_ptr<CacheEngine> cache_engine;
+    CacheEngine::CachePolicy cache_policy = GetCachePolicy(identity);
+    RETURN_IF_ERROR(cache_engine_manager_->GetCacheEngine(cache_policy, &cache_engine));
+
+    std::unordered_map<string, std::shared_ptr<CachedColumn>> retrieved_columns;
+    RETURN_IF_ERROR(RetrieveColumns(identity, col_ids, cache_engine, retrieved_columns));
+    
+    RETURN_IF_ERROR(AddNewColumns(identity, retrieved_columns));
+    return WrapDatasetStream(identity, data_stream);
+}
+
+Status DatasetCacheManager::RetrieveColumns(Identity* identity,
+  const std::vector<int>& col_ids,
+  std::shared_ptr<CacheEngine> cache_engine,
+  std::unordered_map<string, std::shared_ptr<CachedColumn>>& retrieved_columns) {
     std::string partition_path = identity->file_path();
     std::shared_ptr<StoragePlugin> storage_plugin;
 
@@ -105,12 +121,7 @@ Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(Identity* identity
     RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(partition_path, &storage_plugin));
     std::shared_ptr<HdfsReadableFile> file;
     RETURN_IF_ERROR(storage_plugin->GetReadableFile(partition_path, &file));
-
-     // Get cache engine.
-    std::shared_ptr<CacheEngine> cache_engine;
-    CacheEngine::CachePolicy cache_policy = GetCachePolicy(identity);
-    RETURN_IF_ERROR(cache_engine_manager_->GetCacheEngine(cache_policy, &cache_engine));
-
+    
     // Read the columns into ChunkArray.
     // Asumming the cache memory pool is only in same store.
     CacheMemoryPool* memory_pool = new CacheMemoryPool(cache_engine);
@@ -118,8 +129,7 @@ Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(Identity* identity
     memory_pool->GetStore(&memory_pool_store);
     parquet::ArrowReaderProperties properties(new parquet::ArrowReaderProperties());
     std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, memory_pool, properties));
-    std::unordered_map<string, std::shared_ptr<CachedColumn>> retrieved_columns;
-  
+    
     int64_t occupied_size = 0;
     for(auto iter = col_ids.begin(); iter != col_ids.end(); iter ++) {
       std::shared_ptr<arrow::ChunkedArray> chunked_out;
@@ -127,15 +137,15 @@ Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(Identity* identity
       arrow::ChunkedArray* chunked_array = chunked_out.get();
       int64_t column_size = memory_pool->bytes_allocated() - occupied_size;
       occupied_size = memory_pool->bytes_allocated() + occupied_size;
-      std::shared_ptr<CacheRegion> cache_region = std::shared_ptr<CacheRegion>(new CacheRegion(0, column_size, column_size, chunked_array));
+      std::shared_ptr<CacheRegion> cache_region = std::shared_ptr<CacheRegion>(
+        new CacheRegion(0, column_size, column_size, chunked_array));
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, *iter, cache_region));
       retrieved_columns.insert(std::make_pair(std::to_string(*iter), column));
       RETURN_IF_ERROR(cache_engine->PutValue(partition_path, *iter, cache_region, memory_pool_store));
     }
     
-    RETURN_IF_ERROR(AddNewColumns(identity, retrieved_columns));
-    return WrapDatasetStream(identity, data_stream);
+    return Status::OK();
 }
 
 std::vector<int> DatasetCacheManager::GetMissedColumnsIds(std::vector<int> col_ids,
