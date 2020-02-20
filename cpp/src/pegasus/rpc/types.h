@@ -163,8 +163,23 @@ struct PEGASUS_RPC_EXPORT BasicAuth {
   static arrow::Status Serialize(const BasicAuth& basic_auth, std::string* out);
 };
 
+struct PEGASUS_RPC_EXPORT Option {
+  std::string key;
+  std::string value;
+
+  bool Equals(const Option& other) const;
+
+  friend bool operator==(const Option& left, const Option& right) {
+    return left.Equals(right);
+  }
+  friend bool operator!=(const Option& left, const Option& right) {
+    return !(left == right);
+  }
+};
+
 /// \brief A request to retrieve or generate a dataset
 struct PEGASUS_RPC_EXPORT FlightDescriptor {
+
   enum DescriptorType {
     UNKNOWN = 0,  /// Unused
     PATH = 1,     /// Named path identifying a dataset
@@ -181,6 +196,8 @@ struct PEGASUS_RPC_EXPORT FlightDescriptor {
   /// List of strings identifying a particular dataset. Should only be defined
   /// when type is PATH
   std::vector<std::string> path;
+
+  std::vector<Option> options;
 
   bool Equals(const FlightDescriptor& other) const;
 

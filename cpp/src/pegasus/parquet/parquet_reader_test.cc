@@ -59,9 +59,9 @@ TEST(ParquetReaderTest, Unit) {
   ASSERT_EQ(144000, table1->num_rows());
 
   std::shared_ptr<arrow::Table> table2;
-  std::vector<int> column_indice;
-  column_indice.push_back(0);
-  ASSERT_OK(parquet_reader->ReadParquetTable(column_indice, &table2));
+  std::vector<int> column_indices;
+  column_indices.push_back(0);
+  ASSERT_OK(parquet_reader->ReadParquetTable(column_indices, &table2));
   ASSERT_NE(nullptr, table2);
   ASSERT_EQ(1, table2->num_columns());
   ASSERT_EQ(144000, table2->num_rows());

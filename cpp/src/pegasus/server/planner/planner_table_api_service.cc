@@ -79,8 +79,9 @@ arrow::Status PlannerTableAPIService::ListFlights(const rpc::ServerCallContext& 
 /// \param[in] request may be null
 /// \param[out] info the returned flight info provider
 /// \return Status
-arrow::Status PlannerTableAPIService::GetFlightInfo(const rpc::ServerCallContext& context, const rpc::FlightDescriptor& request,
-                       std::unique_ptr<rpc::FlightInfo>* out) {
+arrow::Status PlannerTableAPIService::GetFlightInfo(const rpc::ServerCallContext& context,
+                                                    const rpc::FlightDescriptor& request,
+                                                    std::unique_ptr<rpc::FlightInfo>* out) {
 
   /*if (request.type == FlightDescriptor::PATH) {
     std::vector<std::string> request_path = request.path;
@@ -97,7 +98,6 @@ arrow::Status PlannerTableAPIService::GetFlightInfo(const rpc::ServerCallContext
   if (request.type == rpc::FlightDescriptor::CMD) {
     std::string request_table_name = request.cmd;
     auto parttftrs = std::make_shared<std::vector<Filter>>();
-    // TODO: parse sql cmd here?
 
     Status st = dataset_service_->GetFlightInfo(request_table_name, parttftrs.get(), out);
     if (!st.ok()) {

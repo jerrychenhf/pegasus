@@ -56,8 +56,18 @@ void AssertEqual(const ActionType& expected, const ActionType& actual) {
   ASSERT_EQ(expected.description, actual.description);
 }
 
+void AssertEqual(const Option& expected, const Option& actual) {
+  ASSERT_EQ(expected, actual);
+}
+
 void AssertEqual(const FlightDescriptor& expected, const FlightDescriptor& actual) {
-  ASSERT_TRUE(expected.Equals(actual));
+  ASSERT_EQ(expected.type, actual.type);
+  ASSERT_EQ(expected.cmd, actual.cmd);
+  ASSERT_EQ(expected.path, actual.path);
+  ASSERT_EQ(expected.options.size(), actual.options.size());
+  for (size_t i = 0; i < expected.options.size(); ++i) {
+    AssertEqual(expected.options[i], actual.options[i]);
+  }
 }
 
 void AssertEqual(const Ticket& expected, const Ticket& actual) {
@@ -124,18 +134,27 @@ TEST(TestFlightDescriptor, Basics) {
 // This tests the internal protobuf types which don't get exported in the Flight DLL.
 #ifndef _WIN32
 TEST(TestFlightDescriptor, ToFromProto) {
-  FlightDescriptor descr_test;
-  pb::FlightDescriptor pb_descr;
-
+  FlightDescriptor descr_test1;
+  pb::FlightDescriptor pb_descr1;
   FlightDescriptor descr1{FlightDescriptor::PATH, "", {"foo", "bar"}};
-  ASSERT_OK(internal::ToProto(descr1, &pb_descr));
-  ASSERT_OK(internal::FromProto(pb_descr, &descr_test));
-  AssertEqual(descr1, descr_test);
+  ASSERT_OK(internal::ToProto(descr1, &pb_descr1));
+  ASSERT_OK(internal::FromProto(pb_descr1, &descr_test1));
+  AssertEqual(descr1, descr_test1);
 
+  FlightDescriptor descr_test2;
+  pb::FlightDescriptor pb_descr2;
   FlightDescriptor descr2{FlightDescriptor::CMD, "command", {}};
-  ASSERT_OK(internal::ToProto(descr2, &pb_descr));
-  ASSERT_OK(internal::FromProto(pb_descr, &descr_test));
-  AssertEqual(descr2, descr_test);
+  ASSERT_OK(internal::ToProto(descr2, &pb_descr2));
+  ASSERT_OK(internal::FromProto(pb_descr2, &descr_test2));
+  AssertEqual(descr2, descr_test2);
+
+  FlightDescriptor descr_test3;
+  pb::FlightDescriptor pb_descr3;
+  std::vector<Option> options{Option{"key1", "value1"}, Option{"key2", "value2"}};
+  FlightDescriptor descr3{FlightDescriptor::PATH, "", {"foo", "bar"}, options};
+  ASSERT_OK(internal::ToProto(descr3, &pb_descr3));
+  ASSERT_OK(internal::FromProto(pb_descr3, &descr_test3));
+  AssertEqual(descr3, descr_test3);
 }
 #endif
 

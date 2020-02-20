@@ -277,6 +277,20 @@ void ToProto(const FlightEndpoint& endpoint, pb::FlightEndpoint* pb_endpoint) {
   }
 }
 
+// Option
+
+arrow::Status FromProto(const pb::Option& pb_option, Option* option) {
+  option->key = pb_option.key();
+  option->value = pb_option.value();
+  return arrow::Status::OK();
+}
+
+arrow::Status ToProto(const Option& option, pb::Option* pb_option) {
+  pb_option->set_key(option.key);
+  pb_option->set_value(option.value);
+  return arrow::Status::OK();
+}
+
 // FlightDescriptor
 
 arrow::Status FromProto(const pb::FlightDescriptor& pb_descriptor,
@@ -293,6 +307,10 @@ arrow::Status FromProto(const pb::FlightDescriptor& pb_descriptor,
   } else {
     return arrow::Status::Invalid("Client sent UNKNOWN descriptor type");
   }
+  descriptor->options.resize(pb_descriptor.option_size());
+  for (int i = 0; i < pb_descriptor.option_size(); ++i) {
+    RETURN_NOT_OK(FromProto(pb_descriptor.option(i), &descriptor->options[i]));
+  }
   return arrow::Status::OK();
 }
 
@@ -305,6 +323,10 @@ arrow::Status ToProto(const FlightDescriptor& descriptor, pb::FlightDescriptor* 
   } else {
     pb_descriptor->set_type(pb::FlightDescriptor::CMD);
     pb_descriptor->set_cmd(descriptor.cmd);
+  }
+  pb_descriptor->clear_option();
+  for (const Option& option : descriptor.options) {
+    RETURN_NOT_OK(ToProto(option, pb_descriptor->add_option()));
   }
   return arrow::Status::OK();
 }
