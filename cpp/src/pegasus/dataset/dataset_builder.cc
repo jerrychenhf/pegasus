@@ -20,7 +20,7 @@
 #include "pegasus/dataset/partition.h"
 #include "pegasus/parquet/parquet_metadata.h"
 #include "pegasus/runtime/planner_exec_env.h"
-#include "pegasus/util/consistent_hashing.h"
+#include "consistent_hashing.h"
 
 namespace pegasus {
 

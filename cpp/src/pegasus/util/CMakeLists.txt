@@ -24,7 +24,7 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/util")
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/util")
 
 add_library(Util
-  consistent_hashing.cc
+#  consistent_hashing.cc
   conhash.c
   conhash_inter.c
   conhash_util.c

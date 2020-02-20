@@ -23,7 +23,7 @@
 #include "arrow/util/uri.h"
 
 #include "storage/storage_plugin.h"
-#include "util/consistent_hashing.h"
+#include "dataset/consistent_hashing.h"
 
 #include <boost/algorithm/string.hpp>
 

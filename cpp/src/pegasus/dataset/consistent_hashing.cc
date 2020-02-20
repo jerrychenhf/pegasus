@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "util/consistent_hashing.h"
+#include "consistent_hashing.h"
 #include "runtime/planner_exec_env.h"
 #include "server/planner/worker_manager.h"
 
@@ -51,7 +51,7 @@ void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<std::
 		//Status WorkerManager::GetWorkerRegistrations(std::vector<std::shared_ptr<WorkerRegistration>>& registrations)
 		std::vector<std::shared_ptr<WorkerRegistration>> wregs;
 		worker_manager->GetWorkerRegistrations(wregs);
-		for (auto it:wregs)
+		for (auto &it:wregs)
 		{
 			validlocations_->push_back(std::make_shared<Location>(it->address()));
 		}
@@ -107,7 +107,8 @@ Location ConsistentHashRing::GetLocation(Identity identity)
 	return lcn;
 }
 
-void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<std::vector<Location>> vectloc)
+void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, \
+								std::shared_ptr<std::vector<Location>> vectloc)
 {
 //	std::vector<Location> vectloc;
 	const struct node_s* pnode;

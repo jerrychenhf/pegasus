@@ -26,7 +26,7 @@
 #include "catalog/spark_catalog.h"
 #include "dataset/dataset_service.h"
 #include "dataset/flightinfo_builder.h"
-#include "util/consistent_hashing.h"
+#include "consistent_hashing.h"
 
 namespace pegasus {
 
