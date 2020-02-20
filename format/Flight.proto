@@ -293,7 +293,8 @@ message Location {
  * portion of a stream.
  */
 message Ticket {
-  bytes ticket = 1;
+  bytes partition_identity = 1;
+  repeated int32 column_indice = 2;
 }
 
 /*

@@ -32,7 +32,7 @@ class RequestContext {
 
   std::string get_partition_path();
   std::string get_format();
-  std::vector<int> get_conlumn_index();
+  std::vector<int> get_conlumn_indices();
 
   private:
    std::string partition_path;
