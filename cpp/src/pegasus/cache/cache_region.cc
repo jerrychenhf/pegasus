@@ -27,15 +27,11 @@ CacheRegion::CacheRegion()
 }
 
 CacheRegion::CacheRegion(const std::shared_ptr<CacheMemoryPool>& memory_pool,
-  arrow::ChunkedArray* chunked_array, int64_t size)
+  const std::shared_ptr<arrow::ChunkedArray>& chunked_array, int64_t size)
   : memory_pool_(memory_pool), chunked_array_(chunked_array), size_(size) {
 }
 
 CacheRegion::~CacheRegion () {
- if (chunked_array_ != nullptr) {
-  delete chunked_array_;
-  chunked_array_ = nullptr;
- }
 }  
 
 int64_t CacheRegion::size() const {
@@ -43,7 +39,7 @@ int64_t CacheRegion::size() const {
 }
 
 arrow::ChunkedArray* CacheRegion::chunked_array() const {
-    return chunked_array_;
+    return chunked_array_.get();
 }
 
 } // namespace pegasus

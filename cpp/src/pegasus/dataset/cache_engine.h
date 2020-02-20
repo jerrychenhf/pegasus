@@ -34,9 +34,7 @@ class CacheEngine {
  public:
  virtual Status Init() = 0;
  virtual Status GetCacheStore(CacheStore** cache_store) = 0;
- virtual Status PutValue(std::string partition_path, int column_id,
-   CacheRegion* cache_region, StoreRegion* store_region,
-    CacheStore* cache_store) = 0;
+ virtual Status PutValue(std::string partition_path, int column_id) = 0;
 
   enum CachePolicy {
     LRU,
@@ -84,25 +82,7 @@ class CacheEntryKey {
 
 class CacheEntryValue {
   public:
-    CacheEntryValue(CacheRegion* cache_region, StoreRegion* store_region, CacheStore* cache_store):
-     cache_region_(cache_region), store_region_(store_region), cache_store_(cache_store) {}
-
-    CacheRegion* cache_region() {
-      return cache_region_;
-    }
-
-    StoreRegion* store_region() {
-      return store_region_;
-    }
-
-    CacheStore* cache_store() {
-      return cache_store_;
-    }
-
-  private:
-    CacheRegion* cache_region_;
-    StoreRegion* store_region_;
-    CacheStore* cache_store_;
+    CacheEntryValue() {}
 };
 
 class LruCacheEngine : public CacheEngine {
@@ -116,9 +96,7 @@ class LruCacheEngine : public CacheEngine {
     return cache_store_manager_->GetCacheStore(cache_store);
   }
 
-  Status PutValue(std::string partition_path, int column_id,
-   CacheRegion* cache_region, StoreRegion* store_region,
-    CacheStore* cache_store) override;
+  Status PutValue(std::string partition_path, int column_id) override;
 
  public:
   std::shared_ptr<CacheStoreManager> cache_store_manager_;
@@ -138,9 +116,7 @@ class NonEvictionCacheEngine : public CacheEngine {
   Status GetCacheStore(CacheStore** cache_store) override {
     return Status::NotImplemented("Not yet implemented.");
   }
-  Status PutValue(std::string partition_path, int column_id,
-   CacheRegion* cache_region, StoreRegion* store_region,
-    CacheStore* cache_store) override {
+  Status PutValue(std::string partition_path, int column_id) override {
     return Status::NotImplemented("Not yet implemented.");
   }
 };

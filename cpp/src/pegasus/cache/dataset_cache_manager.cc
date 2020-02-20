@@ -143,7 +143,7 @@ Status DatasetCacheManager::RetrieveColumns(Identity* identity,
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, colId, cache_region));
       retrieved_columns.insert(std::make_pair(std::to_string(*iter), column));
-      RETURN_IF_ERROR(cache_engine->PutValue(partition_path, colId));
+      RETURN_IF_ERROR(cache_engine->PutValue(partition_path, colId, cache_region, nullptr, cache_store));
     }
     
     return Status::OK();

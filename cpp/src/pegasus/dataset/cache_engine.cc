@@ -30,12 +30,9 @@ Status LruCacheEngine::Init() {
   return Status::OK();
 }
 
-Status LruCacheEngine::PutValue(std::string partition_path, int column_id,
-   CacheRegion* cache_region, StoreRegion* store_region,
-    CacheStore* cache_store) {
+Status LruCacheEngine::PutValue(std::string partition_path, int column_id) {
   CacheEntryKey key = CacheEntryKey(partition_path, column_id);
-  CacheEntryValue* value = new CacheEntryValue(cache_region, store_region, cache_store);
-  cache_.insert(key, value);
+  cache_.insert(key, nullptr);
   return Status::OK();
 }
 
