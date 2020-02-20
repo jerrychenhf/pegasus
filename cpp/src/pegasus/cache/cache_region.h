@@ -18,6 +18,8 @@
 #ifndef PEGASUS_MEMORY_BLOCK_HOLDER_H
 #define PEGASUS_MEMORY_BLOCK_HOLDER_H
 
+#include "dataset/cache_store.h"
+
 #include <string>
 #include "arrow/table.h"
 
@@ -37,7 +39,7 @@ class CacheRegion {
   
 
  private:
- int64_t size_;
+  int64_t size_;
   arrow::ChunkedArray* chunked_array_; 
 };
 

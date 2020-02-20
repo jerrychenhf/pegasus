@@ -86,7 +86,7 @@ Status DatasetCacheManager::WrapDatasetStream(Identity* identity,
   std::shared_ptr<Table> table;
   for(auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
     std::shared_ptr<CachedColumn> cache_column = iter->second;
-    std::shared_ptr<CacheRegion> cache_region = cache_column->cache_region_;
+    CacheRegion* cache_region = cache_column->cache_region_;
     std::shared_ptr<arrow::ChunkedArray> chunked_out(cache_region->chunked_array());
     RETURN_IF_ERROR(Status::fromArrowStatus(Table::FromChunkedStructArray(chunked_out, &table)));
   }
@@ -138,12 +138,11 @@ Status DatasetCacheManager::RetrieveColumns(Identity* identity,
       arrow::ChunkedArray* chunked_array = chunked_out.get();
       int64_t column_size = memory_pool->bytes_allocated() - occupied_size;
       occupied_size = memory_pool->bytes_allocated() + occupied_size;
-      std::shared_ptr<CacheRegion> cache_region = std::shared_ptr<CacheRegion>(
-        new CacheRegion(chunked_array, column_size));
+      CacheRegion* cache_region = new CacheRegion(chunked_array, column_size);
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, *iter, cache_region));
       retrieved_columns.insert(std::make_pair(std::to_string(*iter), column));
-      RETURN_IF_ERROR(cache_engine->PutValue(partition_path, *iter, cache_region, cache_store));
+      RETURN_IF_ERROR(cache_engine->PutValue(partition_path, *iter, cache_region, nullptr, cache_store));
     }
     
     return Status::OK();

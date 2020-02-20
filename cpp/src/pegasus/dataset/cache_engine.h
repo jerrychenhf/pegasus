@@ -35,7 +35,8 @@ class CacheEngine {
  virtual Status Init() = 0;
  virtual Status GetCacheStore(CacheStore** cache_store) = 0;
  virtual Status PutValue(std::string partition_path, int column_id,
-  std::shared_ptr<CacheRegion> cache_region, CacheStore* cache_store) = 0;
+   CacheRegion* cache_region, StoreRegion* store_region,
+    CacheStore* cache_store) = 0;
 
   enum CachePolicy {
     LRU,
@@ -81,6 +82,29 @@ class CacheEntryKey {
   size_t hash_code_;
 };
 
+class CacheEntryValue {
+  public:
+    CacheEntryValue(CacheRegion* cache_region, StoreRegion* store_region, CacheStore* cache_store):
+     cache_region_(cache_region), store_region_(store_region), cache_store_(cache_store_) {}
+
+    CacheRegion* cache_region() {
+      return cache_region_;
+    }
+
+    StoreRegion* store_region() {
+      return store_region_;
+    }
+
+    CacheStore* cache_store() {
+      return cache_store_;
+    }
+
+  private:
+    CacheRegion* cache_region_;
+    StoreRegion* store_region_;
+    CacheStore* cache_store_;
+};
+
 class LruCacheEngine : public CacheEngine {
  public:
   LruCacheEngine(int64_t capacity);
@@ -93,11 +117,12 @@ class LruCacheEngine : public CacheEngine {
   }
 
   Status PutValue(std::string partition_path, int column_id,
-   std::shared_ptr<CacheRegion> cache_region, CacheStore* cache_store) override;
+   CacheRegion* cache_region, StoreRegion* store_region,
+    CacheStore* cache_store) override;
 
  public:
   std::shared_ptr<CacheStoreManager> cache_store_manager_;
-  LruCache<CacheEntryKey, std::shared_ptr<CacheRegion>> cache_;
+  LruCache<CacheEntryKey, CacheEntryValue*> cache_;
 };
 
 //NonEvictCacheEngine 
@@ -114,7 +139,8 @@ class NonEvictionCacheEngine : public CacheEngine {
     return Status::NotImplemented("Not yet implemented.");
   }
   Status PutValue(std::string partition_path, int column_id,
-   std::shared_ptr<CacheRegion> cache_region, CacheStore* cache_store) override {
+   CacheRegion* cache_region, StoreRegion* store_region,
+    CacheStore* cache_store) override {
     return Status::NotImplemented("Not yet implemented.");
   }
 };

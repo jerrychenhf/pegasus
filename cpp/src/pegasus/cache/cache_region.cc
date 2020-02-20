@@ -23,7 +23,8 @@ namespace pegasus {
 
 CacheRegion::CacheRegion(){}
 
-CacheRegion::CacheRegion(arrow::ChunkedArray* chunked_array, int64_t _SIZE_T): chunked_array_(chunked_array), size_(size_) {}
+CacheRegion::CacheRegion(arrow::ChunkedArray* chunked_array, int64_t size):
+ chunked_array_(chunked_array), size_(size_) {}
 
 CacheRegion::~CacheRegion () {}  
 

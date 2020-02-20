@@ -22,7 +22,6 @@
 
 #include "common/status.h"
 #include "cache/store.h"
-#include "cache/cache_region.h"
 
 namespace pegasus {
 
