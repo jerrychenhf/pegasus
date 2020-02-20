@@ -46,21 +46,21 @@ Status ParquetReader::ReadParquetTable(const std::vector<int> column_indices, st
   return Status::OK();
 }
 
-Status ParquetReader::ReadColumnChunk(int column_index, std::shared_ptr<arrow::ChunkedArray>* chunked_out) {
+Status ParquetReader::ReadColumnChunk(int column_indice, std::shared_ptr<arrow::ChunkedArray>* chunked_out) {
 
-  arrow::Status arrowStatus = file_reader_->ReadColumn(column_index, chunked_out);
+  arrow::Status arrowStatus = file_reader_->ReadColumn(column_indice, chunked_out);
   Status status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);
   return Status::OK();
 }
 
-Status ParquetReader::ReadColumnChunk(int column_index, std::shared_ptr<arrow::ChunkedArray>* chunked_out, int size) {
+Status ParquetReader::ReadColumnChunk(int column_indice, std::shared_ptr<arrow::ChunkedArray>* chunked_out, int size) {
 
   std::unique_ptr<parquet::arrow::ColumnReader> column_reader;
 
   arrow::Status arrowStatus;
   Status status;
-  arrowStatus = file_reader_->GetColumn(column_index, &column_reader);
+  arrowStatus = file_reader_->GetColumn(column_indice, &column_reader);
   status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);
 

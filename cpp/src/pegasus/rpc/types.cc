@@ -148,7 +148,10 @@ arrow::Status FlightDescriptor::Deserialize(const std::string& serialized,
   return internal::FromProto(pb_descriptor, out);
 }
 
-bool Ticket::Equals(const Ticket& other) const { return ticket == other.ticket; }
+bool Ticket::Equals(const Ticket& other) const {
+  return partition_identity == other.partition_identity
+        && column_indices == other.column_indices; 
+}
 
 arrow::Status Ticket::SerializeToString(std::string* out) const {
   pb::Ticket pb_ticket;

@@ -71,7 +71,7 @@ void AssertEqual(const FlightDescriptor& expected, const FlightDescriptor& actua
 }
 
 void AssertEqual(const Ticket& expected, const Ticket& actual) {
-  ASSERT_EQ(expected.ticket, actual.ticket);
+  ASSERT_EQ(expected.partition_identity, actual.partition_identity);
 }
 
 void AssertEqual(const Location& expected, const Location& actual) {
@@ -208,7 +208,7 @@ TEST(TestFlight, RoundTripTypes) {
   Ticket ticket_deserialized;
   ASSERT_OK(ticket.SerializeToString(&ticket_serialized));
   ASSERT_OK(Ticket::Deserialize(ticket_serialized, &ticket_deserialized));
-  ASSERT_EQ(ticket.ticket, ticket_deserialized.ticket);
+  ASSERT_EQ(ticket.partition_identity, ticket_deserialized.partition_identity);
 
   FlightDescriptor desc = FlightDescriptor::Command("select * from foo;");
   std::string desc_serialized;

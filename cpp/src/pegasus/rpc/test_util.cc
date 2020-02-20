@@ -140,12 +140,12 @@ bool TestServer::IsRunning() { return server_process_->running(); }
 int TestServer::port() const { return port_; }
 
 arrow::Status GetBatchForFlight(const Ticket& ticket, std::shared_ptr<arrow::RecordBatchReader>* out) {
-  if (ticket.ticket == "ticket-ints-1") {
+  if (ticket.partition_identity == "ticket-ints-1") {
     BatchVector batches;
     RETURN_NOT_OK(ExampleIntBatches(&batches));
     *out = std::make_shared<BatchIterator>(batches[0]->schema(), batches);
     return arrow::Status::OK();
-  } else if (ticket.ticket == "ticket-dicts-1") {
+  } else if (ticket.partition_identity == "ticket-dicts-1") {
     BatchVector batches;
     RETURN_NOT_OK(ExampleDictBatches(&batches));
     *out = std::make_shared<BatchIterator>(batches[0]->schema(), batches);
@@ -179,10 +179,10 @@ class FlightTestServer : public FlightServerBase {
   arrow::Status DoGet(const ServerCallContext& context, const Ticket& request,
                std::unique_ptr<FlightDataStream>* data_stream) override {
     // Test for ARROW-5095
-    if (request.ticket == "ARROW-5095-fail") {
+    if (request.partition_identity == "ARROW-5095-fail") {
       return arrow::Status::UnknownError("Server-side error");
     }
-    if (request.ticket == "ARROW-5095-success") {
+    if (request.partition_identity == "ARROW-5095-success") {
       return arrow::Status::OK();
     }
 

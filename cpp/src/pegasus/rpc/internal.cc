@@ -235,12 +235,19 @@ arrow::Status ToProto(const BasicAuth& basic_auth, pb::BasicAuth* pb_basic_auth)
 // Ticket
 
 arrow::Status FromProto(const pb::Ticket& pb_ticket, Ticket* ticket) {
-  ticket->ticket = pb_ticket.ticket();
+  ticket->partition_identity = pb_ticket.partition_identity();
+  ticket->column_indices.reserve(pb_ticket.column_indice_size());
+  for (int i = 0; i < pb_ticket.column_indice_size(); ++i) {
+    ticket->column_indices.emplace_back(pb_ticket.column_indice(i));
+  }
   return arrow::Status::OK();
 }
 
 void ToProto(const Ticket& ticket, pb::Ticket* pb_ticket) {
-  pb_ticket->set_ticket(ticket.ticket);
+  pb_ticket->set_partition_identity(ticket.partition_identity);
+  for (int32_t column_indice : ticket.column_indices) {
+    pb_ticket->add_column_indice(column_indice);
+  }
 }
 
 // FlightData
