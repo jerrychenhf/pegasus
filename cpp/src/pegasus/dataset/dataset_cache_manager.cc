@@ -124,7 +124,7 @@ Status DatasetCacheManager::RetrieveColumns(Identity* identity,
     
     // Read the columns into ChunkArray.
     // Asumming the cache memory pool is only in same store.
-    std::unique_ptr<CacheMemoryPool> memory_pool(new CacheMemoryPool(cache_engine));
+    std::shared_ptr<CacheMemoryPool> memory_pool(new CacheMemoryPool(cache_engine));
     RETURN_IF_ERROR(memory_pool->Create());
     
     CacheStore* cache_store = memory_pool->GetCacheStore();
@@ -138,7 +138,8 @@ Status DatasetCacheManager::RetrieveColumns(Identity* identity,
       arrow::ChunkedArray* chunked_array = chunked_out.get();
       int64_t column_size = memory_pool->bytes_allocated() - occupied_size;
       occupied_size = memory_pool->bytes_allocated() + occupied_size;
-      CacheRegion* cache_region = new CacheRegion(chunked_array, column_size);
+      CacheRegion* cache_region = new CacheRegion(memory_pool,
+        chunked_array, column_size);
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, *iter, cache_region));
       retrieved_columns.insert(std::make_pair(std::to_string(*iter), column));

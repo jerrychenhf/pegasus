@@ -15,8 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_MEMORY_BLOCK_HOLDER_H
-#define PEGASUS_MEMORY_BLOCK_HOLDER_H
+#ifndef PEGASUS_CACHE_REGION_H
+#define PEGASUS_CACHE_REGION_H
 
 #include "dataset/cache_store.h"
 
@@ -27,22 +27,30 @@ using namespace std;
 using namespace arrow;
 
 namespace pegasus {
+  
+class CacheMemoryPool;
 
 class CacheRegion {
  public:
   CacheRegion();
-  CacheRegion(arrow::ChunkedArray* chunked_array, int64_t size);
+  CacheRegion(const std::shared_ptr<CacheMemoryPool>& memory_pool,
+    arrow::ChunkedArray* chunked_array, int64_t size);
   
   ~CacheRegion();
+  
   int64_t size() const;
   arrow::ChunkedArray* chunked_array() const;
-  
-
  private:
+  // the pool object associated to the chunked array
+  // use shared ptr to managed the life time
+  std::shared_ptr<CacheMemoryPool> memory_pool_;
+  
+  // IMPORTANT: We own the life time of ChunkedArray
+  // delete it in the constructor
+  arrow::ChunkedArray* chunked_array_;
   int64_t size_;
-  arrow::ChunkedArray* chunked_array_; 
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_MEMORY_BLOCK_HOLDER_H
+#endif  // PEGASUS_CACHE_REGION_H

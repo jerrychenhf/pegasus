@@ -34,9 +34,13 @@ class CachedColumn {
   explicit CachedColumn(string partition_path, int column_id, CacheRegion* cache_region) :
   partition_path_(partition_path), column_id_(column_id), cache_region_(cache_region) {}
 
+  ~CachedColumn();
  public:
   string partition_path_;
   int column_id_;
+  
+  // IMPORTANT: We owns the CacheRegion pointer
+  // and delete it in destructor
   CacheRegion* cache_region_;
 };
 

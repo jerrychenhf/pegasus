@@ -85,7 +85,7 @@ class CacheEntryKey {
 class CacheEntryValue {
   public:
     CacheEntryValue(CacheRegion* cache_region, StoreRegion* store_region, CacheStore* cache_store):
-     cache_region_(cache_region), store_region_(store_region), cache_store_(cache_store_) {}
+     cache_region_(cache_region), store_region_(store_region), cache_store_(cache_store) {}
 
     CacheRegion* cache_region() {
       return cache_region_;

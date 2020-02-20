@@ -21,6 +21,13 @@
 using namespace pegasus;
 
 namespace pegasus {
+  
+CachedColumn::~CachedColumn() {
+  if(cache_region_ != nullptr) {
+    delete cache_region_;
+    cache_region_ = nullptr;
+  }
+}
 
 DatasetCacheBlockManager::DatasetCacheBlockManager() {
 }

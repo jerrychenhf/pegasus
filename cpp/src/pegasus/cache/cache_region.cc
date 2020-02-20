@@ -18,15 +18,25 @@
 /// \brief Data structure providing an opaque identifier or credential to use
 /// when requesting a data stream with the DoGet RPC
 #include "cache/cache_region.h"
+#include "cache/cache_memory_pool.h"
 
 namespace pegasus {
 
-CacheRegion::CacheRegion(){}
+CacheRegion::CacheRegion()
+  : memory_pool_(nullptr), chunked_array_(nullptr), size_(0){
+}
 
-CacheRegion::CacheRegion(arrow::ChunkedArray* chunked_array, int64_t size):
- chunked_array_(chunked_array), size_(size_) {}
+CacheRegion::CacheRegion(const std::shared_ptr<CacheMemoryPool>& memory_pool,
+  arrow::ChunkedArray* chunked_array, int64_t size)
+  : memory_pool_(memory_pool), chunked_array_(chunked_array), size_(size) {
+}
 
-CacheRegion::~CacheRegion () {}  
+CacheRegion::~CacheRegion () {
+ if (chunked_array_ != nullptr) {
+  delete chunked_array_;
+  chunked_array_ = nullptr;
+ }
+}  
 
 int64_t CacheRegion::size() const {
     return size_;
