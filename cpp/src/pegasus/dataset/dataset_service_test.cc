@@ -24,9 +24,38 @@
 #include "dataset/dataset_service.h"
 #include "pegasus/runtime/exec_env.h"
 #include "pegasus/dataset/dataset_distributor.h"
+#include "consistent_hashing.h"
+
 
 namespace pegasus
 {
+
+TEST(DatasetServiceTest, ConHashBasic)
+{
+  // 
+  auto distributor = std::make_shared<ConsistentHashRing>();
+
+  // generate validloc and update the distributor
+  std::shared_ptr<Location> loc1 = std::make_shared<Location>();
+  Location::ForGrpcTcp("localhost", 10086, loc1.get());
+  std::shared_ptr<std::vector<std::shared_ptr<Location>>> validloc = \
+                          std::make_shared<std::vector<std::shared_ptr<Location>>>();
+  validloc->push_back(loc1);
+  distributor->PrepareValidLocations(validloc);
+
+  // setup the distribution engine
+  distributor->SetupDist();
+
+  // generate partitions
+  auto partitions = std::make_shared<std::vector<Partition>>();
+  // TODO
+
+  // get location for each partition and assign it
+  distributor->GetDistLocations(partitions);
+
+  // check the correctness
+
+}
 
 TEST(DatasetServiceTest, DataSetStoreBasic)
 {
@@ -36,7 +65,7 @@ TEST(DatasetServiceTest, DataSetStoreBasic)
   auto dataset_store_test = std::unique_ptr<DataSetStore>(new DataSetStore);
 //  std::cout << "addressof dataset_store_test: " << std::addressof(dataset_store_test) << std::endl;
 //  std::cout << "dataset_store_test.get(): " << dataset_store_test.get() << std::endl;
-  std::string partition_filepath = "hostnameplusfilepath1";
+  std::string test_dataset_path = "hostnameplusfolderpath";
   std::shared_ptr<DataSet> pds = nullptr;
 
   // create and insert a dataset
@@ -47,7 +76,7 @@ TEST(DatasetServiceTest, DataSetStoreBasic)
 //  std::cout << "addressof dsbuilder: " << std::addressof(dsbuilder) << std::endl;
 //  std::cout << "dsbuilder.get(): " << dsbuilder.get() << std::endl;
   // Status DataSetBuilder::BuildDataset(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy)
-  st = dsbuilder->BuildDataset(partition_filepath, &pds, CONHASH);
+  st = dsbuilder->BuildDataset(test_dataset_path, &pds, CONHASH);
   ASSERT_OK(st);
   //Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset)
   st = dataset_store_test->InsertDataSet(pds);
@@ -55,7 +84,7 @@ TEST(DatasetServiceTest, DataSetStoreBasic)
 
   // get the dataset
   //Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset)
-  st = dataset_store_test->GetDataSet(partition_filepath, &pds);
+  st = dataset_store_test->GetDataSet(test_dataset_path, &pds);
   ASSERT_OK(st);
 
   // check the dataset
@@ -75,11 +104,11 @@ TEST(DatasetServiceTest, DatasetService)
 //  std::cout << "addressof dataset_service_->dataset_store_->planner_metadata_: "
 //            << std::addressof(dataset_service_->dataset_store_->planner_metadata_) << std::endl;
 
-  std::string partition_filepath = "hostnameplusfilepath1";
+  std::string test_dataset_path = "hostnameplusfolderpath";
   auto parttftrs = std::make_shared<std::vector<Filter>>();
   // TODO: parse sql cmd here?
-  std::unique_ptr<rpc::FlightInfo> *out;
-  Status st = dataset_service_->GetFlightInfo(partition_filepath, parttftrs.get(), out);
+  std::unique_ptr<rpc::FlightInfo> *out=nullptr;
+  Status st = dataset_service_->GetFlightInfo(test_dataset_path, parttftrs.get(), out);
   ASSERT_OK(st);
 }
 
