@@ -27,34 +27,34 @@ ParquetReader::ParquetReader(const std::shared_ptr<arrow::io::RandomAccessFile>&
                              const parquet::ArrowReaderProperties& properties) {
 
   parquet::arrow::FileReaderBuilder builder;
-  builder.Open(file);
+  builder.Open(std::move(file));
   builder.memory_pool(pool)->properties(properties)->Build(&file_reader_);
 }
 
-Status ParquetReader::ReadTable(std::shared_ptr<arrow::Table> table) {
+Status ParquetReader::ReadParquetTable(std::shared_ptr<arrow::Table>* table) {
 
-  arrow::Status arrowStatus = file_reader_->ReadTable(&table); 
+  arrow::Status arrowStatus = file_reader_->ReadTable(table); 
   Status status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);
   return Status::OK();
 }
 
-Status ParquetReader::ReadTable(const std::vector<int> column_indices, std::shared_ptr<::arrow::Table> table) {
-  arrow::Status arrowStatus = file_reader_->ReadTable(column_indices, &table); 
+Status ParquetReader::ReadParquetTable(const std::vector<int> column_indices, std::shared_ptr<::arrow::Table>* table) {
+  arrow::Status arrowStatus = file_reader_->ReadTable(column_indices, table); 
   Status status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);
   return Status::OK();
 }
 
-Status ParquetReader::ReadColumnChunk(int column_index, std::shared_ptr<arrow::ChunkedArray> chunked_out) {
+Status ParquetReader::ReadColumnChunk(int column_index, std::shared_ptr<arrow::ChunkedArray>* chunked_out) {
 
-  arrow::Status arrowStatus = file_reader_->ReadColumn(column_index, &chunked_out);
+  arrow::Status arrowStatus = file_reader_->ReadColumn(column_index, chunked_out);
   Status status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);
   return Status::OK();
 }
 
-Status ParquetReader::ReadColumnChunk(int column_index, int size, std::shared_ptr<arrow::ChunkedArray> chunked_out) {
+Status ParquetReader::ReadColumnChunk(int column_index, std::shared_ptr<arrow::ChunkedArray>* chunked_out, int size) {
 
   std::unique_ptr<parquet::arrow::ColumnReader> column_reader;
 
@@ -64,19 +64,19 @@ Status ParquetReader::ReadColumnChunk(int column_index, int size, std::shared_pt
   status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);
 
-  arrowStatus = column_reader->NextBatch(size, &chunked_out);
+  arrowStatus = column_reader->NextBatch(size, chunked_out);
   status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);
 
   return Status::OK();
 }
 
-Status ParquetReader::ReadColumnChunk(int64_t row_group_index, int column_id, std::shared_ptr<arrow::ChunkedArray> chunked_out) {
+Status ParquetReader::ReadColumnChunk(int64_t row_group_index, int column_id, std::shared_ptr<arrow::ChunkedArray>* chunked_out) {
 
   std::shared_ptr<parquet::arrow::RowGroupReader> row_group_reader = file_reader_->RowGroup(row_group_index);
   std::shared_ptr<parquet::arrow::ColumnChunkReader> column_chunk_reader = row_group_reader->Column(column_id);
   
-  arrow::Status arrowStatus = column_chunk_reader->Read(&chunked_out);
+  arrow::Status arrowStatus = column_chunk_reader->Read(chunked_out);
   Status status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);
 

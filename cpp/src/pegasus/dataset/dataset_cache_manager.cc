@@ -134,7 +134,7 @@ Status DatasetCacheManager::RetrieveColumns(Identity* identity,
     int64_t occupied_size = 0;
     for(auto iter = col_ids.begin(); iter != col_ids.end(); iter ++) {
       std::shared_ptr<arrow::ChunkedArray> chunked_out;
-      RETURN_IF_ERROR(parquet_reader->ReadColumnChunk(*iter, chunked_out));
+      RETURN_IF_ERROR(parquet_reader->ReadColumnChunk(*iter, &chunked_out));
       arrow::ChunkedArray* chunked_array = chunked_out.get();
       int64_t column_size = memory_pool->bytes_allocated() - occupied_size;
       occupied_size = memory_pool->bytes_allocated() + occupied_size;

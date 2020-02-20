@@ -28,3 +28,50 @@ add_library(Parquet
 )
 add_dependencies(Parquet gen-deps)
 
+if(PEGASUS_TEST_LINKAGE STREQUAL "static")
+  set(PEGASUS_PARQUET_TEST_LINK_LIBS
+      Parquet
+      Runtime
+      Common
+      Util
+      Planner
+      pegasus_rpc_shared
+      ${PARQUET_SHARED_LIB}
+      ${ARROW_STATIC_LIB}
+      ${PEGASUS_TEST_STATIC_LINK_LIBS})
+else()
+  set(PEGASUS_PARQUET_TEST_LINK_LIBS
+      Parquet
+      Runtime
+      Common
+      Util
+      Planner
+      pegasus_rpc_shared
+      ${PARQUET_SHARED_LIB}
+      ${ARROW_SHARED_LIB}
+      ${PEGASUS_TEST_SHARED_LINK_LIBS})
+endif()
+
+# Adding unit tests part of the "storage" portion of the test suite
+function(ADD_PEGASUS_PARQUET_TEST REL_TEST_NAME)
+  set(options)
+  set(one_value_args PREFIX)
+  set(multi_value_args LABELS)
+  cmake_parse_arguments(ARG
+                        "${options}"
+                        "${one_value_args}"
+                        "${multi_value_args}"
+                        ${ARGN})
+
+  add_pegasus_test(${REL_TEST_NAME}
+                 EXTRA_LINK_LIBS
+                 ${PEGASUS_PARQUET_TEST_LINK_LIBS})
+endfunction()
+
+if(PEGASUS_BUILD_TESTS)
+
+  add_pegasus_parquet_test(parquet_reader_test)
+
+endif()
+
+
