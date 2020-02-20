@@ -58,12 +58,12 @@ Status DatasetCacheBlockManager::GetCachedDataSet(Identity* identity,
 Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity,
  std::shared_ptr<CachedPartition>* partition) {
   std::string dataset_path = identity->dataset_path();
-  std::string partition_path = identity->file_path();
+  std::string partition_path = identity->partition_id();
   std::shared_ptr<CachedDataset> dataset;
   RETURN_IF_ERROR(GetCachedDataSet(identity, &dataset));
   if (dataset == nullptr) {
     stringstream ss;
-    ss << "Can not get the partition: "<< identity->file_path() 
+    ss << "Can not get the partition: "<< identity->partition_id() 
       <<"when the dataset: "<< identity->dataset_path() <<" is NULL";
     LOG(ERROR) << ss.str();
     return Status::UnknownError(ss.str());
@@ -72,7 +72,7 @@ Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity,
   auto entry = dataset->cached_partitions_.find(partition_path);
   if (entry == dataset->cached_partitions_.end()) {
     *partition = nullptr;
-    LOG(WARNING) << "The partition: "<< identity->file_path() <<" is NULL.";
+    LOG(WARNING) << "The partition: "<< identity->partition_id() <<" is NULL.";
     return Status::OK(); 
   }
 
@@ -92,7 +92,9 @@ Status DatasetCacheBlockManager::GetCachedPartition(Identity* identity,
     return Status::UnknownError(ss.str());
   }
    
-  std::vector<int> col_ids = identity->col_ids();
+  // TODO: get the column indexes.
+  // std::vector<int> col_ids = identity->col_ids();
+  std::vector<int> col_ids;
   for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++)
   {
 		auto entry = partition->cached_columns_.find(std::to_string(*iter));
@@ -123,7 +125,7 @@ Status DatasetCacheBlockManager::InsertPartition(Identity* identity,
     return Status::UnknownError(ss.str());
   } 
 
-  string partition_path = identity->file_path();
+  string partition_path = identity->partition_id();
   dataset->cached_partitions_[partition_path] = new_partition;
   return Status::OK();
 }
@@ -134,7 +136,7 @@ Status DatasetCacheBlockManager::InsertColumn(Identity* identity, string column_
   RETURN_IF_ERROR(GetCachedPartition(identity, &partition));
   if (partition == nullptr) {
     stringstream ss;
-    ss << "Can not insert new column when the partition: "<< identity->file_path() <<" is NULL";
+    ss << "Can not insert new column when the partition: "<< identity->partition_id() <<" is NULL";
     LOG(ERROR) << ss.str();
     return Status::UnknownError(ss.str());
   } 

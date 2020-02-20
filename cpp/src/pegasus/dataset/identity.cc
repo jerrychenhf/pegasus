@@ -28,14 +28,10 @@ std::string Identity::dataset_path() const {
     return dataset_path_;
   }
 
-std::string Identity::file_path() const {
+std::string Identity::partition_id() const {
     return partition_id_;
   }
 
-std::vector<int> Identity::col_ids() const { 
-    return col_ids_;
-  }
-  
 bool Identity::Equals(const Identity& other) const {
 	return false;
 }

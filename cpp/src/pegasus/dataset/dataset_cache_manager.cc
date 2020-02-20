@@ -67,7 +67,7 @@ Status DatasetCacheManager::AddNewColumns(Identity* identity,
     RETURN_IF_ERROR(cache_block_manager_->GetCachedPartition(identity, &partition));
     if (partition == nullptr) {
       std::shared_ptr<CachedPartition> new_partition = std::shared_ptr<CachedPartition>(
-        new CachedPartition(identity->dataset_path(), identity->file_path()));
+        new CachedPartition(identity->dataset_path(), identity->partition_id()));
       RETURN_IF_ERROR(cache_block_manager_->InsertPartition(identity, new_partition));
     }
 
@@ -114,7 +114,7 @@ Status DatasetCacheManager::RetrieveColumns(Identity* identity,
   const std::vector<int>& col_ids,
   std::shared_ptr<CacheEngine> cache_engine,
   std::unordered_map<string, std::shared_ptr<CachedColumn>>& retrieved_columns) {
-    std::string partition_path = identity->file_path();
+    std::string partition_path = identity->partition_id();
     std::shared_ptr<StoragePlugin> storage_plugin;
 
     // Get the ReadableFile Debug Check
@@ -170,7 +170,10 @@ std::vector<int> DatasetCacheManager::GetMissedColumnsIds(std::vector<int> col_i
 Status DatasetCacheManager::GetDatasetStream(Identity* identity,
  std::unique_ptr<rpc::FlightDataStream>* data_stream) {
   // Check whether the dataset is cached.
-  std::vector<int> col_ids = identity->col_ids();
+  
+  // TODO: get the column indexes.
+  // std::vector<int> col_ids = identity->col_ids();
+  std::vector<int> col_ids;
   std::unordered_map<string, std::shared_ptr<CachedColumn>> get_columns;
   
   std::shared_ptr<CachedDataset> dataset;
@@ -184,7 +187,7 @@ Status DatasetCacheManager::GetDatasetStream(Identity* identity,
     std::shared_ptr<CachedPartition> partition;
     cache_block_manager_->GetCachedPartition(identity, &partition);
     if (partition == nullptr) {
-      LOG(WARNING) << "The partition "<< identity->file_path() 
+      LOG(WARNING) << "The partition "<< identity->partition_id() 
       <<" is nullptr. We will get all the columns from storage and then insert the column into dataset cache block manager";
       return GetDatasetStreamWithMissedColumns(identity, col_ids, data_stream);
     } else {

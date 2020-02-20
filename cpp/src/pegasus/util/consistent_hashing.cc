@@ -98,7 +98,7 @@ void ConsistentHashRing::RemoveLocation(Location location)
 Location ConsistentHashRing::GetLocation(Identity identity)
 {
 	const struct node_s* pnode;
-	std::string idstr = identity.file_path();
+	std::string idstr = identity.partition_id();
 //	identity.SerializeToString(&idstr);
 	pnode = conhash_lookup(conhash, idstr.c_str());
 	// create the location object and fill with phynode's location (uri).
@@ -113,7 +113,7 @@ void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>>
 	const struct node_s* pnode;
 	for (auto ident:(*vectident))
 	{
-		std::string idstr = ident.file_path();
+		std::string idstr = ident.partition_id();
 		pnode = conhash_lookup(conhash, idstr.c_str());
 		// create the location object and fill with phynode's location (uri).
 		Location lcn;

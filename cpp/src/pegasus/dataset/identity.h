@@ -32,8 +32,7 @@ public:
   Identity(std::string dataset_path, std::string partition_id);
   
   std::string dataset_path() const;
-  std::string file_path() const;
-  std::vector<int> col_ids() const;
+  std::string partition_id() const;
   
   bool Equals(const Identity& other) const;
 
@@ -60,7 +59,6 @@ public:
   std::string dataset_path_;
   std::string partition_id_;
   int64_t partid;
-  std::vector<int> col_ids_;
 };
 
 } // namespace pegasus
