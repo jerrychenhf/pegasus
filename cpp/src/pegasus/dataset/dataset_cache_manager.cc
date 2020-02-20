@@ -139,7 +139,7 @@ Status DatasetCacheManager::RetrieveColumns(Identity* identity,
       int64_t column_size = memory_pool->bytes_allocated() - occupied_size;
       occupied_size = memory_pool->bytes_allocated() + occupied_size;
       std::shared_ptr<CacheRegion> cache_region = std::shared_ptr<CacheRegion>(
-        new CacheRegion(0, column_size, column_size, chunked_array));
+        new CacheRegion(chunked_array, column_size));
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, *iter, cache_region));
       retrieved_columns.insert(std::make_pair(std::to_string(*iter), column));

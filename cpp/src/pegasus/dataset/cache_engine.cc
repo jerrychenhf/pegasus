@@ -22,7 +22,7 @@ using namespace std;
 namespace pegasus {
 
 LruCacheEngine::LruCacheEngine(int64_t capacity)
-  : cache_(capacity), cache_store_manager_(new CacheStoreManager()) {
+  : cache_store_manager_(new CacheStoreManager()), cache_(capacity) {
 }
 
 Status LruCacheEngine::Init() {

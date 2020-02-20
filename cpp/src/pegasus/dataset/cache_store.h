@@ -32,7 +32,7 @@ class CacheStore {
    ~CacheStore();
    
    Status Allocate(int64_t size, StoreRegion* store_region);
-   Status Free(CacheRegion* cache_region);
+   Status Free(StoreRegion* store_region);
    
    Store* GetStore() { return store_; }
    

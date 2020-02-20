@@ -19,10 +19,8 @@
 #define PEGASUS_STORE_REGION_H
 
 #include <string>
-#include "arrow/table.h"
 
 using namespace std;
-using namespace arrow;
 
 namespace pegasus {
 

@@ -45,7 +45,7 @@ namespace pegasus {
     return Status::OK();
   }
 
-  Status CacheStore::Free(CacheRegion* cache_region) {
+  Status CacheStore::Free(StoreRegion* store_region) {
     if (store_ == nullptr) {
       stringstream ss;
       ss << "Failed to free cache region in current cache store. Because the store is NULL";
@@ -53,8 +53,8 @@ namespace pegasus {
       return Status::UnknownError(ss.str());
     }
     
-    int64_t size = cache_region->length();
-    Status status = store_->Free(cache_region);
+    int64_t size = store_region->length();
+    Status status = store_->Free(store_region);
     if (!status.ok()) {
       stringstream ss;
       ss << "Failed to free cache region in current cache store";

@@ -45,13 +45,13 @@ Status MemoryStore::Allocate(int64_t size, StoreRegion* store_region) {
   return Status::OK();
 }
 
-Status MemoryStore::Free(CacheRegion* cache_region) {
-  DCHECK(cache_region != NULL);
+Status MemoryStore::Free(StoreRegion* store_region) {
+  DCHECK(store_region != NULL);
   
-  std::free(cache_region->chunked_array());
+  std::free(store_region->address());
   
-  free_size_  += cache_region->length();
-  used_size_ -= cache_region->length();
+  free_size_  += store_region->length();
+  used_size_ -= store_region->length();
   return Status::OK();
 }
 
@@ -83,7 +83,7 @@ Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
   return Status::OK();
 }
 
-Status DCPMMStore::Free(CacheRegion* cache_region) {
+Status DCPMMStore::Free(StoreRegion* store_region) {
   return Status::OK();
 }
 

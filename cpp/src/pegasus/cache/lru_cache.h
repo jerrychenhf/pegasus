@@ -117,7 +117,7 @@ class LruCache {
     // TODO concurrently free and access
     value_type evict_value = map_.find(evict_key)->second.first;
     CacheStore* cache_store = evict_map_.find(evict_key)->second;
-    cache_store->Free(evict_value.get());
+   // cache_store->Free(evict_value.get());
 
     typename list_type::iterator i = --lru_list_.end();
     map_.erase(*i);

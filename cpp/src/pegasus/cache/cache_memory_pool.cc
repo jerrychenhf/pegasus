@@ -58,8 +58,8 @@ void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
   if (cache_store_ == nullptr)
     return;
     
-  CacheRegion cacheRegion(buffer, size, size);
-  cache_store_->Free(&cacheRegion);
+  StoreRegion storeRegion(buffer, size, size);
+  cache_store_->Free(&storeRegion);
   occupied_size -= size;
 }
 

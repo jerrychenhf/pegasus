@@ -30,7 +30,7 @@ class Store {
   virtual Status Init() = 0;
 
   virtual Status Allocate(int64_t size, StoreRegion* store_region) = 0;
-  virtual Status Free(CacheRegion* cache_region) = 0;
+  virtual Status Free(StoreRegion* store_region) = 0;
   
   virtual int64_t GetCapacity() = 0;
   virtual int64_t GetFreeSize() = 0;
@@ -53,7 +53,7 @@ class MemoryStore : public Store {
   virtual Status Init();
   
   virtual Status Allocate(int64_t size, StoreRegion* store_region) override;
-  virtual Status Free(CacheRegion* cache_region) override;
+  virtual Status Free(StoreRegion* store_region) override;
   
   virtual int64_t GetCapacity()override { return capacity_; } 
   virtual int64_t GetFreeSize() override;
@@ -74,7 +74,7 @@ class DCPMMStore : public Store {
   virtual Status Init();
   
   virtual Status Allocate(int64_t size, StoreRegion* store_region) override;
-  virtual Status Free(CacheRegion* cache_region) override;
+  virtual Status Free(StoreRegion* store_region) override;
   
   virtual int64_t GetCapacity()override { return capacity_; }
   virtual int64_t GetFreeSize() override;
