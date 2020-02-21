@@ -20,7 +20,7 @@
 
 #include <unordered_map>
 
-#include "dataset/identity.h"
+#include "dataset/request_identity.h"
 #include "dataset/cache_engine.h"
 #include "cache/cache_region.h"
 #include "arrow/table.h"
@@ -69,12 +69,15 @@ class DatasetCacheBlockManager {
   
   Status Init();
   
-  Status GetCachedDataSet(Identity* identity, std::shared_ptr<CachedDataset>* dataset);
-  Status GetCachedPartition(Identity* identity, std::shared_ptr<CachedPartition>* partitios);
-  Status GetCachedColumns(Identity* identity, std::unordered_map<string, std::shared_ptr<CachedColumn>>* cached_columns);
-  Status InsertDataSet(Identity* identity, std::shared_ptr<CachedDataset> new_dataset);
-  Status InsertPartition(Identity* identity, std::shared_ptr<CachedPartition> new_partition);
-  Status InsertColumn(Identity* identity, string column_id, std::shared_ptr<CachedColumn> new_column);
+  Status GetCachedDataSet(RequestIdentity* request_identity, std::shared_ptr<CachedDataset>* dataset);
+  Status GetCachedPartition(RequestIdentity* request_identity,
+   std::shared_ptr<CachedPartition>* partitios);
+  Status GetCachedColumns(RequestIdentity* request_identity, 
+    std::unordered_map<string, std::shared_ptr<CachedColumn>>* cached_columns);
+
+  Status InsertDataSet(RequestIdentity* request_identity, std::shared_ptr<CachedDataset> new_dataset);
+  Status InsertPartition(RequestIdentity* request_identity, std::shared_ptr<CachedPartition> new_partition);
+  Status InsertColumn(RequestIdentity* request_identity, string column_id, std::shared_ptr<CachedColumn> new_column);
  
  private: 
   std::unordered_map<std::string, std::shared_ptr<CachedDataset>> cached_datasets_;

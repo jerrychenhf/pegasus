@@ -46,42 +46,42 @@ Status DatasetCacheManager::Init() {
   return Status::OK();
 }
 
-CacheEngine::CachePolicy DatasetCacheManager::GetCachePolicy(Identity* identity) {
+CacheEngine::CachePolicy DatasetCacheManager::GetCachePolicy(RequestIdentity* request_identity) {
   // TODO Choose the CachePolicy based on the data type in Identity
   return CacheEngine::CachePolicy::LRU;
 }
 
-Status DatasetCacheManager::AddNewColumns(Identity* identity,
+Status DatasetCacheManager::AddNewColumns(RequestIdentity* request_identity,
   std::unordered_map<string, std::shared_ptr<CachedColumn>> retrieved_columns) {
     // Before insert into the column, check whether the dataset is inserted.
     std::shared_ptr<CachedDataset> dataset;
-    RETURN_IF_ERROR(cache_block_manager_->GetCachedDataSet(identity, &dataset));
+    RETURN_IF_ERROR(cache_block_manager_->GetCachedDataSet(request_identity, &dataset));
     if (dataset == nullptr) {
       // Insert new dataset.
       std::shared_ptr<CachedDataset> new_dataset = std::shared_ptr<CachedDataset>(
-        new CachedDataset(identity->dataset_path()));
-      RETURN_IF_ERROR(cache_block_manager_->InsertDataSet(identity, new_dataset));
+        new CachedDataset(request_identity->dataset_path()));
+      RETURN_IF_ERROR(cache_block_manager_->InsertDataSet(request_identity, new_dataset));
     }
     // After check the dataset, continue to check whether the partition is inserted.
     std::shared_ptr<CachedPartition> partition;
-    RETURN_IF_ERROR(cache_block_manager_->GetCachedPartition(identity, &partition));
+    RETURN_IF_ERROR(cache_block_manager_->GetCachedPartition(request_identity, &partition));
     if (partition == nullptr) {
       std::shared_ptr<CachedPartition> new_partition = std::shared_ptr<CachedPartition>(
-        new CachedPartition(identity->dataset_path(), identity->partition_id()));
-      RETURN_IF_ERROR(cache_block_manager_->InsertPartition(identity, new_partition));
+        new CachedPartition(request_identity->dataset_path(), request_identity->partition_path()));
+      RETURN_IF_ERROR(cache_block_manager_->InsertPartition(request_identity, new_partition));
     }
 
     // Insert the columns into cache_block_manager_.
     for(auto iter = retrieved_columns.begin(); iter != retrieved_columns.end(); iter ++) {
-      RETURN_IF_ERROR(cache_block_manager_->InsertColumn(identity, iter->first, iter->second));
+      RETURN_IF_ERROR(cache_block_manager_->InsertColumn(request_identity, iter->first, iter->second));
     }
     return Status::OK();
 }
 
-Status DatasetCacheManager::WrapDatasetStream(Identity* identity,
+Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
   std::unique_ptr<rpc::FlightDataStream>* data_stream) {
   std::unordered_map<string, std::shared_ptr<CachedColumn>> cached_columns;
-  RETURN_IF_ERROR(cache_block_manager_->GetCachedColumns(identity, &cached_columns));
+  RETURN_IF_ERROR(cache_block_manager_->GetCachedColumns(request_identity, &cached_columns));
 
   std::shared_ptr<Table> table;
   for(auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
@@ -95,26 +95,26 @@ Status DatasetCacheManager::WrapDatasetStream(Identity* identity,
   return Status::OK();
 }
 
-Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(Identity* identity,
+Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(RequestIdentity* request_identity,
   std::vector<int> col_ids,
   std::unique_ptr<rpc::FlightDataStream>* data_stream) {
      // Get cache engine.
     std::shared_ptr<CacheEngine> cache_engine;
-    CacheEngine::CachePolicy cache_policy = GetCachePolicy(identity);
+    CacheEngine::CachePolicy cache_policy = GetCachePolicy(request_identity);
     RETURN_IF_ERROR(cache_engine_manager_->GetCacheEngine(cache_policy, &cache_engine));
 
     std::unordered_map<string, std::shared_ptr<CachedColumn>> retrieved_columns;
-    RETURN_IF_ERROR(RetrieveColumns(identity, col_ids, cache_engine, retrieved_columns));
+    RETURN_IF_ERROR(RetrieveColumns(request_identity, col_ids, cache_engine, retrieved_columns));
     
-    RETURN_IF_ERROR(AddNewColumns(identity, retrieved_columns));
-    return WrapDatasetStream(identity, data_stream);
+    RETURN_IF_ERROR(AddNewColumns(request_identity, retrieved_columns));
+    return WrapDatasetStream(request_identity, data_stream);
 }
 
-Status DatasetCacheManager::RetrieveColumns(Identity* identity,
+Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
   const std::vector<int>& col_ids,
   std::shared_ptr<CacheEngine> cache_engine,
   std::unordered_map<string, std::shared_ptr<CachedColumn>>& retrieved_columns) {
-    std::string partition_path = identity->partition_id();
+    std::string partition_path = request_identity->partition_path();
     std::shared_ptr<StoragePlugin> storage_plugin;
 
     // Get the ReadableFile Debug Check
@@ -167,42 +167,40 @@ std::vector<int> DatasetCacheManager::GetMissedColumnsIds(std::vector<int> col_i
 // If not, get dataset from hdfs and then put the dataset into CacheEngine.
 //         1. Choose the CachePolicy based on the Identity.
 //         2. Call DatasetCacheEngineManager#GetCacheEngine method to get CacheEngine;
-Status DatasetCacheManager::GetDatasetStream(Identity* identity,
+Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
  std::unique_ptr<rpc::FlightDataStream>* data_stream) {
   // Check whether the dataset is cached.
   
-  // TODO: get the column indexes.
-  // std::vector<int> col_ids = identity->col_ids();
-  std::vector<int> col_ids;
+  std::vector<int> col_ids = request_identity->column_indices();
   std::unordered_map<string, std::shared_ptr<CachedColumn>> get_columns;
   
   std::shared_ptr<CachedDataset> dataset;
-  cache_block_manager_->GetCachedDataSet(identity, &dataset);
+  cache_block_manager_->GetCachedDataSet(request_identity, &dataset);
   if (dataset == nullptr) {
-    LOG(WARNING) << "The dataset "<< identity->dataset_path() 
+    LOG(WARNING) << "The dataset "<< request_identity->dataset_path() 
     <<" is nullptr. We will get all the columns from storage and then insert the column into dataset cache block manager";
-    return GetDatasetStreamWithMissedColumns(identity, col_ids, data_stream);
+    return GetDatasetStreamWithMissedColumns(request_identity, col_ids, data_stream);
   } else {
     // dataset is cached
     std::shared_ptr<CachedPartition> partition;
-    cache_block_manager_->GetCachedPartition(identity, &partition);
+    cache_block_manager_->GetCachedPartition(request_identity, &partition);
     if (partition == nullptr) {
-      LOG(WARNING) << "The partition "<< identity->partition_id() 
+      LOG(WARNING) << "The partition "<< request_identity->partition_path() 
       <<" is nullptr. We will get all the columns from storage and then insert the column into dataset cache block manager";
-      return GetDatasetStreamWithMissedColumns(identity, col_ids, data_stream);
+      return GetDatasetStreamWithMissedColumns(request_identity, col_ids, data_stream);
     } else {
       // partition is cached.
       // Check which column is cached.
       std::unordered_map<string, std::shared_ptr<CachedColumn>> cached_columns;
-      cache_block_manager_->GetCachedColumns(identity, &cached_columns);
+      cache_block_manager_->GetCachedColumns(request_identity, &cached_columns);
       if (col_ids.size() == cached_columns.size()) {
         LOG(WARNING) << "All the columns are cached. And we will wrap the columns into Flight data stream";
-        return WrapDatasetStream(identity, data_stream);
+        return WrapDatasetStream(request_identity, data_stream);
       } else {
         // Not all columns cached.
         // Get the not cached col_ids.
         std::vector<int> missed_col_ids = GetMissedColumnsIds(col_ids, cached_columns);
-        return GetDatasetStreamWithMissedColumns(identity, missed_col_ids, data_stream);
+        return GetDatasetStreamWithMissedColumns(request_identity, missed_col_ids, data_stream);
       }
    }
   }

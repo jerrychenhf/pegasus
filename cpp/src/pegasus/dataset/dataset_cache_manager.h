@@ -21,12 +21,12 @@
 #include "arrow/record_batch.h"
 #include "arrow/table.h"
 
-#include "dataset/identity.h"
 #include "dataset/dataset_cache_block_manager.h"
 #include "dataset/dataset_cache_engine_manager.h"
 #include "storage/storage_plugin.h"
 #include "storage/storage_plugin_factory.h"
 #include "rpc/server.h"
+#include "dataset/request_identity.h"
 
 using namespace std;
 
@@ -39,26 +39,26 @@ class DatasetCacheManager {
   
   Status Init();
 
-  Status GetDatasetStream(Identity* identity, std::unique_ptr<rpc::FlightDataStream>* data_stream);
+  Status GetDatasetStream(RequestIdentity* request_identity, std::unique_ptr<rpc::FlightDataStream>* data_stream);
   
  private: 
   std::shared_ptr<DatasetCacheBlockManager> cache_block_manager_;
   std::shared_ptr<DatasetCacheEngineManager> cache_engine_manager_;
   std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
   
-  CacheEngine::CachePolicy GetCachePolicy(Identity* identity);
+  CacheEngine::CachePolicy GetCachePolicy(RequestIdentity* request_identity);
   
-  Status AddNewColumns(Identity* identity,
+  Status AddNewColumns(RequestIdentity* request_identity,
     std::unordered_map<string, std::shared_ptr<CachedColumn>> retrieved_columns);
-  Status WrapDatasetStream(Identity* identity,
+  Status WrapDatasetStream(RequestIdentity* request_identity,
     std::unique_ptr<rpc::FlightDataStream>* data_stream);
-  Status GetDatasetStreamWithMissedColumns(Identity* identity,
+  Status GetDatasetStreamWithMissedColumns(RequestIdentity* request_identity,
     std::vector<int> col_ids,
     std::unique_ptr<rpc::FlightDataStream>* data_stream);
   std::vector<int> GetMissedColumnsIds(std::vector<int> col_ids,
     std::unordered_map<string, std::shared_ptr<CachedColumn>> cached_columns);
     
-  Status RetrieveColumns(Identity* identity,
+  Status RetrieveColumns(RequestIdentity* request_identity,
     const std::vector<int>& col_ids,
     std::shared_ptr<CacheEngine> cache_engine,
     std::unordered_map<string, std::shared_ptr<CachedColumn>>& retrieved_columns

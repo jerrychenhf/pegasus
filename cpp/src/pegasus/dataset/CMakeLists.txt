@@ -40,6 +40,7 @@ add_library(DataSet
   cache_store.cc
   cache_store_manager.cc
   dataset_cache_engine_manager.cc
+  request_identity.cc
 )
 add_dependencies(DataSet gen-deps)
 
