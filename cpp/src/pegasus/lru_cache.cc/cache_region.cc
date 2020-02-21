@@ -15,25 +15,31 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "dataset/cache_engine.h"
-
-using namespace std;
+/// \brief Data structure providing an opaque identifier or credential to use
+/// when requesting a data stream with the DoGet RPC
+#include "cache/cache_region.h"
+#include "cache/cache_memory_pool.h"
 
 namespace pegasus {
 
-LruCacheEngine::LruCacheEngine(int64_t capacity)
-  : cache_store_manager_(new CacheStoreManager()) {
+CacheRegion::CacheRegion()
+  : memory_pool_(nullptr), chunked_array_(nullptr), size_(0){
 }
 
-Status LruCacheEngine::Init() {
-  RETURN_IF_ERROR(cache_store_manager_->Init());
-  return Status::OK();
+CacheRegion::CacheRegion(const std::shared_ptr<CacheMemoryPool>& memory_pool,
+  const std::shared_ptr<arrow::ChunkedArray>& chunked_array, int64_t size)
+  : memory_pool_(memory_pool), chunked_array_(chunked_array), size_(size) {
 }
 
-Status LruCacheEngine::PutValue(std::string dataset_path, std::string partition_path, int column_id) {
-  CacheEntryKey key = CacheEntryKey(partition_path, column_id);
-  return Status::OK();
+CacheRegion::~CacheRegion () {
+}  
+
+int64_t CacheRegion::size() const {
+    return size_;
 }
 
+arrow::ChunkedArray* CacheRegion::chunked_array() const {
+    return chunked_array_.get();
+}
 
 } // namespace pegasus

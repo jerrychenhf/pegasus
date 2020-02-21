@@ -28,7 +28,6 @@ add_library(Cache
   cache_region.cc
   cache_memory_pool.cc
   store_region.cc
-  lru_cache.cc
 )
 add_dependencies(Cache gen-deps)
 

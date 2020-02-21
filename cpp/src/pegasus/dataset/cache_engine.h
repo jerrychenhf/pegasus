@@ -21,7 +21,6 @@
 #include "common/status.h"
 #include "dataset/dataset.h"
 #include <boost/compute/detail/lru_cache.hpp>
-#include "cache/lru_cache.h"
 #include "cache/cache_region.h"
 #include "boost/functional/hash.hpp"
 #include "dataset/cache_store_manager.h"
@@ -34,7 +33,7 @@ class CacheEngine {
  public:
  virtual Status Init() = 0;
  virtual Status GetCacheStore(CacheStore** cache_store) = 0;
- virtual Status PutValue(std::string partition_path, int column_id) = 0;
+ virtual Status PutValue(std::string dataset_path, std::string partition_path, int column_id) = 0;
 
   enum CachePolicy {
     LRU,
@@ -96,11 +95,10 @@ class LruCacheEngine : public CacheEngine {
     return cache_store_manager_->GetCacheStore(cache_store);
   }
 
-  Status PutValue(std::string partition_path, int column_id) override;
+  Status PutValue(std::string dataset_path, std::string partition_path, int column_id) override;
 
  public:
   std::shared_ptr<CacheStoreManager> cache_store_manager_;
-  LruCache<CacheEntryKey, CacheEntryValue*> cache_;
 };
 
 //NonEvictCacheEngine 
@@ -116,7 +114,7 @@ class NonEvictionCacheEngine : public CacheEngine {
   Status GetCacheStore(CacheStore** cache_store) override {
     return Status::NotImplemented("Not yet implemented.");
   }
-  Status PutValue(std::string partition_path, int column_id) override {
+  Status PutValue(std::string dataset_path, std::string partition_path, int column_id) override {
     return Status::NotImplemented("Not yet implemented.");
   }
 };

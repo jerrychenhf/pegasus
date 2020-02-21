@@ -15,25 +15,37 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "dataset/cache_engine.h"
+#ifndef PEGASUS_STORE_REGION_H
+#define PEGASUS_STORE_REGION_H
+
+#include <string>
 
 using namespace std;
 
 namespace pegasus {
 
-LruCacheEngine::LruCacheEngine(int64_t capacity)
-  : cache_store_manager_(new CacheStoreManager()) {
-}
+class StoreRegion {
+ public:
+  StoreRegion();
+  StoreRegion(uint8_t* address, long length, long occupied_size);
+  
+  ~StoreRegion();
+  
+  void reset_address(uint8_t* address, int64_t length) {
+    address_ = address;
+    length_ = length;
+  }
+  
+  uint8_t* address() const;
+  int64_t length() const;
+  int64_t occupies_size() const;
 
-Status LruCacheEngine::Init() {
-  RETURN_IF_ERROR(cache_store_manager_->Init());
-  return Status::OK();
-}
-
-Status LruCacheEngine::PutValue(std::string dataset_path, std::string partition_path, int column_id) {
-  CacheEntryKey key = CacheEntryKey(partition_path, column_id);
-  return Status::OK();
-}
-
+ private:
+  uint8_t* address_;
+  int64_t length_;
+  int64_t occupied_size_;
+};
 
 } // namespace pegasus
+
+#endif  // PEGASUS_STORE_REGION_H

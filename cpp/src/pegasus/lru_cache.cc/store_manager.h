@@ -15,25 +15,27 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "dataset/cache_engine.h"
+#ifndef PEGASUS_STORE_MANAGER_H
+#define PEGASUS_STORE_MANAGER_H
 
-using namespace std;
+#include <unordered_map>
+#include "cache/store.h"
 
 namespace pegasus {
 
-LruCacheEngine::LruCacheEngine(int64_t capacity)
-  : cache_store_manager_(new CacheStoreManager()) {
-}
+class StoreManager {
+ public:
+  StoreManager();
+  ~StoreManager();
 
-Status LruCacheEngine::Init() {
-  RETURN_IF_ERROR(cache_store_manager_->Init());
-  return Status::OK();
-}
+  Status Init();
 
-Status LruCacheEngine::PutValue(std::string dataset_path, std::string partition_path, int column_id) {
-  CacheEntryKey key = CacheEntryKey(partition_path, column_id);
-  return Status::OK();
-}
+  Status GetStore(Store::StoreType cache_type, Store** store);
 
+ private:
+  std::unordered_map<std::string, std::shared_ptr<Store>> stores_;
+};
 
 } // namespace pegasus
+
+#endif  // PEGASUS_STORE_MANAGER_H
