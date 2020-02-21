@@ -224,6 +224,7 @@ struct PEGASUS_RPC_EXPORT FlightDescriptor {
 /// \brief Data structure providing an opaque identifier or credential to use
 /// when requesting a data stream with the DoGet RPC
 struct PEGASUS_RPC_EXPORT Ticket {
+  std::string dataset_path;
   std::string partition_identity;
   std::vector<int> column_indices;
 

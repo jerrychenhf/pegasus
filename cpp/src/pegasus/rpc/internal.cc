@@ -235,6 +235,7 @@ arrow::Status ToProto(const BasicAuth& basic_auth, pb::BasicAuth* pb_basic_auth)
 // Ticket
 
 arrow::Status FromProto(const pb::Ticket& pb_ticket, Ticket* ticket) {
+  ticket->dataset_path = pb_ticket.dataset_path();
   ticket->partition_identity = pb_ticket.partition_identity();
   ticket->column_indices.reserve(pb_ticket.column_indice_size());
   for (int i = 0; i < pb_ticket.column_indice_size(); ++i) {
@@ -244,6 +245,7 @@ arrow::Status FromProto(const pb::Ticket& pb_ticket, Ticket* ticket) {
 }
 
 void ToProto(const Ticket& ticket, pb::Ticket* pb_ticket) {
+  pb_ticket->set_dataset_path(ticket.dataset_path);
   pb_ticket->set_partition_identity(ticket.partition_identity);
   for (int32_t column_indice : ticket.column_indices) {
     pb_ticket->add_column_indice(column_indice);

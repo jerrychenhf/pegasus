@@ -291,8 +291,9 @@ message Location {
  * portion of a stream.
  */
 message Ticket {
-  bytes partition_identity = 1;
-  repeated int32 column_indice = 2;
+  bytes dataset_path = 1;
+  bytes partition_identity = 2;
+  repeated int32 column_indice = 3;
 }
 
 /*
