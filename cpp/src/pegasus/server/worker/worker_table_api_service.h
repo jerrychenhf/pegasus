@@ -19,7 +19,7 @@
 #define PEGASUS_WORKER_TABLE_API_SERVICE_H
 
 #include "rpc/server.h"
-#include "dataset/data_request.h"
+#include "dataset/request_identity.h"
 
 namespace arrow {
 
@@ -63,7 +63,7 @@ private:
   std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
   WorkerExecEnv* env_;
   
-  arrow::Status CreateDataRequest(const rpc::Ticket& request, DataRequest* dataRequest);
+  arrow::Status CreateDataRequest(const rpc::Ticket& request, RequestIdentity* request_identity);
 };
     
 }  // namespace pegasus

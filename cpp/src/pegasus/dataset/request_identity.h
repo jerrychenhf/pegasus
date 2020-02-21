@@ -18,8 +18,28 @@
 /// \brief Data structure providing an identifier to use when requesting a table chunk
 #pragma once
 
+#ifndef PEGASUS_DATASET_REQUEST_H_
+#define PEGASUS_DATASET_REQUEST_H_
+
 #include "dataset/identity.h"
 
 namespace pegasus {
-  typedef Identity DataRequest;
+  class RequestIdentity {
+
+ public:
+  RequestIdentity();
+  RequestIdentity(std::string dataset_path, std::string partition_path, std::vector<int> column_indices);
+
+
+  const std::string& dataset_path();
+  const std::vector<int>& column_indices();
+  const std::string& partition_path();
+
+  private:
+   std::string dataset_path_;
+   std::string partition_path_;
+   std::vector<int> column_indices_;
+};
+
 } // namespace pegasus
+#endif  // PEGASUS_DATASET_REQUEST_H_

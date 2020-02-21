@@ -65,12 +65,12 @@ Status WorkerTableAPIService::Serve() {
 /// \return Status
 arrow::Status WorkerTableAPIService::DoGet(const rpc::ServerCallContext& context,
   const rpc::Ticket& request, std::unique_ptr<rpc::FlightDataStream>* data_stream) {
-  DataRequest dataRequest;
-  arrow::Status st = CreateDataRequest(request, &dataRequest);
+  RequestIdentity request_identity;
+  arrow::Status st = CreateDataRequest(request, &request_identity);
   if(!st.ok());
     return st;
   
-  Status status = dataset_cache_manager_->GetDatasetStream(&dataRequest, data_stream);
+  Status status = dataset_cache_manager_->GetDatasetStream(&request_identity, data_stream);
   return status.toArrowStatus();
 }
 
@@ -88,9 +88,11 @@ arrow::Status WorkerTableAPIService::DoPut(const rpc::ServerCallContext& context
 }
 
 arrow::Status WorkerTableAPIService::CreateDataRequest(const rpc::Ticket& request,
-  DataRequest* dataRequest) {
-  // TO DO
-  // convert Ticket request to data request
+  RequestIdentity* request_identity) {
+
+  request_identity = new RequestIdentity(
+    request.dataset_path, request.partition_identity, request.column_indices);
+  
   return arrow::Status::OK();
 }
 
