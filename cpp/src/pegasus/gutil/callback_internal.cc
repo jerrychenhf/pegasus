@@ -4,7 +4,7 @@
 
 #include "gutil/callback_internal.h"
 
-namespace kudu {
+namespace pegasus {
 namespace internal {
 
 bool CallbackBase::is_null() const {
@@ -33,4 +33,4 @@ CallbackBase::~CallbackBase() {
 }
 
 }  // namespace internal
-}  // namespace kudu
+}  // namespace pegasus

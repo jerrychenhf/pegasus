@@ -5,7 +5,7 @@
 #ifndef GUTIL_CALLBACK_FORWARD_H_
 #define GUTIL_CALLBACK_FORWARD_H_
 
-namespace kudu {
+namespace pegasus {
 
 template <typename Sig>
 class Callback;

@@ -16,7 +16,7 @@
 template <typename T>
 class ScopedVector;
 
-namespace kudu {
+namespace pegasus {
 namespace internal {
 
 // BindStateBase is used to provide an opaque handle that the Callback
@@ -172,6 +172,6 @@ typename base::enable_if<IsMoveOnlyType<T>::value, T>::type CallbackForward(T& t
 }
 
 }  // namespace internal
-}  // namespace kudu
+}  // namespace pegasus
 
 #endif  // GUTIL_CALLBACK_INTERNAL_H_

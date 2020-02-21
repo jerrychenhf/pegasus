@@ -18,6 +18,12 @@
 #ifndef PEGASUS_UTIL_THREAD_H
 #define PEGASUS_UTIL_THREAD_H
 
+#if defined(__linux__)
+#include <syscall.h>
+#else
+#include <sys/syscall.h>
+#endif
+
 #include <memory>
 #include <vector>
 
@@ -126,6 +132,25 @@ class Thread {
   const std::string& name() const { return name_; }
 
   static const int64_t INVALID_THREAD_ID = -1;
+
+  // Returns the system thread ID (tid on Linux) for the current thread. Note
+  // that this is a static method and thus can be used from any thread,
+  // including the main thread of the process. This is in contrast to
+  // Thread::tid(), which only works on kudu::Threads.
+  //
+  // Thread::tid() will return the same value, but the value is cached in the
+  // Thread object, so will be faster to call.
+  //
+  // Thread::UniqueThreadId() (or Thread::tid()) should be preferred for
+  // performance sensistive code, however it is only guaranteed to return a
+  // unique and stable thread ID, not necessarily the system thread ID.
+  static int64_t CurrentThreadId() {
+#if defined(__linux__)
+    return syscall(SYS_gettid);
+#else
+    return UniqueThreadId();
+#endif
+  }
 
  private:
   Thread(const std::string& category, const std::string& name)

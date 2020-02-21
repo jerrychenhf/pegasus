@@ -7,7 +7,7 @@
 #include <common/logging.h>
 #include "gutil/threading/thread_collision_warner.h"
 
-namespace kudu {
+namespace pegasus {
 
 namespace subtle {
 
@@ -92,4 +92,4 @@ bool RefCountedThreadSafeBase::Release() const {
 
 }  // namespace subtle
 
-}  // namespace kudu
+}  // namespace pegasus

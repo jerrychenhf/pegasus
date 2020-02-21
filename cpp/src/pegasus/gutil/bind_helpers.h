@@ -4,7 +4,7 @@
 
 // This defines a set of argument wrappers and related factory methods that
 // can be used specify the refcounting and reference semantics of arguments
-// that are bound by the Bind() function in kudu/gutil/bind.h.
+// that are bound by the Bind() function in pegasus/gutil/bind.h.
 //
 // It also defines a set of simple functions and utilities that people want
 // when using Callback<> and Bind().
@@ -12,8 +12,8 @@
 //
 // ARGUMENT BINDING WRAPPERS
 //
-// The wrapper functions are kudu::Unretained(), kudu::Owned(), kudu::Passed(),
-// kudu::ConstRef(), and kudu::IgnoreResult().
+// The wrapper functions are pegasus::Unretained(), pegasus::Owned(), pegasus::Passed(),
+// pegasus::ConstRef(), and pegasus::IgnoreResult().
 //
 // Unretained() allows Bind() to bind a non-refcounted class, and to disable
 // refcounting on arguments that are refcounted objects.
@@ -153,7 +153,7 @@
 #define BASE_EXPORT
 
 
-namespace kudu {
+namespace pegasus {
 namespace internal {
 
 // Use the Substitution Failure Is Not An Error (SFINAE) trick to inspect T
@@ -546,6 +546,6 @@ void DeletePointer(T* obj) {
   delete obj;
 }
 
-}  // namespace kudu
+}  // namespace pegasus
 
 #endif  // BASE_BIND_HELPERS_H_
