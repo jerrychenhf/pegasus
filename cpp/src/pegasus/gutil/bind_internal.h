@@ -21,10 +21,10 @@
 
 // During Chromium import, WeakPtr-related code was removed.
 
-namespace kudu {
+namespace pegasus {
 namespace internal {
 
-// See kudu/gutil/callback.h for user documentation.
+// See pegasus/gutil/callback.h for user documentation.
 //
 //
 // CONCEPTS:
@@ -2690,6 +2690,6 @@ struct BindState<Runnable, RunType, void(P1, P2, P3, P4, P5, P6,
 };
 
 }  // namespace internal
-}  // namespace kudu
+}  // namespace pegasus
 
 #endif  // GUTIL_BIND_INTERNAL_H_

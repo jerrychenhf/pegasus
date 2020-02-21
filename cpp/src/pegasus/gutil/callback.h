@@ -31,8 +31,8 @@
 // much like lexical closures are used in other languages. For example, it
 // is used in Chromium code to schedule tasks on different MessageLoops.
 //
-// A callback with no unbound input parameters (kudu::Callback<void(void)>)
-// is called a kudu::Closure. Note that this is NOT the same as what other
+// A callback with no unbound input parameters (pegasus::Callback<void(void)>)
+// is called a pegasus::Closure. Note that this is NOT the same as what other
 // languages refer to as a closure -- it does not retain a reference to its
 // enclosing environment.
 //
@@ -53,7 +53,7 @@
 // BINDING A BARE FUNCTION
 //
 //   int Return5() { return 5; }
-//   kudu::Callback<int(void)> func_cb = kudu::Bind(&Return5);
+//   pegasus::Callback<int(void)> func_cb = pegasus::Bind(&Return5);
 //   LOG(INFO) << func_cb.Run();  // Prints 5.
 //
 // BINDING A CLASS METHOD
@@ -61,13 +61,13 @@
 //   The first argument to bind is the member function to call, the second is
 //   the object on which to call it.
 //
-//   class Ref : public kudu::RefCountedThreadSafe<Ref> {
+//   class Ref : public pegasus::RefCountedThreadSafe<Ref> {
 //    public:
 //     int Foo() { return 3; }
 //     void PrintBye() { LOG(INFO) << "bye."; }
 //   };
 //   scoped_refptr<Ref> ref = new Ref();
-//   kudu::Callback<void(void)> ref_cb = kudu::Bind(&Ref::Foo, ref);
+//   pegasus::Callback<void(void)> ref_cb = pegasus::Bind(&Ref::Foo, ref);
 //   LOG(INFO) << ref_cb.Run();  // Prints out 3.
 //
 //   By default the object must support RefCounted or you will get a compiler
@@ -80,14 +80,14 @@
 //   Callbacks can be run with their "Run" method, which has the same
 //   signature as the template argument to the callback.
 //
-//   void DoSomething(const kudu::Callback<void(int, std::string)>& callback) {
+//   void DoSomething(const pegasus::Callback<void(int, std::string)>& callback) {
 //     callback.Run(5, "hello");
 //   }
 //
 //   Callbacks can be run more than once (they don't get deleted or marked when
-//   run). However, this precludes using kudu::Passed (see below).
+//   run). However, this precludes using pegasus::Passed (see below).
 //
-//   void DoSomething(const kudu::Callback<double(double)>& callback) {
+//   void DoSomething(const pegasus::Callback<double(double)>& callback) {
 //     double myresult = callback.Run(3.14159);
 //     myresult += callback.Run(2.71828);
 //   }
@@ -98,7 +98,7 @@
 //   specified in the Callback template type:
 //
 //   void MyFunc(int i, const std::string& str) {}
-//   kudu::Callback<void(int, const std::string&)> cb = kudu::Bind(&MyFunc);
+//   pegasus::Callback<void(int, const std::string&)> cb = pegasus::Bind(&MyFunc);
 //   cb.Run(23, "hello, world");
 //
 // PASSING BOUND INPUT PARAMETERS
@@ -109,18 +109,18 @@
 //   calling.
 //
 //   void MyFunc(int i, const std::string& str) {}
-//   kudu::Callback<void(void)> cb = kudu::Bind(&MyFunc, 23, "hello world");
+//   pegasus::Callback<void(void)> cb = pegasus::Bind(&MyFunc, 23, "hello world");
 //   cb.Run();
 //
-//   A callback with no unbound input parameters (kudu::Callback<void(void)>)
-//   is called a kudu::Closure. So we could have also written:
+//   A callback with no unbound input parameters (pegasus::Callback<void(void)>)
+//   is called a pegasus::Closure. So we could have also written:
 //
-//   kudu::Closure cb = kudu::Bind(&MyFunc, 23, "hello world");
+//   pegasus::Closure cb = pegasus::Bind(&MyFunc, 23, "hello world");
 //
 //   When calling member functions, bound parameters just go after the object
 //   pointer.
 //
-//   kudu::Closure cb = kudu::Bind(&MyClass::MyFunc, this, 23, "hello world");
+//   pegasus::Closure cb = pegasus::Bind(&MyClass::MyFunc, this, 23, "hello world");
 //
 // PARTIAL BINDING OF PARAMETERS
 //
@@ -128,7 +128,7 @@
 //   the rest when you execute the callback.
 //
 //   void MyFunc(int i, const std::string& str) {}
-//   kudu::Callback<void(const std::string&)> cb = kudu::Bind(&MyFunc, 23);
+//   pegasus::Callback<void(const std::string&)> cb = pegasus::Bind(&MyFunc, 23);
 //   cb.Run("hello world");
 //
 //   When calling a function bound parameters are first, followed by unbound
@@ -141,7 +141,7 @@
 //
 // BINDING A CLASS METHOD WITH WEAK POINTERS
 //
-//   kudu::Bind(&MyClass::Foo, GetWeakPtr());
+//   pegasus::Bind(&MyClass::Foo, GetWeakPtr());
 //
 //   The callback will not be issued if the object is destroyed at the time
 //   it's issued. DANGER: weak pointers are not threadsafe, so don't use this
@@ -149,7 +149,7 @@
 //
 // BINDING A CLASS METHOD WITH MANUAL LIFETIME MANAGEMENT
 //
-//   kudu::Bind(&MyClass::Foo, kudu::Unretained(this));
+//   pegasus::Bind(&MyClass::Foo, pegasus::Unretained(this));
 //
 //   This disables all lifetime management on the object. You're responsible
 //   for making sure the object is alive at the time of the call. You break it,
@@ -158,7 +158,7 @@
 // BINDING A CLASS METHOD AND HAVING THE CALLBACK OWN THE CLASS
 //
 //   MyClass* myclass = new MyClass;
-//   kudu::Bind(&MyClass::Foo, kudu::Owned(myclass));
+//   pegasus::Bind(&MyClass::Foo, pegasus::Owned(myclass));
 //
 //   The object will be deleted when the callback is destroyed, even if it's
 //   not run (like if you post a task during shutdown). Potentially useful for
@@ -170,8 +170,8 @@
 //   that doesn't expect a return value.
 //
 //   int DoSomething(int arg) { cout << arg << endl; }
-//   kudu::Callback<void<int>) cb =
-//       kudu::Bind(kudu::IgnoreResult(&DoSomething));
+//   pegasus::Callback<void<int>) cb =
+//       pegasus::Bind(pegasus::IgnoreResult(&DoSomething));
 //
 //
 // -----------------------------------------------------------------------------
@@ -180,13 +180,13 @@
 //
 // Bound parameters are specified as arguments to Bind() and are passed to the
 // function. A callback with no parameters or no unbound parameters is called a
-// Closure (kudu::Callback<void(void)> and kudu::Closure are the same thing).
+// Closure (pegasus::Callback<void(void)> and pegasus::Closure are the same thing).
 //
 // PASSING PARAMETERS OWNED BY THE CALLBACK
 //
 //   void Foo(int* arg) { cout << *arg << endl; }
 //   int* pn = new int(1);
-//   kudu::Closure foo_callback = kudu::Bind(&foo, kudu::Owned(pn));
+//   pegasus::Closure foo_callback = pegasus::Bind(&foo, pegasus::Owned(pn));
 //
 //   The parameter will be deleted when the callback is destroyed, even if it's
 //   not run (like if you post a task during shutdown).
@@ -196,7 +196,7 @@
 //   void TakesOwnership(scoped_ptr<Foo> arg) {}
 //   scoped_ptr<Foo> f(new Foo);
 //   // f becomes null during the following call.
-//   kudu::Closure cb = kudu::Bind(&TakesOwnership, kudu::Passed(&f));
+//   pegasus::Closure cb = pegasus::Bind(&TakesOwnership, pegasus::Passed(&f));
 //
 //   Ownership of the parameter will be with the callback until the it is run,
 //   when ownership is passed to the callback function. This means the callback
@@ -207,7 +207,7 @@
 //
 //   void TakesOneRef(scoped_refptr<Foo> arg) {}
 //   scoped_refptr<Foo> f(new Foo)
-//   kudu::Closure cb = kudu::Bind(&TakesOneRef, f);
+//   pegasus::Closure cb = pegasus::Bind(&TakesOneRef, f);
 //
 //   This should "just work." The closure will take a reference as long as it
 //   is alive, and another reference will be taken for the called function.
@@ -216,7 +216,7 @@
 //
 //   void foo(int arg) { cout << arg << endl }
 //   int n = 1;
-//   kudu::Closure has_ref = kudu::Bind(&foo, kudu::ConstRef(n));
+//   pegasus::Closure has_ref = pegasus::Bind(&foo, pegasus::ConstRef(n));
 //   n = 2;
 //   has_ref.Run();  // Prints "2"
 //
@@ -280,7 +280,7 @@
 // To change this behavior, we introduce a set of argument wrappers
 // (e.g., Unretained(), and ConstRef()).  These are simple container templates
 // that are passed by value, and wrap a pointer to argument.  See the
-// file-level comment in kudu/gutil/bind_helpers.h for more info.
+// file-level comment in pegasus/gutil/bind_helpers.h for more info.
 //
 // These types are passed to the Unwrap() functions, and the MaybeRefcount()
 // functions respectively to modify the behavior of Bind().  The Unwrap()
@@ -342,7 +342,7 @@
 //      Bind(&Foo, "test");
 //      Bind(&Bar, "test");  // This fails because ptr is not const.
 
-namespace kudu {
+namespace pegasus {
 
 // First, we forward declare the Callback class template. This informs the
 // compiler that the template only has 1 type parameter which is the function
@@ -760,6 +760,6 @@ class Callback<R(A1, A2, A3, A4, A5, A6, A7)> : public internal::CallbackBase {
 // will be used in a lot of APIs with delayed execution.
 typedef Callback<void(void)> Closure;
 
-}  // namespace kudu
+}  // namespace pegasus
 
 #endif  // GUTIL_CALLBACK_H

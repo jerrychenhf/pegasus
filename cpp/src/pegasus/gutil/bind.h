@@ -17,7 +17,7 @@
 // Usage documentation
 // -----------------------------------------------------------------------------
 //
-// See kudu/gutil/callback.h for documentation.
+// See pegasus/gutil/callback.h for documentation.
 //
 //
 // -----------------------------------------------------------------------------
@@ -25,7 +25,7 @@
 // -----------------------------------------------------------------------------
 //
 // If you're reading the implementation, before proceeding further, you should
-// read the top comment of kudu/gutil/bind_internal.h for a definition of common
+// read the top comment of pegasus/gutil/bind_internal.h for a definition of common
 // terms and concepts.
 //
 // RETURN TYPES
@@ -51,7 +51,7 @@
 // need to crack open bind_internal.h.  On the other hand, it makes Bind()
 // harder to read.
 
-namespace kudu {
+namespace pegasus {
 
 template <typename Functor>
 Callback<
@@ -534,6 +534,6 @@ Bind(Functor functor, const P1& p1, const P2& p2, const P3& p3, const P4& p4,
           p7));
 }
 
-}  // namespace kudu
+}  // namespace pegasus
 
 #endif  // GUTIL_BIND_H_

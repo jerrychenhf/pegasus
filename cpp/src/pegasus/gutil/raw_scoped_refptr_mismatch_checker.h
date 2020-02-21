@@ -16,7 +16,7 @@
 // The following set of traits are designed to generate a compile error
 // whenever this antipattern is attempted.
 
-namespace kudu {
+namespace pegasus {
 
 // This is a base internal implementation file used by task.h and callback.h.
 // Not for public consumption, so we wrap it in namespace internal.
@@ -58,6 +58,6 @@ struct ParamsUseScopedRefptrCorrectly<std::tuple<Head, Tail...>> {
 
 }  // namespace internal
 
-}  // namespace kudu
+}  // namespace pegasus
 
 #endif  // GUTIL_RAW_SCOPED_REFPTR_MISMATCH_CHECKER_H_

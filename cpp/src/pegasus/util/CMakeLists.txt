@@ -42,6 +42,13 @@ add_library(Util
   disk-info.cc
   mem-info.cc
   debug-util.cc
+  slice.cc
+  cache.cc
+  flag_tags.cc
+  locks.cc
+  malloc.cc
+  faststring.cc
+  test_util_prod
 )
 add_dependencies(Util gen-deps)
 
