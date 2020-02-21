@@ -61,6 +61,14 @@ Status FlightInfoBuilder::GetFlightDescriptor(std::unique_ptr<rpc::FlightDescrip
 
 Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::FlightEndpoint>>* endpoints) {
   // fill ticket and locations in the endpoints
+  // every endpoint has 1 ticket + many locations
+  // every ticket has 1 dataset_path, 1 partition_id, many column indices.
+  // so, every endpoint = 1 dataset_path + 1 partition_id + many column indices + many locations.
+  // every dataset has 1 schema, 1 dataset_path, many partitions.
+  // every partition has 1 identity, 1 location.
+  // every identity has 1 dataset_path, 1 partition_id.
+  // so, every dataset has 1 schema + 1 dataset_path + many partition ids + many locations.
+
   // Ticket ticket;    std::string dataset_path;  std::string partition_identity;  std::vector<int> column_indices;
   // std::vector<Location> locations;
   rpc::Ticket tkt;

@@ -25,11 +25,11 @@
 #include "pegasus/runtime/exec_env.h"
 #include "pegasus/dataset/dataset_distributor.h"
 #include "consistent_hashing.h"
-
+#include "dataset_request.h"
 
 namespace pegasus
 {
-#if 0
+#if 1
 TEST(DatasetServiceTest, ConHashInit)
 {
   // 
@@ -89,8 +89,11 @@ TEST(DatasetServiceTest, DataSetStoreBasic)
   auto dsbuilder = std::make_shared<DataSetBuilder>(metadata_manager);
 //  std::cout << "addressof dsbuilder: " << std::addressof(dsbuilder) << std::endl;
 //  std::cout << "dsbuilder.get(): " << dsbuilder.get() << std::endl;
-  // Status DataSetBuilder::BuildDataset(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy)
-  st = dsbuilder->BuildDataset(test_dataset_path, &pds, CONHASH);
+  DataSetRequest dataset_request;
+  dataset_request.set_dataset_path(test_dataset_path);
+  // Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
+  //                                    std::shared_ptr<DataSet>* dataset, int distpolicy)
+  st = dsbuilder->BuildDataset(&dataset_request, &pds, CONHASH);
   ASSERT_OK(st);
   //Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset)
   st = dataset_store_test->InsertDataSet(pds);
@@ -121,8 +124,12 @@ TEST(DatasetServiceTest, DatasetService)
   std::string test_dataset_path = "hostnameplusfolderpath";
   auto parttftrs = std::make_shared<std::vector<Filter>>();
   // TODO: parse sql cmd here?
-  std::unique_ptr<rpc::FlightInfo> *out=nullptr;
-  Status st = dataset_service_->GetFlightInfo(test_dataset_path, parttftrs.get(), out);
+  std::unique_ptr<rpc::FlightInfo>* flight_info=nullptr;
+  DataSetRequest dataset_request;
+  dataset_request.set_dataset_path(test_dataset_path);
+  // Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
+  //                                   std::unique_ptr<rpc::FlightInfo>* flight_info)
+  Status st = dataset_service_->GetFlightInfo(&dataset_request, flight_info);
   ASSERT_OK(st);
 }
 #endif

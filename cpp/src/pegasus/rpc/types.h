@@ -249,13 +249,13 @@ struct PEGASUS_RPC_EXPORT Ticket {
   /// services) that may want to return Flight types.
   static arrow::Status Deserialize(const std::string& serialized, Ticket* out);
 
-  std::string getDatasetpath() const { return dataset_path; }
-  std::string getPartitionid() const { return partition_identity; }
-  std::vector<int> getColids() const { return column_indices; }
+  const std::string& getDatasetpath() const { return dataset_path; }
+  const std::string& getPartitionid() const { return partition_identity; }
+  const std::vector<int>& getColids() const { return column_indices; }
 
-  void setDatasetpath(std::string dspath) { dataset_path = dspath; }
-  void setPartitionid(std::string partid) { partition_identity = partid; }
-  void setColids(std::vector<int> colids) { column_indices = colids; }
+  void setDatasetpath(const std::string& dspath) { dataset_path = dspath; }
+  void setPartitionid(const std::string& partid) { partition_identity = partid; }
+  void setColids(const std::vector<int>& colids) { column_indices = colids; }
 };
 
 class FlightClient;
