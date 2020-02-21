@@ -83,30 +83,14 @@ arrow::Status PlannerTableAPIService::GetFlightInfo(const rpc::ServerCallContext
                                                     const rpc::FlightDescriptor& request,
                                                     std::unique_ptr<rpc::FlightInfo>* out) {
 
-  /*if (request.type == FlightDescriptor::PATH) {
-    std::vector<std::string> request_path = request.path;
-    if (request_path.size() != 1) {
-      return arrow::Status::Invalid("Invalid path");
-    }
-    std::string dataset_path = request_path[0];
 
-    dataset_service_->GetFlightInfo(dataset_path, out);
+  DataSetRequest dataset_request;
+  arrow::Status st = CreateDataSetRequest(request, &dataset_request);
+  if (!st.ok());
+    return st;
 
-    arrow::Status::OK();
-  }*/
-
-  if (request.type == rpc::FlightDescriptor::CMD) {
-    std::string request_table_name = request.cmd;
-    auto parttftrs = std::make_shared<std::vector<Filter>>();
-
-    Status st = dataset_service_->GetFlightInfo(request_table_name, parttftrs.get(), out);
-    if (!st.ok()) {
-      return arrow::Status(arrow::StatusCode(st.code()), st.message());
-    }
-    return arrow::Status::OK();
-  } else {
-    return arrow::Status::NotImplemented(request.type);
-  }
+  Status status = dataset_service_->GetFlightInfo(&dataset_request, out);
+  return status.toArrowStatus();
 }
 
 arrow::Status PlannerTableAPIService::Heartbeat(const rpc::ServerCallContext& context,
@@ -114,6 +98,35 @@ arrow::Status PlannerTableAPIService::Heartbeat(const rpc::ServerCallContext& co
   std::unique_ptr<rpc::HeartbeatResult>* response) {
   Status status = worker_manager_->Heartbeat(request, response);
   return status.toArrowStatus();
+}
+
+/// \brief Convert FlightDescriptor request to DataSetRequest
+/// \param[in] flight descriptor.
+/// \param[out] dataset request.
+/// \return Status
+arrow::Status PlannerTableAPIService::CreateDataSetRequest(const rpc::FlightDescriptor& descriptor,
+                                                           DataSetRequest* dataset_request) {
+  
+  dataset_request = new DataSetRequest();
+  if (descriptor.type == rpc::FlightDescriptor::PATH) {
+    std::vector<std::string> request_path = descriptor.path;
+    if (request_path.size() != 1) {
+      return arrow::Status::Invalid("Invalid dataset path, currently only supports one path");
+    }
+    std::string dataset_path = request_path[0];
+    dataset_request->set_dataset_path(dataset_path);
+  } else {
+    return arrow::Status::NotImplemented(descriptor.type);
+  }
+
+  if(!descriptor.options.empty() && descriptor.options.size() != 0) {
+    DataSetRequest::RequestOptions options_map;
+    for (const auto& option : descriptor.options) {
+      options_map.emplace(option.key, option.value);
+    }
+    dataset_request->set_options(&options_map);
+  }
+  return arrow::Status::OK();
 }
 
 }  // namespace pegasus

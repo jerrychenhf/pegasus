@@ -21,9 +21,10 @@
 #include <vector>
 #include <string>
 
-#include "pegasus/catalog/pegasus_catalog.h"
-#include "pegasus/catalog/spark_catalog.h"
-#include "pegasus/common/status.h"
+#include "catalog/pegasus_catalog.h"
+#include "catalog/spark_catalog.h"
+#include "dataset/dataset_request.h"
+#include "common/status.h"
 
 namespace pegasus {
 
@@ -45,8 +46,8 @@ class MetadataManager {
  public:
   MetadataManager();
 
-  std::string GetProvider(std::string dataset_path);
-  Status GetTableMeta(std::string dataset_path, std::shared_ptr<TableMetadata>* table_meta);
+  std::string GetProvider(DataSetRequest* dataset_request);
+  Status GetTableMeta(DataSetRequest* dataset_request, std::shared_ptr<TableMetadata>* table_meta);
   Status GetPartitionMeta(std::shared_ptr<std::vector<PartitionMetadata>>* partition_meta);
 
  private:

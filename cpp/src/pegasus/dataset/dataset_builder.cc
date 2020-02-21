@@ -17,19 +17,22 @@
 
 #include "pegasus/dataset/dataset_builder.h"
 
-#include "pegasus/dataset/partition.h"
-#include "pegasus/parquet/parquet_metadata.h"
-#include "pegasus/runtime/planner_exec_env.h"
-#include "consistent_hashing.h"
+#include "dataset/consistent_hashing.h"
+#include "dataset/dataset_request.h"
+#include "dataset/partition.h"
+#include "parquet/parquet_metadata.h"
+#include "runtime/planner_exec_env.h"
 
 namespace pegasus {
 
-DataSetBuilder::DataSetBuilder(std::shared_ptr<MetadataManager> metadata_manager) : metadata_manager_(metadata_manager) {
+DataSetBuilder::DataSetBuilder(std::shared_ptr<MetadataManager> metadata_manager)
+    : metadata_manager_(metadata_manager) {
   PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
   std::shared_ptr<StoragePluginFactory> storage_plugin_factory_ = env->get_storage_plugin_factory();
 }
 
-Status DataSetBuilder::BuildDataset(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy) {
+Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
+                                   std::shared_ptr<DataSet>* dataset, int distpolicy) {
 
 #if 0 //TODO: need redesign
   std::shared_ptr<DSDistributor> distributor;
@@ -63,16 +66,16 @@ Status DataSetBuilder::BuildDataset(std::string dataset_path, std::shared_ptr<Da
   auto vectident = std::make_shared<std::vector<Identity>>();
   auto partitions = std::make_shared<std::vector<Partition>>();
   // setup the identity vector for ondisk dataset
-  std::string provider = metadata_manager_->GetProvider(dataset_path);
+  std::string provider = metadata_manager_->GetProvider(dataset_request);
   if (provider == "spark") {
     std::shared_ptr<TableMetadata> table_meta;
-    metadata_manager_->GetTableMeta(dataset_path, &table_meta);
+    metadata_manager_->GetTableMeta(dataset_request, &table_meta);
     std::string table_location = table_meta->location_uri;
     storage_plugin_factory_->GetStoragePlugin(table_location, &storage_plugin_);
     std::vector<std::string> file_list;
-    storage_plugin_->ListFiles(dataset_path, &file_list);
+    storage_plugin_->ListFiles(table_location, &file_list);
     for (auto filepath : file_list) {
-      partitions->push_back(Partition(Identity(dataset_path, filepath)));
+      partitions->push_back(Partition(Identity(table_location, filepath)));
     }
   }
   // allocate location for each partition
@@ -81,7 +84,7 @@ Status DataSetBuilder::BuildDataset(std::string dataset_path, std::shared_ptr<Da
 
   // build dataset
   DataSet::Data dd;
-  dd.dataset_path = dataset_path;
+  dd.dataset_path = dataset_request->get_dataset_path();
   for (auto partt : *partitions)
     dd.partitions.push_back(partt);
 

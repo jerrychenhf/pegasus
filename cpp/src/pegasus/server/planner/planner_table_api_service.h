@@ -20,9 +20,9 @@
 
 #include <string>
 
-#include "pegasus/rpc/server.h"
-
+#include "dataset/dataset_request.h"
 #include "dataset/dataset_service.h"
+#include "rpc/server.h"
 #include "storage/storage_plugin.h"
 
 namespace pegasus {
@@ -66,6 +66,9 @@ class PEGASUS_EXPORT PlannerTableAPIService : public rpc::FlightServerBase {
   std::shared_ptr<DataSetService> dataset_service_;
   std::shared_ptr<WorkerManager> worker_manager_;
   PlannerExecEnv* env_;
+
+  arrow::Status CreateDataSetRequest(const rpc::FlightDescriptor& descriptor,
+                                     DataSetRequest* dataset_request);
 };
 
 }  // namespace pegasus

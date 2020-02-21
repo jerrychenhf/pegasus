@@ -52,9 +52,10 @@ Status DataSetService::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<D
   return Status::OK();
 }
 
-Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset) {
+Status DataSetService::GetDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset) {
 
   std::shared_ptr<DataSet> pds = NULL;
+  std::string dataset_path = dataset_request->get_dataset_path();
   dataset_store_->GetDataSet(dataset_path, &pds);
 
   if (pds == NULL) {
@@ -62,7 +63,7 @@ Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<Data
     // build the dataset and insert it to dataset store.
     auto dsbuilder = std::make_shared<DataSetBuilder>(metadata_manager_);
     // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
-    dsbuilder->BuildDataset(dataset_path, dataset, CONHASH);
+    dsbuilder->BuildDataset(dataset_request, dataset, CONHASH);
     // Begin Write
     (*dataset)->lockwrite();
 #if 0
@@ -92,12 +93,12 @@ Status DataSetService::GetDataSet(std::string dataset_path, std::shared_ptr<Data
   return Status::OK();
 }
 
-Status DataSetService::CacheDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy) {
+Status DataSetService::CacheDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset, int distpolicy) {
 
   // build the dataset and insert it to dataset store.
   auto dsbuilder = std::make_shared<DataSetBuilder>(metadata_manager_);
   // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
-  dsbuilder->BuildDataset(dataset_path, dataset, distpolicy);
+  dsbuilder->BuildDataset(dataset_request, dataset, distpolicy);
   // Begin Write
   (*dataset)->lockwrite();
   dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));
@@ -108,15 +109,16 @@ Status DataSetService::CacheDataSet(std::string dataset_path, std::shared_ptr<Da
 }
 
 /// Build FlightInfo from DataSet.
-Status DataSetService::GetFlightInfo(std::string dataset_path, 
-                      std::vector<Filter>* parttftrs, std::unique_ptr<rpc::FlightInfo>* flight_info) {
+Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
+                                     std::unique_ptr<rpc::FlightInfo>* flight_info) {
 
   std::shared_ptr<DataSet> dataset = nullptr;
-  Status st = GetDataSet(dataset_path, &dataset);
+  Status st = GetDataSet(dataset_request, &dataset);
   if (!st.ok()) {
     return st;
   }
   std::shared_ptr<ResultDataSet> rdataset;
+  std::vector<Filter>* parttftrs = dataset_request->get_filters();
   // Filter dataset
   dataset->lockread();
   st = FilterDataSet(parttftrs, dataset, &rdataset);

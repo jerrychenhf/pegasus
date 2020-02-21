@@ -15,32 +15,16 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_REQUEST_CONTEXT_H_
-#define PEGASUS_REQUEST_CONTEXT_H_
-
-#include <string>
-#include <vector>
-
-using namespace std;
+#include "dataset/filter.h"
 
 namespace pegasus {
 
-class RequestContext {
- public:
-  RequestContext();
-  ~RequestContext();
+Filter::Filter() {
 
-  std::string get_partition_path();
-  std::string get_format();
-  std::vector<int> get_conlumn_indices();
+}
 
-  private:
-   std::string partition_path;
-   std::string format;
-   std::vector<int> column_indices;
-};
+Filter::~Filter() {
 
+}
 
 } // namespace pegasus
-
-#endif  // PEGASUS_REQUEST_CONTEXT_H_

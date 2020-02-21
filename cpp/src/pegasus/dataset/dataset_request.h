@@ -15,7 +15,47 @@
 // specific language governing permissions and limitations
 // under the License.
 
+#ifndef PEGASUS_DATASET_REQUEST_H_
+#define PEGASUS_DATASET_REQUEST_H_
+
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include "dataset/filter.h"
+
+using namespace std;
+
 namespace pegasus {
+
+class DataSetRequest {
+
+ public:
+  DataSetRequest();
+  ~DataSetRequest();
+  
+  typedef std::unordered_map<std::string, std::string> RequestOptions;
+
+  void set_dataset_path(std::string dataset_path);
+  void set_options(RequestOptions *options);
+
+  std::string get_dataset_path();
+  RequestOptions* get_options();
+  std::string get_format();
+  std::vector<uint32_t>* get_column_indices();
+  std::vector<Filter>* get_filters();
+
+  private:
+   std::string dataset_path_;
+   RequestOptions* options_;
+
+   std::string format_;
+   std::vector<uint32_t>* column_indices_;
+   std::vector<Filter>* filters_;
+};
 
 
 } // namespace pegasus
+
+#endif  // PEGASUS_DATASET_REQUEST_H_
