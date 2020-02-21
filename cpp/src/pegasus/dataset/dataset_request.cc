@@ -15,36 +15,44 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/catalog/metadata_manager.h"
+#include "dataset/dataset_request.h"
 
 namespace pegasus {
 
-TableMetadata::TableMetadata() {
+  DataSetRequest::DataSetRequest() {
 
-}
 
-PartitionMetadata::PartitionMetadata() {
+  }
+  DataSetRequest::~DataSetRequest() {
+
+  }
     
-}
+  void DataSetRequest::set_dataset_path(std::string dataset_path) {
 
-MetadataManager::MetadataManager() {
+  }
 
-}
+  void DataSetRequest::set_options(DataSetRequest::RequestOptions *options) {
+    options_ = options;
+  }
 
-std::string MetadataManager::GetProvider(DataSetRequest* dataset_request) {
-    
-}
+  std::string DataSetRequest::get_dataset_path() {
+    return dataset_path_;
+  }
 
-Status MetadataManager::GetTableMeta(DataSetRequest* dataset_request,
-    std::shared_ptr<TableMetadata>* table_meta) {
+  DataSetRequest::RequestOptions* DataSetRequest::get_options() {
+    return options_;
+  }
 
-}
+  std::string DataSetRequest::get_format() {
+    return format_;
+  }
 
-Status MetadataManager::GetPartitionMeta(
-    std::shared_ptr<std::vector<PartitionMetadata>>* partition_meta) {
+  std::vector<uint32_t>* DataSetRequest::get_column_indices() {
+    return column_indices_;
+  }
 
-}
-
-
+  std::vector<Filter>* DataSetRequest::get_filters() {
+    return filters_;
+  }
 
 } // namespace pegasus

@@ -15,36 +15,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/catalog/metadata_manager.h"
+#ifndef PEGASUS_FILTER_H
+#define PEGASUS_FILTER_H
 
 namespace pegasus {
 
-TableMetadata::TableMetadata() {
+class Filter {
+ public:
+  Filter();
+  ~Filter();
 
-}
-
-PartitionMetadata::PartitionMetadata() {
-    
-}
-
-MetadataManager::MetadataManager() {
-
-}
-
-std::string MetadataManager::GetProvider(DataSetRequest* dataset_request) {
-    
-}
-
-Status MetadataManager::GetTableMeta(DataSetRequest* dataset_request,
-    std::shared_ptr<TableMetadata>* table_meta) {
-
-}
-
-Status MetadataManager::GetPartitionMeta(
-    std::shared_ptr<std::vector<PartitionMetadata>>* partition_meta) {
-
-}
-
-
+};
 
 } // namespace pegasus
+
+#endif  // PEGASUS_FILTER_H

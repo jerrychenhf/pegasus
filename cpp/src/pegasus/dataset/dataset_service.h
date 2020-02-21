@@ -24,7 +24,9 @@
 #include "dataset/dataset.h"
 #include "dataset/dataset_store.h"
 #include "dataset/dataset_builder.h"
+#include "dataset/dataset_request.h"
 #include "dataset/flightinfo_builder.h"
+#include "dataset/filter.h"
 #include "runtime/planner_exec_env.h"
 #include "server/planner/worker_manager.h"
 
@@ -39,8 +41,6 @@ class FlightListing;
 
 }  // namespace rpc
 
-class Filter{}; //to pass compile
-
 class DataSetService {
  public:
   DataSetService();
@@ -48,11 +48,11 @@ class DataSetService {
   Status Init();
   Status Start();
   Status Stop();
-  Status GetFlightInfo(std::string dataset_path, std::vector<Filter>* parttftrs, std::unique_ptr<rpc::FlightInfo>* flight_info);
+  Status GetFlightInfo(DataSetRequest* dataset_request, std::unique_ptr<rpc::FlightInfo>* flight_info);
   Status GetFlightListing(std::unique_ptr<rpc::FlightListing>* listings);
   Status GetDataSets( std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets);
-  Status GetDataSet(std::string table_name, std::shared_ptr<DataSet>* dataset);
-  Status CacheDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset, int distpolicy);
+  Status GetDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset);
+  Status CacheDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset, int distpolicy);
   Status FilterDataSet(std::vector<Filter>* parttftr, std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet>* resultdataset);
  private:
   std::shared_ptr<WorkerManager> worker_manager_;

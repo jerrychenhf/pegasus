@@ -23,10 +23,12 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/dataset")
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/dataset")
 
 add_library(DataSet
+  filter.cc
   partition.cc
   identity.cc
   consistent_hashing.cc
   dataset_listing.cc
+  dataset_request.cc
   dataset_service.cc
   dataset_store.cc
   dataset.cc
