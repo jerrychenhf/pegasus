@@ -114,6 +114,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
   const std::vector<int>& col_ids,
   std::shared_ptr<CacheEngine> cache_engine,
   std::unordered_map<string, std::shared_ptr<CachedColumn>>& retrieved_columns) {
+    std::string dataset_path = request_identity->dataset_path();
     std::string partition_path = request_identity->partition_path();
     std::shared_ptr<StoragePlugin> storage_plugin;
 
@@ -143,7 +144,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, colId, cache_region));
       retrieved_columns.insert(std::make_pair(std::to_string(*iter), column));
-      RETURN_IF_ERROR(cache_engine->PutValue(partition_path, colId));
+      RETURN_IF_ERROR(cache_engine->PutValue(dataset_path, partition_path, colId));
     }
     
     return Status::OK();

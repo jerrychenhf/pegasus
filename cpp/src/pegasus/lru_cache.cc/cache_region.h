@@ -15,25 +15,39 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "dataset/cache_engine.h"
+#ifndef PEGASUS_CACHE_REGION_H
+#define PEGASUS_CACHE_REGION_H
+
+#include "dataset/cache_store.h"
+
+#include <string>
+#include "arrow/table.h"
 
 using namespace std;
+using namespace arrow;
 
 namespace pegasus {
+  
+class CacheMemoryPool;
 
-LruCacheEngine::LruCacheEngine(int64_t capacity)
-  : cache_store_manager_(new CacheStoreManager()) {
-}
-
-Status LruCacheEngine::Init() {
-  RETURN_IF_ERROR(cache_store_manager_->Init());
-  return Status::OK();
-}
-
-Status LruCacheEngine::PutValue(std::string dataset_path, std::string partition_path, int column_id) {
-  CacheEntryKey key = CacheEntryKey(partition_path, column_id);
-  return Status::OK();
-}
-
+class CacheRegion {
+ public:
+  CacheRegion();
+  CacheRegion(const std::shared_ptr<CacheMemoryPool>& memory_pool,
+    const std::shared_ptr<arrow::ChunkedArray>& chunked_array, int64_t size);
+  
+  ~CacheRegion();
+  
+  int64_t size() const;
+  arrow::ChunkedArray* chunked_array() const;
+ private:
+  // the pool object associated to the chunked array
+  // use shared ptr to managed the life time
+  std::shared_ptr<CacheMemoryPool> memory_pool_;
+  std::shared_ptr<arrow::ChunkedArray> chunked_array_;
+  int64_t size_;
+};
 
 } // namespace pegasus
+
+#endif  // PEGASUS_CACHE_REGION_H
