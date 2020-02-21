@@ -118,10 +118,9 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
     return st;
   }
   std::shared_ptr<ResultDataSet> rdataset;
-  std::vector<Filter>* parttftrs = dataset_request->get_filters();
   // Filter dataset
   dataset->lockread();
-  st = FilterDataSet(parttftrs, dataset, &rdataset);
+  st = FilterDataSet(dataset_request->get_filters(), dataset, &rdataset);
   dataset->unlockread();
   // Note: we can also release the dataset readlock here, the benefit is it avoids dataset mem copy.
   if (!st.ok()) {
@@ -131,7 +130,7 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   return flightinfo_builder_->BuildFlightInfo(flight_info);
 }
 
-Status DataSetService::FilterDataSet(std::vector<Filter>* parttftr, std::shared_ptr<DataSet> dataset,
+Status DataSetService::FilterDataSet(const std::vector<Filter>& parttftr, std::shared_ptr<DataSet> dataset,
                                      std::shared_ptr<ResultDataSet>* resultdataset)
 {
   //TODO: filter the dataset

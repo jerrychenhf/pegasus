@@ -27,31 +27,31 @@ namespace pegasus {
 
   }
     
-  void DataSetRequest::set_dataset_path(std::string dataset_path) {
-
+  void DataSetRequest::set_dataset_path(const std::string& dataset_path) {
+    dataset_path_ = dataset_path;
   }
 
-  void DataSetRequest::set_options(DataSetRequest::RequestOptions *options) {
+  void DataSetRequest::set_options(const DataSetRequest::RequestProperties& options) {
     options_ = options;
   }
 
-  std::string DataSetRequest::get_dataset_path() {
+  const std::string& DataSetRequest::get_dataset_path() {
     return dataset_path_;
   }
 
-  DataSetRequest::RequestOptions* DataSetRequest::get_options() {
+  const DataSetRequest::RequestProperties& DataSetRequest::get_options() {
     return options_;
   }
 
-  std::string DataSetRequest::get_format() {
+  const std::string& DataSetRequest::get_format() {
     return format_;
   }
 
-  std::vector<uint32_t>* DataSetRequest::get_column_indices() {
+  const std::vector<uint32_t>& DataSetRequest::get_column_indices() {
     return column_indices_;
   }
 
-  std::vector<Filter>* DataSetRequest::get_filters() {
+  const std::vector<Filter>& DataSetRequest::get_filters() {
     return filters_;
   }
 

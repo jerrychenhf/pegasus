@@ -34,25 +34,25 @@ class DataSetRequest {
  public:
   DataSetRequest();
   ~DataSetRequest();
-  
-  typedef std::unordered_map<std::string, std::string> RequestOptions;
 
-  void set_dataset_path(std::string dataset_path);
-  void set_options(RequestOptions *options);
+  typedef std::unordered_map<std::string, std::string> RequestProperties;
 
-  std::string get_dataset_path();
-  RequestOptions* get_options();
-  std::string get_format();
-  std::vector<uint32_t>* get_column_indices();
-  std::vector<Filter>* get_filters();
+  void set_dataset_path(const std::string& dataset_path);
+  void set_options(const RequestProperties& options);
+
+  const std::string& get_dataset_path();
+  const RequestProperties& get_options();
+  const std::string& get_format();
+  const std::vector<uint32_t>& get_column_indices();
+  const std::vector<Filter>& get_filters();
 
   private:
    std::string dataset_path_;
-   RequestOptions* options_;
+   RequestProperties options_;
 
    std::string format_;
-   std::vector<uint32_t>* column_indices_;
-   std::vector<Filter>* filters_;
+   std::vector<uint32_t> column_indices_;
+   std::vector<Filter> filters_;
 };
 
 

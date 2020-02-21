@@ -120,8 +120,7 @@ arrow::Status PlannerTableAPIService::CreateDataSetRequest(const rpc::FlightDesc
   }
 
   if(!descriptor.properties.empty()) {
-    //TODO Jiajia
-    //dataset_request->set_options(&descriptor.properties);
+    dataset_request->set_options(descriptor.properties);
   }
   return arrow::Status::OK();
 }

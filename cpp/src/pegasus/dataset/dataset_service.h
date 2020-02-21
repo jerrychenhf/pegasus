@@ -53,7 +53,7 @@ class DataSetService {
   Status GetDataSets( std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets);
   Status GetDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset);
   Status CacheDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset, int distpolicy);
-  Status FilterDataSet(std::vector<Filter>* parttftr, std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet>* resultdataset);
+  Status FilterDataSet(const std::vector<Filter>& parttftr, std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet>* resultdataset);
  private:
   std::shared_ptr<WorkerManager> worker_manager_;
   std::shared_ptr<FlightInfoBuilder> flightinfo_builder_;

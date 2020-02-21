@@ -21,11 +21,13 @@ namespace pegasus {
 
 using ParquetFileReader = parquet::ParquetFileReader;
 
-ParquetMetadata::ParquetMetadata(std::shared_ptr<std::vector<std::string>> flie_path_list) {
+ParquetMetadata::ParquetMetadata(
+    std::shared_ptr<std::vector<std::string>> flie_path_list) {
 
 }
 
-Status ParquetMetadata::GetFilesMeta(std::shared_ptr<std::vector<std::shared_ptr<FileMetaData>>>* files_metadata) {
+Status ParquetMetadata::GetFilesMeta(
+    std::shared_ptr<std::vector<std::shared_ptr<FileMetaData>>>* files_metadata) {
 
 }
 
