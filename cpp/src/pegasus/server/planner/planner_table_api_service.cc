@@ -120,7 +120,7 @@ arrow::Status PlannerTableAPIService::CreateDataSetRequest(const rpc::FlightDesc
   }
 
   if(!descriptor.properties.empty()) {
-    dataset_request->set_options(descriptor.properties);
+    dataset_request->set_properties(descriptor.properties);
   }
   return arrow::Status::OK();
 }

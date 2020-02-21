@@ -31,16 +31,16 @@ namespace pegasus {
     dataset_path_ = dataset_path;
   }
 
-  void DataSetRequest::set_options(const DataSetRequest::RequestProperties& options) {
-    options_ = options;
+  void DataSetRequest::set_properties(const DataSetRequest::RequestProperties& properties) {
+    properties_ = properties;
   }
 
   const std::string& DataSetRequest::get_dataset_path() {
     return dataset_path_;
   }
 
-  const DataSetRequest::RequestProperties& DataSetRequest::get_options() {
-    return options_;
+  const DataSetRequest::RequestProperties& DataSetRequest::get_properties() {
+    return properties_;
   }
 
   const std::string& DataSetRequest::get_format() {
