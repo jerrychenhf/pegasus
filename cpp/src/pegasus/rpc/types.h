@@ -25,6 +25,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <unordered_map>
 
 #include "rpc/visibility.h"
 #include "arrow/ipc/writer.h"
@@ -163,20 +164,6 @@ struct PEGASUS_RPC_EXPORT BasicAuth {
   static arrow::Status Serialize(const BasicAuth& basic_auth, std::string* out);
 };
 
-struct PEGASUS_RPC_EXPORT Option {
-  std::string key;
-  std::string value;
-
-  bool Equals(const Option& other) const;
-
-  friend bool operator==(const Option& left, const Option& right) {
-    return left.Equals(right);
-  }
-  friend bool operator!=(const Option& left, const Option& right) {
-    return !(left == right);
-  }
-};
-
 /// \brief A request to retrieve or generate a dataset
 struct PEGASUS_RPC_EXPORT FlightDescriptor {
 
@@ -197,7 +184,7 @@ struct PEGASUS_RPC_EXPORT FlightDescriptor {
   /// when type is PATH
   std::vector<std::string> path;
 
-  std::vector<Option> options;
+  std::unordered_map<std::string, std::string> properties;
 
   bool Equals(const FlightDescriptor& other) const;
 

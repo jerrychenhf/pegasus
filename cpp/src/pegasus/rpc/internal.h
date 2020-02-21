@@ -90,7 +90,6 @@ arrow::Status FromProto(const pb::Location& pb_location, Location* location);
 arrow::Status FromProto(const pb::Ticket& pb_ticket, Ticket* ticket);
 arrow::Status FromProto(const pb::FlightData& pb_data, FlightDescriptor* descriptor,
                  std::unique_ptr<arrow::ipc::Message>* message);
-arrow::Status FromProto(const pb::Option& pb_option, Option* option);
 arrow::Status FromProto(const pb::FlightDescriptor& pb_descr, FlightDescriptor* descr);
 arrow::Status FromProto(const pb::FlightEndpoint& pb_endpoint, FlightEndpoint* endpoint);
 arrow::Status FromProto(const pb::FlightInfo& pb_info, FlightInfo::Data* info);
@@ -100,7 +99,6 @@ arrow::Status FromProto(const pb::NodeInfo& pb_info, NodeInfo* info);
 arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info);
 arrow::Status FromProto(const pb::HeartbeatResult& pb_result, HeartbeatResult* result);
 
-arrow::Status ToProto(const Option& option, pb::Option* pb_option);
 arrow::Status ToProto(const FlightDescriptor& descr, pb::FlightDescriptor* pb_descr);
 arrow::Status ToProto(const FlightInfo& info, pb::FlightInfo* pb_info);
 arrow::Status ToProto(const ActionType& type, pb::ActionType* pb_type);

@@ -77,19 +77,15 @@ arrow::Status MakeFlightError(FlightStatusCode code, const std::string& message)
   return arrow::Status(arrow_code, message, std::make_shared<FlightStatusDetail>(code));
 }
 
-bool Option::Equals(const Option& other) const {
-  return key == other.key && value == other.value;
-}
-
 bool FlightDescriptor::Equals(const FlightDescriptor& other) const {
   if (type != other.type) {
     return false;
   }
   switch (type) {
     case PATH:
-      return path == other.path && options == other.options;
+      return path == other.path && properties == other.properties;
     case CMD:
-      return cmd == other.cmd && options == other.options;
+      return cmd == other.cmd && properties == other.properties;
     default:
       return false;
   }

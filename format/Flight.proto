@@ -189,11 +189,6 @@ message SchemaResult {
   bytes schema = 1;
 }
 
-message Option {
-  string key = 1;
-  string value = 2;
-}
-
 /*
  * The name or tag for a Flight. May be used as a way to retrieve or generate
  * a flight or be used to expose a set of previously defined flights.
@@ -235,7 +230,10 @@ message FlightDescriptor {
    */
   repeated string path = 3;
 
-  repeated Option option = 4;
+  /*
+   * Any additional properties
+   */
+  map<string, string> properties = 4;
 }
 
 /*
