@@ -56,21 +56,18 @@ void AssertEqual(const ActionType& expected, const ActionType& actual) {
   ASSERT_EQ(expected.description, actual.description);
 }
 
-void AssertEqual(const Option& expected, const Option& actual) {
-  ASSERT_EQ(expected, actual);
-}
-
 void AssertEqual(const FlightDescriptor& expected, const FlightDescriptor& actual) {
   ASSERT_EQ(expected.type, actual.type);
   ASSERT_EQ(expected.cmd, actual.cmd);
   ASSERT_EQ(expected.path, actual.path);
-  ASSERT_EQ(expected.options.size(), actual.options.size());
-  for (size_t i = 0; i < expected.options.size(); ++i) {
-    AssertEqual(expected.options[i], actual.options[i]);
-  }
+  ASSERT_EQ(expected.properties, actual.properties);
+  // for (size_t i = 0; i < expected.properties.size(); ++i) {
+  //   AssertEqual(expected.properties[i], actual.properties[i]);
+  // }
 }
 
 void AssertEqual(const Ticket& expected, const Ticket& actual) {
+  ASSERT_EQ(expected.dataset_path, actual.dataset_path);
   ASSERT_EQ(expected.partition_identity, actual.partition_identity);
 }
 
@@ -150,7 +147,9 @@ TEST(TestFlightDescriptor, ToFromProto) {
 
   FlightDescriptor descr_test3;
   pb::FlightDescriptor pb_descr3;
-  std::vector<Option> options{Option{"key1", "value1"}, Option{"key2", "value2"}};
+  std::unordered_map<std::string, std::string> options;
+  options.insert(std::make_pair("key1", "value1"));
+  options.insert(std::make_pair("key2", "value"));
   FlightDescriptor descr3{FlightDescriptor::PATH, "", {"foo", "bar"}, options};
   ASSERT_OK(internal::ToProto(descr3, &pb_descr3));
   ASSERT_OK(internal::FromProto(pb_descr3, &descr_test3));
@@ -203,11 +202,12 @@ TEST(TestFlight, ConnectUri) {
 }
 
 TEST(TestFlight, RoundTripTypes) {
-  Ticket ticket{"foo"};
+  Ticket ticket{"aaa", "foo"};
   std::string ticket_serialized;
   Ticket ticket_deserialized;
   ASSERT_OK(ticket.SerializeToString(&ticket_serialized));
   ASSERT_OK(Ticket::Deserialize(ticket_serialized, &ticket_deserialized));
+  ASSERT_EQ(ticket.dataset_path, ticket_deserialized.dataset_path);
   ASSERT_EQ(ticket.partition_identity, ticket_deserialized.partition_identity);
 
   FlightDescriptor desc = FlightDescriptor::Command("select * from foo;");
