@@ -29,7 +29,7 @@
 
 namespace pegasus
 {
-/*
+
 TEST(DatasetServiceTest, ConHashBasic)
 {
   // 
@@ -111,6 +111,6 @@ TEST(DatasetServiceTest, DatasetService)
   Status st = dataset_service_->GetFlightInfo(test_dataset_path, parttftrs.get(), out);
   ASSERT_OK(st);
 }
-*/
+
 } // namespace pegasus
 PEGASUS_TEST_MAIN();
