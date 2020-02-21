@@ -15,7 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/dataset/flightinfo_builder.h"
+#include "dataset/flightinfo_builder.h"
+#include "rpc/types.h"
 
 namespace pegasus {
 
@@ -59,6 +60,16 @@ Status FlightInfoBuilder::GetFlightDescriptor(std::unique_ptr<rpc::FlightDescrip
 }
 
 Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::FlightEndpoint>>* endpoints) {
+  // fill ticket and locations in the endpoints
+  // Ticket ticket;    std::string dataset_path;  std::string partition_identity;  std::vector<int> column_indices;
+  // std::vector<Location> locations;
+  rpc::Ticket tkt;
+  tkt.setDatasetpath(dataset_->dataset_path());
+//  tkt.setPartitionid(dataset_->);
+//  tkt.set
+  rpc::FlightEndpoint fep;
+
+  (*endpoints)->push_back(fep);
 
   return Status::OK();
 }

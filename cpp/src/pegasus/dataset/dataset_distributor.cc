@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/util/consistent_hashing.h"
+#include "consistent_hashing.h"
 
 namespace pegasus {
 

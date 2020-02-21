@@ -92,7 +92,7 @@ private:
 class PEGASUS_EXPORT DataSet {
  public:
   struct Data {
-    std::string schema;
+    std::vector<std::string> schema; //colname
     /// Path identifying a particular dataset. 
     std::string dataset_path;
     std::vector<Partition> partitions;
@@ -133,7 +133,7 @@ class PEGASUS_EXPORT DataSet {
 class PEGASUS_EXPORT ResultDataSet {
  public:
   struct Data {
-    std::string schema;
+    std::vector<std::string> schema; //colname
     /// Path identifying a particular dataset. 
     std::string dataset_path;
     std::vector<Partition> partitions;

@@ -26,6 +26,7 @@ struct conhash_s* ConsistentHashRing::conhash = NULL;
 ConsistentHashRing::ConsistentHashRing()
 {
 //	distpolicy_ = CONHASH;
+	validlocations_ = nullptr;
 }
 
 ConsistentHashRing::~ConsistentHashRing()
@@ -65,15 +66,18 @@ void ConsistentHashRing::SetupDist()
 		ConsistentHashRing::conhash = conhash_init(NULL);
 	}
 //	std::vector<std::shared_ptr<Location>> lcns;
-	for (auto lcn:(*validlocations_)) {
-		AddLocation(*lcn);
+	if (validlocations_)
+	{
+		for (auto lcn:(*validlocations_)) {
+			AddLocation(*lcn);
+		}
 	}
 }
 
 void ConsistentHashRing::AddLocation(Location location)
 {
-  //TO CORRECT: get from worker registation instead of Location
-  uint32_t cacheSize = 512; //GB
+	//TO CORRECT: get from worker registation instead of Location
+	uint32_t cacheSize = 512; //GB
 	int num_vn = cacheSize / 10;
 	num_vn = std::max(MIN_VIRT_NODE_NUM, num_vn);
 	num_vn = std::min(MAX_VIRT_NODE_NUM, num_vn);
@@ -127,13 +131,12 @@ void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>
 {
 	const struct node_s* pnode;
 	for (auto partt:(*partitions))
-//	for (auto ident:(*vectident))
 	{
 		std::string idstr = partt.GetIdentPath();
 		pnode = conhash_lookup(conhash, idstr.c_str());
 		// create the location object and fill with phynode's location (uri).
 		Location lcn;
-		lcn.Parse(pnode->iden, &lcn);  	//TODO: refactor Location::Parse()?
+		lcn.Parse(pnode->iden, &lcn);
 		partt.UpdateLocation(lcn);
 	}
 }

@@ -30,7 +30,7 @@ class Identity {
 public:
   Identity() {}
   Identity(std::string dataset_path, std::string partition_id);
-  
+
   std::string dataset_path() const;
   std::string partition_id() const;
   

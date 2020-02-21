@@ -29,9 +29,9 @@ namespace pegasus {
 class Partition {
   ///  identify;
   Identity identity;
-
   /// The location where identity can be redeemed. 
   Location location;
+
 public:
   Partition(Identity id): identity(id) {};
   Partition(Identity id, Location loc): identity(id), location(loc) {};

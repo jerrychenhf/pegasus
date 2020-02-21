@@ -29,6 +29,18 @@
 
 namespace pegasus
 {
+#if 0
+TEST(DatasetServiceTest, ConHashInit)
+{
+  // 
+//  std::cout << "ConHashInit..." << std::endl;
+  auto distributor = std::make_shared<ConsistentHashRing>();
+  // setup the distribution engine
+  distributor->SetupDist();
+//  std::cout << "ConHash SetupDist() done." << std::endl;
+
+//  std::cout << "...ConHashInit" << std::endl;
+}
 
 TEST(DatasetServiceTest, ConHashBasic)
 {
@@ -47,8 +59,10 @@ TEST(DatasetServiceTest, ConHashBasic)
   distributor->SetupDist();
 
   // generate partitions
+  std::string test_dataset_path = "hostnameplusfolderpath";
   auto partitions = std::make_shared<std::vector<Partition>>();
-  // TODO
+  partitions->push_back(Partition(Identity(test_dataset_path, "partitionfile1")));
+  partitions->push_back(Partition(Identity(test_dataset_path, "partitionfile2")));
 
   // get location for each partition and assign it
   distributor->GetDistLocations(partitions);
@@ -111,6 +125,6 @@ TEST(DatasetServiceTest, DatasetService)
   Status st = dataset_service_->GetFlightInfo(test_dataset_path, parttftrs.get(), out);
   ASSERT_OK(st);
 }
-
+#endif
 } // namespace pegasus
 PEGASUS_TEST_MAIN();
