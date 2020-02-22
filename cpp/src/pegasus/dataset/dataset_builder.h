@@ -48,8 +48,6 @@ class DataSetBuilder {
 //  std::string dataset_path;
 //  std::shared_ptr<std::vector<std::string>> file_list_;
 //  std::shared_ptr<std::vector<Location>> vectloc_;
-  std::shared_ptr<StoragePlugin> storage_plugin_;
-  std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
   std::shared_ptr<CatalogManager> catalog_manager_;
 };
 

@@ -18,8 +18,9 @@
 #ifndef PEGASUS_SPARK_CATALOG_H
 #define PEGASUS_SPARK_CATALOG_H
 
-#include "pegasus/catalog/catalog.h"
-#include "pegasus/common/status.h"
+#include "catalog/catalog.h"
+#include "storage/storage_plugin.h"
+#include "storage/storage_plugin_factory.h"
 
 #include <string>
 
@@ -32,12 +33,11 @@ class SparkCatalog : public Catalog {
   SparkCatalog();
   ~SparkCatalog();
 
-  Status GetTableMeta(DataSetRequest* dataset_request,
-      std::shared_ptr<TableMetadata>* table_meta);
-  Status GetPartitionMeta(DataSetRequest* dataset_request,
-      std::shared_ptr<std::vector<PartitionMetadata>>* partition_meta);
+  Status GetPartitions(DataSetRequest* dataset_request,
+      std::shared_ptr<std::vector<Partition>>* partitions);
   
-
+  private:
+    std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
 };
 
 } // namespace pegasus

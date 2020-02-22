@@ -22,11 +22,54 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/catalog")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/catalog")
 
-add_library(Metadata
+add_library(Catalog
   spark_catalog.cc
   pegasus_catalog.cc
   catalog_manager.cc
 )
-add_dependencies(Metadata gen-deps)
+add_dependencies(Catalog gen-deps)
 
+if(PEGASUS_TEST_LINKAGE STREQUAL "static")
+  set(PEGASUS_CATALOG_TEST_LINK_LIBS
+      Catalog
+      Runtime
+      Common
+      Util
+      Planner
+      pegasus_rpc_shared
+      ${ARROW_STATIC_LIB}
+      ${PEGASUS_TEST_STATIC_LINK_LIBS})
+else()
+  set(PEGASUS_CATALOG_TEST_LINK_LIBS
+      Catalog
+      Runtime
+      Common
+      Util
+      Planner
+      pegasus_rpc_shared
+      ${ARROW_SHARED_LIB}
+      ${PEGASUS_TEST_SHARED_LINK_LIBS})
+endif()
+
+# Adding unit tests part of the "catalog" portion of the test suite
+function(ADD_PEGASUS_CATALOG_TEST REL_TEST_NAME)
+  set(options)
+  set(one_value_args PREFIX)
+  set(multi_value_args LABELS)
+  cmake_parse_arguments(ARG
+                        "${options}"
+                        "${one_value_args}"
+                        "${multi_value_args}"
+                        ${ARGN})
+
+  add_pegasus_test(${REL_TEST_NAME}
+                 EXTRA_LINK_LIBS
+                 ${PEGASUS_CATALOG_TEST_LINK_LIBS})
+endfunction()
+
+if(PEGASUS_BUILD_TESTS)
+
+  add_pegasus_catalog_test(catalog_test)
+
+endif()
 

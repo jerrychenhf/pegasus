@@ -99,7 +99,7 @@ include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 
 set (PEGASUS_LIBS
   Cache
-  Metadata
+  Catalog
   Common
   DataSet
   Parquet

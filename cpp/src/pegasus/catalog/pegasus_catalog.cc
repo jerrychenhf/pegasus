@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/catalog/pegasus_catalog.h"
+#include "catalog/pegasus_catalog.h"
 
 using namespace std;
 
@@ -29,14 +29,10 @@ PegasusCatalog::~PegasusCatalog() {
     
 }
 
-Status PegasusCatalog::GetTableMeta(DataSetRequest* dataset_request,
-    std::shared_ptr<TableMetadata>* table_meta) {
-
-}
-
-Status PegasusCatalog::GetPartitionMeta(DataSetRequest* dataset_request,
-    std::shared_ptr<std::vector<PartitionMetadata>>* partition_meta) {
-
+Status PegasusCatalog::GetPartitions(DataSetRequest* dataset_request,
+    std::shared_ptr<std::vector<Partition>>* partitions) {
+        
+  return Status::NotImplemented("Pegasus Catalog not yet implemented.");
 }
 
 } // namespace pegasus

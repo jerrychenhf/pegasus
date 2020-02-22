@@ -19,20 +19,22 @@
 
 namespace pegasus {
 
-TableMetadata::TableMetadata() {
-
-}
-
-PartitionMetadata::PartitionMetadata() {
-    
-}
-
 CatalogManager::CatalogManager()
   : spark_catalog_(new SparkCatalog()), pegasus_catalog_(new PegasusCatalog()) {
 }
 
 Status CatalogManager::GetCatalog(DataSetRequest* dataset_request,
     std::shared_ptr<Catalog>* catalog) {
+  
+  const auto properties = dataset_request->get_properties();
+  std::unordered_map<std::string, std::string>::const_iterator it = 
+      properties.find("provider");
+  if (it != properties.end() && it->second == "SPARK") {
+    *catalog = spark_catalog_;
+  } else {
+    *catalog = pegasus_catalog_;
+  }
+  return Status::OK();
 }
 
 } // namespace pegasus

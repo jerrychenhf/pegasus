@@ -18,39 +18,19 @@
 #ifndef PEGASUS_CATALOG_H
 #define PEGASUS_CATALOG_H
 
+#include "common/status.h"
 #include "dataset/dataset_request.h"
-#include "pegasus/common/status.h"
+#include "dataset/identity.h"
+#include "dataset/partition.h"
 
 using namespace std;
 
 namespace pegasus {
 
-class TableMetadata {
- public:
-  TableMetadata();
-
-  std::string location_uri;
-};
-
-class PartitionMetadata {
- public:
-  PartitionMetadata();
-
-  std::string location_uri;
-};
-
 class Catalog {
  public:
-  virtual Status GetTableMeta(DataSetRequest* dataset_request,
-      std::shared_ptr<TableMetadata>* table_meta) = 0;
-  virtual Status GetPartitionMeta(DataSetRequest* dataset_request,
-      std::shared_ptr<std::vector<PartitionMetadata>>* partition_meta) = 0;
-
- private:
-  // file format for this table, e.g. parquet, orc, etc.
-  std::string file_format_;
-  TableMetadata table_meta_;
-  std::vector<PartitionMetadata> partitions_meta_;
+  virtual Status GetPartitions(DataSetRequest* dataset_request,
+      std::shared_ptr<std::vector<Partition>>* partitions) = 0;
 };
 
 } // namespace pegasus

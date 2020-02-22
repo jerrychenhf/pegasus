@@ -15,15 +15,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_METADATA_H
-#define PEGASUS_METADATA_H
+#ifndef PEGASUS_CATALOG_MANAGER_H
+#define PEGASUS_CATALOG_MANAGER_H
 
 #include <vector>
 #include <string>
 
+#include "common/status.h"
 #include "catalog/pegasus_catalog.h"
 #include "catalog/spark_catalog.h"
-#include "common/status.h"
 
 namespace pegasus {
 
@@ -42,4 +42,4 @@ class CatalogManager {
 
 } // namespace pegasus
 
-#endif  // PEGASUS_METADATA_H
+#endif  // PEGASUS_CATALOG_MANAGER_H

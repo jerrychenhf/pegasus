@@ -18,7 +18,7 @@
 #ifndef PEGASUS_PEGASUS_CATALOG_H
 #define PEGASUS_PEGASUS_CATALOG_H
 
-#include "pegasus/catalog/catalog.h"
+#include "catalog/catalog.h"
 
 #include <string>
 
@@ -31,12 +31,8 @@ class PegasusCatalog : public Catalog {
   PegasusCatalog();
   ~PegasusCatalog();
 
-  Status GetTableMeta(DataSetRequest* dataset_request,
-      std::shared_ptr<TableMetadata>* table_meta);
-  Status GetPartitionMeta(DataSetRequest* dataset_request,
-      std::shared_ptr<std::vector<PartitionMetadata>>* partition_meta);
-  
-
+  Status GetPartitions(DataSetRequest* dataset_request,
+      std::shared_ptr<std::vector<Partition>>* partitions);
 };
 
 } // namespace pegasus
