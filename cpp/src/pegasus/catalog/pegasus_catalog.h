@@ -30,6 +30,13 @@ class PegasusCatalog : public Catalog {
  public:
   PegasusCatalog();
   ~PegasusCatalog();
+
+  Status GetTableMeta(DataSetRequest* dataset_request,
+      std::shared_ptr<TableMetadata>* table_meta);
+  Status GetPartitionMeta(DataSetRequest* dataset_request,
+      std::shared_ptr<std::vector<PartitionMetadata>>* partition_meta);
+  
+
 };
 
 } // namespace pegasus

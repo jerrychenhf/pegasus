@@ -23,10 +23,9 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/catalog")
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/catalog")
 
 add_library(Metadata
-  catalog.cc
   spark_catalog.cc
   pegasus_catalog.cc
-  metadata_manager.cc
+  catalog_manager.cc
 )
 add_dependencies(Metadata gen-deps)
 

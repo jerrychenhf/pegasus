@@ -25,8 +25,8 @@
 
 namespace pegasus {
 
-DataSetBuilder::DataSetBuilder(std::shared_ptr<MetadataManager> metadata_manager)
-    : metadata_manager_(metadata_manager) {
+DataSetBuilder::DataSetBuilder(std::shared_ptr<CatalogManager> catalog_manager)
+    : catalog_manager_(catalog_manager) {
   PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
   std::shared_ptr<StoragePluginFactory> storage_plugin_factory_ = env->get_storage_plugin_factory();
 }
@@ -66,18 +66,19 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
   auto vectident = std::make_shared<std::vector<Identity>>();
   auto partitions = std::make_shared<std::vector<Partition>>();
   // setup the identity vector for ondisk dataset
-  std::string provider = metadata_manager_->GetProvider(dataset_request);
-  if (provider == "spark") {
-    std::shared_ptr<TableMetadata> table_meta;
-    metadata_manager_->GetTableMeta(dataset_request, &table_meta);
-    std::string table_location = table_meta->location_uri;
-    storage_plugin_factory_->GetStoragePlugin(table_location, &storage_plugin_);
-    std::vector<std::string> file_list;
-    storage_plugin_->ListFiles(table_location, &file_list);
-    for (auto filepath : file_list) {
-      partitions->push_back(Partition(Identity(table_location, filepath)));
-    }
+  std::shared_ptr<Catalog> catalog;
+  catalog_manager_->GetCatalog(dataset_request, &catalog);
+
+  std::shared_ptr<TableMetadata> table_meta;
+  catalog->GetTableMeta(dataset_request, &table_meta);
+  std::string table_location = table_meta->location_uri;
+  storage_plugin_factory_->GetStoragePlugin(table_location, &storage_plugin_);
+  std::vector<std::string> file_list;
+  storage_plugin_->ListFiles(table_location, &file_list);
+  for (auto filepath : file_list) {
+    partitions->push_back(Partition(Identity(table_location, filepath)));
   }
+
   // allocate location for each partition
   auto vectloc = std::make_shared<std::vector<Location>>();
   distributor->GetDistLocations(partitions);

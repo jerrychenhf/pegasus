@@ -42,7 +42,7 @@ Status DataSetService::Init() {
   PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
   dataset_store_ = std::unique_ptr<DataSetStore>(new DataSetStore);
   worker_manager_ = env->GetInstance()->get_worker_manager();
-  metadata_manager_ = std::make_shared<MetadataManager>();
+  catalog_manager_ = std::make_shared<CatalogManager>();
   return Status::OK();
 }
 
@@ -61,7 +61,7 @@ Status DataSetService::GetDataSet(DataSetRequest* dataset_request, std::shared_p
   if (pds == NULL) {
     // === CacheDataSet(dataset_path, dataset, CONHASH);
     // build the dataset and insert it to dataset store.
-    auto dsbuilder = std::make_shared<DataSetBuilder>(metadata_manager_);
+    auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
     // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
     dsbuilder->BuildDataset(dataset_request, dataset, CONHASH);
     // Begin Write
@@ -96,7 +96,7 @@ Status DataSetService::GetDataSet(DataSetRequest* dataset_request, std::shared_p
 Status DataSetService::CacheDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset, int distpolicy) {
 
   // build the dataset and insert it to dataset store.
-  auto dsbuilder = std::make_shared<DataSetBuilder>(metadata_manager_);
+  auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
   // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
   dsbuilder->BuildDataset(dataset_request, dataset, distpolicy);
   // Begin Write

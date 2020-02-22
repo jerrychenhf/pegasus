@@ -15,36 +15,31 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/catalog/metadata_manager.h"
+#ifndef PEGASUS_METADATA_H
+#define PEGASUS_METADATA_H
+
+#include <vector>
+#include <string>
+
+#include "catalog/pegasus_catalog.h"
+#include "catalog/spark_catalog.h"
+#include "common/status.h"
 
 namespace pegasus {
 
-TableMetadata::TableMetadata() {
+class CatalogManager {
+ public:
+  CatalogManager();
 
-}
+  Status GetCatalog(DataSetRequest* dataset_request, std::shared_ptr<Catalog>* catalog);
 
-PartitionMetadata::PartitionMetadata() {
-    
-}
-
-MetadataManager::MetadataManager() {
-
-}
-
-std::string MetadataManager::GetProvider(DataSetRequest* dataset_request) {
-    
-}
-
-Status MetadataManager::GetTableMeta(DataSetRequest* dataset_request,
-    std::shared_ptr<TableMetadata>* table_meta) {
-
-}
-
-Status MetadataManager::GetPartitionMeta(
-    std::shared_ptr<std::vector<PartitionMetadata>>* partition_meta) {
-
-}
-
-
+ private:
+  // provider: spark catalog or pegasus catalog
+  std::string provider_;
+  std::shared_ptr<SparkCatalog> spark_catalog_;
+  std::shared_ptr<PegasusCatalog> pegasus_catalog_;
+};
 
 } // namespace pegasus
+
+#endif  // PEGASUS_METADATA_H

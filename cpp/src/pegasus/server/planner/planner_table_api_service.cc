@@ -107,7 +107,6 @@ arrow::Status PlannerTableAPIService::Heartbeat(const rpc::ServerCallContext& co
 arrow::Status PlannerTableAPIService::CreateDataSetRequest(const rpc::FlightDescriptor& descriptor,
                                                            DataSetRequest* dataset_request) {
   
-  dataset_request = new DataSetRequest();
   if (descriptor.type == rpc::FlightDescriptor::PATH) {
     std::vector<std::string> request_path = descriptor.path;
     if (request_path.size() != 1) {

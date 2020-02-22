@@ -29,4 +29,15 @@ SparkCatalog::~SparkCatalog() {
     
 }
 
+Status SparkCatalog::GetTableMeta(DataSetRequest* dataset_request,
+    std::shared_ptr<TableMetadata>* table_meta) {
+
+}
+
+Status SparkCatalog::GetPartitionMeta(DataSetRequest* dataset_request,
+    std::shared_ptr<std::vector<PartitionMetadata>>* partition_meta) {
+
+}
+  
+
 } // namespace pegasus

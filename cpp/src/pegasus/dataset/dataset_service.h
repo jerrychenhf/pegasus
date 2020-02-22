@@ -20,7 +20,7 @@
 
 #include <string>
 
-#include "catalog/metadata_manager.h"
+#include "catalog/catalog_manager.h"
 #include "dataset/dataset.h"
 #include "dataset/dataset_store.h"
 #include "dataset/dataset_builder.h"
@@ -58,7 +58,7 @@ class DataSetService {
   std::shared_ptr<WorkerManager> worker_manager_;
   std::shared_ptr<FlightInfoBuilder> flightinfo_builder_;
   std::shared_ptr<DataSetStore> dataset_store_;
-  std::shared_ptr<MetadataManager> metadata_manager_;
+  std::shared_ptr<CatalogManager> catalog_manager_;
 };
 
 } // namespace pegasus

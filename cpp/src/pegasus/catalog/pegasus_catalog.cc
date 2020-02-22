@@ -29,4 +29,14 @@ PegasusCatalog::~PegasusCatalog() {
     
 }
 
+Status PegasusCatalog::GetTableMeta(DataSetRequest* dataset_request,
+    std::shared_ptr<TableMetadata>* table_meta) {
+
+}
+
+Status PegasusCatalog::GetPartitionMeta(DataSetRequest* dataset_request,
+    std::shared_ptr<std::vector<PartitionMetadata>>* partition_meta) {
+
+}
+
 } // namespace pegasus

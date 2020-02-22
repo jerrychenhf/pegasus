@@ -15,18 +15,24 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/catalog/catalog.h"
-
-using namespace std;
+#include "pegasus/catalog/catalog_manager.h"
 
 namespace pegasus {
 
-Catalog::Catalog() {
+TableMetadata::TableMetadata() {
 
 }
 
-Catalog::~Catalog() {
+PartitionMetadata::PartitionMetadata() {
     
+}
+
+CatalogManager::CatalogManager()
+  : spark_catalog_(new SparkCatalog()), pegasus_catalog_(new PegasusCatalog()) {
+}
+
+Status CatalogManager::GetCatalog(DataSetRequest* dataset_request,
+    std::shared_ptr<Catalog>* catalog) {
 }
 
 } // namespace pegasus
