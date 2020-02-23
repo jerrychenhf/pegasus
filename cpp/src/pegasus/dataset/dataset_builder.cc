@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/dataset/dataset_builder.h"
+#include "dataset/dataset_builder.h"
 
 #include "dataset/consistent_hashing.h"
 #include "dataset/dataset_request.h"
@@ -27,7 +27,7 @@ namespace pegasus {
 
 DataSetBuilder::DataSetBuilder(std::shared_ptr<CatalogManager> catalog_manager)
     : catalog_manager_(catalog_manager) {
-  PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
+//  PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
 }
 
 Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
@@ -58,7 +58,7 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
 //  DSDistributor* distributor(new ConsistentHashRing); //error: is an inaccessible base of
   auto distributor = std::make_shared<ConsistentHashRing>(); 
   // TODO: get locations here to decouple distributor from workermanager
-  distributor->PrepareValidLocations(nullptr);
+  distributor->PrepareValidLocations(nullptr, nullptr);
   distributor->SetupDist();
 
   // create partitions with identities

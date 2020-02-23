@@ -15,102 +15,132 @@
 // specific language governing permissions and limitations
 // under the License.
 
+#include <iostream>
 #include "consistent_hashing.h"
 #include "runtime/planner_exec_env.h"
 #include "server/planner/worker_manager.h"
 
 namespace pegasus {
 
-struct conhash_s* ConsistentHashRing::conhash = NULL;
 
 ConsistentHashRing::ConsistentHashRing()
 {
-//	distpolicy_ = CONHASH;
+//    boost::format node_fmt("192.168.1.%1%");
+
 	validlocations_ = nullptr;
+	nodecacheMB_ = nullptr;
 }
 
 ConsistentHashRing::~ConsistentHashRing()
 {
-	if (NULL != ConsistentHashRing::conhash)
-	{
-		conhash_fini(ConsistentHashRing::conhash);
-	}
 }
 
-// TODO: decouple it with workermanager
-void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations)
+void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations, 
+											std::shared_ptr<std::vector<int>> nodecacheMB)
 {
-	// If the locations are not provided, get the worker locations from worker_manager
 	if (nullptr != locations)
 	{
 		validlocations_ = locations;
+		nodecacheMB_ = nodecacheMB;
 	}
-	else
+	else	// If the locations are not provided, get the worker locations from worker_manager
 	{
 		std::shared_ptr<WorkerManager> worker_manager = PlannerExecEnv::GetInstance()->GetInstance()->get_worker_manager();
-//		std::shared_ptr<std::vector<std::shared_ptr<Location>>> worker_locations;
 		//Status WorkerManager::GetWorkerRegistrations(std::vector<std::shared_ptr<WorkerRegistration>>& registrations)
 		std::vector<std::shared_ptr<WorkerRegistration>> wregs;
 		worker_manager->GetWorkerRegistrations(wregs);
-		for (auto &it:wregs)
+		std::cout << "node count form workerregistration vector: " << wregs.size() << std::endl;
+		for (auto it:wregs)
 		{
-			validlocations_->push_back(std::make_shared<Location>(it->address()));
+			validlocations_->push_back(it->address());
+//			nodecacheMB_->push_back(it->getcachesizeMB());	// TODO: need implementation in WorkerRegistration.
+			//fake code for test
+			nodecacheMB_->push_back(1024);	//1GB
 		}
 	}
 }
 
 void ConsistentHashRing::SetupDist()
 {
-	if (NULL == ConsistentHashRing::conhash)
-	{
-		ConsistentHashRing::conhash = conhash_init(NULL);
-	}
 //	std::vector<std::shared_ptr<Location>> lcns;
 	if (validlocations_)
 	{
-		for (auto lcn:(*validlocations_)) {
-			AddLocation(*lcn);
-		}
+//		for (auto lcn:(*validlocations_)) {
+//			AddLocation(lcn);
+//		}
+		for (unsigned int i=0; i<validlocations_->size(); i++)
+			AddLocation(i);
 	}
+}
+
+void ConsistentHashRing::AddLocation(unsigned int locidx)
+{
+	int num_vn = nodecacheMB_->at(locidx) / 1000;
+	num_vn = std::max(MIN_VIRT_NODE_NUM, num_vn);
+	num_vn = std::min(MAX_VIRT_NODE_NUM, num_vn);
+
+	std::string node = validlocations_->at(locidx).ToString() + "_" + std::to_string(num_vn);
+	consistent_hash_.insert(node);
 }
 
 void ConsistentHashRing::AddLocation(Location location)
 {
-	//TO CORRECT: get from worker registation instead of Location
-	uint32_t cacheSize = 512; //GB
-	int num_vn = cacheSize / 10;
+#if 0
+	int num_vn = nodecacheMB_ / 1000;
 	num_vn = std::max(MIN_VIRT_NODE_NUM, num_vn);
 	num_vn = std::min(MAX_VIRT_NODE_NUM, num_vn);
 	AddLocation(location, num_vn);
+#endif
 }
-
 void ConsistentHashRing::AddLocation(Location location, int num_virtual_nodes)
 {
-	struct node_s* pnode = new (struct node_s);
-	conhash_set_node(pnode, location.ToString().c_str(), num_virtual_nodes);
-	conhash_add_node(conhash, pnode);
-}
 #if 0
-void ConsistentHashRing::RemoveLocation(Location location)
-{
-	//TODO: the libcohash needs update to remove dependency on node
-	struct node_s node;
-	conhash_set_node(&node, location.ToString().c_str(), MAX_VIRT_NODE_NUM);
-	conhash_del_node(conhash, &node);
-}
+	std::string node = location.ToString() + "_" + std::to_string(num_virtual_nodes);
+	consistent_hash_.insert(node);
 #endif
+}
+
 Location ConsistentHashRing::GetLocation(Identity identity)
 {
-	const struct node_s* pnode;
-	std::string idstr = identity.partition_id();
-//	identity.SerializeToString(&idstr);
-	pnode = conhash_lookup(conhash, idstr.c_str());
+	crc32_hasher h;
+	std::cout << "h(identity.partition_id()): " << h(identity.partition_id()) << endl;
+    consistent_hash_t::iterator it;
+    it = consistent_hash_.find(h(identity.partition_id()));
+    std::cout<<boost::format("node:%1%, %2%") % it->second % it->first << std::endl;
+
+	std::size_t pos = it->second.find_last_of("_");
+	std::string node = it->second.substr(0, pos);
+	std::cout << node << std::endl;
 	// create the location object and fill with phynode's location (uri).
 	Location lcn;
-	lcn.Parse(pnode->iden, &lcn);  	//TODO: refactor Location::Parse()?
+	Location::Parse(node, &lcn);
 	return lcn;
 }
 
+void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, \
+								std::shared_ptr<std::vector<Location>> vectloc)
+{
+}
+
+void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions)
+{
+	crc32_hasher h;
+	for (auto partt:(*partitions))
+	{
+		std::cout << "h(partt.GetIdentPath()): " << h(partt.GetIdentPath()) << endl;
+	    consistent_hash_t::iterator it;
+    	it = consistent_hash_.find(h(partt.GetIdentPath()));
+		std::size_t pos = it->second.find_last_of("_");
+		std::string node = it->second.substr(0, pos);
+		std::cout << node << std::endl;
+		// create the location object and fill with phynode's location (uri).
+		Location lcn;
+		Location::Parse(node, &lcn);
+		partt.UpdateLocation(lcn);
+	}
+}
+
+#if 0
 void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, \
 								std::shared_ptr<std::vector<Location>> vectloc)
 {
@@ -126,19 +156,5 @@ void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>>
 		vectloc->push_back(lcn);
 	}
 }
-
-void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions)
-{
-	const struct node_s* pnode;
-	for (auto partt:(*partitions))
-	{
-		std::string idstr = partt.GetIdentPath();
-		pnode = conhash_lookup(conhash, idstr.c_str());
-		// create the location object and fill with phynode's location (uri).
-		Location lcn;
-		lcn.Parse(pnode->iden, &lcn);
-		partt.UpdateLocation(lcn);
-	}
-}
-
+#endif
 } // namespace pegasus

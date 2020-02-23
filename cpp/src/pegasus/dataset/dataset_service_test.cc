@@ -27,6 +27,12 @@
 #include "consistent_hashing.h"
 #include "dataset_request.h"
 
+#include "arrow/ipc/test_common.h"
+#include "arrow/status.h"
+#include "arrow/testing/gtest_util.h"
+//#include "arrow/testing/util.h"
+//#include "arrow/util/make_unique.h"
+
 namespace pegasus
 {
 #if 1
@@ -41,25 +47,38 @@ TEST(DatasetServiceTest, ConHashInit)
 
 //  std::cout << "...ConHashInit" << std::endl;
 }
-
+#endif
+#if 1
 TEST(DatasetServiceTest, ConHashBasic)
 {
   // 
   auto distributor = std::make_shared<ConsistentHashRing>();
 
   // generate validloc and update the distributor
-  std::shared_ptr<Location> loc1 = std::make_shared<Location>();
-  Location::ForGrpcTcp("localhost", 10086, loc1.get());
-  std::shared_ptr<std::vector<std::shared_ptr<Location>>> validloc = \
-                          std::make_shared<std::vector<std::shared_ptr<Location>>>();
-  validloc->push_back(loc1);
-  distributor->PrepareValidLocations(validloc);
+//  std::shared_ptr<Location> loc1 = std::make_shared<Location>();
+  Location location1, location2, location3;
+  ASSERT_OK(Location::ForGrpcTcp("localhost", 10010, &location1));
+  ASSERT_OK(Location::ForGrpcTls("localhost", 10010, &location2));
+  ASSERT_OK(Location::ForGrpcUnix("/tmp/test.sock", &location3));
+  std::shared_ptr<std::vector<Location>> validlocs = std::make_shared<std::vector<Location>>();
+  validlocs->push_back(location1);
+  validlocs->push_back(location2);
+  validlocs->push_back(location3);
+  std::shared_ptr<std::vector<int>> nodecacheMBs = std::make_shared<std::vector<int>>();
+  nodecacheMBs->push_back(1024);
+  nodecacheMBs->push_back(1024);
+  nodecacheMBs->push_back(1024);
+  distributor->PrepareValidLocations(validlocs, nodecacheMBs);
 
   // setup the distribution engine
   distributor->SetupDist();
 
-  // generate partitions
   std::string test_dataset_path = "hostnameplusfolderpath";
+
+  // test get distlocation
+  distributor->GetLocation(Identity(test_dataset_path, "partitionfile1"));
+
+  // generate partitions
   auto partitions = std::make_shared<std::vector<Partition>>();
   partitions->push_back(Partition(Identity(test_dataset_path, "partitionfile1")));
   partitions->push_back(Partition(Identity(test_dataset_path, "partitionfile2")));
@@ -70,7 +89,8 @@ TEST(DatasetServiceTest, ConHashBasic)
   // check the correctness
 
 }
-
+#endif
+#if 0
 TEST(DatasetServiceTest, DataSetStoreBasic)
 {
   Status st;

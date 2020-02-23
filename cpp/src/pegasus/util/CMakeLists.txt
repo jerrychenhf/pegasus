@@ -24,12 +24,6 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/util")
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/util")
 
 add_library(Util
-#  consistent_hashing.cc
-  conhash.c
-  conhash_inter.c
-  conhash_util.c
-  util_rbtree.c
-  md5.c
   global_flags.cc
   string_builder.cc
   time.cc
@@ -91,4 +85,7 @@ if(PEGASUS_BUILD_TESTS)
 
   add_pegasus_util_test(pretty-printer-test)
 
+  add_pegasus_util_test(consistent_hash_map-test)
+
 endif()
+

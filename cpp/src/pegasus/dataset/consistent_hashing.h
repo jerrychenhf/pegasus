@@ -20,25 +20,42 @@
 
 #include <string>
 #include <vector>
+#include <boost/functional/hash.hpp>
+#include <boost/format.hpp>
+#include <boost/crc.hpp>
+//#include <boost/algorithm/string/trim.hpp>
 
 #include "pegasus/common/location.h"
 #include "pegasus/dataset/identity.h"
 #include "pegasus/dataset/dataset_distributor.h"
-#include "pegasus/util/conhash.h"
+#include "pegasus/util/consistent_hash_map.hpp"
 
 using namespace std;
 
 namespace pegasus {
 #define MAX_VIRT_NODE_NUM 100
 #define MIN_VIRT_NODE_NUM 1
+
+struct crc32_hasher {
+    uint32_t operator()(const std::string& node) {
+        boost::crc_32_type ret;
+        ret.process_bytes(node.c_str(), node.size());
+        return ret.checksum();
+    }
+    typedef uint32_t result_type;
+};
+
+typedef consistent_hash_map<std::string, crc32_hasher> consistent_hash_t;
+
   // Consistent hash ring to distribute items across nodes (locations). If we add 
   // or remove nodes, it minimizes the item migration.
   class ConsistentHashRing : DSDistributor {
   public:
     ConsistentHashRing();
     ~ConsistentHashRing();
-    void PrepareValidLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations);
+    void PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations, std::shared_ptr<std::vector<int>> nodecacheMB);
     void SetupDist();
+    void AddLocation(unsigned int locidx);
     void AddLocation(Location location);
     void AddLocation(Location location, int num_virtual_nodes);
     void RemoveLocation(Location location);
@@ -47,7 +64,8 @@ namespace pegasus {
     void GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<std::vector<Location>> vectloc);
     void GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions);
   private:
-	  static struct conhash_s *conhash;
+//	  static struct conhash_s *conhash;
+    consistent_hash_t consistent_hash_;
   };
 
 } // namespace pegasus

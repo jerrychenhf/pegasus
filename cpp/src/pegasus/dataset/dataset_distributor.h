@@ -21,10 +21,9 @@
 #include <string>
 #include <vector>
 
-#include "pegasus/common/location.h"
-#include "pegasus/dataset/identity.h"
-#include "pegasus/dataset/partition.h"
-#include "pegasus/util/conhash.h"
+#include "common/location.h"
+#include "dataset/identity.h"
+#include "dataset/partition.h"
 
 using namespace std;
 
@@ -40,7 +39,7 @@ enum {
   public:
     DSDistributor() {};
     ~DSDistributor() {};
-    virtual void PrepareValidLocations(std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations) = 0;
+    virtual void PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations, std::shared_ptr<std::vector<int>> nodecacheMB) = 0;
     virtual void SetupDist() = 0;
     void AddLocation(Location location);
     void AddLocation(Location location, int num_virtual_nodes);
@@ -51,7 +50,8 @@ enum {
     virtual void GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions) = 0;
 //  private:
 //	  int distpolicy_;
-    std::shared_ptr<std::vector<std::shared_ptr<Location>>> validlocations_;
+    std::shared_ptr<std::vector<Location>> validlocations_;
+    std::shared_ptr<std::vector<int>> nodecacheMB_;
   };
 
 } // namespace pegasus
