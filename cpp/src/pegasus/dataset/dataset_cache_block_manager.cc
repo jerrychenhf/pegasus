@@ -39,14 +39,13 @@ Status DatasetCacheBlockManager::Init() {
   return Status::OK();
 }
 
-Status DatasetCacheBlockManager::GetCachedDataSet(RequestIdentity* request_identity,
+Status DatasetCacheBlockManager::GetCachedDataSet(std::string dataset_path,
  std::shared_ptr<CachedDataset>* dataset) {
-  std::string dataset_path = request_identity->dataset_path();
   auto entry = cached_datasets_.find(dataset_path);
 
   if (entry == cached_datasets_.end()) {
     *dataset = nullptr;
-    LOG(WARNING) << "The dataset: "<< request_identity->dataset_path() <<" is NULL.";
+    LOG(WARNING) << "The dataset: "<< dataset_path <<" is NULL.";
     return Status::OK(); 
   }
   auto find_cache_info = entry->second;
@@ -55,16 +54,14 @@ Status DatasetCacheBlockManager::GetCachedDataSet(RequestIdentity* request_ident
 }
 
 
-Status DatasetCacheBlockManager::GetCachedPartition(RequestIdentity* request_identity,
- std::shared_ptr<CachedPartition>* partition) {
-  std::string dataset_path = request_identity->dataset_path();
-  std::string partition_path = request_identity->partition_path();
+Status DatasetCacheBlockManager::GetCachedPartition(std::string dataset_path,
+  std::string partition_path, std::shared_ptr<CachedPartition>* partition) {
   std::shared_ptr<CachedDataset> dataset;
-  RETURN_IF_ERROR(GetCachedDataSet(request_identity, &dataset));
+  RETURN_IF_ERROR(GetCachedDataSet(dataset_path, &dataset));
   if (dataset == nullptr) {
     stringstream ss;
-    ss << "Can not get the partition: "<< request_identity->partition_path() 
-      <<"when the dataset: "<< request_identity->dataset_path() <<" is NULL";
+    ss << "Can not get the partition: "<< partition_path 
+      <<"when the dataset: "<< dataset_path <<" is NULL";
     LOG(ERROR) << ss.str();
     return Status::UnknownError(ss.str());
   }
@@ -72,7 +69,7 @@ Status DatasetCacheBlockManager::GetCachedPartition(RequestIdentity* request_ide
   auto entry = dataset->cached_partitions_.find(partition_path);
   if (entry == dataset->cached_partitions_.end()) {
     *partition = nullptr;
-    LOG(WARNING) << "The partition: "<< request_identity->partition_path() <<" is NULL.";
+    LOG(WARNING) << "The partition: "<< partition_path <<" is NULL.";
     return Status::OK(); 
   }
 
@@ -81,20 +78,18 @@ Status DatasetCacheBlockManager::GetCachedPartition(RequestIdentity* request_ide
   return Status::OK();
 }
 
- Status DatasetCacheBlockManager::GetCachedColumns(RequestIdentity* request_identity,
+ Status DatasetCacheBlockManager::GetCachedColumns(std::string dataset_path,
+  std::string partition_path, std::vector<int> col_ids,
   std::unordered_map<string, std::shared_ptr<CachedColumn>>* columns) {
   std::shared_ptr<CachedPartition> partition;
-  RETURN_IF_ERROR(GetCachedPartition(request_identity, &partition));
+  RETURN_IF_ERROR(GetCachedPartition(dataset_path, partition_path, &partition));
   if (partition == nullptr) {
     stringstream ss;
-    ss << "Can not get the columns when the dataset: "<< request_identity->dataset_path() <<" is NULL";
+    ss << "Can not get the columns when the dataset: "<< dataset_path <<" is NULL";
     LOG(ERROR) << ss.str();
     return Status::UnknownError(ss.str());
   }
    
-  // TODO: get the column indexes.
-  // std::vector<int> col_ids = identity->col_ids();
-  std::vector<int> col_ids;
   for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++)
   {
 		auto entry = partition->cached_columns_.find(std::to_string(*iter));
@@ -106,43 +101,57 @@ Status DatasetCacheBlockManager::GetCachedPartition(RequestIdentity* request_ide
   return Status::OK();
  }
 
-Status DatasetCacheBlockManager::InsertDataSet(RequestIdentity* request_identity,
+Status DatasetCacheBlockManager::InsertDataSet(std::string dataset_path,
  std::shared_ptr<CachedDataset> new_dataset) {
-  std::string dataset_path = request_identity->dataset_path();
   cached_datasets_.insert(std::make_pair(dataset_path, new_dataset));
   return Status::OK();
 }
 
-Status DatasetCacheBlockManager::InsertPartition(RequestIdentity* request_identity,
- std::shared_ptr<CachedPartition> new_partition) {
-  std::string dataset_path = request_identity->dataset_path();
+Status DatasetCacheBlockManager::InsertPartition(std::string dataset_path,
+  std::string partition_path, std::shared_ptr<CachedPartition> new_partition) {
   std::shared_ptr<CachedDataset> dataset;
-  RETURN_IF_ERROR(GetCachedDataSet(request_identity, &dataset));
+  RETURN_IF_ERROR(GetCachedDataSet(dataset_path, &dataset));
   if (dataset == nullptr) {
     stringstream ss;
-    ss << "Can not insert new partition when the dataset: "<< request_identity->dataset_path() <<" is NULL";
+    ss << "Can not insert new partition when the dataset: "<< dataset_path <<" is NULL";
     LOG(ERROR) << ss.str();
     return Status::UnknownError(ss.str());
   } 
-
-  string partition_path = request_identity->partition_path();
   dataset->cached_partitions_[partition_path] = new_partition;
   return Status::OK();
 }
 
-Status DatasetCacheBlockManager::InsertColumn(RequestIdentity* request_identity, string column_id,
+Status DatasetCacheBlockManager::InsertColumn(std::string dataset_path,
+  std::string partition_path, string column_id,
  std::shared_ptr<CachedColumn> new_column) {
   std::shared_ptr<CachedPartition> partition;
-  RETURN_IF_ERROR(GetCachedPartition(request_identity, &partition));
+  RETURN_IF_ERROR(GetCachedPartition(dataset_path, partition_path, &partition));
   if (partition == nullptr) {
     stringstream ss;
-    ss << "Can not insert new column when the partition: "<< request_identity->partition_path() <<" is NULL";
+    ss << "Can not insert new column when the partition: "<< partition_path <<" is NULL";
     LOG(ERROR) << ss.str();
     return Status::UnknownError(ss.str());
   } 
 
   partition->cached_columns_[column_id] = std::move(new_column);
   return Status::OK();
+}
+
+Status DatasetCacheBlockManager::DeleteColumn(std::string dataset_path, std::string partition_path,
+   string column_id) {
+ std::shared_ptr<CachedPartition> partition;
+ RETURN_IF_ERROR(GetCachedPartition(dataset_path, partition_path, &partition));
+
+ if (partition == nullptr) {
+    stringstream ss;
+    ss << "Can not delete this column when the partition: "<< partition_path <<" is NULL";
+    LOG(ERROR) << ss.str();
+    return Status::UnknownError(ss.str());
+ } 
+
+ partition->cached_columns_.erase(column_id);
+ 
+ return Status::OK();
 }
 
 } // namespace pegasus

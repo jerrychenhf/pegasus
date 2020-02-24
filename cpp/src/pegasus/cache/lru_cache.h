@@ -36,6 +36,8 @@ class MetricEntity;
 
 class LRUCacheHandle;
 
+class DatasetCacheBlockManager;
+
 // Wrapper around pegasus::Cache specifically for caching blocks of CFiles.
 // Provides a singleton and LRU cache for CFile blocks.
 class LRUCache {
@@ -54,14 +56,20 @@ class LRUCache {
   // important that the layout be fixed and kept compatible for all
   // future releases.
   struct CacheKey {
-    CacheKey(std::string dataset_path, std::string partition_path, int column_id) :
+    CacheKey(std::string dataset_path, std::string partition_path,
+     int column_id, int64_t occupied_size,
+      std::shared_ptr<DatasetCacheBlockManager> cache_block_manager) :
       dataset_path_(dataset_path),
       partition_path_(partition_path),
-      column_id_(column_id){}
+      column_id_(column_id),
+      occupied_size_(occupied_size),
+      cache_block_manager_(cache_block_manager){}
 
    std::string dataset_path_;
    std::string partition_path_;
    int column_id_;
+   int64_t occupied_size_;
+   std::shared_ptr<DatasetCacheBlockManager> cache_block_manager_;
   } PACKED;
 
   // An entry that is in the process of being inserted into the block

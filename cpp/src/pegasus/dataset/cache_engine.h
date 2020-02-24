@@ -24,6 +24,7 @@
 #include "cache/cache_region.h"
 #include "boost/functional/hash.hpp"
 #include "dataset/cache_store_manager.h"
+#include "cache/lru_cache.h"
 
 using namespace boost;
 
@@ -33,7 +34,7 @@ class CacheEngine {
  public:
  virtual Status Init() = 0;
  virtual Status GetCacheStore(CacheStore** cache_store) = 0;
- virtual Status PutValue(std::string dataset_path, std::string partition_path, int column_id) = 0;
+ virtual Status PutValue(LRUCache::CacheKey key) = 0;
 
   enum CachePolicy {
     LRU,
@@ -42,46 +43,6 @@ class CacheEngine {
 
  private:
   CachePolicy cache_policy;
-};
-
-class CacheEntryKey {
- public:
-  explicit CacheEntryKey(std::string partition_path, int column_id)
-   : partition_path_(partition_path), column_id_(column_id) {
-    static const int kSeedValue = 4;
-    size_t result = kSeedValue;
-
-    boost::hash_combine(result, partition_path);
-    boost::hash_combine(result, std::to_string(column_id));
-    hash_code_ = result;
-  }
-
-  std::size_t Hash() const { return hash_code_; }
-
-  bool operator==(const CacheEntryKey& other) const {
-    // arrow schema does not overload equality operators.
-    if (partition_path_ != other.partition_path_) {
-      return false;
-    }
-
-    if (column_id_ != other.column_id_) {
-      return false;
-    }
-    return true;
-  }
-
-  bool operator!=(const CacheEntryKey& other) const { return !(*this == other); }
-
-  
- private:
-  std::string partition_path_;
-  int column_id_;
-  size_t hash_code_;
-};
-
-class CacheEntryValue {
-  public:
-    CacheEntryValue() {}
 };
 
 class LruCacheEngine : public CacheEngine {
@@ -95,10 +56,11 @@ class LruCacheEngine : public CacheEngine {
     return cache_store_manager_->GetCacheStore(cache_store);
   }
 
-  Status PutValue(std::string dataset_path, std::string partition_path, int column_id) override;
+  Status PutValue(LRUCache::CacheKey key) override;
 
  public:
   std::shared_ptr<CacheStoreManager> cache_store_manager_;
+  std::shared_ptr<LRUCache> lru_cache_;
 };
 
 //NonEvictCacheEngine 
@@ -114,7 +76,7 @@ class NonEvictionCacheEngine : public CacheEngine {
   Status GetCacheStore(CacheStore** cache_store) override {
     return Status::NotImplemented("Not yet implemented.");
   }
-  Status PutValue(std::string dataset_path, std::string partition_path, int column_id) override {
+  Status PutValue(LRUCache::CacheKey key) override {
     return Status::NotImplemented("Not yet implemented.");
   }
 };

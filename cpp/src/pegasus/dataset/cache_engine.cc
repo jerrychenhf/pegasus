@@ -23,6 +23,7 @@ namespace pegasus {
 
 LruCacheEngine::LruCacheEngine(int64_t capacity)
   : cache_store_manager_(new CacheStoreManager()) {
+  lru_cache_ = std::shared_ptr<LRUCache>(new LRUCache(capacity));
 }
 
 Status LruCacheEngine::Init() {
@@ -30,10 +31,17 @@ Status LruCacheEngine::Init() {
   return Status::OK();
 }
 
-Status LruCacheEngine::PutValue(std::string dataset_path, std::string partition_path, int column_id) {
-  CacheEntryKey key = CacheEntryKey(partition_path, column_id);
-  return Status::OK();
-}
+Status LruCacheEngine::PutValue(LRUCache::CacheKey key) {
+  LRUCache::PendingEntry pending_entry = lru_cache_->Allocate(key, sizeof(key));
 
+  LRUCacheHandle inserted_handle;
+  lru_cache_->Insert(&pending_entry, &inserted_handle);
+
+  if (!pending_entry.valid() && inserted_handle.valid()) {
+    return Status::OK();
+  } else {
+    return Status::Invalid("Failed to insert the cached colmn into lru cache");
+  }
+}
 
 } // namespace pegasus

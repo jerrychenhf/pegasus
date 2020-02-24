@@ -21,10 +21,12 @@
 #include "dataset/cache_store.h"
 
 #include <string>
-#include "arrow/table.h"
 
 using namespace std;
-using namespace arrow;
+
+namespace arrow {
+  class ChunkedArray;
+}
 
 namespace pegasus {
   

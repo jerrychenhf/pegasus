@@ -20,6 +20,7 @@
 
 #include "dataset/cache_engine.h"
 #include "runtime/exec_env.h"
+#include "dataset/dataset_cache_manager.h"
 
 using namespace std;
 
@@ -53,6 +54,10 @@ class WorkerExecEnv : public ExecEnv {
     return store_manager_;
   }
 
+  std::shared_ptr<DatasetCacheManager> GetDatasetCacheManager() {
+    return dataset_cache_manager_;
+  }
+
  private:
   static WorkerExecEnv* exec_env_;
 
@@ -64,6 +69,7 @@ class WorkerExecEnv : public ExecEnv {
   std::vector<CacheEngine::CachePolicy> cache_policies_;
   
   std::shared_ptr<StoreManager> store_manager_;
+  std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
 };
 
 } // namespace pegasus

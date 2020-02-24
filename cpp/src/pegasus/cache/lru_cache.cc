@@ -35,6 +35,8 @@
 #include "util/slice.h"
 #include "util/string_case.h"
 
+#include "dataset/dataset_cache_block_manager.h"
+
 DEFINE_int64(lru_cache_capacity_mb, 512, "lru cache capacity in MB");
 TAG_FLAG(lru_cache_capacity_mb, stable);
 
@@ -63,15 +65,40 @@ namespace pegasus {
 
 class MetricEntity;
 
+class EvictionCallback : public Cache::EvictionCallback {
+   public:
+    explicit EvictionCallback() {
+    }
+
+    void EvictedEntry(Slice key, Slice val) override {
+      // VLOG(2) << strings::Substitute("EvictedEntry callback for key '$0'",
+      //                                key.ToString());
+      auto* entry_ptr = reinterpret_cast<LRUCache::CacheKey*>(val.mutable_data());
+      std::string dataset_path = entry_ptr->dataset_path_;
+      std::string partition_path = entry_ptr->partition_path_;
+      int column_id = entry_ptr->column_id_;
+
+      std::shared_ptr<DatasetCacheBlockManager> cache_block_manager = entry_ptr->cache_block_manager_;
+      cache_block_manager->DeleteColumn(dataset_path, partition_path, std::to_string(column_id));
+
+      // TODO delete the record in block manager.
+      // delete entry_ptr->val_ptr;
+    }
+
+   private:
+    DISALLOW_COPY_AND_ASSIGN(EvictionCallback);
+};
+
+
 Cache* CreateCache(int64_t capacity) {
   const auto mem_type = LRUCache::GetConfiguredCacheMemoryTypeOrDie();
   switch (mem_type) {
     case Cache::MemoryType::DRAM:
       return NewCache<Cache::EvictionPolicy::LRU, Cache::MemoryType::DRAM>(
           capacity, "lru_cache");
-    case Cache::MemoryType::NVM:
-      return NewCache<Cache::EvictionPolicy::LRU, Cache::MemoryType::NVM>(
-          capacity, "lru_cache");
+    // case Cache::MemoryType::NVM:
+    //   return NewCache<Cache::EvictionPolicy::LRU, Cache::MemoryType::NVM>(
+    //       capacity, "lru_cache");
     default:
       LOG(FATAL) << "unsupported LRU cache memory type: " << mem_type;
       return nullptr;
@@ -108,10 +135,10 @@ bool ValidateLRUCacheCapacity() {
 }
 
 
-GROUP_FLAG_VALIDATOR(lru_cache_capacity_mb, ValidateLRUCacheCapacity);
+// GROUP_FLAG_VALIDATOR(lru_cache_capacity_mb, ValidateLRUCacheCapacity);
 
 Cache::MemoryType LRUCache::GetConfiguredCacheMemoryTypeOrDie() {
-    ToUpperCase(FLAGS_lru_cache_type, &FLAGS_lru_cache_type);
+    // ToUpperCase(FLAGS_lru_cache_type, &FLAGS_lru_cache_type);
   if (FLAGS_lru_cache_type == "NVM") {
     return Cache::MemoryType::NVM;
   }
@@ -134,7 +161,7 @@ LRUCache::LRUCache(size_t capacity)
 
 LRUCache::PendingEntry LRUCache::Allocate(const CacheKey& key, size_t lru_size) {
   Slice key_slice(reinterpret_cast<const uint8_t*>(&key), sizeof(key));
-  return PendingEntry(cache_->Allocate(key_slice, lru_size));
+  return PendingEntry(cache_->Allocate(key_slice, lru_size, key.occupied_size_));
 }
 
 bool LRUCache::Lookup(const CacheKey& key, Cache::CacheBehavior behavior,
@@ -150,7 +177,7 @@ bool LRUCache::Lookup(const CacheKey& key, Cache::CacheBehavior behavior,
 
 void LRUCache::Insert(LRUCache::PendingEntry* entry, LRUCacheHandle* inserted) {
   auto h(cache_->Insert(std::move(entry->handle_),
-                        /* eviction_callback= */ nullptr));
+                        new EvictionCallback()));
   inserted->SetHandle(std::move(h));
 }
 

@@ -69,15 +69,20 @@ class DatasetCacheBlockManager {
   
   Status Init();
   
-  Status GetCachedDataSet(RequestIdentity* request_identity, std::shared_ptr<CachedDataset>* dataset);
-  Status GetCachedPartition(RequestIdentity* request_identity,
+  Status GetCachedDataSet(std::string dataset_path, std::shared_ptr<CachedDataset>* dataset);
+  Status GetCachedPartition(std::string dataset_path, std::string partition_path,
    std::shared_ptr<CachedPartition>* partitios);
-  Status GetCachedColumns(RequestIdentity* request_identity, 
+  Status GetCachedColumns(std::string dataset_path, std::string partition_path, std::vector<int> col_ids,
     std::unordered_map<string, std::shared_ptr<CachedColumn>>* cached_columns);
 
-  Status InsertDataSet(RequestIdentity* request_identity, std::shared_ptr<CachedDataset> new_dataset);
-  Status InsertPartition(RequestIdentity* request_identity, std::shared_ptr<CachedPartition> new_partition);
-  Status InsertColumn(RequestIdentity* request_identity, string column_id, std::shared_ptr<CachedColumn> new_column);
+  Status InsertDataSet(std::string dataset_path, std::shared_ptr<CachedDataset> new_dataset);
+  Status InsertPartition(std::string dataset_path, std::string partition_path,
+   std::shared_ptr<CachedPartition> new_partition);
+  Status InsertColumn(std::string dataset_path, std::string partition_path,
+   string column_id, std::shared_ptr<CachedColumn> new_column);
+
+  Status DeleteColumn(std::string dataset_path, std::string partition_path,
+   string column_id);
  
  private: 
   std::unordered_map<std::string, std::shared_ptr<CachedDataset>> cached_datasets_;
