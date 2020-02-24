@@ -29,6 +29,8 @@ class ParquetReader {
  public:
   ParquetReader(const std::shared_ptr<arrow::io::RandomAccessFile>& file,
                 arrow::MemoryPool* pool, const parquet::ArrowReaderProperties& properties);
+
+  Status GetSchema(std::shared_ptr<arrow::Schema>* out);
   Status ReadParquetTable(std::shared_ptr<arrow::Table>* table);
   Status ReadParquetTable(const std::vector<int> column_indices, std::shared_ptr<::arrow::Table>* table);
   Status ReadColumnChunk(int column_indice, std::shared_ptr<arrow::ChunkedArray>* chunked_out);

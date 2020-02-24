@@ -20,7 +20,7 @@
 #include <iostream>
 
 #include "arrow/util/uri.h"
-#include <boost/algorithm/string.hpp>
+#include "arrow/type.h"
 #include <gtest/gtest.h>
 
 #include "catalog/catalog.h"
@@ -41,21 +41,21 @@ TEST(SpakrCatalogTest, Unit) {
   dataset_request.set_dataset_path(dataset_path);
   DataSetRequest::RequestProperties properties;
   properties["provider"] = "SPARK";
+  properties["column_names"] = "a, b, c";
   dataset_request.set_properties(properties);
 
   std::shared_ptr<CatalogManager> catalog_manager = std::make_shared<CatalogManager>();
   std::shared_ptr<Catalog> catalog;
   ASSERT_OK(catalog_manager->GetCatalog(&dataset_request, &catalog));
 
-  // get partitions from catalog.
-  auto partitions = std::make_shared<std::vector<Partition>>();
-  ASSERT_OK(catalog->GetPartitions(&dataset_request, &partitions));
+  std::shared_ptr<arrow::Schema> schema;
+  ASSERT_OK(catalog->GetSchema(&dataset_request, &schema));
+  ASSERT_EQ(18, schema->num_fields());
 
-  ASSERT_EQ(1, partitions->size());
-  for(auto partition : *partitions) {
-    std::string partition_path = partition.GetIdentPath();
-    ASSERT_EQ(1, boost::algorithm::starts_with(partition_path, dataset_path));
-  }
+  std::vector<std::string> columns = dataset_request.get_column_names();
+  std::vector<std::string> columns_expected= {"a", "b", "c"};
+  ASSERT_EQ(3, columns.size());
+  ASSERT_EQ(columns_expected, columns);
 }
 
 }

@@ -226,7 +226,7 @@ struct PEGASUS_RPC_EXPORT FlightDescriptor {
 struct PEGASUS_RPC_EXPORT Ticket {
   std::string dataset_path;
   std::string partition_identity;
-  std::vector<int> column_indices;
+  std::vector<int32_t> column_indices;
 
   bool Equals(const Ticket& other) const;
 

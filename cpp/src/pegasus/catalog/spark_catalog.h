@@ -33,8 +33,11 @@ class SparkCatalog : public Catalog {
   SparkCatalog();
   ~SparkCatalog();
 
-  Status GetPartitions(DataSetRequest* dataset_request,
-      std::shared_ptr<std::vector<Partition>>* partitions);
+  Status GetSchema(DataSetRequest* dataset_request,
+      std::shared_ptr<arrow::Schema>* schema);
+  FileFormat GetFileFormat(DataSetRequest* dataset_request);
+
+  CatalogType GetCatalogType();
   
   private:
     std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;

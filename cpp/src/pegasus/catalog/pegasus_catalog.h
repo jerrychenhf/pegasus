@@ -31,8 +31,11 @@ class PegasusCatalog : public Catalog {
   PegasusCatalog();
   ~PegasusCatalog();
 
-  Status GetPartitions(DataSetRequest* dataset_request,
-      std::shared_ptr<std::vector<Partition>>* partitions);
+  Status GetSchema(DataSetRequest* dataset_request,
+      std::shared_ptr<arrow::Schema>* schema);
+  FileFormat GetFileFormat(DataSetRequest* dataset_request);
+
+  CatalogType GetCatalogType();
 };
 
 } // namespace pegasus

@@ -31,8 +31,14 @@ ParquetReader::ParquetReader(const std::shared_ptr<arrow::io::RandomAccessFile>&
   builder.memory_pool(pool)->properties(properties)->Build(&file_reader_);
 }
 
-Status ParquetReader::ReadParquetTable(std::shared_ptr<arrow::Table>* table) {
+Status ParquetReader::GetSchema(std::shared_ptr<arrow::Schema>* out) {
+  arrow::Status arrowStatus = file_reader_->GetSchema(out);
+  Status status = Status::fromArrowStatus(arrowStatus);
+  RETURN_IF_ERROR(status);
+  return Status::OK();
+}
 
+Status ParquetReader::ReadParquetTable(std::shared_ptr<arrow::Table>* table) {
   arrow::Status arrowStatus = file_reader_->ReadTable(table); 
   Status status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);

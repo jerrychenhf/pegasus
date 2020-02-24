@@ -43,12 +43,18 @@ namespace pegasus {
     return properties_;
   }
 
-  const std::string& DataSetRequest::get_format() {
-    return format_;
-  }
-
-  const std::vector<uint32_t>& DataSetRequest::get_column_indices() {
-    return column_indices_;
+  const std::vector<std::string>& DataSetRequest::get_column_names() {
+    std::unordered_map<std::string, std::string>::const_iterator it = 
+        properties_.find("column_names");
+    if (it != properties_.end()) {
+      std::string column_name_string = it->second;
+      boost::split(column_names_, column_name_string,
+          boost::is_any_of(","), boost::token_compress_on);
+      for(int i = 0; i < column_names_.size(); i++) {
+        boost::trim(column_names_[i]);
+      }
+    }
+    return column_names_;
   }
 
   const std::vector<Filter>& DataSetRequest::get_filters() {

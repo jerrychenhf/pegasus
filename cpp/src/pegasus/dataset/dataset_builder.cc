@@ -27,7 +27,8 @@ namespace pegasus {
 
 DataSetBuilder::DataSetBuilder(std::shared_ptr<CatalogManager> catalog_manager)
     : catalog_manager_(catalog_manager) {
-//  PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
+  PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
+  storage_plugin_factory_ = env->get_storage_plugin_factory();
 }
 
 Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
@@ -69,8 +70,18 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
   std::shared_ptr<Catalog> catalog;
   RETURN_IF_ERROR(catalog_manager_->GetCatalog(dataset_request, &catalog));
 
-  // get partitions from catalog.
-  RETURN_IF_ERROR(catalog->GetPartitions(dataset_request, &partitions));
+  if (catalog->GetCatalogType() == Catalog::SPARK) {
+    std::string table_location = dataset_request->get_dataset_path();
+    std::shared_ptr<StoragePlugin> storage_plugin;
+    RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(table_location, &storage_plugin));
+    std::vector<std::string> file_list;
+    RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list));
+
+    for (auto filepath : file_list) {
+      Partition partition = Partition(Identity(table_location, filepath));
+      partitions->push_back(partition);
+    }
+  }
 
   // allocate location for each partition
   auto vectloc = std::make_shared<std::vector<Location>>();

@@ -29,8 +29,27 @@ namespace pegasus {
 
 class Catalog {
  public:
-  virtual Status GetPartitions(DataSetRequest* dataset_request,
-      std::shared_ptr<std::vector<Partition>>* partitions) = 0;
+  virtual Status GetSchema(DataSetRequest* dataset_request,
+      std::shared_ptr<arrow::Schema>* schema) = 0;
+
+  enum CatalogType {
+    UNKOWN,
+    SPARK,
+    PEGASUS
+  };
+
+  enum FileFormat {
+    UNKNOWN,
+    PARQUET,
+    ORC
+  };
+
+  virtual FileFormat GetFileFormat(DataSetRequest* dataset_request) = 0;
+
+  virtual CatalogType GetCatalogType() = 0;
+
+ private:
+  CatalogType catalog_type_;
 };
 
 } // namespace pegasus

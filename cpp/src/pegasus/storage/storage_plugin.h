@@ -35,8 +35,9 @@ class StoragePlugin {
   virtual Status GetReadableFile(std::string file_path, std::shared_ptr<HdfsReadableFile>* file) = 0;
     
   enum StoragePluginType {
+    UNKNOWN,
     HDFS,
-    S3,
+    S3
   };
 
   virtual StoragePluginType GetPluginType() = 0;

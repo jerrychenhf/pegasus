@@ -29,10 +29,18 @@ PegasusCatalog::~PegasusCatalog() {
     
 }
 
-Status PegasusCatalog::GetPartitions(DataSetRequest* dataset_request,
-    std::shared_ptr<std::vector<Partition>>* partitions) {
+Status PegasusCatalog::GetSchema(DataSetRequest* dataset_request,
+    std::shared_ptr<arrow::Schema>* schema) {
         
   return Status::NotImplemented("Pegasus Catalog not yet implemented.");
+}
+
+Catalog::FileFormat PegasusCatalog::GetFileFormat(DataSetRequest* dataset_request) {
+  return FileFormat::UNKNOWN;
+}
+
+Catalog::CatalogType PegasusCatalog::GetCatalogType() {
+   return CatalogType::PEGASUS;
 }
 
 } // namespace pegasus

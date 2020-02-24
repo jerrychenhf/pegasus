@@ -37,6 +37,7 @@ if(PEGASUS_TEST_LINKAGE STREQUAL "static")
       Util
       Planner
       pegasus_rpc_shared
+      ${PARQUET_SHARED_LIB}
       ${ARROW_STATIC_LIB}
       ${PEGASUS_TEST_STATIC_LINK_LIBS})
 else()
@@ -47,6 +48,7 @@ else()
       Util
       Planner
       pegasus_rpc_shared
+      ${PARQUET_SHARED_LIB}
       ${ARROW_SHARED_LIB}
       ${PEGASUS_TEST_SHARED_LINK_LIBS})
 endif()

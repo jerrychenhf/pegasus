@@ -23,6 +23,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <boost/algorithm/string.hpp>
+
 #include "dataset/filter.h"
 
 using namespace std;
@@ -43,7 +45,7 @@ class DataSetRequest {
   const std::string& get_dataset_path();
   const RequestProperties& get_properties();
   const std::string& get_format();
-  const std::vector<uint32_t>& get_column_indices();
+  const std::vector<std::string>& get_column_names();
   const std::vector<Filter>& get_filters();
 
   private:
@@ -51,7 +53,7 @@ class DataSetRequest {
    RequestProperties properties_;
 
    std::string format_;
-   std::vector<uint32_t> column_indices_;
+   std::vector<std::string> column_names_;
    std::vector<Filter> filters_;
 };
 
