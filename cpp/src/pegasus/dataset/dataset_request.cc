@@ -61,4 +61,12 @@ namespace pegasus {
     return filters_;
   }
 
+  void DataSetRequest::set_column_indices(const std::vector<int32_t>& column_indices) {
+    column_indices_ = column_indices;
+  }
+
+  const std::vector<int32_t>& DataSetRequest::get_column_indices() {
+    return column_indices_;
+  }
+
 } // namespace pegasus

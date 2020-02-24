@@ -126,6 +126,8 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   if (!st.ok()) {
     return st;
   }
+  std::vector<std::string> column_names = dataset_request->get_column_names();
+  
   flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdataset));
   return flightinfo_builder_->BuildFlightInfo(flight_info);
 }

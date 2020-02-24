@@ -58,8 +58,6 @@ Status SparkCatalog::GetSchema(DataSetRequest* dataset_request,
   std::vector<std::string> file_list;
   RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list));
 
-  std::vector<std::string> column_names = dataset_request->get_column_names();
-
   std::shared_ptr<HdfsReadableFile> file;
   RETURN_IF_ERROR(storage_plugin->GetReadableFile(file_list[0], &file));
   parquet::ArrowReaderProperties properties = parquet::default_arrow_reader_properties();

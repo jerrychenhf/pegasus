@@ -82,6 +82,16 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
       Partition partition = Partition(Identity(table_location, filepath));
       partitions->push_back(partition);
     }
+
+    // map the column names to column indices
+    std::shared_ptr<arrow::Schema> schema;
+    RETURN_IF_ERROR(catalog->GetSchema(dataset_request, &schema));
+    const std::vector<std::string> column_names = dataset_request->get_column_names();
+    std::vector<int32_t> column_indices;
+    for(std::string column_name : column_names) {
+      column_indices.push_back(schema->GetFieldIndex(column_name));
+    }
+    dataset_request->set_column_indices(column_indices);
   }
 
   // allocate location for each partition

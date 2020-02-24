@@ -41,11 +41,13 @@ class DataSetRequest {
 
   void set_dataset_path(const std::string& dataset_path);
   void set_properties(const RequestProperties& properties);
+  void set_column_indices(const std::vector<int32_t>& column_indices);
 
   const std::string& get_dataset_path();
   const RequestProperties& get_properties();
   const std::string& get_format();
   const std::vector<std::string>& get_column_names();
+  const std::vector<int32_t>& get_column_indices();
   const std::vector<Filter>& get_filters();
 
   private:
@@ -55,6 +57,7 @@ class DataSetRequest {
    std::string format_;
    std::vector<std::string> column_names_;
    std::vector<Filter> filters_;
+   std::vector<std::int32_t> column_indices_;
 };
 
 

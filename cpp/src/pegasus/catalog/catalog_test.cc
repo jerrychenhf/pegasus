@@ -52,6 +52,14 @@ TEST(SpakrCatalogTest, Unit) {
   std::shared_ptr<arrow::Schema> schema;
   ASSERT_OK(catalog->GetSchema(&dataset_request, &schema));
   ASSERT_EQ(18, schema->num_fields());
+  std::vector<std::string> field_names = schema->field_names();
+  std::vector<int32_t> column_indices;
+  for(std::string column_name : field_names) {
+    column_indices.push_back(schema->GetFieldIndex(column_name));
+  }
+  dataset_request.set_column_indices(column_indices);
+  std::vector<int32_t> indices = dataset_request.get_column_indices();
+  ASSERT_EQ(18, indices.size());
 
   std::vector<std::string> columns = dataset_request.get_column_names();
   std::vector<std::string> columns_expected= {"a", "b", "c"};
