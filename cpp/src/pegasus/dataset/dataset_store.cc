@@ -35,14 +35,14 @@ Status DataSetStore::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<Dat
   for(auto entry : planner_metadata_) {
     //TODO: lockread for each dataset
     datasets->get()->push_back(entry.second);
-  } 
+  }
   return Status::OK();
 }
 
 Status DataSetStore::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset) {
 
 //  boost::shared_lock<boost::shared_mutex> rdlock(dssmtx);
-  boost::lock_guard<boost::detail::spinlock> l(dssspl);
+//  boost::lock_guard<boost::detail::spinlock> l(dssspl); //TODO: temp disable
 //  boost::lock_guard<SpinLock> l(dssspl);
   auto entry = planner_metadata_.find(dataset_path);
   if (entry == planner_metadata_.end()) {
@@ -62,7 +62,7 @@ Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset) {
 
   std::string key = dataset->dataset_path();
 //  boost::unique_lock<boost::shared_mutex> wrlock(dssmtx);
-  boost::lock_guard<boost::detail::spinlock> l(dssspl);
+//  boost::lock_guard<boost::detail::spinlock> l(dssspl); //TODO: temp disable
 //  boost::lock_guard<SpinLock> l(dssspl);
   planner_metadata_[key] = std::move(dataset);  // why use move here while dataset is a shared_ptr?
   return Status::OK();

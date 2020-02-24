@@ -20,8 +20,8 @@
 
 #include <vector>
 
-#include "pegasus/dataset/identity.h"
-#include "pegasus/common/location.h"
+#include "dataset/identity.h"
+#include "common/location.h"
 
 namespace pegasus {
 
@@ -40,6 +40,8 @@ public:
   bool Equals(const Partition& other) const;
 
   std::string GetIdentPath() {return identity.partition_id();}
+
+  Location GetLocation() {return location;}
 
   void UpdateLocation(Location lcn) {location = lcn;}
 

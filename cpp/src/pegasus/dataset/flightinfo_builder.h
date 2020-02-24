@@ -18,9 +18,9 @@
 #ifndef PEGASUS_FLIGHTINFO_BUILDER_H
 #define PEGASUS_FLIGHTINFO_BUILDER_H
 
-#include "pegasus/rpc/types.h"
+#include "rpc/types.h"
 
-#include "pegasus/dataset/dataset.h"
+#include "dataset/dataset.h"
 
 namespace pegasus {
 

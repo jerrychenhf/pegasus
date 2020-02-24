@@ -27,9 +27,9 @@
 #include "consistent_hashing.h"
 #include "dataset_request.h"
 
-#include "arrow/ipc/test_common.h"
-#include "arrow/status.h"
-#include "arrow/testing/gtest_util.h"
+//#include "arrow/ipc/test_common.h"
+//#include "arrow/status.h"
+//#include "arrow/testing/gtest_util.h"
 //#include "arrow/testing/util.h"
 //#include "arrow/util/make_unique.h"
 
@@ -57,9 +57,9 @@ TEST(DatasetServiceTest, ConHashBasic)
   // generate validloc and update the distributor
 //  std::shared_ptr<Location> loc1 = std::make_shared<Location>();
   Location location1, location2, location3;
-  ASSERT_OK(Location::ForGrpcTcp("localhost", 10010, &location1));
-  ASSERT_OK(Location::ForGrpcTls("localhost", 10010, &location2));
-  ASSERT_OK(Location::ForGrpcUnix("/tmp/test.sock", &location3));
+  Location::ForGrpcTcp("localhost", 10010, &location1);
+  Location::ForGrpcTls("localhost", 10010, &location2);
+  Location::ForGrpcUnix("/tmp/test.sock", &location3);
   std::shared_ptr<std::vector<Location>> validlocs = std::make_shared<std::vector<Location>>();
   validlocs->push_back(location1);
   validlocs->push_back(location2);
@@ -90,7 +90,7 @@ TEST(DatasetServiceTest, ConHashBasic)
 
 }
 #endif
-#if 0
+#if 1
 TEST(DatasetServiceTest, DataSetStoreBasic)
 {
   Status st;
@@ -103,10 +103,11 @@ TEST(DatasetServiceTest, DataSetStoreBasic)
   std::shared_ptr<DataSet> pds = nullptr;
 
   // create and insert a dataset
-  auto metadata_manager = std::make_shared<MetadataManager>();
+//  auto metadata_manager = std::make_shared<MetadataManager>();
+  auto catalog_manager = std::make_shared<CatalogManager>();
 //  std::cout << "addressof metadata_manager: " << std::addressof(metadata_manager) << std::endl;
 //  std::cout << "metadata_manager.get(): " << metadata_manager.get() << std::endl;
-  auto dsbuilder = std::make_shared<DataSetBuilder>(metadata_manager);
+  auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager);
 //  std::cout << "addressof dsbuilder: " << std::addressof(dsbuilder) << std::endl;
 //  std::cout << "dsbuilder.get(): " << dsbuilder.get() << std::endl;
   DataSetRequest dataset_request;
@@ -127,7 +128,8 @@ TEST(DatasetServiceTest, DataSetStoreBasic)
   // check the dataset
 
 }
-
+#endif
+#if 0
 TEST(DatasetServiceTest, DatasetService)
 {
   std::unique_ptr<PlannerExecEnv> exec_env_(new PlannerExecEnv());

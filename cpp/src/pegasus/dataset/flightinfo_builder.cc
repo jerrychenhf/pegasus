@@ -16,6 +16,7 @@
 // under the License.
 
 #include "dataset/flightinfo_builder.h"
+#include "dataset/partition.h"
 #include "rpc/types.h"
 
 namespace pegasus {
@@ -69,15 +70,17 @@ Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::Fl
   // every identity has 1 dataset_path, 1 partition_id.
   // so, every dataset has 1 schema + 1 dataset_path + many partition ids + many locations.
 
+  for (auto partit:dataset_->partitions())
+  {
+    rpc::FlightEndpoint fep;
   // Ticket ticket;    std::string dataset_path;  std::string partition_identity;  std::vector<int> column_indices;
   // std::vector<Location> locations;
-  rpc::Ticket tkt;
-  tkt.setDatasetpath(dataset_->dataset_path());
-//  tkt.setPartitionid(dataset_->);
-//  tkt.set
-  rpc::FlightEndpoint fep;
-
-  (*endpoints)->push_back(fep);
+    fep.ticket.setDatasetpath(dataset_->dataset_path());
+    fep.ticket.setPartitionid(partit.GetIdentPath());
+//  fep.ticket.setColids(); // (const std::vector<int>& colids) TODO: get colids
+    fep.locations.push_back(partit.GetLocation());
+    (*endpoints)->push_back(fep);
+  }
 
   return Status::OK();
 }
