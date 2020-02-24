@@ -14,7 +14,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
+#include <arrow/record_batch.h>
 #include <arrow/type.h>
 
 #include <boost/algorithm/string/classification.hpp>
