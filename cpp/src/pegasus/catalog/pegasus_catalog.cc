@@ -29,6 +29,11 @@ PegasusCatalog::~PegasusCatalog() {
     
 }
 
+Status PegasusCatalog::GetTableLocation(DataSetRequest* dataset_request,
+    std::string& table_location) {
+  return Status::NotImplemented("Pegasus Catalog not yet implemented.");
+}
+
 Status PegasusCatalog::GetSchema(DataSetRequest* dataset_request,
     std::shared_ptr<arrow::Schema>* schema) {
         

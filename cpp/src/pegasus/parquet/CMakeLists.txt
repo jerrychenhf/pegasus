@@ -30,6 +30,7 @@ add_dependencies(Parquet gen-deps)
 
 if(PEGASUS_TEST_LINKAGE STREQUAL "static")
   set(PEGASUS_PARQUET_TEST_LINK_LIBS
+      Cache
       Parquet
       Runtime
       Common
@@ -41,6 +42,7 @@ if(PEGASUS_TEST_LINKAGE STREQUAL "static")
       ${PEGASUS_TEST_STATIC_LINK_LIBS})
 else()
   set(PEGASUS_PARQUET_TEST_LINK_LIBS
+      Cache
       Parquet
       Runtime
       Common

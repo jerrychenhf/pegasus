@@ -31,6 +31,7 @@ class PegasusCatalog : public Catalog {
   PegasusCatalog();
   ~PegasusCatalog();
 
+  Status GetTableLocation(DataSetRequest* dataset_request, std::string& table_location);
   Status GetSchema(DataSetRequest* dataset_request,
       std::shared_ptr<arrow::Schema>* schema);
   FileFormat GetFileFormat(DataSetRequest* dataset_request);

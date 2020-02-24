@@ -15,46 +15,30 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_CATALOG_H
-#define PEGASUS_CATALOG_H
+#ifndef PEGASUS_PROPERTIES_H_
+#define PEGASUS_PROPERTIES_H_
 
-#include "common/status.h"
-#include "dataset/dataset_request.h"
-#include "dataset/identity.h"
-#include "dataset/partition.h"
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
 
-using namespace std;
+#include "arrow/type.h"
+#include "arrow/util/compression.h"
+#include "parquet/encryption.h"
+#include "parquet/exception.h"
+#include "parquet/parquet_version.h"
+#include "parquet/platform.h"
+#include "parquet/schema.h"
+#include "parquet/types.h"
 
 namespace pegasus {
 
-class Catalog {
- public:
-  virtual Status GetTableLocation(DataSetRequest* dataset_request,
-      std::string& table_location) = 0;
+DEFINE_string(kudu_read_mode, "READ_LATEST", "(Advanced) Sets the Kudu scan ReadMode. "
+    "Supported Kudu read modes are READ_LATEST and READ_AT_SNAPSHOT. Can be overridden "
+    "with the query option of the same name.");
 
-  virtual Status GetSchema(DataSetRequest* dataset_request,
-      std::shared_ptr<arrow::Schema>* schema) = 0;
+}  // namespace pegasus
 
-  enum CatalogType {
-    UNKOWN,
-    SPARK,
-    PEGASUS
-  };
-
-  enum FileFormat {
-    UNKNOWN,
-    PARQUET,
-    ORC
-  };
-
-  virtual FileFormat GetFileFormat(DataSetRequest* dataset_request) = 0;
-
-  virtual CatalogType GetCatalogType() = 0;
-
- private:
-  CatalogType catalog_type_;
-};
-
-} // namespace pegasus
-
-#endif  // PEGASUS_CATALOG_H
+#endif  // PEGASUS_PROPERTIES_H_

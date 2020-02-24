@@ -71,7 +71,8 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
   RETURN_IF_ERROR(catalog_manager_->GetCatalog(dataset_request, &catalog));
 
   if (catalog->GetCatalogType() == Catalog::SPARK) {
-    std::string table_location = dataset_request->get_dataset_path();
+    std::string table_location;
+    RETURN_IF_ERROR(catalog->GetTableLocation(dataset_request, table_location));
     std::shared_ptr<StoragePlugin> storage_plugin;
     RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(table_location, &storage_plugin));
     std::vector<std::string> file_list;

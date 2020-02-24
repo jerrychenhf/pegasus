@@ -36,10 +36,23 @@ SparkCatalog::~SparkCatalog() {
     
 }
 
+Status SparkCatalog::GetTableLocation(DataSetRequest* dataset_request, std::string& table_location) {
+  const auto properties = dataset_request->get_properties();
+  std::unordered_map<std::string, std::string>::const_iterator it = 
+      properties.find("table_location");
+  if (it != properties.end()) {
+    table_location = it->second;
+    return Status::OK();
+  } else {
+    return Status::ObjectNotFound("table path not found.");
+  }
+}
+
 Status SparkCatalog::GetSchema(DataSetRequest* dataset_request,
     std::shared_ptr<arrow::Schema>* schema) {
   
-  std::string table_location = dataset_request->get_dataset_path();
+  std::string table_location;
+  RETURN_IF_ERROR(GetTableLocation(dataset_request, table_location));
   std::shared_ptr<StoragePlugin> storage_plugin;
   RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(table_location, &storage_plugin));
   std::vector<std::string> file_list;
