@@ -38,7 +38,7 @@ Status DatasetCacheEngineManager::Init() {
   for(std::vector<CacheEngine::CachePolicy>::iterator it = cache_policies.begin(); it != cache_policies.end(); ++it) {
     if (*it == CacheEngine::CachePolicy::LRU) {
       cache_policy_type = "LRU";
-      cache_engine = std::shared_ptr<CacheEngine>(new LruCacheEngine(100));
+      cache_engine = std::shared_ptr<CacheEngine>(new LruCacheEngine(3221225472)); // 3gb
     } else if (*it == CacheEngine::CachePolicy::NonEvict) {
       cache_policy_type = "NonEvict";
       cache_engine = std::shared_ptr<CacheEngine>(new NonEvictionCacheEngine());

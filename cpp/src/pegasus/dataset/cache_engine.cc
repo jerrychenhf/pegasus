@@ -23,7 +23,7 @@ namespace pegasus {
 
 LruCacheEngine::LruCacheEngine(int64_t capacity)
   : cache_store_manager_(new CacheStoreManager()) {
-  lru_cache_ = std::shared_ptr<LRUCache>(new LRUCache(capacity));
+  lru_cache_ = new LRUCache(capacity);
 }
 
 Status LruCacheEngine::Init() {

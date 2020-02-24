@@ -38,8 +38,8 @@ int64_t CacheRegion::size() const {
     return size_;
 }
 
-arrow::ChunkedArray* CacheRegion::chunked_array() const {
-    return chunked_array_.get();
+std::shared_ptr<arrow::ChunkedArray>  CacheRegion::chunked_array() const {
+    return chunked_array_;
 }
 
 } // namespace pegasus

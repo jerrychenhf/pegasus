@@ -18,9 +18,6 @@
 #ifndef PEGASUS_DATASET_CACHE_MANAGER_H
 #define PEGASUS_DATASET_CACHE_MANAGER_H
 
-#include "arrow/record_batch.h"
-#include "arrow/table.h"
-
 #include "dataset/dataset_cache_block_manager.h"
 #include "dataset/dataset_cache_engine_manager.h"
 #include "storage/storage_plugin.h"
@@ -29,6 +26,11 @@
 #include "dataset/request_identity.h"
 
 using namespace std;
+
+namespace arrow {
+  class ChunkedArray;
+  class Table;
+}
 
 namespace pegasus {
 

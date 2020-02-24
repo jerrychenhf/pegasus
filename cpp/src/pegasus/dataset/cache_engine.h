@@ -48,7 +48,12 @@ class CacheEngine {
 class LruCacheEngine : public CacheEngine {
  public:
   LruCacheEngine(int64_t capacity);
-  ~LruCacheEngine() {};
+  ~LruCacheEngine() {
+    if (lru_cache_ != nullptr) {
+      delete lru_cache_;
+      lru_cache_ = nullptr;
+    }
+  }
   
   virtual Status Init();
   
@@ -60,7 +65,7 @@ class LruCacheEngine : public CacheEngine {
 
  public:
   std::shared_ptr<CacheStoreManager> cache_store_manager_;
-  std::shared_ptr<LRUCache> lru_cache_;
+  LRUCache* lru_cache_;
 };
 
 //NonEvictCacheEngine 

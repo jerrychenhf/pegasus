@@ -34,6 +34,7 @@
 #include "util/flag_validators.h"
 #include "util/slice.h"
 #include "util/string_case.h"
+#include "common/logging.h"
 
 #include "dataset/dataset_cache_block_manager.h"
 
@@ -79,7 +80,13 @@ class EvictionCallback : public Cache::EvictionCallback {
       int column_id = entry_ptr->column_id_;
 
       std::shared_ptr<DatasetCacheBlockManager> cache_block_manager = entry_ptr->cache_block_manager_;
-      cache_block_manager->DeleteColumn(dataset_path, partition_path, std::to_string(column_id));
+      Status status = cache_block_manager->DeleteColumn(dataset_path,
+       partition_path, std::to_string(column_id));
+       if (!status.ok()) {
+         stringstream ss;
+         ss << "Failed to delete the column when free the column";
+         LOG(ERROR) << ss.str();
+       }
 
       // TODO delete the record in block manager.
       // delete entry_ptr->val_ptr;

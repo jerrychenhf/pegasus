@@ -28,7 +28,7 @@
 namespace pegasus {
 
 DatasetCacheManager::DatasetCacheManager() {
-   WorkerExecEnv* env =  WorkerExecEnv::GetInstance();
+   ExecEnv* env =  ExecEnv::GetInstance();
    storage_plugin_factory_ = env->get_storage_plugin_factory();
 }
 
@@ -92,8 +92,8 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
   for(auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
     std::shared_ptr<CachedColumn> cache_column = iter->second;
     CacheRegion* cache_region = cache_column->cache_region_;
-    std::shared_ptr<arrow::ChunkedArray> chunked_out(cache_region->chunked_array());
-    RETURN_IF_ERROR(Status::fromArrowStatus(Table::FromChunkedStructArray(chunked_out, &table)));
+    RETURN_IF_ERROR(Status::fromArrowStatus(Table::FromChunkedStructArray(
+      cache_region->chunked_array(), &table)));
   }
   *data_stream = std::unique_ptr<rpc::FlightDataStream>(
     new rpc::RecordBatchStream(std::shared_ptr<RecordBatchReader>(new TableBatchReader(*table))));
@@ -123,7 +123,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
     std::string partition_path = request_identity->partition_path();
     std::shared_ptr<StoragePlugin> storage_plugin;
 
-    // Get the ReadableFile Debug Check
+    // Get the ReadableFile
     RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(partition_path, &storage_plugin));
     std::shared_ptr<HdfsReadableFile> file;
     RETURN_IF_ERROR(storage_plugin->GetReadableFile(partition_path, &file));
@@ -134,7 +134,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
     RETURN_IF_ERROR(memory_pool->Create());
     
     CacheStore* cache_store = memory_pool->GetCacheStore();
-    parquet::ArrowReaderProperties properties(new parquet::ArrowReaderProperties());
+    parquet::ArrowReaderProperties properties(parquet::default_arrow_reader_properties());
     std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, memory_pool.get(), properties));
     
     int64_t occupied_size = 0;
@@ -149,6 +149,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, colId, cache_region));
       retrieved_columns.insert(std::make_pair(std::to_string(*iter), column));
+      
       LRUCache::CacheKey key(dataset_path, partition_path, colId, column_size, cache_block_manager_);
       RETURN_IF_ERROR(cache_engine->PutValue(key));
     }
@@ -185,7 +186,8 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
   cache_block_manager_->GetCachedDataSet(request_identity->dataset_path(), &dataset);
   if (dataset == nullptr) {
     LOG(WARNING) << "The dataset "<< request_identity->dataset_path() 
-    <<" is nullptr. We will get all the columns from storage and then insert the column into dataset cache block manager";
+    <<" is nullptr. We will get all the columns from storage and"
+     << "then insert the column into dataset cache block manager";
     return GetDatasetStreamWithMissedColumns(request_identity, col_ids, data_stream);
   } else {
     // dataset is cached
@@ -194,7 +196,8 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
      request_identity->partition_path(), &partition);
     if (partition == nullptr) {
       LOG(WARNING) << "The partition "<< request_identity->partition_path() 
-      <<" is nullptr. We will get all the columns from storage and then insert the column into dataset cache block manager";
+      <<" is nullptr. We will get all the columns from storage and"
+       << "then insert the column into dataset cache block manager";
       return GetDatasetStreamWithMissedColumns(request_identity, col_ids, data_stream);
     } else {
       // partition is cached.

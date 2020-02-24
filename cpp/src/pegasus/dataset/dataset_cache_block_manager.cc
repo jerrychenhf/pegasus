@@ -41,6 +41,11 @@ Status DatasetCacheBlockManager::Init() {
 
 Status DatasetCacheBlockManager::GetCachedDataSet(std::string dataset_path,
  std::shared_ptr<CachedDataset>* dataset) {
+  if (cached_datasets_.size() == 0) {
+     *dataset = nullptr;
+    LOG(WARNING) << "The dataset: "<< dataset_path <<" is NULL.";
+    return Status::OK(); 
+  }
   auto entry = cached_datasets_.find(dataset_path);
 
   if (entry == cached_datasets_.end()) {
