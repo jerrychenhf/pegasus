@@ -29,24 +29,19 @@ add_library(Catalog
 )
 add_dependencies(Catalog gen-deps)
 
+set(PEGASUS_CATALOG_TEST_LINK_LIBS
+    Common
+    Util
+    Catalog)
+
 if(PEGASUS_TEST_LINKAGE STREQUAL "static")
-  set(PEGASUS_CATALOG_TEST_LINK_LIBS
-      Catalog
-      Runtime
-      Common
-      Util
-      Planner
-      pegasus_rpc_shared
-      ${PARQUET_SHARED_LIB}
+  list(APPEND PEGASUS_CATALOG_TEST_LINK_LIBS
+      pegasus_rpc_static
+      ${PARQUET_STATIC_LIB}
       ${ARROW_STATIC_LIB}
       ${PEGASUS_TEST_STATIC_LINK_LIBS})
 else()
-  set(PEGASUS_CATALOG_TEST_LINK_LIBS
-      Catalog
-      Runtime
-      Common
-      Util
-      Planner
+  list(APPEND PEGASUS_CATALOG_TEST_LINK_LIBS
       pegasus_rpc_shared
       ${PARQUET_SHARED_LIB}
       ${ARROW_SHARED_LIB}

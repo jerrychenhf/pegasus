@@ -27,12 +27,10 @@
 #include "catalog/catalog_manager.h"
 #include "dataset/dataset_request.h"
 #include "test/gtest-util.h"
-#include "runtime/planner_exec_env.h"
 
 namespace pegasus {
 
 TEST(SpakrCatalogTest, Unit) {
-  std::unique_ptr<PlannerExecEnv> planner_exec_env_(new PlannerExecEnv());
 
   //TODO: create a test file.
   std::string dataset_path = "hdfs://10.239.47.55:9000/genData2/customer";
