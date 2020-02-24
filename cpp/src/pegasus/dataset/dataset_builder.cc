@@ -70,6 +70,8 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
   std::shared_ptr<Catalog> catalog;
   RETURN_IF_ERROR(catalog_manager_->GetCatalog(dataset_request, &catalog));
 
+  std::shared_ptr<arrow::Schema> schema;
+
   if (catalog->GetCatalogType() == Catalog::SPARK) {
     std::string table_location;
     RETURN_IF_ERROR(catalog->GetTableLocation(dataset_request, table_location));
@@ -83,15 +85,7 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
       partitions->push_back(partition);
     }
 
-    // map the column names to column indices
-    std::shared_ptr<arrow::Schema> schema;
     RETURN_IF_ERROR(catalog->GetSchema(dataset_request, &schema));
-    const std::vector<std::string> column_names = dataset_request->get_column_names();
-    std::vector<int32_t> column_indices;
-    for(std::string column_name : column_names) {
-      column_indices.push_back(schema->GetFieldIndex(column_name));
-    }
-    dataset_request->set_column_indices(column_indices);
   }
 
   // allocate location for each partition
@@ -105,6 +99,7 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
     dd.partitions.push_back(partt);
 
   *dataset = std::make_shared<DataSet>(dd);
+  (*dataset)->set_schema(schema);
 
   return Status::OK();
 }

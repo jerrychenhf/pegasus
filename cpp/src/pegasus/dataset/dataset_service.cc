@@ -126,8 +126,19 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   if (!st.ok()) {
     return st;
   }
+
+  // map the column names to column indices
   std::vector<std::string> column_names = dataset_request->get_column_names();
-  
+  std::vector<int32_t> column_indices;
+  std::shared_ptr<arrow::Schema> schema = rdataset->get_schema();
+  if (column_names.empty()) {
+    column_names = schema->field_names();
+  }
+  for(std::string column_name : column_names) {
+    column_indices.push_back(schema->GetFieldIndex(column_name));
+  }
+  dataset_request->set_column_indices(column_indices);
+
   flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdataset));
   return flightinfo_builder_->BuildFlightInfo(flight_info);
 }

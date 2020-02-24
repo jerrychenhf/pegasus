@@ -20,9 +20,13 @@
 
 #include <string>
 #include <vector>
+
+#include <arrow/type.h>
+
 #include <boost/thread/shared_mutex.hpp>
-#include "pegasus/dataset/partition.h"
-#include "pegasus/util/visibility.h"
+
+#include "dataset/partition.h"
+#include "util/visibility.h"
 
 namespace pegasus {
 
@@ -92,7 +96,6 @@ private:
 class PEGASUS_EXPORT DataSet {
  public:
   struct Data {
-    std::vector<std::string> schema; //colname
     /// Path identifying a particular dataset. 
     std::string dataset_path;
     std::vector<Partition> partitions;
@@ -107,6 +110,14 @@ class PEGASUS_EXPORT DataSet {
 
   /// Get the data_
   const Data& GetData() {return data_;}
+
+  std::shared_ptr<arrow::Schema> get_schema() {
+    return schema_;
+  }
+
+  void set_schema(std::shared_ptr<arrow::Schema> schema) {
+    schema_ = schema;
+  }
 
   /// The path of the dataset
   const std::string& dataset_path() const { return data_.dataset_path; }
@@ -128,12 +139,13 @@ class PEGASUS_EXPORT DataSet {
  private:
   rwlock dslock;
   Data data_;
+  std::shared_ptr<arrow::Schema> schema_;
 };
 
 class PEGASUS_EXPORT ResultDataSet {
  public:
   struct Data {
-    std::vector<std::string> schema; //colname
+    // arrow::Schema schema;
     /// Path identifying a particular dataset. 
     std::string dataset_path;
     std::vector<Partition> partitions;
@@ -144,6 +156,14 @@ class PEGASUS_EXPORT ResultDataSet {
   explicit ResultDataSet(const Data& data) : data_(data) {}
   explicit ResultDataSet(Data&& data)
       : data_(std::move(data)) {}
+
+  std::shared_ptr<arrow::Schema> get_schema() {
+    return schema_;
+  }
+
+  void set_schema(std::shared_ptr<arrow::Schema> schema) {
+    schema_ = schema;
+  }
 
   /// The path of the dataset
   const std::string& dataset_path() const { return data_.dataset_path; }
@@ -159,6 +179,7 @@ class PEGASUS_EXPORT ResultDataSet {
 
  private:
   Data data_;
+  std::shared_ptr<arrow::Schema> schema_;
 };
 
 } // namespace pegasus
