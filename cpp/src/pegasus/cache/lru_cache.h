@@ -228,4 +228,4 @@ bool ValidateLRUCacheCapacity();
 
 } // namespace pegasus
 
-#endif
+#endif // PEGASUS_LRU_CACHE_H

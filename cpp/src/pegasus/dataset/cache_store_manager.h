@@ -38,4 +38,4 @@ class CacheStoreManager {
 };
 } // namespace pegasus                              
 
-#endif  // PEGASUS_CACHE_STORE_H
+#endif  // PEGASUS_CACHE_STORE_MANAGER_H
