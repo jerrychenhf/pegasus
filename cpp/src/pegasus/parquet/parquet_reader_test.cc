@@ -51,6 +51,10 @@ TEST(ParquetReaderTest, Unit) {
   arrow::MemoryPool *pool = arrow::default_memory_pool();
   std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, pool, properties));
 
+  std::shared_ptr<arrow::Schema> schema;
+  ASSERT_OK(parquet_reader->GetSchema(&schema));
+  ASSERT_EQ(18, schema->num_fields());
+
   std::shared_ptr<arrow::Table> table1;
   ASSERT_OK(parquet_reader->ReadParquetTable(&table1));
   ASSERT_NE(nullptr, table1);
