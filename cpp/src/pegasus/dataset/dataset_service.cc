@@ -140,7 +140,7 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   dataset_request->set_column_indices(column_indices);
 
   flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdataset));
-  return flightinfo_builder_->BuildFlightInfo(flight_info);
+  return flightinfo_builder_->BuildFlightInfo(flight_info, column_indices);
 }
 
 Status DataSetService::FilterDataSet(const std::vector<Filter>& parttftr, std::shared_ptr<DataSet> dataset,

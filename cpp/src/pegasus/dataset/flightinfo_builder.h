@@ -39,14 +39,13 @@ public:
   FlightInfoBuilder(std::shared_ptr<ResultDataSet> dataset);
   FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr<ResultDataSet>>> datasets);
 
-  Status BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flight_info);
+  Status BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flight_info, std::vector<int32_t>& indices);
 
   Status BuildFlightListing(std::unique_ptr<rpc::FlightListing>* listings);
 
   Status GetFlightDescriptor(std::unique_ptr<rpc::FlightDescriptor>* flight_descriptor);
 
-  Status GetFlightEndpoints(std::unique_ptr<std::vector<rpc::FlightEndpoint>>* endpoints);
-
+  Status GetFlightEndpoints(std::unique_ptr<std::vector<rpc::FlightEndpoint>>* endpoints, std::vector<int32_t>& indices);
   Status GetTotalRecords(int64_t* total_records);
     
   Status GetTotalBytes(int64_t* total_bytes);

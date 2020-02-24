@@ -29,11 +29,12 @@ FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr
 
 }
 
-Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flight_info) {
+Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flight_info, \
+                                          std::vector<int32_t>& indices) {
   std::unique_ptr<rpc::FlightDescriptor> flight_descriptor;
   GetFlightDescriptor(&flight_descriptor);
   std::unique_ptr<std::vector<rpc::FlightEndpoint>> endpoints;
-  GetFlightEndpoints(&endpoints);
+  GetFlightEndpoints(&endpoints, indices);
   int64_t* total_records;
   GetTotalRecords(total_records);
   int64_t* total_bytes;
@@ -60,7 +61,8 @@ Status FlightInfoBuilder::GetFlightDescriptor(std::unique_ptr<rpc::FlightDescrip
   return Status::OK();
 }
 
-Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::FlightEndpoint>>* endpoints) {
+Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::FlightEndpoint>>* endpoints, \
+                                              std::vector<int32_t>& indices) {
   // fill ticket and locations in the endpoints
   // every endpoint has 1 ticket + many locations
   // every ticket has 1 dataset_path, 1 partition_id, many column indices.
@@ -77,7 +79,7 @@ Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::Fl
   // std::vector<Location> locations;
     fep.ticket.setDatasetpath(dataset_->dataset_path());
     fep.ticket.setPartitionid(partit.GetIdentPath());
-//  fep.ticket.setColids(); // (const std::vector<int>& colids) TODO: get colids
+    fep.ticket.setColids(indices);
     fep.locations.push_back(partit.GetLocation());
     (*endpoints)->push_back(fep);
   }

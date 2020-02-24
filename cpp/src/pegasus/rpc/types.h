@@ -255,7 +255,7 @@ struct PEGASUS_RPC_EXPORT Ticket {
 
   void setDatasetpath(const std::string& dspath) { dataset_path = dspath; }
   void setPartitionid(const std::string& partid) { partition_identity = partid; }
-  void setColids(const std::vector<int>& colids) { column_indices = colids; }
+  void setColids(const std::vector<int32_t>& colids) { column_indices = colids; }
 };
 
 class FlightClient;
