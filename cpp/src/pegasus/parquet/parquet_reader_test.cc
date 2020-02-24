@@ -24,8 +24,8 @@
 
 #include "parquet/parquet_reader.h"
 #include "test/gtest-util.h"
-#include "runtime/planner_exec_env.h"
-#include "runtime/worker_exec_env.h"
+#include "storage/storage_plugin.h"
+#include "storage/storage_plugin_factory.h"
 
 namespace pegasus {
 
@@ -33,9 +33,8 @@ TEST(ParquetReaderTest, Unit) {
 
   std::string partition_path = 
       "hdfs://10.239.47.55:9000/genData2/customer/part-00000-1fafbf9f-6edf-4f8f-8b51-268708b6f6c5-c000.snappy.parquet";
-  std::unique_ptr<WorkerExecEnv> worker_exec_env_(new WorkerExecEnv());
-  std::shared_ptr<StoragePluginFactory> worker_storage_plugin_factory =
-      worker_exec_env_->get_storage_plugin_factory();
+  std::shared_ptr<StoragePluginFactory> worker_storage_plugin_factory(
+      new StoragePluginFactory());
 
   std::shared_ptr<StoragePlugin> worker_storage_plugin;
 

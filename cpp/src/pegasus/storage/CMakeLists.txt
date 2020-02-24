@@ -28,23 +28,19 @@ add_library(StoragePlugin
 )
 add_dependencies(StoragePlugin gen-deps)
 
+set(PEGASUS_STORAGE_TEST_LINK_LIBS
+    StoragePlugin
+    Common
+    Util
+    Parquet)
+
 if(PEGASUS_TEST_LINKAGE STREQUAL "static")
-  set(PEGASUS_STORAGE_TEST_LINK_LIBS
-      StoragePlugin
-      Runtime
-      Common
-      Util
-      Planner
-      pegasus_rpc_shared
+  list(APPEND PEGASUS_STORAGE_TEST_LINK_LIBS
+      pegasus_rpc_static
       ${ARROW_STATIC_LIB}
       ${PEGASUS_TEST_STATIC_LINK_LIBS})
 else()
-  set(PEGASUS_STORAGE_TEST_LINK_LIBS
-      StoragePlugin
-      Runtime
-      Common
-      Util
-      Planner
+  list(APPEND PEGASUS_STORAGE_TEST_LINK_LIBS
       pegasus_rpc_shared
       ${ARROW_SHARED_LIB}
       ${PEGASUS_TEST_SHARED_LINK_LIBS})

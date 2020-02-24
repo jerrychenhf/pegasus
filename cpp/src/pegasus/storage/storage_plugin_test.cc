@@ -23,20 +23,21 @@
 #include <gtest/gtest.h>
 
 #include "test/gtest-util.h"
-#include "runtime/planner_exec_env.h"
-#include "runtime/worker_exec_env.h"
+#include "storage/storage_plugin.h"
+#include "storage/storage_plugin_factory.h"
 
 namespace pegasus {
 
 TEST(StoragePluginTest, Unit) {
 
-  std::unique_ptr<PlannerExecEnv> planner_exec_env_(new PlannerExecEnv());
-  std::shared_ptr<StoragePluginFactory> planner_storage_plugin_factory = planner_exec_env_->get_storage_plugin_factory();
+  std::shared_ptr<StoragePluginFactory> planner_storage_plugin_factory(
+      new StoragePluginFactory());
 
   std::shared_ptr<StoragePlugin> planner_storage_plugin;
   //TODO: create a test file.
   std::string table_location = "hdfs://10.239.47.55:9000/genData2/customer";
-  ASSERT_OK(planner_storage_plugin_factory->GetStoragePlugin(table_location, &planner_storage_plugin));
+  ASSERT_OK(planner_storage_plugin_factory->GetStoragePlugin(table_location,
+      &planner_storage_plugin));
 
   ASSERT_NE(nullptr, planner_storage_plugin);
   ASSERT_EQ(StoragePlugin::HDFS, planner_storage_plugin->GetPluginType());
@@ -50,14 +51,14 @@ TEST(StoragePluginTest, Unit) {
     partitions->push_back(Partition(Identity(table_location, filepath)));
   }
   
-  std::unique_ptr<WorkerExecEnv> worker_exec_env_(new WorkerExecEnv());
-  std::shared_ptr<StoragePluginFactory> worker_storage_plugin_factory =
-      worker_exec_env_->get_storage_plugin_factory();
+  std::shared_ptr<StoragePluginFactory> worker_storage_plugin_factory(
+      new StoragePluginFactory());
 
   std::shared_ptr<StoragePlugin> worker_storage_plugin;
   for(auto partition : *partitions) {
     std::string partition_path = partition.GetIdentPath();
-    ASSERT_OK(worker_storage_plugin_factory->GetStoragePlugin(partition_path, &worker_storage_plugin));
+    ASSERT_OK(worker_storage_plugin_factory->GetStoragePlugin(partition_path,
+        &worker_storage_plugin));
     ASSERT_NE(nullptr, worker_storage_plugin);
     ASSERT_EQ(StoragePlugin::HDFS, worker_storage_plugin->GetPluginType());
     arrow::internal::Uri uri;

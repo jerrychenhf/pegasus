@@ -28,26 +28,19 @@ add_library(Parquet
 )
 add_dependencies(Parquet gen-deps)
 
+set(PEGASUS_PARQUET_TEST_LINK_LIBS
+    Common
+    Util
+    Parquet)
+
 if(PEGASUS_TEST_LINKAGE STREQUAL "static")
-  set(PEGASUS_PARQUET_TEST_LINK_LIBS
-      Cache
-      Parquet
-      Runtime
-      Common
-      Util
-      Planner
-      pegasus_rpc_shared
-      ${PARQUET_SHARED_LIB}
+  list(APPEND PEGASUS_PARQUET_TEST_LINK_LIBS
+      pegasus_rpc_static
+      ${PARQUET_STATIC_LIB}
       ${ARROW_STATIC_LIB}
       ${PEGASUS_TEST_STATIC_LINK_LIBS})
 else()
-  set(PEGASUS_PARQUET_TEST_LINK_LIBS
-      Cache
-      Parquet
-      Runtime
-      Common
-      Util
-      Planner
+  list(APPEND PEGASUS_PARQUET_TEST_LINK_LIBS
       pegasus_rpc_shared
       ${PARQUET_SHARED_LIB}
       ${ARROW_SHARED_LIB}

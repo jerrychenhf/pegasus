@@ -18,8 +18,10 @@
 #ifndef PEGASUS_PARQUET_READER_H
 #define PEGASUS_PARQUET_READER_H
 
-#include "arrow/io/interfaces.h"
 #include "parquet/arrow/reader.h"
+#include "arrow/io/interfaces.h"
+#include "parquet/properties.h"
+#include "arrow/table.h"
 
 #include "common/status.h"
 

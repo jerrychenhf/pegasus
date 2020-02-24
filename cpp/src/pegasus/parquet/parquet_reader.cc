@@ -17,9 +17,6 @@
 
 #include "parquet/parquet_reader.h"
 
-#include "parquet/properties.h"
-#include "arrow/table.h"
-
 namespace pegasus {
 
 ParquetReader::ParquetReader(const std::shared_ptr<arrow::io::RandomAccessFile>& file,
