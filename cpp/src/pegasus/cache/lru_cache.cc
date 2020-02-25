@@ -37,6 +37,7 @@
 #include "common/logging.h"
 
 #include "dataset/dataset_cache_block_manager.h"
+#include "runtime/worker_exec_env.h"
 
 DEFINE_int64(lru_cache_capacity_mb, 512, "lru cache capacity in MB");
 TAG_FLAG(lru_cache_capacity_mb, stable);
@@ -80,16 +81,19 @@ class EvictionCallback : public Cache::EvictionCallback {
       const std::string& partition_path = entry_ptr->partition_path_;
       int column_id = entry_ptr->column_id_;
 
-      std::shared_ptr<DatasetCacheBlockManager> cache_block_manager = entry_ptr->cache_block_manager_;
-      cache_block_manager->DeleteColumn(dataset_path,
-       partition_path, column_id);
-      // Status status = cache_block_manager->DeleteColumn(dataset_path,
-      //  partition_path, column_id);
-      // if (!status.ok()) {
-      //   stringstream ss;
-      //   ss << "Failed to delete the column when free the column";
-      //   LOG(ERROR) << ss.str();
-      // }
+      WorkerExecEnv* worker_exec = WorkerExecEnv::GetInstance();
+      std::shared_ptr<DatasetCacheManager> cache_manager = worker_exec->GetDatasetCacheManager();
+      if (cache_manager->cache_block_manager_ == nullptr
+       || cache_manager->cache_block_manager_->cached_datasets_.size() == 0) {
+        return;
+      }
+      Status status = cache_manager->cache_block_manager_->DeleteColumn(
+        dataset_path, partition_path, column_id);
+      if (!status.ok()) {
+        stringstream ss;
+        ss << "Failed to delete the column when free the column";
+        LOG(ERROR) << ss.str();
+      }
     }
 
    private:

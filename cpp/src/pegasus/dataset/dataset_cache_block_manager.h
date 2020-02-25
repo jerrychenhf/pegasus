@@ -107,7 +107,7 @@ class DatasetCacheBlockManager {
   Status DeleteColumn(const std::string& dataset_path, const std::string& partition_path,
    int column_id);
  
- private: 
+ public: 
   std::unordered_map<DatasetKey, std::shared_ptr<CachedDataset>, hasher> cached_datasets_;
 };
 

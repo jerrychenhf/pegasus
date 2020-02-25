@@ -43,10 +43,12 @@ class DatasetCacheManager {
   Status Init();
 
   Status GetDatasetStream(RequestIdentity* request_identity, std::unique_ptr<rpc::FlightDataStream>* data_stream);
-  
+
+ public:
+  DatasetCacheBlockManager* cache_block_manager_;
+  DatasetCacheEngineManager* cache_engine_manager_;
  private: 
-  std::shared_ptr<DatasetCacheBlockManager> cache_block_manager_;
-  std::shared_ptr<DatasetCacheEngineManager> cache_engine_manager_;
+  
   std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
   
   CacheEngine::CachePolicy GetCachePolicy(RequestIdentity* request_identity);
