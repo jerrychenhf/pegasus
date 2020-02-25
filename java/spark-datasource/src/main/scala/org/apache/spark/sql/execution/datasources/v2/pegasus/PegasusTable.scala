@@ -19,7 +19,6 @@ package org.apache.spark.sql.execution.datasources.v2.pegasus
 import java.util
 
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.connector.catalog.TableCapability.STREAMING_WRITE
 import org.apache.spark.sql.connector.catalog.{SupportsRead, Table, TableCapability}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
@@ -40,6 +39,6 @@ case class PegasusTable(
   override def schema(): StructType = StructType(Seq())
 
   override def capabilities(): util.Set[TableCapability] = {
-    Set(STREAMING_WRITE).asJava
+    Set(TableCapability.BATCH_READ, TableCapability.ACCEPT_ANY_SCHEMA).asJava
   }
 }

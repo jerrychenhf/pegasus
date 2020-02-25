@@ -16,8 +16,14 @@
  */
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
+import scala.collection.JavaConverters._
+
+import java.nio.charset.StandardCharsets
+import java.util
+import java.util.{ArrayList, HashMap, List, Map}
+
 import org.apache.arrow.memory.{BufferAllocator, RootAllocator}
-import org.apache.pegasus.rpc.{Action, FlightClient, FlightDescriptor, FlightEndpoint, FlightInfo, Location, Result, SchemaResult}
+import org.apache.pegasus.rpc.{FlightDescriptor, FlightInfo, Location, Ticket}
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
 class PegasusDataSetReader(options: CaseInsensitiveStringMap, paths: Seq[String]) {
@@ -35,7 +41,11 @@ class PegasusDataSetReader(options: CaseInsensitiveStringMap, paths: Seq[String]
   def getDataSet(): FlightInfo = {
     try {
       val client = clientFactory.apply
-      client.getInfo(FlightDescriptor.path(paths.mkString(" ")))
+      val properties: Map[String, String] = new HashMap[String, String]
+      properties.put("table_location",  paths(0))
+
+      val descriptor: FlightDescriptor = FlightDescriptor.path(paths.asJava, properties)
+      client.getInfo(descriptor)
     } catch {
         case e: InterruptedException =>
           throw new RuntimeException(e)
@@ -52,7 +62,8 @@ class PegasusDataSetReader(options: CaseInsensitiveStringMap, paths: Seq[String]
     } else {
       location = endpoint.getLocations.get(0)
     }
-    new PegasusPartitionReader(endpoint.getTicket.getBytes, location.getUri.getHost, location.getUri.getPort,
+    val ticket: Ticket = endpoint.getTicket
+    new PegasusPartitionReader(ticket, location.getUri.getHost, location.getUri.getPort,
       clientFactory.getUsername, clientFactory.getPassword)
   }
 }

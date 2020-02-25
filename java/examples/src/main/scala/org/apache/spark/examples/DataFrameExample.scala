@@ -14,24 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.spark.sql.execution.datasources.v2.pegasus
+package org.apache.spark.examples
 
-import org.apache.arrow.memory.BufferAllocator
-import org.apache.pegasus.rpc.FlightClient
-import org.apache.pegasus.rpc.Location
+import java.util.Properties
 
-class PegasusClientFactory(allocator: BufferAllocator,
-                           location: Location,
-                           username: String,
-                           password: String) {
+import org.apache.spark.sql.SparkSession
 
-  def apply: FlightClient = {
-    val client = FlightClient.builder(allocator, location).build
-//    client.authenticateBasic(username, password)
-    client
+object DataFrameExample {
+
+  case class Person(name: String, age: Long)
+
+  def main(args: Array[String]): Unit = {
+    // $example on:init_session$
+    val sparkSession = SparkSession.builder
+      .master("local")
+      .appName("pegasusTest")
+      .config("spark.driver.allowMultipleContexts", "true")
+      .getOrCreate()
+
+    val sqlContext = sparkSession.sqlContext
+    val reader = sqlContext.read.format("pegasus")
+
+    val count = reader.option("planner.port", "30001")
+      .option("planner.host", "localhost")
+      .load("hdfs://10.239.47.55:9000/genData2/customer").count()
+
+    sparkSession.stop()
   }
 
-  def getUsername: String = username
-
-  def getPassword: String = password
 }

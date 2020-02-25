@@ -15,32 +15,45 @@
  */
 package org.apache.spark
 
+import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.parquet.Log
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.execution.datasources.parquet.ParquetFileFormat
 import org.apache.spark.sql.execution.datasources.v2.pegasus.PegasusSparkContext
+import org.junit.Assert
 
 class PegasusDataSourceV2Suite extends PegasusFunSuite  {
 
   test("test read table from hdfs") {
 
-    val conf = new SparkConf()
-      .setAppName("pegasusTest")
-      .setMaster("local[*]")
-      .set("spark.driver.allowMultipleContexts", "true")
-      .set("planner.host", "localhost")
-      .set("planner.port", "30001")
-//    val sc = new SparkContext(conf)
-
     val sparkSession = SparkSession.builder
       .master("local")
       .appName("pegasusTest")
       .config("spark.driver.allowMultipleContexts", "true")
-      .config("planner.host", "localhost")
-      .config("planner.port", "30001")
       .getOrCreate()
 
-    val psc = new PegasusSparkContext(sparkSession, conf)
-    val count = psc.read("test.table").count
-//    Assert.assertEquals(20, count)
+    val sqlContext = sparkSession.sqlContext
+    val reader = sqlContext.read.format("pegasus")
+
+
+    val testAppender = new LogAppender("test pegasus")
+    withLogAppender(testAppender) {
+      withTempDir { dir =>
+        val basePath = dir.getCanonicalPath
+        val path1 = new Path(basePath, "first")
+        sparkSession.range(1, 3)
+          .toDF("c1")
+          .coalesce(2)
+          .write.parquet(path1.toString)
+
+        val count = reader.option("planner.port", "30001")
+          .option("planner.host", "localhost")
+          .load("hdfs://10.239.47.55:9000/genData2/customer").count()
+
+        Assert.assertEquals(30, count)
+      }
+    }
+
   }
 }

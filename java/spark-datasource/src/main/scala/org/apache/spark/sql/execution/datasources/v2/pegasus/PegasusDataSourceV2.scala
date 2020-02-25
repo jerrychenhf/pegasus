@@ -17,6 +17,7 @@
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
 import java.util
+import scala.collection.JavaConverters._
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.hadoop.fs.Path

@@ -39,7 +39,6 @@
 
   <properties>
     <arrow.version>0.16.0</arrow.version>
-    <spark.version>3.0.0-SNAPSHOT</spark.version>
     <protostuff.version>1.4.4</protostuff.version>
   </properties>
 
