@@ -35,7 +35,6 @@ using namespace std;
 
 namespace pegasus {
 
-using HdfsDriver = arrow::io::HdfsDriver;
 using HdfsPathInfo = arrow::io::HdfsPathInfo;
 using ObjectType = arrow::io::ObjectType;
 using FileStats = arrow::fs::FileStats;
@@ -60,21 +59,11 @@ Status HDFSStoragePlugin::Init(std::string host, int32_t port) {
   } else {
     conf_.port = port;
   }
-  std::string driver_ = FLAGS_hdfs_driver;
-  if (driver_ == "libhdfs") {
-    conf_.driver = HdfsDriver::LIBHDFS;
-    arrow::Status arrowStatus = arrow::io::HaveLibHdfs();
-    Status status = Status::fromArrowStatus(arrowStatus);
-    RETURN_IF_ERROR(status);
-  } else if (driver_ == "libhdfs3") {
-    conf_.driver = HdfsDriver::LIBHDFS3;
-    arrow::Status arrowStatus = arrow::io::HaveLibHdfs3();
-    Status status = Status::fromArrowStatus(arrowStatus);
-    RETURN_IF_ERROR(status);
-  } else {
-    return Status::Invalid("Invalid HDFS driver type!");
-  }
 
+  arrow::Status arrowStatus = arrow::io::HaveLibHdfs();
+  Status status = Status::fromArrowStatus(arrowStatus);
+  RETURN_IF_ERROR(status);
+  
   return Status::OK();
 }
 
