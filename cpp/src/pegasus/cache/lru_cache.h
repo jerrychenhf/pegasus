@@ -56,7 +56,7 @@ class LRUCache {
   // important that the layout be fixed and kept compatible for all
   // future releases.
   struct CacheKey {
-    CacheKey(std::string dataset_path, std::string partition_path,
+    CacheKey(const std::string& dataset_path, const std::string& partition_path,
      int column_id, int64_t occupied_size,
       std::shared_ptr<DatasetCacheBlockManager> cache_block_manager) :
       dataset_path_(dataset_path),
@@ -65,8 +65,8 @@ class LRUCache {
       occupied_size_(occupied_size),
       cache_block_manager_(cache_block_manager){}
 
-   std::string dataset_path_;
-   std::string partition_path_;
+   const std::string& dataset_path_;
+   const std::string& partition_path_;
    int column_id_;
    int64_t occupied_size_;
    std::shared_ptr<DatasetCacheBlockManager> cache_block_manager_;

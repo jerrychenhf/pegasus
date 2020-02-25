@@ -26,6 +26,7 @@
 #include "dataset/request_identity.h"
 
 using namespace std;
+using std::string;
 
 namespace arrow {
   class ChunkedArray;
@@ -51,19 +52,19 @@ class DatasetCacheManager {
   CacheEngine::CachePolicy GetCachePolicy(RequestIdentity* request_identity);
   
   Status AddNewColumns(RequestIdentity* request_identity,
-    std::unordered_map<string, std::shared_ptr<CachedColumn>> retrieved_columns);
+    unordered_map<int, std::shared_ptr<CachedColumn>> retrieved_columns);
   Status WrapDatasetStream(RequestIdentity* request_identity,
     std::unique_ptr<rpc::FlightDataStream>* data_stream);
   Status GetDatasetStreamWithMissedColumns(RequestIdentity* request_identity,
     std::vector<int> col_ids,
     std::unique_ptr<rpc::FlightDataStream>* data_stream);
   std::vector<int> GetMissedColumnsIds(std::vector<int> col_ids,
-    std::unordered_map<string, std::shared_ptr<CachedColumn>> cached_columns);
+    unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns);
     
   Status RetrieveColumns(RequestIdentity* request_identity,
     const std::vector<int>& col_ids,
     std::shared_ptr<CacheEngine> cache_engine,
-    std::unordered_map<string, std::shared_ptr<CachedColumn>>& retrieved_columns
+    unordered_map<int, std::shared_ptr<CachedColumn>>& retrieved_columns
     );
 };
 

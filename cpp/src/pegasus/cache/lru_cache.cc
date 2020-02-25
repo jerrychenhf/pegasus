@@ -59,6 +59,7 @@ DEFINE_string(lru_cache_type, "DRAM",
               "otherwise pegasus will crash.");
 
 using strings::Substitute;
+using std::string;
 
 template <class T> class scoped_refptr;
 
@@ -75,21 +76,20 @@ class EvictionCallback : public Cache::EvictionCallback {
       // VLOG(2) << strings::Substitute("EvictedEntry callback for key '$0'",
       //                                key.ToString());
       auto* entry_ptr = reinterpret_cast<LRUCache::CacheKey*>(val.mutable_data());
-      std::string dataset_path = entry_ptr->dataset_path_;
-      std::string partition_path = entry_ptr->partition_path_;
+      const std::string& dataset_path = entry_ptr->dataset_path_;
+      const std::string& partition_path = entry_ptr->partition_path_;
       int column_id = entry_ptr->column_id_;
 
       std::shared_ptr<DatasetCacheBlockManager> cache_block_manager = entry_ptr->cache_block_manager_;
-      Status status = cache_block_manager->DeleteColumn(dataset_path,
-       partition_path, std::to_string(column_id));
-       if (!status.ok()) {
-         stringstream ss;
-         ss << "Failed to delete the column when free the column";
-         LOG(ERROR) << ss.str();
-       }
-
-      // TODO delete the record in block manager.
-      // delete entry_ptr->val_ptr;
+      cache_block_manager->DeleteColumn(dataset_path,
+       partition_path, column_id);
+      // Status status = cache_block_manager->DeleteColumn(dataset_path,
+      //  partition_path, column_id);
+      // if (!status.ok()) {
+      //   stringstream ss;
+      //   ss << "Failed to delete the column when free the column";
+      //   LOG(ERROR) << ss.str();
+      // }
     }
 
    private:

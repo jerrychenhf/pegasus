@@ -40,6 +40,9 @@ TEST(DatasetCacheManagerTest, Unit) {
   RequestIdentity* request_identity = new RequestIdentity(dataset_path, partition_path, column_indices);
   std::unique_ptr<rpc::FlightDataStream>* data_stream;
   dataset_cache_manager->GetDatasetStream(request_identity, data_stream);
+
+ 
+  delete dataset_cache_manager;
 }
 
 }
