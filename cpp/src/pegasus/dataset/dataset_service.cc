@@ -87,6 +87,7 @@ Status DataSetService::GetDataSet(DataSetRequest* dataset_request, std::shared_p
     pds->lockread();
 //    *dataset = std::shared_ptr<DataSet>(new DataSet(*pds));
     *dataset = std::make_shared<DataSet>(pds->GetData());
+    (*dataset)->set_schema(pds->get_schema());
     pds->unlockread();
   }
 

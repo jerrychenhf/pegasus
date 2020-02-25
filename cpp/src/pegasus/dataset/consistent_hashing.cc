@@ -25,8 +25,6 @@ namespace pegasus {
 
 ConsistentHashRing::ConsistentHashRing()
 {
-//    boost::format node_fmt("192.168.1.%1%");
-
 	validlocations_ = nullptr;
 	nodecacheMB_ = nullptr;
 }
@@ -36,7 +34,7 @@ ConsistentHashRing::~ConsistentHashRing()
 }
 
 void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations, 
-											std::shared_ptr<std::vector<int>> nodecacheMB)
+											std::shared_ptr<std::vector<int64_t>> nodecacheMB)
 {
 	if (nullptr != locations)
 	{
@@ -49,13 +47,17 @@ void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Locat
 		//Status WorkerManager::GetWorkerRegistrations(std::vector<std::shared_ptr<WorkerRegistration>>& registrations)
 		std::vector<std::shared_ptr<WorkerRegistration>> wregs;
 		worker_manager->GetWorkerRegistrations(wregs);
+//std::cout << "node count form workerregistration vector: " << wregs.size() << std::endl;
 		LOG(INFO) << "node count form workerregistration vector: " << wregs.size();
-		for (auto it:wregs)
+		if (wregs.size() > 0)
 		{
-			validlocations_->push_back(it->address());
-			nodecacheMB_->push_back(it->node_info()->get_cache_capacity()/(1024*1024));
-			//fake code for test
-//			nodecacheMB_->push_back(1024);	//1GB
+			validlocations_ = std::make_shared<std::vector<Location>>();
+			nodecacheMB_ = std::make_shared<std::vector<int64_t>>();
+			for (auto it:wregs)
+			{
+				validlocations_->push_back(it->address());
+				nodecacheMB_->push_back(it->node_info()->get_cache_capacity()/(1024*1024));
+			}
 		}
 	}
 }

@@ -72,6 +72,9 @@ Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::Fl
   // every identity has 1 dataset_path, 1 partition_id.
   // so, every dataset has 1 schema + 1 dataset_path + many partition ids + many locations.
 
+//  *endpoints = std::make_unique<std::vector<rpc::FlightEndpoint>>();
+  *endpoints = std::unique_ptr<std::vector<rpc::FlightEndpoint>>(new std::vector<rpc::FlightEndpoint>());
+
   for (auto partit:dataset_->partitions())
   {
     rpc::FlightEndpoint fep;
