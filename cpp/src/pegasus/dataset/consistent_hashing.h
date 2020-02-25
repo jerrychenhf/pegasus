@@ -53,7 +53,7 @@ typedef consistent_hash_map<std::string, crc32_hasher> consistent_hash_t;
   public:
     ConsistentHashRing();
     ~ConsistentHashRing();
-    void PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations, std::shared_ptr<std::vector<int>> nodecacheMB);
+    void PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations, std::shared_ptr<std::vector<int64_t>> nodecacheMB);
     void SetupDist();
     void AddLocation(unsigned int locidx);
     void AddLocation(Location location);

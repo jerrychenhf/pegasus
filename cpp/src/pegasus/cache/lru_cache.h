@@ -57,19 +57,16 @@ class LRUCache {
   // future releases.
   struct CacheKey {
     CacheKey(const std::string& dataset_path, const std::string& partition_path,
-     int column_id, int64_t occupied_size,
-      std::shared_ptr<DatasetCacheBlockManager> cache_block_manager) :
+     int column_id, int64_t occupied_size) :
       dataset_path_(dataset_path),
       partition_path_(partition_path),
       column_id_(column_id),
-      occupied_size_(occupied_size),
-      cache_block_manager_(cache_block_manager){}
+      occupied_size_(occupied_size){}
 
    const std::string& dataset_path_;
    const std::string& partition_path_;
    int column_id_;
    int64_t occupied_size_;
-   std::shared_ptr<DatasetCacheBlockManager> cache_block_manager_;
   } PACKED;
 
   // An entry that is in the process of being inserted into the block

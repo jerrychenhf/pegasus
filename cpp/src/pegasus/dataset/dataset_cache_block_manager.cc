@@ -124,7 +124,6 @@ Status DatasetCacheBlockManager::GetCachedPartition(const std::string& dataset_p
   {
 		auto entry = partition->cached_columns_.find(*iter);
     if (entry != partition->cached_columns_.end()) {
-      printf("found the column");
       auto find_column = entry->second;
       columns->insert(pair<int, std::shared_ptr<CachedColumn>>(*iter, find_column));
     }

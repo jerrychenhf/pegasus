@@ -60,11 +60,11 @@ TEST(DatasetServiceTest, ConHashBasic)
   Location::ForGrpcTcp("localhost", 10010, &location1);
   Location::ForGrpcTls("localhost", 10010, &location2);
   Location::ForGrpcUnix("/tmp/test.sock", &location3);
-  std::shared_ptr<std::vector<Location>> validlocs = std::make_shared<std::vector<Location>>();
+  auto validlocs = std::make_shared<std::vector<Location>>();
   validlocs->push_back(location1);
   validlocs->push_back(location2);
   validlocs->push_back(location3);
-  std::shared_ptr<std::vector<int>> nodecacheMBs = std::make_shared<std::vector<int>>();
+  auto nodecacheMBs = std::make_shared<std::vector<int64_t>>();
   nodecacheMBs->push_back(1024);
   nodecacheMBs->push_back(1024);
   nodecacheMBs->push_back(1024);
@@ -131,20 +131,45 @@ TEST(DatasetServiceTest, DatasetService)
   std::cout << "addressof dataset_service_: " << std::addressof(dataset_service_) << std::endl;
   //  std::cout << "value dataset_service_: " << std::static_cast<uint64_t>(dataset_service_) << std::endl;
   std::cout << "dataset_service_.get(): " << dataset_service_.get() << std::endl;
-//  std::cout << "addressof dataset_service_->dataset_store_: "
-//            << std::addressof(dataset_service_->dataset_store_) << std::endl;
-//  std::cout << "addressof dataset_service_->dataset_store_->planner_metadata_: "
-//            << std::addressof(dataset_service_->dataset_store_->planner_metadata_) << std::endl;
-//  auto worker_manager_ = exec_env_->get_worker_manager();
+
+  rpc::HeartbeatInfo hbinfo;
+/*
+  HeartbeatType type;
+  std::string hostname;
+  std::shared_ptr<Location> address;
+  std::shared_ptr<NodeInfo> node_info;
+    int64_t cache_capacity;
+    int64_t cache_free;
+*/
+  hbinfo.type = rpc::HeartbeatInfo::HeartbeatType::REGISTRATION;
+  hbinfo.hostname = "localhost:10010";
+  Location location1;
+  Location::ForGrpcTcp("localhost", 10010, &location1);
+  hbinfo.address = std::make_shared<Location>(location1);
+  hbinfo.node_info = std::make_shared<rpc::NodeInfo>();
+  hbinfo.node_info->cache_capacity = 1024*1024*1024; //bytes
+  hbinfo.node_info->cache_free = 1024*1024*1024; //bytes
+
+  std::unique_ptr<rpc::HeartbeatResult> hbresult;
+//Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info, std::unique_ptr<rpc::HeartbeatResult>* result)
+  exec_env_->get_worker_manager()->Heartbeat(hbinfo, &hbresult);
+  hbinfo.type = rpc::HeartbeatInfo::HeartbeatType::HEARTBEAT;
+  exec_env_->get_worker_manager()->Heartbeat(hbinfo, &hbresult);
 
 //  std::string test_dataset_path = "hostnameplusfolderpath";
 //  std::string test_dataset_path = "hdfs://10.239.47.55:9000/genData2/customer/part-00000-1fafbf9f-6edf-4f8f-8b51-268708b6f6c5-c000.snappy.parquet";
   std::string test_dataset_path = "hdfs://10.239.47.55:9000/genData2/customer";
   auto parttftrs = std::make_shared<std::vector<Filter>>();
-  // TODO: parse sql cmd here?
+
   std::unique_ptr<rpc::FlightInfo>* flight_info=nullptr;
+
   DataSetRequest dataset_request;
   dataset_request.set_dataset_path(test_dataset_path);
+  DataSetRequest::RequestProperties properties;
+  properties["table_location"] = test_dataset_path;
+  properties["provider"] = "SPARK";
+  properties["column_names"] = "a, b, c";
+  dataset_request.set_properties(properties);
   // Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   //                                   std::unique_ptr<rpc::FlightInfo>* flight_info)
   Status st = dataset_service_->GetFlightInfo(&dataset_request, flight_info);

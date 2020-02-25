@@ -33,13 +33,20 @@ DatasetCacheManager::DatasetCacheManager() {
 }
 
 DatasetCacheManager::~DatasetCacheManager() {
+  if (cache_engine_manager_ != nullptr) {
+    delete cache_engine_manager_;
+    cache_engine_manager_ = nullptr;
+  }
+
+  if (cache_block_manager_ != nullptr) {
+    delete cache_block_manager_;
+    cache_block_manager_ = nullptr;
+  }
 }
 
 Status DatasetCacheManager::Init() {
-  cache_block_manager_ = std::shared_ptr<DatasetCacheBlockManager>(
-     new DatasetCacheBlockManager());
-  cache_engine_manager_ = std::shared_ptr<DatasetCacheEngineManager>
-   (new DatasetCacheEngineManager());
+  cache_block_manager_ = new DatasetCacheBlockManager();
+  cache_engine_manager_ = new DatasetCacheEngineManager();
    
   RETURN_IF_ERROR(cache_block_manager_->Init());
   RETURN_IF_ERROR(cache_engine_manager_->Init());
@@ -76,7 +83,6 @@ Status DatasetCacheManager::AddNewColumns(RequestIdentity* request_identity,
 
     // Insert the columns into cache_block_manager_.
     for(auto iter = retrieved_columns.begin(); iter != retrieved_columns.end(); iter ++) {
-      printf("inserting new columns\n");
     
       RETURN_IF_ERROR(cache_block_manager_->InsertColumn(request_identity->dataset_path(),
         request_identity->partition_path(), iter->first, iter->second));
@@ -91,7 +97,6 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
      request_identity->partition_path(), request_identity->column_indices(), &cached_columns));
 
   std::shared_ptr<Table> table;
-  printf("the size is %d \n", cached_columns.size());
   for(auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
     std::shared_ptr<CachedColumn> cache_column = iter->second;
     CacheRegion* cache_region = cache_column->cache_region_;
@@ -150,12 +155,11 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       occupied_size = memory_pool->bytes_allocated() + occupied_size;
       CacheRegion* cache_region = new CacheRegion(memory_pool,
         chunked_array, column_size);
-         printf("the cache region size when retrieving is %d \n", column_size);
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, colId, cache_region));
       retrieved_columns.insert(std::make_pair(*iter, column));
       
-      LRUCache::CacheKey key(dataset_path, partition_path, colId, column_size, cache_block_manager_);
+      LRUCache::CacheKey key(dataset_path, partition_path, colId, column_size);
       RETURN_IF_ERROR(cache_engine->PutValue(key));
     }
     
