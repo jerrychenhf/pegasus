@@ -29,19 +29,22 @@ StoreManager::StoreManager() {
 Status StoreManager::Init() {
   WorkerExecEnv* env =  WorkerExecEnv::GetInstance();
   std::shared_ptr<Store> store;
-  std::unordered_map<string, long> stores_info = env->GetStoresInfo();
-  for(std::unordered_map<string, long>::iterator it = stores_info.begin();
-   it != stores_info.end(); ++it) {
+  const StoreInfos& store_infos = env->GetStoreInfos();
+  
+  for(StoreInfos::const_iterator it = store_infos.begin();
+   it != store_infos.end(); ++it) {
     std::shared_ptr<Store> store;
-    if (it->first == "MEMORY") {
-      store = std::shared_ptr<MemoryStore>(new MemoryStore(it->second));
-    } else if (it->first == "DCPMM") {
-      store = std::shared_ptr<DCPMMStore>(new DCPMMStore(it->second));
+    std::shared_ptr<StoreInfo> store_info = it->second;
+    
+    if (store_info->type() == Store::StoreType::MEMORY ) {
+      store = std::shared_ptr<MemoryStore>(new MemoryStore(store_info->capacity()));
+    } else if (store_info->type() == Store::StoreType::DCPMM) {
+      store = std::shared_ptr<DCPMMStore>(new DCPMMStore(store_info->capacity()));
     } else {
       return Status::Invalid("Invalid store type specified.");
     }
     
-    RETURN_IF_ERROR(store->Init());
+    RETURN_IF_ERROR(store->Init(store_info->properties().get()));
     stores_.insert(std::make_pair(it->first, store));
   }
   
@@ -50,7 +53,7 @@ Status StoreManager::Init() {
 
 Status StoreManager::GetStore(Store::StoreType store_type, Store** store) {
   if (store_type == Store::StoreType::MEMORY) {
-    auto  entry = stores_.find("MEMORY");
+    auto  entry = stores_.find(WorkerExecEnv::STORE_ID_DRAM);
     if (entry == stores_.end()) {
       stringstream ss;
       ss << "Failed to get the memory store in store manager.";
@@ -60,7 +63,7 @@ Status StoreManager::GetStore(Store::StoreType store_type, Store** store) {
     *store = entry->second.get();
     return Status::OK();
   } else if (store_type == Store::StoreType::DCPMM) {
-    auto  entry = stores_.find("DCPMM");
+    auto  entry = stores_.find(WorkerExecEnv::STORE_ID_DCPMM);
     if (entry == stores_.end()) {
       stringstream ss;
       ss << "Failed to get the DCPMM store in store manager.";

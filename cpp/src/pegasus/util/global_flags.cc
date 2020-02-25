@@ -53,4 +53,16 @@ DEFINE_int32(worker_heartbeat_frequency_ms, 3000, "(Advanced) Frequency (in ms) 
 
 DEFINE_int32(planner_max_missed_heartbeats, 5, "Maximum number of consecutive "
     "heartbeat messages a worker can miss before being declared failed by the "
-    "planner.");      
+    "planner.");
+
+DEFINE_bool(store_dram_enabled, true,
+    "If true, enable DRAM store.");
+DEFINE_int32(store_dram_capacity_gb, 10,
+    "The DRAM store capacity in GB.");
+
+DEFINE_bool(store_dcpmm_enabled, false,
+    "If true, enable DCPMM store.");
+DEFINE_int32(store_dcpmm_capacity_gb, 100,
+    "The DCPMM store capacity in GB.");
+DEFINE_string(storage_dcpmm_path, "",
+    "The DCPMM device path.");

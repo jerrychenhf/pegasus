@@ -25,7 +25,7 @@ MemoryStore::MemoryStore(int64_t capacity)
     used_size_(0) {
 }
 
-Status MemoryStore::Init() {
+Status MemoryStore::Init(const std::unordered_map<string, string>* properties) {
   return Status::OK();
 }
 
@@ -73,7 +73,7 @@ DCPMMStore::DCPMMStore(int64_t capacity)
     used_size_(0) {
 }
 
-Status DCPMMStore::Init() {
+Status DCPMMStore::Init(const std::unordered_map<string, string>* properties) {
   //TODO
   // initialize the DCPMM
   return Status::OK();

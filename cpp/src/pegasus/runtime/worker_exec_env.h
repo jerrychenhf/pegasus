@@ -28,13 +28,39 @@ namespace pegasus {
   
 class StoreManager;
 
+typedef std::unordered_map<string, string> StoreProperties;
+    
+class StoreInfo {
+public:
+  StoreInfo(const std::string& id, Store::StoreType type, int64_t capacity,
+    const std::shared_ptr<StoreProperties>& properties)
+    : id_(id), type_(type), capacity_(capacity), properties_(properties) {
+  }
+  
+  ~StoreInfo() {
+  }
+  
+  const std::string& id() { return id_; }
+  Store::StoreType type() { return type_; }
+  int64_t capacity() const { return capacity_; }
+  std::shared_ptr<StoreProperties> properties() { return properties_; }
+private:
+  std::string id_;
+  Store::StoreType type_;
+  int64_t capacity_;  
+  std::shared_ptr<StoreProperties> properties_;
+};
+
+typedef std::unordered_map<string, std::shared_ptr<StoreInfo>> StoreInfos;
+
 /// There should only be one ExecEnv instance.
 /// It should always be accessed by calling WorkerExecEnv::GetInstance().
 class WorkerExecEnv : public ExecEnv {
  public:
+ 
   WorkerExecEnv();
 
-  WorkerExecEnv(const std::string& hostname, int32_t port, const std::string& store_types);
+  WorkerExecEnv(const std::string& hostname, int32_t port);
 
   static WorkerExecEnv* GetInstance() { return exec_env_; }
 
@@ -44,7 +70,7 @@ class WorkerExecEnv : public ExecEnv {
 
   int32_t GetWorkerGrpcPort();
 
-  std::unordered_map<string, long> GetStoresInfo();
+  const StoreInfos& GetStoreInfos();
 
   std::vector<CacheEngine::CachePolicy> GetCachePolicies();
 
@@ -63,13 +89,24 @@ class WorkerExecEnv : public ExecEnv {
 
   std::string worker_grpc_hostname_;
   int32_t worker_grpc_port_;
-  std::unordered_map<string, long> stores_info_;
-  std::vector<Store::StoreType> store_types_;
+
+  StoreInfos store_infos_;
   std::unordered_map<string, long> cache_stores_info_; // string: store type
   std::vector<CacheEngine::CachePolicy> cache_policies_;
   
   std::shared_ptr<StoreManager> store_manager_;
   std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
+  
+  Status InitStoreInfo();
+  
+public:
+  static const std::string STORE_ID_DRAM;
+  static const std::string STORE_ID_DCPMM;
+  static const std::string STORE_PROPERTY_PATH;
+  
+  static const int64_t KILOBYTE = 1024;
+  static const int64_t MEGABYTE = KILOBYTE * 1024;
+  static const int64_t GIGABYTE = MEGABYTE * 1024;
 };
 
 } // namespace pegasus

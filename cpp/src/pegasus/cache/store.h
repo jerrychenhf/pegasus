@@ -18,6 +18,7 @@
 #ifndef PEGASUS_STORE_H
 #define PEGASUS_STORE_H
 
+#include <unordered_map>
 #include "common/status.h"
 #include "cache/store_region.h"
 
@@ -26,7 +27,7 @@ namespace pegasus {
 class Store {
  public:
  
-  virtual Status Init() = 0;
+  virtual Status Init(const std::unordered_map<string, string>* properties) = 0;
 
   virtual Status Allocate(int64_t size, StoreRegion* store_region) = 0;
   virtual Status Free(StoreRegion* store_region) = 0;
@@ -49,7 +50,7 @@ class MemoryStore : public Store {
  public:
   MemoryStore(int64_t capacity);
   
-  virtual Status Init();
+  virtual Status Init(const std::unordered_map<string, string>* properties);
   
   virtual Status Allocate(int64_t size, StoreRegion* store_region) override;
   virtual Status Free(StoreRegion* store_region) override;
@@ -70,7 +71,7 @@ class DCPMMStore : public Store {
  public:
   DCPMMStore(int64_t capacity);
   
-  virtual Status Init();
+  virtual Status Init(const std::unordered_map<string, string>* properties);
   
   virtual Status Allocate(int64_t size, StoreRegion* store_region) override;
   virtual Status Free(StoreRegion* store_region) override;

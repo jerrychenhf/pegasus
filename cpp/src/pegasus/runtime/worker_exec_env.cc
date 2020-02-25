@@ -25,39 +25,72 @@
 DECLARE_string(hostname);
 DECLARE_int32(worker_port);
 DECLARE_string(storage_plugin_type);
-DECLARE_string(store_types);
+
+DECLARE_bool(store_dram_enabled);
+DECLARE_int32(store_dram_capacity_gb);
+
+DECLARE_bool(store_dcpmm_enabled);
+DECLARE_int32(store_dcpmm_capacity_gb);
+DECLARE_string(storage_dcpmm_path);
 
 namespace pegasus {
+  
+const std::string WorkerExecEnv::STORE_ID_DRAM = "MEMORY";
+const std::string WorkerExecEnv::STORE_ID_DCPMM = "DCPMM";
+const std::string WorkerExecEnv::STORE_PROPERTY_PATH = "path";
 
 WorkerExecEnv* WorkerExecEnv::exec_env_ = nullptr;
 
 WorkerExecEnv::WorkerExecEnv()
-  : WorkerExecEnv(FLAGS_hostname, FLAGS_worker_port, FLAGS_store_types) {}
+  : WorkerExecEnv(FLAGS_hostname, FLAGS_worker_port) {}
 
-WorkerExecEnv::WorkerExecEnv(const std::string& hostname,
-  int32_t worker_port, const std::string& store_types)
+WorkerExecEnv::WorkerExecEnv(const std::string& hostname, int32_t worker_port)
   : worker_grpc_hostname_(hostname),
     worker_grpc_port_(worker_port),
     store_manager_(new StoreManager()),
     dataset_cache_manager_(new DatasetCacheManager()) {
 
-  std::vector<std::string> types;
-  boost::split(types, store_types, boost::is_any_of(", "), boost::token_compress_on);
-  for(std::vector<std::string>::iterator it = types.begin(); it != types.end(); ++it) {
-    if(*it == "MEMORY") {
-      store_types_.push_back(Store::StoreType::MEMORY);
-    } else if(*it == "DCPMM") {
-      store_types_.push_back(Store::StoreType::DCPMM);
-    } else if(*it == "FILE") {
-      store_types_.push_back(Store::StoreType::FILE);
-    }
-  }
+  //TODO improve the store configuration
+  InitStoreInfo();
+  
   // TODO need get the cache policy and store policy from configuration
   cache_policies_.push_back(CacheEngine::LRU);
-  stores_info_.insert(std::make_pair("MEMORY", 1000));
   cache_stores_info_.insert(std::make_pair("MEMORY", 100));
 
   exec_env_ = this;
+}
+
+Status WorkerExecEnv::InitStoreInfo() {
+  // if DRAM store configured
+  if(FLAGS_store_dram_enabled) {
+    // read capacity
+    int64_t capacity = ((int64_t) FLAGS_store_dram_capacity_gb) * GIGABYTE;
+    
+    std::shared_ptr<StoreProperties> properties = std::make_shared<StoreProperties>();
+    // read properties
+    
+    std::shared_ptr<StoreInfo> store_info(
+      new StoreInfo(STORE_ID_DRAM, Store::StoreType::MEMORY,
+      capacity, properties));
+    store_infos_.insert(std::make_pair(STORE_ID_DRAM, store_info));
+  }
+  
+  // if DCPMM store configured
+  if(FLAGS_store_dcpmm_enabled) {
+    // read capacity
+    int64_t capacity = ((int64_t) FLAGS_store_dcpmm_capacity_gb) * GIGABYTE;
+    
+    std::shared_ptr<StoreProperties> properties = std::make_shared<StoreProperties>();
+    // read properties
+    properties->insert(std::make_pair(STORE_PROPERTY_PATH, FLAGS_storage_dcpmm_path));
+    
+    std::shared_ptr<StoreInfo> store_info(
+      new StoreInfo(STORE_ID_DCPMM, Store::StoreType::DCPMM,
+      capacity, properties));
+    store_infos_.insert(std::make_pair(STORE_ID_DCPMM, store_info));
+  }
+  
+  return Status::OK();
 }
 
 Status WorkerExecEnv::Init() {
@@ -76,8 +109,8 @@ int32_t WorkerExecEnv::GetWorkerGrpcPort() {
   return worker_grpc_port_;
 }
 
-std::unordered_map<string, long> WorkerExecEnv::GetStoresInfo() {
-  return stores_info_;
+const StoreInfos& WorkerExecEnv::GetStoreInfos() {
+  return store_infos_;
 }
 
 std::unordered_map<string, long>  WorkerExecEnv::GetCacheStoresInfo() {
