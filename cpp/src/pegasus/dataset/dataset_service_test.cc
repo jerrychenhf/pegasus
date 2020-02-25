@@ -126,6 +126,7 @@ TEST(DatasetServiceTest, DataSetStoreBasic)
   ASSERT_OK(st);
 
   // check the dataset
+  ASSERT_TRUE(pds->dataset_path() == test_dataset_path);
 
 }
 #endif

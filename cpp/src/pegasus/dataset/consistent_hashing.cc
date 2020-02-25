@@ -49,13 +49,13 @@ void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Locat
 		//Status WorkerManager::GetWorkerRegistrations(std::vector<std::shared_ptr<WorkerRegistration>>& registrations)
 		std::vector<std::shared_ptr<WorkerRegistration>> wregs;
 		worker_manager->GetWorkerRegistrations(wregs);
-		std::cout << "node count form workerregistration vector: " << wregs.size() << std::endl;
+		LOG(INFO) << "node count form workerregistration vector: " << wregs.size();
 		for (auto it:wregs)
 		{
 			validlocations_->push_back(it->address());
-//			nodecacheMB_->push_back(it->getcachesizeMB());	// TODO: need implementation in WorkerRegistration.
+			nodecacheMB_->push_back(it->node_info()->get_cache_capacity()/(1024*1024));
 			//fake code for test
-			nodecacheMB_->push_back(1024);	//1GB
+//			nodecacheMB_->push_back(1024);	//1GB
 		}
 	}
 }
@@ -71,6 +71,11 @@ void ConsistentHashRing::SetupDist()
 		for (unsigned int i=0; i<validlocations_->size(); i++)
 			AddLocation(i);
 	}
+	else
+	{
+		LOG(FATAL) << "ConsistentHashRing has 0 locations. Call PrepareValidLocations() first.";
+	}
+	
 }
 
 void ConsistentHashRing::AddLocation(unsigned int locidx)
@@ -103,14 +108,14 @@ void ConsistentHashRing::AddLocation(Location location, int num_virtual_nodes)
 Location ConsistentHashRing::GetLocation(Identity identity)
 {
 	crc32_hasher h;
-	std::cout << "h(identity.partition_id()): " << h(identity.partition_id()) << endl;
+	LOG(INFO) << "h(identity.partition_id()): " << h(identity.partition_id());
     consistent_hash_t::iterator it;
     it = consistent_hash_.find(h(identity.partition_id()));
-    std::cout<<boost::format("node:%1%, %2%") % it->second % it->first << std::endl;
+    LOG(INFO) << boost::format("node:%1%, %2%") % it->second % it->first;
 
 	std::size_t pos = it->second.find_last_of("_");
 	std::string node = it->second.substr(0, pos);
-	std::cout << node << std::endl;
+	LOG(INFO) << node;
 	// create the location object and fill with phynode's location (uri).
 	Location lcn;
 	Location::Parse(node, &lcn);
@@ -127,12 +132,12 @@ void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>
 	crc32_hasher h;
 	for (auto partt:(*partitions))
 	{
-		std::cout << "h(partt.GetIdentPath()): " << h(partt.GetIdentPath()) << endl;
+		LOG(INFO) << "h(partt.GetIdentPath()): " << h(partt.GetIdentPath());
 	    consistent_hash_t::iterator it;
     	it = consistent_hash_.find(h(partt.GetIdentPath()));
 		std::size_t pos = it->second.find_last_of("_");
 		std::string node = it->second.substr(0, pos);
-		std::cout << node << std::endl;
+		LOG(INFO) << node;
 		// create the location object and fill with phynode's location (uri).
 		Location lcn;
 		Location::Parse(node, &lcn);
