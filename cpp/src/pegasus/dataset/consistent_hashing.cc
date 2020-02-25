@@ -73,7 +73,7 @@ void ConsistentHashRing::SetupDist()
 	}
 	else
 	{
-		LOG(FATAL) << "ConsistentHashRing has 0 locations. Call PrepareValidLocations() first.";
+		LOG(ERROR) << "ConsistentHashRing has 0 locations. Call PrepareValidLocations() first.";
 	}
 	
 }

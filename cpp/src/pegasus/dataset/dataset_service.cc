@@ -147,7 +147,15 @@ Status DataSetService::FilterDataSet(const std::vector<Filter>& parttftr, std::s
                                      std::shared_ptr<ResultDataSet>* resultdataset)
 {
   //TODO: filter the dataset
-//  resultdataset = std::make_shared<ResultDataSet>(dataset->GetData());
+  ResultDataSet::Data rdata;
+  rdata.dataset_path = dataset->dataset_path();
+  rdata.partitions = dataset->partitions();
+  rdata.total_bytes = dataset->total_bytes();
+  rdata.total_records = dataset->total_records();
+
+  *resultdataset = std::make_shared<ResultDataSet>(std::move(rdata));
+  (*resultdataset)->set_schema(dataset->get_schema());
+
   return Status::OK();
 }
 

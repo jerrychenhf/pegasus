@@ -95,21 +95,13 @@ TEST(DatasetServiceTest, DataSetStoreBasic)
 {
   Status st;
   std::unique_ptr<PlannerExecEnv> exec_env_(new PlannerExecEnv());
-//  auto worker_manager = exec_env_->get_worker_manager();
   auto dataset_store_test = std::unique_ptr<DataSetStore>(new DataSetStore);
-//  std::cout << "addressof dataset_store_test: " << std::addressof(dataset_store_test) << std::endl;
-//  std::cout << "dataset_store_test.get(): " << dataset_store_test.get() << std::endl;
   std::string test_dataset_path = "hostnameplusfolderpath";
   std::shared_ptr<DataSet> pds = nullptr;
 
   // create and insert a dataset
-//  auto metadata_manager = std::make_shared<MetadataManager>();
   auto catalog_manager = std::make_shared<CatalogManager>();
-//  std::cout << "addressof metadata_manager: " << std::addressof(metadata_manager) << std::endl;
-//  std::cout << "metadata_manager.get(): " << metadata_manager.get() << std::endl;
   auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager);
-//  std::cout << "addressof dsbuilder: " << std::addressof(dsbuilder) << std::endl;
-//  std::cout << "dsbuilder.get(): " << dsbuilder.get() << std::endl;
   DataSetRequest dataset_request;
   dataset_request.set_dataset_path(test_dataset_path);
   // Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
@@ -130,12 +122,12 @@ TEST(DatasetServiceTest, DataSetStoreBasic)
 
 }
 #endif
-#if 0
+#if 1
 TEST(DatasetServiceTest, DatasetService)
 {
   std::unique_ptr<PlannerExecEnv> exec_env_(new PlannerExecEnv());
-  auto worker_manager_ = exec_env_->get_worker_manager();
   auto dataset_service_ = std::unique_ptr<DataSetService>(new DataSetService());
+  dataset_service_->Init();
   std::cout << "addressof dataset_service_: " << std::addressof(dataset_service_) << std::endl;
   //  std::cout << "value dataset_service_: " << std::static_cast<uint64_t>(dataset_service_) << std::endl;
   std::cout << "dataset_service_.get(): " << dataset_service_.get() << std::endl;
@@ -143,8 +135,11 @@ TEST(DatasetServiceTest, DatasetService)
 //            << std::addressof(dataset_service_->dataset_store_) << std::endl;
 //  std::cout << "addressof dataset_service_->dataset_store_->planner_metadata_: "
 //            << std::addressof(dataset_service_->dataset_store_->planner_metadata_) << std::endl;
+//  auto worker_manager_ = exec_env_->get_worker_manager();
 
-  std::string test_dataset_path = "hostnameplusfolderpath";
+//  std::string test_dataset_path = "hostnameplusfolderpath";
+//  std::string test_dataset_path = "hdfs://10.239.47.55:9000/genData2/customer/part-00000-1fafbf9f-6edf-4f8f-8b51-268708b6f6c5-c000.snappy.parquet";
+  std::string test_dataset_path = "hdfs://10.239.47.55:9000/genData2/customer";
   auto parttftrs = std::make_shared<std::vector<Filter>>();
   // TODO: parse sql cmd here?
   std::unique_ptr<rpc::FlightInfo>* flight_info=nullptr;
