@@ -41,12 +41,14 @@ Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flig
   GetTotalBytes(total_bytes);
 
   rpc::FlightInfo::Data flight_data;
-  flight_data.descriptor = *flight_descriptor;
+//  flight_data.descriptor = *flight_descriptor;
   flight_data.endpoints = *endpoints;
-  flight_data.total_records = *total_records;
-  flight_data.total_bytes = *total_bytes;
-  rpc::FlightInfo value(flight_data);
-  *flight_info = std::unique_ptr<rpc::FlightInfo>(new rpc::FlightInfo(value));
+//  flight_data.total_records = *total_records;
+//  flight_data.total_bytes = *total_bytes;
+//  rpc::FlightInfo value(flight_data);
+//  *flight_info = std::unique_ptr<rpc::FlightInfo>(new rpc::FlightInfo(std::move(value)));
+  auto upfi = std::unique_ptr<rpc::FlightInfo>(new rpc::FlightInfo(std::move(flight_data)));
+  flight_info = &upfi;
   return Status::OK();
 }
 
