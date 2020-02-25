@@ -20,11 +20,7 @@ package org.apache.pegasus.rpc;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -72,7 +68,7 @@ public class TestBasicOperation {
 
   @Test
   public void roundTripTicket() throws Exception {
-    final Ticket ticket = new Ticket(new byte[]{0, 1, 2, 3, 4, 5});
+    final Ticket ticket = new Ticket(new byte[]{0, 1, 2, 3, 4, 5}, new byte[0], new ArrayList<>());
     Assert.assertEquals(ticket, Ticket.deserialize(ticket.serialize()));
   }
 
@@ -87,12 +83,12 @@ public class TestBasicOperation {
     final FlightInfo info1 = new FlightInfo(schema, FlightDescriptor.path(), Collections.emptyList(), -1, -1);
     final FlightInfo info2 = new FlightInfo(schema, FlightDescriptor.command(new byte[2]),
         Collections.singletonList(new FlightEndpoint(
-            new Ticket(new byte[10]), Location.forGrpcDomainSocket("/tmp/test.sock"))), 200, 500);
+            new Ticket(new byte[10], new byte[10], new ArrayList<>()), Location.forGrpcDomainSocket("/tmp/test.sock"))), 200, 500);
     final FlightInfo info3 = new FlightInfo(schema, FlightDescriptor.path("a", "b"),
         Arrays.asList(new FlightEndpoint(
-                new Ticket(new byte[10]), Location.forGrpcDomainSocket("/tmp/test.sock")),
+                new Ticket(new byte[10], new byte[10], new ArrayList<>()), Location.forGrpcDomainSocket("/tmp/test.sock")),
             new FlightEndpoint(
-                new Ticket(new byte[10]), Location.forGrpcDomainSocket("/tmp/test.sock"),
+                new Ticket(new byte[10], new byte[10], new ArrayList<>()), Location.forGrpcDomainSocket("/tmp/test.sock"),
                 Location.forGrpcInsecure("localhost", 50051))
         ), 200, 500);
 
@@ -214,7 +210,7 @@ public class TestBasicOperation {
   @Test
   public void getStream() throws Exception {
     test(c -> {
-      FlightStream stream = c.getStream(new Ticket(new byte[0]));
+      FlightStream stream = c.getStream(new Ticket(new byte[0], new byte[0], null));
       VectorSchemaRoot root = stream.getRoot();
       IntVector iv = (IntVector) root.getVector("c1");
       int value = 0;

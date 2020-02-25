@@ -64,7 +64,7 @@ public class TestBasicAuth {
   public void asyncCall() {
     client.authenticateBasic(USERNAME, PASSWORD);
     client.listFlights(Criteria.ALL);
-    FlightStream s = client.getStream(new Ticket(new byte[1]));
+    FlightStream s = client.getStream(new Ticket(new byte[1], new byte[1], null));
 
     while (s.next()) {
       Assert.assertEquals(4095, s.getRoot().getRowCount());

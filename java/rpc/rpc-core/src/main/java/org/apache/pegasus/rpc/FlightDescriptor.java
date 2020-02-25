@@ -20,7 +20,9 @@ package org.apache.pegasus.rpc;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.arrow.util.Preconditions;
 import org.apache.pegasus.rpc.impl.Flight;
@@ -40,24 +42,31 @@ public class FlightDescriptor {
   private boolean isCmd;
   private List<String> path;
   private byte[] cmd;
+  private Map<String, String> properties = new HashMap<>();
 
-  private FlightDescriptor(boolean isCmd, List<String> path, byte[] cmd) {
+  private FlightDescriptor(boolean isCmd, List<String> path, byte[] cmd,
+                           Map<String, String> properties) {
     super();
     this.isCmd = isCmd;
     this.path = path;
     this.cmd = cmd;
+    this.properties = properties;
   }
 
   public static FlightDescriptor command(byte[] cmd) {
-    return new FlightDescriptor(true, null, cmd);
+    return new FlightDescriptor(true, null, cmd, new HashMap<>());
   }
 
   public static FlightDescriptor path(Iterable<String> path) {
-    return new FlightDescriptor(false, ImmutableList.copyOf(path), null);
+    return new FlightDescriptor(false, ImmutableList.copyOf(path), null, new HashMap<>());
   }
 
   public static FlightDescriptor path(String...path) {
-    return new FlightDescriptor(false, ImmutableList.copyOf(path), null);
+    return new FlightDescriptor(false, ImmutableList.copyOf(path), null, new HashMap<>());
+  }
+
+  public static FlightDescriptor path(Iterable<String> path, Map<String, String> properties) {
+    return new FlightDescriptor(false, ImmutableList.copyOf(path), null, properties);
   }
 
   FlightDescriptor(Flight.FlightDescriptor descriptor) {
@@ -70,6 +79,7 @@ public class FlightDescriptor {
     } else {
       throw new UnsupportedOperationException();
     }
+    properties = descriptor.getPropertiesMap();
   }
 
   public boolean isCommand() {
@@ -86,9 +96,15 @@ public class FlightDescriptor {
     return cmd;
   }
 
+  public Map<String, String> getProperties() {
+    return properties;
+  }
+
   Flight.FlightDescriptor toProtocol() {
     Flight.FlightDescriptor.Builder b = Flight.FlightDescriptor.newBuilder();
-
+    if (properties != null && properties.size() > 0) {
+      b.putAllProperties(properties);
+    }
     if (isCmd) {
       return b.setType(DescriptorType.CMD).setCmd(ByteString.copyFrom(cmd)).build();
     }
@@ -171,6 +187,13 @@ public class FlightDescriptor {
         return false;
       }
     } else if (!path.equals(other.path)) {
+      return false;
+    }
+    if(properties == null) {
+      if (other.properties != null) {
+        return false;
+      }
+    } else if (!properties.equals(other.properties)) {
       return false;
     }
     return true;

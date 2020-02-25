@@ -173,7 +173,7 @@ public class TestServerMiddleware {
   public void doGetUncaught() {
     test(new ServerErrorProducer(EXPECTED_EXCEPTION),
         (allocator, client) -> {
-          try (final FlightStream stream = client.getStream(new Ticket(new byte[0]))) {
+          try (final FlightStream stream = client.getStream(new Ticket(new byte[0], new byte[0], null))) {
             while (stream.next()) {
             }
           } catch (Exception e) {

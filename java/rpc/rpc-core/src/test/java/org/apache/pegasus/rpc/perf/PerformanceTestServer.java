@@ -79,7 +79,7 @@ public class PerformanceTestServer implements AutoCloseable {
         ServerStreamListener listener) {
       VectorSchemaRoot root = null;
       try {
-        Token token = Token.parseFrom(ticket.getBytes());
+        Token token = Token.parseFrom(ticket.getDatasetPath());
         Perf perf = token.getDefinition();
         Schema schema = Schema.deserialize(ByteBuffer.wrap(perf.getSchema().toByteArray()));
         root = VectorSchemaRoot.create(schema, allocator);
@@ -156,7 +156,7 @@ public class PerformanceTestServer implements AutoCloseable {
             .setStart(0)
             .setEnd(exec.getRecordsPerStream())
             .build();
-        final Ticket ticket = new Ticket(token.toByteArray());
+        final Ticket ticket = new Ticket(token.toByteArray(), null, null);
 
         List<FlightEndpoint> endpoints = new ArrayList<>();
         for (int i = 0; i < exec.getStreamCount(); i++) {

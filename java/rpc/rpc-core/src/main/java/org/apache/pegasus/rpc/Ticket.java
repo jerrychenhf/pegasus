@@ -19,7 +19,11 @@ package org.apache.pegasus.rpc;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.pegasus.rpc.impl.Flight;
 
@@ -29,25 +33,51 @@ import com.google.protobuf.ByteString;
  * Endpoint for a particular stream.
  */
 public class Ticket {
-  private final byte[] bytes;
+  private final byte[] datasetPath;
+  private byte[] partitionIdentity;
+  private List<Integer> columnIndices;
 
-  public Ticket(byte[] bytes) {
+  public Ticket(byte[] datasetPath, byte[] partitionIdentity, List<Integer> columnIndices) {
     super();
-    this.bytes = bytes;
+    this.datasetPath = datasetPath;
+    this.partitionIdentity = partitionIdentity;
+    this.columnIndices = columnIndices;
   }
 
-  public byte[] getBytes() {
-    return bytes;
+  public byte[] getDatasetPath() {
+    return datasetPath;
+  }
+
+  public byte[] getPartitionIdentity() {
+    return partitionIdentity;
+  }
+
+  public List<Integer> getcolumnIndices() {
+    return columnIndices;
   }
 
   Ticket(org.apache.pegasus.rpc.impl.Flight.Ticket ticket) {
-    this.bytes = ticket.getTicket().toByteArray();
+    this.datasetPath = ticket.getDatasetPath().toByteArray();
+    this.partitionIdentity = ticket.getPartitionIdentity().toByteArray();
+    this.columnIndices = ticket.getColumnIndiceList();
   }
 
   Flight.Ticket toProtocol() {
-    return Flight.Ticket.newBuilder()
-        .setTicket(ByteString.copyFrom(bytes))
-        .build();
+    Flight.Ticket.Builder b = Flight.Ticket.newBuilder();
+
+    if(datasetPath != null && datasetPath.length > 0) {
+      b.setDatasetPath(ByteString.copyFrom(datasetPath));
+    }
+    if (partitionIdentity != null && partitionIdentity.length > 0) {
+      b.setPartitionIdentity(ByteString.copyFrom(partitionIdentity));
+    }
+    if (columnIndices != null && !columnIndices.isEmpty()) {
+      b.addAllColumnIndice(columnIndices.stream().collect(Collectors.toList()));
+    } else {
+      b.addAllColumnIndice(new ArrayList<>());
+    }
+
+    return b.build();
   }
 
   /**
@@ -76,7 +106,10 @@ public class Ticket {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + Arrays.hashCode(bytes);
+    result = prime * result
+            + ((datasetPath == null) ? 0 : Arrays.hashCode(datasetPath))
+            + ((partitionIdentity == null) ? 0 : Arrays.hashCode(partitionIdentity))
+            + ((columnIndices == null ) ? 0 : columnIndices.hashCode());
     return result;
   }
 
@@ -92,7 +125,17 @@ public class Ticket {
       return false;
     }
     Ticket other = (Ticket) obj;
-    if (!Arrays.equals(bytes, other.bytes)) {
+    if (!Arrays.equals(datasetPath, other.datasetPath)) {
+      return false;
+    }
+    if (!Arrays.equals(partitionIdentity, other.partitionIdentity)) {
+      return false;
+    }
+    if (columnIndices == null) {
+      if (other.columnIndices != null) {
+        return false;
+      }
+    } else if (!columnIndices.equals(other.columnIndices)) {
       return false;
     }
     return true;

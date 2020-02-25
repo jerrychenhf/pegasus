@@ -55,7 +55,7 @@ public class TestApplicationMetadata {
   @Ignore
   public void retrieveMetadata() {
     test((allocator, client) -> {
-      try (final FlightStream stream = client.getStream(new Ticket(new byte[0]))) {
+      try (final FlightStream stream = client.getStream(new Ticket(new byte[0], new byte[0], null))) {
         byte i = 0;
         while (stream.next()) {
           final IntVector vector = (IntVector) stream.getRoot().getVector("a");

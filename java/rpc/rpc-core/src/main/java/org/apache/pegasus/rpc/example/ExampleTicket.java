@@ -78,7 +78,7 @@ public class ExampleTicket {
    */
   public static ExampleTicket from(Ticket ticket) {
     try {
-      return MAPPER.readValue(ticket.getBytes(), ExampleTicket.class);
+      return MAPPER.readValue(ticket.getDatasetPath(), ExampleTicket.class);
     } catch (IOException e) {
       throw Throwables.propagate(e);
     }
@@ -89,7 +89,7 @@ public class ExampleTicket {
    */
   public Ticket toTicket() {
     try {
-      return new Ticket(MAPPER.writeValueAsBytes(this));
+      return new Ticket(MAPPER.writeValueAsBytes(this), null, null);
     } catch (JsonProcessingException e) {
       throw Throwables.propagate(e);
     }
