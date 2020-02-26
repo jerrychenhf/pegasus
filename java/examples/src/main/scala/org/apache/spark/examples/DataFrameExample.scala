@@ -18,6 +18,8 @@ package org.apache.spark.examples
 
 import java.util.Properties
 
+import org.apache.spark.SparkConf
+import org.apache.spark.internal.config.UI.UI_ENABLED
 import org.apache.spark.sql.SparkSession
 
 object DataFrameExample {
@@ -25,12 +27,15 @@ object DataFrameExample {
   case class Person(name: String, age: Long)
 
   def main(args: Array[String]): Unit = {
-    // $example on:init_session$
-    val sparkSession = SparkSession.builder
-      .master("local")
-      .appName("pegasusTest")
-      .config("spark.driver.allowMultipleContexts", "true")
-      .getOrCreate()
+
+    val conf = new SparkConf()
+      .setAppName("pegasusTest")
+      .set("spark.master", "local[1]")
+      .set("spark.driver.memory", "3g")
+      .set("spark.executor.memory", "3g")
+      .set("spark.testing.memory", "10240000000")
+
+    val sparkSession = SparkSession.builder.config(conf).getOrCreate()
 
     val sqlContext = sparkSession.sqlContext
     val reader = sqlContext.read.format("pegasus")
