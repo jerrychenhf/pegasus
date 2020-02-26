@@ -38,9 +38,10 @@ TEST(SpakrCatalogTest, Unit) {
   DataSetRequest dataset_request;
   dataset_request.set_dataset_path(dataset_path);
   DataSetRequest::RequestProperties properties;
-  properties["table_location"] = dataset_path;
-  properties["provider"] = "SPARK";
-  properties["column_names"] = "a, b, c";
+
+  properties[DataSetRequest::TABLE_LOCATION] = dataset_path;
+  properties[DataSetRequest::PROVIDER] = "SPARK";
+  properties[DataSetRequest::COLUMN_NAMES] = "a, b, c";
   dataset_request.set_properties(properties);
 
   std::shared_ptr<CatalogManager> catalog_manager = std::make_shared<CatalogManager>();

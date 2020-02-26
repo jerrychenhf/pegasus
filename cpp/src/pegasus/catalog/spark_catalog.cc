@@ -39,7 +39,7 @@ SparkCatalog::~SparkCatalog() {
 Status SparkCatalog::GetTableLocation(DataSetRequest* dataset_request, std::string& table_location) {
   const auto properties = dataset_request->get_properties();
   std::unordered_map<std::string, std::string>::const_iterator it = 
-      properties.find("table_location");
+      properties.find(DataSetRequest::TABLE_LOCATION);
   if (it != properties.end()) {
     table_location = it->second;
     return Status::OK();
@@ -71,7 +71,7 @@ Status SparkCatalog::GetSchema(DataSetRequest* dataset_request,
 Catalog::FileFormat SparkCatalog::GetFileFormat(DataSetRequest* dataset_request) {
   const auto properties = dataset_request->get_properties();
   std::unordered_map<std::string, std::string>::const_iterator it = 
-      properties.find("format");
+      properties.find(DataSetRequest::FORMAT);
   if (it != properties.end() && it->second == "PARQUET") {
     return FileFormat::PARQUET;
   } else {

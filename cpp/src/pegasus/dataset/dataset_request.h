@@ -50,6 +50,11 @@ class DataSetRequest {
   const std::vector<int32_t>& get_column_indices();
   const std::vector<Filter>& get_filters();
 
+  static const std::string PROVIDER;
+  static const std::string FORMAT;
+  static const std::string TABLE_LOCATION;
+  static const std::string COLUMN_NAMES;
+
   private:
    std::string dataset_path_;
    RequestProperties properties_;

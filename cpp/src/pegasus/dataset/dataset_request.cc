@@ -18,6 +18,10 @@
 #include "dataset/dataset_request.h"
 
 namespace pegasus {
+  const std::string DataSetRequest::PROVIDER = "provider";
+  const std::string DataSetRequest::FORMAT = "format";
+  const std::string DataSetRequest::TABLE_LOCATION = "table_location";
+  const std::string DataSetRequest::COLUMN_NAMES = "column_names";
 
   DataSetRequest::DataSetRequest() {
 
@@ -45,7 +49,7 @@ namespace pegasus {
 
   const std::vector<std::string>& DataSetRequest::get_column_names() {
     std::unordered_map<std::string, std::string>::const_iterator it = 
-        properties_.find("column_names");
+        properties_.find(DataSetRequest::COLUMN_NAMES);
     if (it != properties_.end()) {
       std::string column_name_string = it->second;
       boost::split(column_names_, column_name_string,

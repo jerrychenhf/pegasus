@@ -28,7 +28,7 @@ Status CatalogManager::GetCatalog(DataSetRequest* dataset_request,
   
   const auto properties = dataset_request->get_properties();
   std::unordered_map<std::string, std::string>::const_iterator it = 
-      properties.find("provider");
+      properties.find(DataSetRequest::PROVIDER);
   if (it != properties.end() && it->second == "SPARK") {
     *catalog = spark_catalog_;
   } else {
