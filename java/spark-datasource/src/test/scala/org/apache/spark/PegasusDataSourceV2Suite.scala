@@ -47,11 +47,11 @@ class PegasusDataSourceV2Suite extends PegasusFunSuite  {
           .coalesce(2)
           .write.parquet(path1.toString)
 
-        val count = reader.option("planner.port", "30001")
-          .option("planner.host", "localhost")
-          .load("hdfs://10.239.47.55:9000/genData2/customer").count()
-
-        Assert.assertEquals(30, count)
+//        val count = reader.option("planner.port", "30001")
+//          .option("planner.host", "localhost")
+//          .load("hdfs://10.239.47.55:9000/genData2/customer").count()
+//
+//        Assert.assertEquals(30, count)
       }
     }
 
