@@ -142,7 +142,6 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
     std::shared_ptr<CacheMemoryPool> memory_pool(new CacheMemoryPool(cache_engine));
     RETURN_IF_ERROR(memory_pool->Create());
     
-    CacheStore* cache_store = memory_pool->GetCacheStore();
     parquet::ArrowReaderProperties properties(parquet::default_arrow_reader_properties());
     std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, memory_pool.get(), properties));
     

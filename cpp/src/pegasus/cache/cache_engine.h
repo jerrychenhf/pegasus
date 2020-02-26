@@ -23,16 +23,18 @@
 #include <boost/compute/detail/lru_cache.hpp>
 #include "cache/cache_region.h"
 #include "boost/functional/hash.hpp"
-#include "cache/cache_store_manager.h"
 #include "cache/lru_cache.h"
 
 using namespace boost;
 
 namespace pegasus {
 
+class CacheEngineInfo;
+class CacheStoreManager;
+
 class CacheEngine {
  public:
- virtual Status Init() = 0;
+ virtual Status Init(const std::shared_ptr<CacheEngineInfo>& info) = 0;
  virtual Status GetCacheStore(CacheStore** cache_store) = 0;
  virtual Status PutValue(LRUCache::CacheKey key) = 0;
 
@@ -55,11 +57,9 @@ class LruCacheEngine : public CacheEngine {
     }
   }
   
-  virtual Status Init();
+  virtual Status Init(const std::shared_ptr<CacheEngineInfo>& info);
   
-  Status GetCacheStore(CacheStore** cache_store) override {
-    return cache_store_manager_->GetCacheStore(cache_store);
-  }
+  Status GetCacheStore(CacheStore** cache_store) override;
 
   Status PutValue(LRUCache::CacheKey key) override;
 
@@ -74,7 +74,7 @@ class NonEvictionCacheEngine : public CacheEngine {
   NonEvictionCacheEngine() {};
   ~NonEvictionCacheEngine() {};
 
-  virtual Status Init() {
+  virtual Status Init(const std::shared_ptr<CacheEngineInfo>& info) {
     return Status::OK();
   }
   

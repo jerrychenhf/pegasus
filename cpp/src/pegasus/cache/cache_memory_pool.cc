@@ -25,7 +25,9 @@ CacheMemoryPool::CacheMemoryPool(std::shared_ptr<CacheEngine> cache_engine)
 }
 CacheMemoryPool::~CacheMemoryPool() {}
 
-Status CacheMemoryPool::Create() {
+Status CacheMemoryPool::Create() {  
+  // TO BE IMPPROVED
+  // for choose different stores from engine according to the dataset
   RETURN_IF_ERROR(cache_engine_->GetCacheStore(&cache_store_));
   return Status::OK();
 }

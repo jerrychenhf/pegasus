@@ -21,6 +21,9 @@ using namespace pegasus;
 
 namespace pegasus {
 
+const std::string DatasetCacheEngineManager::ENGINE_ID_LRU = "LRU";
+const std::string DatasetCacheEngineManager::ENGINE_ID_NONEVICT = "NONEVICT";
+
 DatasetCacheEngineManager::DatasetCacheEngineManager() {
 
 }
@@ -32,20 +35,23 @@ Status DatasetCacheEngineManager::Init() {
   // Initialize all configurated cache engines.
   WorkerExecEnv* env =  WorkerExecEnv::GetInstance();
   
-  std::vector<CacheEngine::CachePolicy> cache_policies = env->GetCachePolicies();
-  std::shared_ptr<CacheEngine> cache_engine;
+  const CacheEngineInfos& cache_engine_infos = env->GetCacheEngines();
   std::string cache_policy_type;
-  for(std::vector<CacheEngine::CachePolicy>::iterator it = cache_policies.begin(); it != cache_policies.end(); ++it) {
-    if (*it == CacheEngine::CachePolicy::LRU) {
-      cache_policy_type = "LRU";
-      cache_engine = std::shared_ptr<CacheEngine>(new LruCacheEngine(3221225472)); // 3gb
-    } else if (*it == CacheEngine::CachePolicy::NonEvict) {
-      cache_policy_type = "NonEvict";
-      cache_engine = std::shared_ptr<CacheEngine>(new NonEvictionCacheEngine());
+  for(CacheEngineInfos::const_iterator it = cache_engine_infos.begin();
+    it != cache_engine_infos.end(); ++it) {
+    std::shared_ptr<CacheEngineInfo> cache_engine_info = it->second;
+    
+    std::shared_ptr<CacheEngine> cache_engine;
+    if (cache_engine_info->type() == CacheEngine::CachePolicy::LRU) {
+      cache_engine = std::shared_ptr<CacheEngine>(
+        new LruCacheEngine(cache_engine_info->capacity()));
+    } else if (cache_engine_info->type() == CacheEngine::CachePolicy::NonEvict) {
+      cache_engine = std::shared_ptr<CacheEngine>(
+        new NonEvictionCacheEngine());
     }
     
-    RETURN_IF_ERROR(cache_engine->Init());
-    cached_engines_.insert(std::make_pair(cache_policy_type, cache_engine));
+    RETURN_IF_ERROR(cache_engine->Init(cache_engine_info));
+    cached_engines_.insert(std::make_pair(it->first, cache_engine));
   }
   return Status::OK();
 }
@@ -53,20 +59,20 @@ Status DatasetCacheEngineManager::Init() {
 // Get the specific cache engine based on the available capacity.
 Status DatasetCacheEngineManager::GetCacheEngine(CacheEngine::CachePolicy cache_policy, std::shared_ptr<CacheEngine>* cache_engine) {
     if (cache_policy == CacheEngine::CachePolicy::LRU) {
-      auto entry = cached_engines_.find("LRU");
+      auto entry = cached_engines_.find(ENGINE_ID_LRU);
       if (entry == cached_engines_.end()) {
         stringstream ss;
-        ss << "Could not find LRU cache engine.";
+        ss << "Could not find cache engine with id: " << ENGINE_ID_LRU;
         LOG(ERROR) << ss.str();
         return Status::UnknownError(ss.str());
       }
       *cache_engine = entry->second;
       return Status::OK();
     } else if (cache_policy == CacheEngine::CachePolicy::NonEvict) {
-      auto entry = cached_engines_.find("NonEvict");
+      auto entry = cached_engines_.find(ENGINE_ID_NONEVICT);
       if (entry == cached_engines_.end()) {
         stringstream ss;
-        ss << "Could not find NonEvict cache engine.";
+        ss << "Could not find cache engine with id: " << ENGINE_ID_NONEVICT;
         LOG(ERROR) << ss.str();
         return Status::UnknownError(ss.str());
       }

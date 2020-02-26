@@ -36,6 +36,7 @@
 #include "util/string_case.h"
 #include "common/logging.h"
 
+#include "dataset/dataset_cache_manager.h"
 #include "dataset/dataset_cache_block_manager.h"
 #include "runtime/worker_exec_env.h"
 

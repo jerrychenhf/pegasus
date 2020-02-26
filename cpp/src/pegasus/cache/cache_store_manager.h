@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include "common/status.h"
 #include "cache/cache_store.h"
+#include "runtime/worker_config.h"
 
 namespace pegasus {
 
@@ -30,11 +31,17 @@ class CacheStoreManager {
    CacheStoreManager();
    ~CacheStoreManager();
 
-   Status Init();
+   Status Init(const CacheStoreInfos& cache_store_infos);
+   
+   Status GetCacheStore(const std::string& id, CacheStore** cache_store);
    Status GetCacheStore(CacheStore** cache_store);
 
   private:
    std::unordered_map<std::string, std::shared_ptr<CacheStore>> cached_stores_;
+   
+  public:
+   static const std::string CACHE_STORE_ID_DRAM;
+   static const std::string CACHE_STORE_ID_DCPMM;
 };
 } // namespace pegasus                              
 

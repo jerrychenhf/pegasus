@@ -16,6 +16,8 @@
 // under the License.
 
 #include "cache/cache_engine.h"
+#include "runtime/worker_config.h"
+#include "cache/cache_store_manager.h"
 
 using namespace std;
 
@@ -26,11 +28,15 @@ LruCacheEngine::LruCacheEngine(int64_t capacity)
   lru_cache_ = new LRUCache(capacity);
 }
 
-Status LruCacheEngine::Init() {
-  RETURN_IF_ERROR(cache_store_manager_->Init());
+Status LruCacheEngine::Init(const std::shared_ptr<CacheEngineInfo>& info) {
+  RETURN_IF_ERROR(cache_store_manager_->Init(info->cache_stores()));
   return Status::OK();
 }
 
+Status LruCacheEngine::GetCacheStore(CacheStore** cache_store) {
+  return cache_store_manager_->GetCacheStore(cache_store);
+}
+  
 Status LruCacheEngine::PutValue(LRUCache::CacheKey key) {
   LRUCache::PendingEntry pending_entry = lru_cache_->Allocate(key, sizeof(key));
 

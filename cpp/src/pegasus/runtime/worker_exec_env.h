@@ -18,40 +18,15 @@
 #ifndef PEGASUS_WORKER_EXEC_ENV_H
 #define PEGASUS_WORKER_EXEC_ENV_H
 
-#include "cache/cache_engine.h"
 #include "runtime/exec_env.h"
-#include "dataset/dataset_cache_manager.h"
+#include "runtime/worker_config.h"
 
 using namespace std;
 
 namespace pegasus {
-  
+
 class StoreManager;
-
-typedef std::unordered_map<string, string> StoreProperties;
-    
-class StoreInfo {
-public:
-  StoreInfo(const std::string& id, Store::StoreType type, int64_t capacity,
-    const std::shared_ptr<StoreProperties>& properties)
-    : id_(id), type_(type), capacity_(capacity), properties_(properties) {
-  }
-  
-  ~StoreInfo() {
-  }
-  
-  const std::string& id() { return id_; }
-  Store::StoreType type() { return type_; }
-  int64_t capacity() const { return capacity_; }
-  std::shared_ptr<StoreProperties> properties() { return properties_; }
-private:
-  std::string id_;
-  Store::StoreType type_;
-  int64_t capacity_;  
-  std::shared_ptr<StoreProperties> properties_;
-};
-
-typedef std::unordered_map<string, std::shared_ptr<StoreInfo>> StoreInfos;
+class DatasetCacheManager;
 
 /// There should only be one ExecEnv instance.
 /// It should always be accessed by calling WorkerExecEnv::GetInstance().
@@ -70,11 +45,8 @@ class WorkerExecEnv : public ExecEnv {
 
   int32_t GetWorkerGrpcPort();
 
-  const StoreInfos& GetStoreInfos();
-
-  std::vector<CacheEngine::CachePolicy> GetCachePolicies();
-
-  std::unordered_map<string, long>  GetCacheStoresInfo();
+  const StoreInfos& GetStores();
+  const CacheEngineInfos& GetCacheEngines();
   
   std::shared_ptr<StoreManager> GetStoreManager() {
     return store_manager_;
@@ -90,14 +62,14 @@ class WorkerExecEnv : public ExecEnv {
   std::string worker_grpc_hostname_;
   int32_t worker_grpc_port_;
 
-  StoreInfos store_infos_;
-  std::unordered_map<string, long> cache_stores_info_; // string: store type
-  std::vector<CacheEngine::CachePolicy> cache_policies_;
+  StoreInfos stores_;
+  CacheEngineInfos cache_engines_;
   
   std::shared_ptr<StoreManager> store_manager_;
   std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
   
   Status InitStoreInfo();
+  Status InitCacheEngineInfos();
 };
 
 } // namespace pegasus

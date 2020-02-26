@@ -30,6 +30,7 @@ class StoreManager {
 
   Status Init();
 
+  Status GetStore(const std::string& id, Store** store);
   Status GetStore(Store::StoreType cache_type, Store** store);
 
  private:

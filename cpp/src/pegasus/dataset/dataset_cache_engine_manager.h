@@ -35,6 +35,10 @@ class DatasetCacheEngineManager {
 
   private:
    std::unordered_map<std::string, std::shared_ptr<CacheEngine>> cached_engines_;
+   
+  public:
+   static const std::string ENGINE_ID_LRU;
+   static const std::string ENGINE_ID_NONEVICT;
 };
 
 } // namespace pegasus

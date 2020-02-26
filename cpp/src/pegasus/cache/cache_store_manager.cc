@@ -24,51 +24,62 @@
 using namespace std;
 
 namespace pegasus {
+  
+const std::string CacheStoreManager::CACHE_STORE_ID_DRAM = "DRAM";
+const std::string CacheStoreManager::CACHE_STORE_ID_DCPMM = "DCPMM";
+  
   CacheStoreManager::CacheStoreManager(){
   }
   
   CacheStoreManager::~CacheStoreManager(){
   }
 
-  Status CacheStoreManager::Init() {
+  Status CacheStoreManager::Init(const CacheStoreInfos& cache_store_infos) {
     WorkerExecEnv* env =  WorkerExecEnv::GetInstance();
-    
-    std::shared_ptr<Store> store;
-    std::unordered_map<string, long> cache_stores_info = env->GetCacheStoresInfo();
-
-    Store::StoreType store_type_;
-    for(std::unordered_map<string, long>::iterator it = cache_stores_info.begin(); it != cache_stores_info.end(); ++it) {
-      string store_type = it->first;
-      long capacity = it->second;
+  
+    for(CacheStoreInfos::const_iterator it = cache_store_infos.begin();
+      it != cache_store_infos.end(); ++it) {
+      std::shared_ptr<CacheStoreInfo> cache_store_info = it->second;
+      
       Store* store = NULL;
-
-      if (store_type == "MEMORY") {
-        store_type_ = Store::StoreType::MEMORY;
-      } else if (store_type == "DCPMM") {
-        store_type_ = Store::StoreType::DCPMM;
-      } else {
-        return Status::Invalid("Invalid store type!");
-      }
-
-      RETURN_IF_ERROR(env->GetStoreManager()->GetStore(store_type_, &store));
+      RETURN_IF_ERROR(env->GetStoreManager()->GetStore(cache_store_info->store_id(), &store));
+      
       std::shared_ptr<CacheStore> cache_store =
-        std::shared_ptr<CacheStore>(new CacheStore(store, capacity));
-      cached_stores_.insert(std::make_pair(store_type, cache_store));
+        std::shared_ptr<CacheStore>(
+        new CacheStore(store, cache_store_info->capacity_quote()));
+      cached_stores_.insert(std::make_pair(it->first, cache_store));
     }
+    
     return Status::OK();
   }
-
-  Status CacheStoreManager::GetCacheStore(CacheStore** cache_store){
-    // MEMORY > DCPMM > FILE
-    auto entry = cached_stores_.find("MEMORY");
+  
+  Status CacheStoreManager::GetCacheStore(const std::string& id, CacheStore** cache_store) {
+    auto entry = cached_stores_.find(id);
     if (entry == cached_stores_.end()) {
       stringstream ss;
-      ss << "Failed to get the cache store in cache store manager.";
-       LOG(ERROR) << ss.str();
+      ss << "Failed to get the cache store in cache store manager with id: " << id;
+      LOG(ERROR) << ss.str();
       return Status::UnknownError(ss.str());
     }
     
     *cache_store = entry->second.get();
     return Status::OK();
+  }
+
+  Status CacheStoreManager::GetCacheStore(CacheStore** cache_store){
+    // DRAM > DCPMM > FILE
+    if(cached_stores_.size() == 1) {
+      *cache_store = cached_stores_.begin()->second.get();
+      return Status::OK();
+    } else {
+      // TO BE IMPROVED
+      // choose stores depend on other factors
+      Status status = GetCacheStore(CACHE_STORE_ID_DRAM, cache_store);
+      if(!status.ok()) {
+        return GetCacheStore(CACHE_STORE_ID_DCPMM, cache_store);
+      }
+      
+      return Status::OK();
+    }
   }
 } // namespace pegasus

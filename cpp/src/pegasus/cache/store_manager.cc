@@ -20,7 +20,7 @@
 
 namespace pegasus {
 
-const std::string StoreManager::STORE_ID_DRAM = "MEMORY";
+const std::string StoreManager::STORE_ID_DRAM = "DRAM";
 const std::string StoreManager::STORE_ID_DCPMM = "DCPMM";
 const std::string StoreManager::STORE_PROPERTY_PATH = "path";
 
@@ -32,11 +32,10 @@ StoreManager::StoreManager() {
 
 Status StoreManager::Init() {
   WorkerExecEnv* env =  WorkerExecEnv::GetInstance();
-  std::shared_ptr<Store> store;
-  const StoreInfos& store_infos = env->GetStoreInfos();
+  const StoreInfos& store_infos = env->GetStores();
   
   for(StoreInfos::const_iterator it = store_infos.begin();
-   it != store_infos.end(); ++it) {
+    it != store_infos.end(); ++it) {
     std::shared_ptr<Store> store;
     std::shared_ptr<StoreInfo> store_info = it->second;
     
@@ -55,27 +54,23 @@ Status StoreManager::Init() {
   return Status::OK();
 }
 
+Status StoreManager::GetStore(const std::string& id, Store** store) {
+  auto  entry = stores_.find(id);
+  if (entry == stores_.end()) {
+    stringstream ss;
+    ss << "Failed to get the store in store manager with id: " << id;
+    LOG(ERROR) << ss.str();
+    return Status::UnknownError(ss.str());
+  }
+  *store = entry->second.get();
+  return Status::OK();
+}
+
 Status StoreManager::GetStore(Store::StoreType store_type, Store** store) {
   if (store_type == Store::StoreType::MEMORY) {
-    auto  entry = stores_.find(STORE_ID_DRAM);
-    if (entry == stores_.end()) {
-      stringstream ss;
-      ss << "Failed to get the memory store in store manager.";
-      LOG(ERROR) << ss.str();
-      return Status::UnknownError(ss.str());
-    }
-    *store = entry->second.get();
-    return Status::OK();
+    return GetStore(STORE_ID_DRAM, store);
   } else if (store_type == Store::StoreType::DCPMM) {
-    auto  entry = stores_.find(STORE_ID_DCPMM);
-    if (entry == stores_.end()) {
-      stringstream ss;
-      ss << "Failed to get the DCPMM store in store manager.";
-      LOG(ERROR) << ss.str();
-      return Status::UnknownError(ss.str());
-    }
-    *store = entry->second.get();
-    return Status::OK();
+    return GetStore(STORE_ID_DCPMM, store);
   } else {
     return Status::Invalid("Invalid store type!");
   }

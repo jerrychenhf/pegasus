@@ -21,6 +21,7 @@
 #include "runtime/worker_exec_env.h"
 #include "util/global_flags.h"
 #include "cache/store_manager.h"
+#include "dataset/dataset_cache_manager.h"
 
 DECLARE_string(hostname);
 DECLARE_int32(worker_port);
@@ -48,10 +49,7 @@ WorkerExecEnv::WorkerExecEnv(const std::string& hostname, int32_t worker_port)
 
   //TODO improve the store configuration
   InitStoreInfo();
-  
-  // TODO need get the cache policy and store policy from configuration
-  cache_policies_.push_back(CacheEngine::LRU);
-  cache_stores_info_.insert(std::make_pair("MEMORY", 100));
+  InitCacheEngineInfos();
 
   exec_env_ = this;
 }
@@ -68,7 +66,7 @@ Status WorkerExecEnv::InitStoreInfo() {
     std::shared_ptr<StoreInfo> store_info(
       new StoreInfo(StoreManager::STORE_ID_DRAM, Store::StoreType::MEMORY,
       capacity, properties));
-    store_infos_.insert(std::make_pair(StoreManager::STORE_ID_DRAM, store_info));
+    stores_.insert(std::make_pair(StoreManager::STORE_ID_DRAM, store_info));
   }
   
   // if DCPMM store configured
@@ -83,9 +81,40 @@ Status WorkerExecEnv::InitStoreInfo() {
     std::shared_ptr<StoreInfo> store_info(
       new StoreInfo(StoreManager::STORE_ID_DCPMM, Store::StoreType::DCPMM,
       capacity, properties));
-    store_infos_.insert(std::make_pair(StoreManager::STORE_ID_DCPMM, store_info));
+    stores_.insert(std::make_pair(StoreManager::STORE_ID_DCPMM, store_info));
   }
   
+  return Status::OK();
+}
+
+Status WorkerExecEnv::InitCacheEngineInfos() {
+  // read properties
+  std::shared_ptr<CacheEngineProperties> properties = std::make_shared<CacheEngineProperties>();
+  
+  int64_t capacity = 0;
+  for(StoreInfos::const_iterator it = stores_.begin();
+    it != stores_.end(); ++it) {
+    std::shared_ptr<StoreInfo> store_info = it->second;
+    capacity += store_info->capacity();
+  }
+  
+  std::shared_ptr<CacheEngineInfo> cache_engine_info(
+      new CacheEngineInfo(DatasetCacheEngineManager::ENGINE_ID_LRU,
+      CacheEngine::CachePolicy::LRU, capacity, properties));
+
+  for(StoreInfos::const_iterator it = stores_.begin();
+    it != stores_.end(); ++it) {
+    std::shared_ptr<StoreInfo> store_info = it->second;
+    std::shared_ptr<CacheStoreProperties> properties = std::make_shared<CacheStoreProperties>();
+    
+    std::shared_ptr<CacheStoreInfo> cache_store_info(
+      new CacheStoreInfo(store_info->id(),
+      store_info->id(), store_info->capacity(), properties));
+    cache_engine_info->add_cache_store(cache_store_info);
+  }
+  
+  cache_engines_.insert(
+    std::make_pair(DatasetCacheEngineManager::ENGINE_ID_LRU, cache_engine_info));
   return Status::OK();
 }
 
@@ -105,16 +134,12 @@ int32_t WorkerExecEnv::GetWorkerGrpcPort() {
   return worker_grpc_port_;
 }
 
-const StoreInfos& WorkerExecEnv::GetStoreInfos() {
-  return store_infos_;
+const StoreInfos& WorkerExecEnv::GetStores() {
+  return stores_;
 }
 
-std::unordered_map<string, long>  WorkerExecEnv::GetCacheStoresInfo() {
-  return cache_stores_info_;
-}
-
-std::vector<CacheEngine::CachePolicy> WorkerExecEnv::GetCachePolicies() {
-  return cache_policies_;
+const CacheEngineInfos& WorkerExecEnv::GetCacheEngines() {
+  return cache_engines_;
 }
 
 } // namespace pegasus
