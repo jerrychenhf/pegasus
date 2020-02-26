@@ -18,7 +18,7 @@
 #ifndef PEGASUS_WORKER_EXEC_ENV_H
 #define PEGASUS_WORKER_EXEC_ENV_H
 
-#include "dataset/cache_engine.h"
+#include "cache/cache_engine.h"
 #include "runtime/exec_env.h"
 #include "dataset/dataset_cache_manager.h"
 

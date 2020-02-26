@@ -21,7 +21,7 @@
 #include <unordered_map>
 
 #include "dataset/request_identity.h"
-#include "dataset/cache_engine.h"
+#include "cache/cache_engine.h"
 #include "cache/cache_region.h"
 #include "arrow/table.h"
 

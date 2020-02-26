@@ -23,7 +23,7 @@
 #include <boost/compute/detail/lru_cache.hpp>
 #include "cache/cache_region.h"
 #include "boost/functional/hash.hpp"
-#include "dataset/cache_store_manager.h"
+#include "cache/cache_store_manager.h"
 #include "cache/lru_cache.h"
 
 using namespace boost;
