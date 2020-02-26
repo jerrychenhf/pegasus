@@ -83,12 +83,13 @@ arrow::Status PlannerTableAPIService::GetFlightInfo(const rpc::ServerCallContext
                                                     const rpc::FlightDescriptor& request,
                                                     std::unique_ptr<rpc::FlightInfo>* out) {
 
-
   DataSetRequest dataset_request;
+  LOG(INFO) << "Requesting flight info";
   arrow::Status st = CreateDataSetRequest(request, &dataset_request);
-  if (!st.ok());
-    return st;
 
+  if (!st.ok()) {
+    return st;
+  }
   Status status = dataset_service_->GetFlightInfo(&dataset_request, out);
   return status.toArrowStatus();
 }
@@ -113,6 +114,7 @@ arrow::Status PlannerTableAPIService::CreateDataSetRequest(const rpc::FlightDesc
       return arrow::Status::Invalid("Invalid dataset path, currently only supports one path");
     }
     std::string dataset_path = request_path[0];
+    LOG(INFO) << "dataset path:" << dataset_path;
     dataset_request->set_dataset_path(dataset_path);
   } else {
     return arrow::Status::NotImplemented(descriptor.type);
