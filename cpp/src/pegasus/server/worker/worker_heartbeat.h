@@ -101,6 +101,8 @@ class WorkerHeartbeat {
     
   bool GetNodeInfo(rpc::NodeInfo* node_info, int64_t& ts);
   bool HeartbeatedNodeInfo(int64_t ts);
+
+  Status GetStoreInfo(int64_t *cache_capacity, int64_t *cache_free);
   
   std::string planner_address_;
 };

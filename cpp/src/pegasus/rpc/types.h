@@ -523,6 +523,9 @@ struct PEGASUS_RPC_EXPORT NodeInfo {
   friend bool operator!=(const NodeInfo& left, const NodeInfo& right) {
     return !(left == right);
   }
+  
+  void set_cache_capacity(int64_t cache_capacity) { cache_capacity = cache_capacity; }
+  void set_cache_free(int64_t cache_free) { cache_free = cache_free; }
 };
 
 /// \brief Worker heartbeat information passed to planner

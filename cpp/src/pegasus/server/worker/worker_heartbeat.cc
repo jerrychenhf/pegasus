@@ -27,6 +27,8 @@
 #include "rpc/client.h"
 #include "rpc/types.h"
 #include <boost/thread/lock_guard.hpp>
+#include "runtime/worker_exec_env.h"
+#include "cache/store_manager.h"
 
 using namespace boost;
 
@@ -149,8 +151,30 @@ Status WorkerHeartbeat::OfferHeartbeat(const ScheduledHeartbeat& heartbeat) {
   return Status::OK();
 }
 
+Status WorkerHeartbeat::GetStoreInfo(int64_t *cache_capacity, int64_t *cache_free) {
+  WorkerExecEnv* worker_exec_env = WorkerExecEnv::GetInstance();
+  std::shared_ptr<StoreManager> store_manager = worker_exec_env->GetStoreManager();
+  std::unordered_map<std::string, std::shared_ptr<Store>>  stores = store_manager->GetStores();
+
+  for(auto iter = stores.begin(); iter != stores.end(); *iter ++) {
+    *cache_capacity += iter->second->GetCapacity();
+    *cache_free += iter->second->GetFreeSize();
+  }
+  return Status::OK();
+}
+
 void WorkerHeartbeat::DoHeartbeat(int thread_id,
     const ScheduledHeartbeat& heartbeat) {
+
+  int64_t cache_capacity = 0;
+  int64_t cache_free = 0;
+  GetStoreInfo(&cache_capacity, &cache_free);
+
+  rpc::NodeInfo new_node_info = rpc::NodeInfo();
+  new_node_info.set_cache_capacity(cache_capacity);
+  new_node_info.set_cache_free(cache_free);
+  UpdateNodeInfo(new_node_info);
+  
   int64_t heartbeat_deadline = heartbeat.deadline;
   if (heartbeat_deadline != 0) {
     // Wait until deadline.
