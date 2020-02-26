@@ -166,9 +166,10 @@ TEST(DatasetServiceTest, DatasetService)
   DataSetRequest dataset_request;
   dataset_request.set_dataset_path(test_dataset_path);
   DataSetRequest::RequestProperties properties;
-  properties["table_location"] = test_dataset_path;
-  properties["provider"] = "SPARK";
-  properties["column_names"] = "a, b, c";
+
+  properties[DataSetRequest::TABLE_LOCATION] = test_dataset_path;
+  properties[DataSetRequest::PROVIDER] = "SPARK";
+  properties[DataSetRequest::COLUMN_NAMES] = "a, b, c";
   dataset_request.set_properties(properties);
   // Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   //                                   std::unique_ptr<rpc::FlightInfo>* flight_info)
