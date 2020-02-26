@@ -20,6 +20,10 @@
 
 namespace pegasus {
 
+const std::string StoreManager::STORE_ID_DRAM = "MEMORY";
+const std::string StoreManager::STORE_ID_DCPMM = "DCPMM";
+const std::string StoreManager::STORE_PROPERTY_PATH = "path";
+
 StoreManager::~StoreManager(){
 }
 
@@ -53,7 +57,7 @@ Status StoreManager::Init() {
 
 Status StoreManager::GetStore(Store::StoreType store_type, Store** store) {
   if (store_type == Store::StoreType::MEMORY) {
-    auto  entry = stores_.find(WorkerExecEnv::STORE_ID_DRAM);
+    auto  entry = stores_.find(STORE_ID_DRAM);
     if (entry == stores_.end()) {
       stringstream ss;
       ss << "Failed to get the memory store in store manager.";
@@ -63,7 +67,7 @@ Status StoreManager::GetStore(Store::StoreType store_type, Store** store) {
     *store = entry->second.get();
     return Status::OK();
   } else if (store_type == Store::StoreType::DCPMM) {
-    auto  entry = stores_.find(WorkerExecEnv::STORE_ID_DCPMM);
+    auto  entry = stores_.find(STORE_ID_DCPMM);
     if (entry == stores_.end()) {
       stringstream ss;
       ss << "Failed to get the DCPMM store in store manager.";
