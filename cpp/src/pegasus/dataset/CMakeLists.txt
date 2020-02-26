@@ -36,9 +36,6 @@ add_library(DataSet
   flightinfo_builder.cc
   dataset_cache_manager.cc
   dataset_cache_block_manager.cc
-  cache_engine.cc
-  cache_store.cc
-  cache_store_manager.cc
   dataset_cache_engine_manager.cc
   request_identity.cc
 )

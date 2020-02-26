@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "dataset/cache_store.h"
+#include "cache/cache_store.h"
 #include "common/logging.h"
 
 using namespace std;

@@ -19,7 +19,7 @@
 #define PEGASUS_DATASET_CACHE_ENGINE_MANAGER_H
 
 #include "common/status.h"
-#include "dataset/cache_engine.h"
+#include "cache/cache_engine.h"
 
 
 using namespace std;

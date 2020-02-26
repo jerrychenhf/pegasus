@@ -21,7 +21,7 @@
 #include <vector>
 #include <unordered_map>
 #include "common/status.h"
-#include "dataset/cache_store.h"
+#include "cache/cache_store.h"
 
 namespace pegasus {
 

@@ -16,7 +16,7 @@
 // under the License.
 
 
-#include "dataset/cache_store_manager.h"
+#include "cache/cache_store_manager.h"
 #include "runtime/worker_exec_env.h"
 #include "cache/store_manager.h"
 #include "common/logging.h"

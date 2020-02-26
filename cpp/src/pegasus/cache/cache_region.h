@@ -18,7 +18,7 @@
 #ifndef PEGASUS_CACHE_REGION_H
 #define PEGASUS_CACHE_REGION_H
 
-#include "dataset/cache_store.h"
+#include "cache/cache_store.h"
 
 #include <string>
 
