@@ -40,7 +40,7 @@ object DataFrameExample {
       .option("planner.port", "30001")
       .option("planner.host", "localhost")
       .option("provider", "SPARK")
-      .option("table_location", path)
+      .option("table.location", path)
       .option("format", "PARQUET")
       .load(path).count()
 

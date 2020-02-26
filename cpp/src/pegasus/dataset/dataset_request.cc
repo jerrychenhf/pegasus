@@ -20,8 +20,8 @@
 namespace pegasus {
   const std::string DataSetRequest::PROVIDER = "provider";
   const std::string DataSetRequest::FORMAT = "format";
-  const std::string DataSetRequest::TABLE_LOCATION = "table_location";
-  const std::string DataSetRequest::COLUMN_NAMES = "column_names";
+  const std::string DataSetRequest::TABLE_LOCATION = "table.location";
+  const std::string DataSetRequest::COLUMN_NAMES = "column.names";
 
   DataSetRequest::DataSetRequest() {
 
