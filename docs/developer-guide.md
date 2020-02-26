@@ -43,7 +43,7 @@ Setting up ARROW_HOME variable, add the following command to ~/.bashrc file.
 export ARROW_HOME=/usr/local
 ```
 
-### Building pegasus
+### Building pegasus C++
 
 ```
 git clone https://gitlab.devtools.intel.com/intel-bigdata/pegasus.git
@@ -83,4 +83,18 @@ To run just one test:
 ```
 cd pegasus/cpp/debug/release/util/
 ./pegasus-thread-pool-test
+```
+
+### Building Java and running tests
+To build without tests
+```
+cd pegasus/java
+mvn clean package -DskipTests
+
+```
+To run with tests
+```
+cd pegasus/java
+mvn clean package
+
 ```
