@@ -17,34 +17,54 @@
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
 import scala.collection.JavaConverters._
-
 import java.nio.charset.StandardCharsets
 import java.util
 import java.util.{ArrayList, HashMap, List, Map}
 
 import org.apache.arrow.memory.{BufferAllocator, RootAllocator}
 import org.apache.pegasus.rpc.{FlightDescriptor, FlightInfo, Location, Ticket}
+import org.apache.spark.internal.config
+import org.apache.spark.internal.config.ConfigBuilder
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
 class PegasusDataSetReader(options: CaseInsensitiveStringMap, paths: Seq[String]) {
 
-  private val rootAllocator = new RootAllocator(Long.MaxValue)
-  private val allocator: BufferAllocator = rootAllocator.newChildAllocator(options.toString, 0, rootAllocator.getLimit)
+  private[spark] val PLANNER_HOST = ConfigBuilder("planner.host")
+    .doc("Hostname of the planner.")
+    .stringConf
+    .createWithDefault("localhost")
 
-  private val location = Location.forGrpcInsecure(
-    options.getOrDefault("host", "localhost"),
-    options.getInt("port", 30001))
+  private[spark] val PLANNER_PORT = ConfigBuilder("planner.port")
+    .doc("Port of the planner.")
+    .stringConf
+    .createWithDefault("30001")
+
+  private[spark] val USERNAME = ConfigBuilder("username")
+    .doc("username to access the planner.")
+    .stringConf
+    .createWithDefault("anonymous")
+
+  private[spark] val PASSWORD = ConfigBuilder("password")
+    .doc("password to access the planner.")
+    .stringConf
+    .createWithDefault("")
+
+  private val rootAllocator = new RootAllocator(Long.MaxValue)
+  private val allocator: BufferAllocator = rootAllocator.newChildAllocator(options.toString,
+    0, rootAllocator.getLimit)
+
+  private val plannerHost = options.get(PLANNER_HOST.key)
+  private val plannerPort = options.get(PLANNER_PORT.key)
+  private val location = Location.forGrpcInsecure(plannerHost, plannerPort.toInt)
+
   private val clientFactory = new PegasusClientFactory(
-    allocator, location, options.getOrDefault("username", "anonymous"),
-    options.getOrDefault("password", null))
+    allocator, location, options.get(USERNAME.key), options.get(PASSWORD.key))
 
   def getDataSet(): FlightInfo = {
     try {
       val client = clientFactory.apply
-      val properties: Map[String, String] = new HashMap[String, String]
-      properties.put("table_location",  paths(0))
 
-      val descriptor: FlightDescriptor = FlightDescriptor.path(paths.asJava, properties)
+      val descriptor: FlightDescriptor = FlightDescriptor.path(paths.asJava, options)
       client.getInfo(descriptor)
     } catch {
         case e: InterruptedException =>

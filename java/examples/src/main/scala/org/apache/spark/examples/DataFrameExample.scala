@@ -35,9 +35,14 @@ object DataFrameExample {
     val sqlContext = sparkSession.sqlContext
     val reader = sqlContext.read.format("pegasus")
 
-    val count = reader.option("planner.port", "30001")
+    val path = "hdfs://10.239.47.55:9000/genData2/customer"
+    val count = reader
+      .option("planner.port", "30001")
       .option("planner.host", "localhost")
-      .load("hdfs://10.239.47.55:9000/genData2/customer").count()
+      .option("provider", "SPARK")
+      .option("table_location", path)
+      .option("format", "PARQUET")
+      .load(path).count()
 
     sparkSession.stop()
   }
