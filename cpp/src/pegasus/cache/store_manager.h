@@ -34,6 +34,15 @@ class StoreManager {
 
  private:
   std::unordered_map<std::string, std::shared_ptr<Store>> stores_;
+  
+public:
+  static const std::string STORE_ID_DRAM;
+  static const std::string STORE_ID_DCPMM;
+  static const std::string STORE_PROPERTY_PATH;
+  
+  static const int64_t KILOBYTE = 1024;
+  static const int64_t MEGABYTE = KILOBYTE * 1024;
+  static const int64_t GIGABYTE = MEGABYTE * 1024;  
 };
 
 } // namespace pegasus

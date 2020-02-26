@@ -34,10 +34,6 @@ DECLARE_int32(store_dcpmm_capacity_gb);
 DECLARE_string(storage_dcpmm_path);
 
 namespace pegasus {
-  
-const std::string WorkerExecEnv::STORE_ID_DRAM = "MEMORY";
-const std::string WorkerExecEnv::STORE_ID_DCPMM = "DCPMM";
-const std::string WorkerExecEnv::STORE_PROPERTY_PATH = "path";
 
 WorkerExecEnv* WorkerExecEnv::exec_env_ = nullptr;
 
@@ -64,30 +60,30 @@ Status WorkerExecEnv::InitStoreInfo() {
   // if DRAM store configured
   if(FLAGS_store_dram_enabled) {
     // read capacity
-    int64_t capacity = ((int64_t) FLAGS_store_dram_capacity_gb) * GIGABYTE;
+    int64_t capacity = ((int64_t) FLAGS_store_dram_capacity_gb) * StoreManager::GIGABYTE;
     
     std::shared_ptr<StoreProperties> properties = std::make_shared<StoreProperties>();
     // read properties
     
     std::shared_ptr<StoreInfo> store_info(
-      new StoreInfo(STORE_ID_DRAM, Store::StoreType::MEMORY,
+      new StoreInfo(StoreManager::STORE_ID_DRAM, Store::StoreType::MEMORY,
       capacity, properties));
-    store_infos_.insert(std::make_pair(STORE_ID_DRAM, store_info));
+    store_infos_.insert(std::make_pair(StoreManager::STORE_ID_DRAM, store_info));
   }
   
   // if DCPMM store configured
   if(FLAGS_store_dcpmm_enabled) {
     // read capacity
-    int64_t capacity = ((int64_t) FLAGS_store_dcpmm_capacity_gb) * GIGABYTE;
+    int64_t capacity = ((int64_t) FLAGS_store_dcpmm_capacity_gb) * StoreManager::GIGABYTE;
     
     std::shared_ptr<StoreProperties> properties = std::make_shared<StoreProperties>();
     // read properties
-    properties->insert(std::make_pair(STORE_PROPERTY_PATH, FLAGS_storage_dcpmm_path));
+    properties->insert(std::make_pair(StoreManager::STORE_PROPERTY_PATH, FLAGS_storage_dcpmm_path));
     
     std::shared_ptr<StoreInfo> store_info(
-      new StoreInfo(STORE_ID_DCPMM, Store::StoreType::DCPMM,
+      new StoreInfo(StoreManager::STORE_ID_DCPMM, Store::StoreType::DCPMM,
       capacity, properties));
-    store_infos_.insert(std::make_pair(STORE_ID_DCPMM, store_info));
+    store_infos_.insert(std::make_pair(StoreManager::STORE_ID_DCPMM, store_info));
   }
   
   return Status::OK();
