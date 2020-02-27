@@ -99,7 +99,7 @@ Status DataSetService::CacheDataSet(DataSetRequest* dataset_request, std::shared
   // build the dataset and insert it to dataset store.
   auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
   // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
-  dsbuilder->BuildDataset(dataset_request, dataset, distpolicy);
+  RETURN_IF_ERROR(dsbuilder->BuildDataset(dataset_request, dataset, distpolicy));
   // Begin Write
   (*dataset)->lockwrite();
   dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));
@@ -115,14 +115,12 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
                                      const rpc::FlightDescriptor& fldtr) {
 
   std::shared_ptr<DataSet> dataset = nullptr;
-  Status st = GetDataSet(dataset_request, &dataset);
-  if (!st.ok()) {
-    return st;
-  }
+  RETURN_IF_ERROR(GetDataSet(dataset_request, &dataset));
+
   std::shared_ptr<ResultDataSet> rdataset;
   // Filter dataset
   dataset->lockread();
-  st = FilterDataSet(dataset_request->get_filters(), dataset, &rdataset);
+  Status st = FilterDataSet(dataset_request->get_filters(), dataset, &rdataset);
   dataset->unlockread();
   // Note: we can also release the dataset readlock here, the benefit is it avoids dataset mem copy.
   if (!st.ok()) {
@@ -142,8 +140,8 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   dataset_request->set_column_indices(column_indices);
 
   flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdataset));
-  st = flightinfo_builder_->BuildFlightInfo(flight_info, column_indices, (rpc::FlightDescriptor&)fldtr);
-  return st;
+  RETURN_IF_ERROR(flightinfo_builder_->BuildFlightInfo(flight_info, column_indices, (rpc::FlightDescriptor&)fldtr));
+  return Status::OK();
 }
 
 Status DataSetService::FilterDataSet(const std::vector<Filter>& parttftr, std::shared_ptr<DataSet> dataset,
