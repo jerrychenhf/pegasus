@@ -93,6 +93,13 @@ Status WorkerManager::RegisterWorker(const rpc::HeartbeatInfo& info) {
     current_registration->address_ = *(address.get());
     current_registration->state_ = WorkerRegistration::ACTIVE;
     current_registration->last_heartbeat_time_ = UnixMillis();
+    
+    if (info.node_info != nullptr) {
+      // there are node info update
+      LOG(INFO) << "Worker '" << id <<  " updated node info.";
+      current_registration->node_info_ = info.node_info;
+    }
+    
     workers_.emplace(id, current_registration);
     
     worker_failure_detector_->UpdateHeartbeat(id);
@@ -120,6 +127,7 @@ Status WorkerManager::HeartbeatWorker(const rpc::HeartbeatInfo& info) {
     
     if (info.node_info != nullptr) {
       // there are node info update
+      VLOG(3) << "Worker '" << id <<  " updated node info.";
       current_registration->node_info_ = info.node_info;
     }
     
