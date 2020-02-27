@@ -47,8 +47,8 @@ void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Locat
 		//Status WorkerManager::GetWorkerRegistrations(std::vector<std::shared_ptr<WorkerRegistration>>& registrations)
 		std::vector<std::shared_ptr<WorkerRegistration>> wregs;
 		worker_manager->GetWorkerRegistrations(wregs);
-//std::cout << "node count form workerregistration vector: " << wregs.size() << std::endl;
-		LOG(INFO) << "node count form workerregistration vector: " << wregs.size();
+//std::cout << "node count from workerregistration vector: " << wregs.size() << std::endl;
+LOG(INFO) << "node count from workerregistration vector: " << wregs.size();
 		if (wregs.size() > 0)
 		{
 			validlocations_ = std::make_shared<std::vector<Location>>();
@@ -56,7 +56,11 @@ void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Locat
 			for (auto it:wregs)
 			{
 				validlocations_->push_back(it->address());
+LOG(INFO) << "== insert location: " << it->address().ToString();
 				nodecacheMB_->push_back(it->node_info()->get_cache_capacity()/(1024*1024));
+LOG(INFO) << "== nodecachesize(MB): " << it->node_info()->get_cache_capacity()/(1024*1024);
+//				nodecacheMB_->push_back(1024);
+//LOG(INFO) << "== nodecachesize(MB): fake 1024";
 			}
 		}
 	}
@@ -141,9 +145,11 @@ void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>
 		std::string node = it->second.substr(0, pos);
 		LOG(INFO) << node;
 		// create the location object and fill with phynode's location (uri).
-		Location lcn;
-		Location::Parse(node, &lcn);
-		partt.UpdateLocation(lcn);
+//		Location lcn;
+//		Location::Parse(node, &lcn);
+//std::cout << "lcn.ToString(): " << lcn.ToString() << std::endl;
+//		partt.UpdateLocation(lcn);
+		partt.UpdateLocation(node);
 	}
 }
 

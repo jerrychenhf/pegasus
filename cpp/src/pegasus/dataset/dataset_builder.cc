@@ -91,7 +91,7 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
   }
 
   // allocate location for each partition
-  auto vectloc = std::make_shared<std::vector<Location>>();
+//  auto vectloc = std::make_shared<std::vector<Location>>();
   distributor->GetDistLocations(partitions);
  
   // build dataset
@@ -102,6 +102,8 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
 
   *dataset = std::make_shared<DataSet>(dd);
   (*dataset)->set_schema(schema);
+
+LOG(INFO) << "BuildDataset() finished successfully.";
 
   return Status::OK();
 }

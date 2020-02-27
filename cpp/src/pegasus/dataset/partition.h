@@ -43,7 +43,8 @@ public:
 
   Location GetLocation() {return location;}
 
-  void UpdateLocation(Location lcn) {location = lcn;}
+//  void UpdateLocation(Location lcn) {location = lcn;}
+  void UpdateLocation(std::string strlcn) { Location::Parse(strlcn, &location); }
 
   friend bool operator==(const Partition& left, const Partition& right) {
     return left.Equals(right);

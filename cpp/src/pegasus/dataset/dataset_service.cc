@@ -91,6 +91,8 @@ Status DataSetService::GetDataSet(DataSetRequest* dataset_request, std::shared_p
     pds->unlockread();
   }
 
+LOG(INFO) << "DataSetService::GetDataSet() finished successfully.";
+
   return Status::OK();
 }
 

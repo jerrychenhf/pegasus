@@ -195,7 +195,7 @@ TEST(DatasetServiceTest, DatasetService)
     ASSERT_EQ(test_dataset_path, endpoint.ticket.getDatasetpath());
     auto locations = endpoint.locations;
     for (auto location : locations) {
-      ASSERT_EQ(30002, location.port());
+      ASSERT_EQ(10010, location.port());
     }
   }
   // 

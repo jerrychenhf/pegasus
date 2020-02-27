@@ -36,6 +36,9 @@ Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flig
 //  GetFlightDescriptor(flight_descriptor);
   std::unique_ptr<std::vector<rpc::FlightEndpoint>> endpoints;
   GetFlightEndpoints(&endpoints, indices);
+//LOG(INFO) << "endpoints->at(0).ticket.dataset_path: " << endpoints->at(0).ticket.dataset_path;
+//LOG(INFO) << "endpoints->at(0).ticket.partition_identity: " << endpoints->at(0).ticket.partition_identity;
+//LOG(INFO) << "endpoints->at(0).locations.at(0).Tostring(): " << endpoints->at(0).locations.at(0).Tostring();
 
   rpc::FlightInfo::Data flight_data;
   flight_data.descriptor = fldtr;
@@ -45,6 +48,9 @@ Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flig
 //  rpc::FlightInfo value(flight_data);
 //  *flight_info = std::unique_ptr<rpc::FlightInfo>(new rpc::FlightInfo(std::move(value)));
   *flight_info  = std::unique_ptr<rpc::FlightInfo>(new rpc::FlightInfo(std::move(flight_data)));
+
+LOG(INFO) << "FlightInfoBuilder::BuildFlightInfo() finished successfully.";
+
   return Status::OK();
 }
 
@@ -83,6 +89,8 @@ Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::Fl
     fep.locations.push_back(partit.GetLocation());
     (*endpoints)->push_back(fep);
   }
+
+LOG(INFO) << "GetFlightEndpoints() finished successfully.";
 
   return Status::OK();
 }
