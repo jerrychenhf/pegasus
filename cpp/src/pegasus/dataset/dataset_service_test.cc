@@ -128,9 +128,9 @@ TEST(DatasetServiceTest, DatasetService)
   std::unique_ptr<PlannerExecEnv> exec_env_(new PlannerExecEnv());
   auto dataset_service_ = std::unique_ptr<DataSetService>(new DataSetService());
   dataset_service_->Init();
-  std::cout << "addressof dataset_service_: " << std::addressof(dataset_service_) << std::endl;
+//  std::cout << "addressof dataset_service_: " << std::addressof(dataset_service_) << std::endl;
   //  std::cout << "value dataset_service_: " << std::static_cast<uint64_t>(dataset_service_) << std::endl;
-  std::cout << "dataset_service_.get(): " << dataset_service_.get() << std::endl;
+//  std::cout << "dataset_service_.get(): " << dataset_service_.get() << std::endl;
 
   rpc::HeartbeatInfo hbinfo;
 /*
@@ -161,7 +161,7 @@ TEST(DatasetServiceTest, DatasetService)
   std::string test_dataset_path = "hdfs://10.239.47.55:9000/genData2/customer";
   auto parttftrs = std::make_shared<std::vector<Filter>>();
 
-  std::unique_ptr<rpc::FlightInfo>* flight_info=nullptr;
+  std::unique_ptr<rpc::FlightInfo> flight_info;
 
   DataSetRequest dataset_request;
   dataset_request.set_dataset_path(test_dataset_path);
@@ -171,10 +171,20 @@ TEST(DatasetServiceTest, DatasetService)
   properties[DataSetRequest::PROVIDER] = "SPARK";
   properties[DataSetRequest::COLUMN_NAMES] = "a, b, c";
   dataset_request.set_properties(properties);
+  rpc::FlightDescriptor fldtr;
+  fldtr.type = rpc::FlightDescriptor::DescriptorType::PATH;
+  fldtr.cmd = "testcmd";
+  fldtr.path.push_back("a sample path");
+//  fldtr.properties;
   // Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   //                                   std::unique_ptr<rpc::FlightInfo>* flight_info)
-  Status st = dataset_service_->GetFlightInfo(&dataset_request, flight_info);
+  //                                   const rpc::FlightDescriptor& fldtr);
+  Status st = dataset_service_->GetFlightInfo(&dataset_request, &flight_info, fldtr);
   ASSERT_OK(st);
+
+  // check data correctness
+  ASSERT_EQ(1, flight_info->endpoints().size());
+  // 
 }
 #endif
 } // namespace pegasus
