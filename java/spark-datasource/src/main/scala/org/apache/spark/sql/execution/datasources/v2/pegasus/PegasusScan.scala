@@ -19,7 +19,7 @@ package org.apache.spark.sql.execution.datasources.v2.pegasus
 import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
-
+import org.apache.pegasus.rpc.{FlightInfo, Location, Ticket}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.read.{Batch, InputPartition, PartitionReaderFactory, Scan}
@@ -34,8 +34,10 @@ case class PegasusScan(
     sparkSession: SparkSession,
     hadoopConf: Configuration,
     paths: Seq[String],
-    options: CaseInsensitiveStringMap)
+    options: CaseInsensitiveStringMap,
+    flightInfo: FlightInfo)
   extends Scan with Batch with Logging {
+
 
   /**
     * Returns whether a file with `path` could be split or not.
@@ -49,7 +51,7 @@ case class PegasusScan(
 
   override def createReaderFactory(): PartitionReaderFactory = {
 
-    PegasusPartitionReaderFactory(options, sparkSession.sessionState.conf, paths)
+    PegasusPartitionReaderFactory(paths)
   }
 
   override def equals(obj: Any): Boolean = obj match {
@@ -79,10 +81,8 @@ case class PegasusScan(
 
   protected def partitions: Seq[PegasusPartition] = {
 
-    val pegasusDataReader = new PegasusDataSetReader(options, paths)
-    val info = pegasusDataReader.getDataSet()
     val partitions = new ArrayBuffer[PegasusPartition]
-    val endpoints = info.getEndpoints.asScala
+    val endpoints = flightInfo.getEndpoints.asScala
     var index = 0
     while (index < endpoints.length) {
       val pegasusPartition = PegasusPartition(index, endpoints(index))

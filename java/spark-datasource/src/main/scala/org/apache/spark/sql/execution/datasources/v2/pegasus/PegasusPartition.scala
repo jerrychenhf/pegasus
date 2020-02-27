@@ -17,8 +17,9 @@
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
 import scala.collection.JavaConverters._
-import org.apache.pegasus.rpc.FlightEndpoint
+import org.apache.pegasus.rpc.{FlightEndpoint, Location}
 import org.apache.spark.Partition
+import org.apache.spark.internal.Logging
 import org.apache.spark.sql.connector.read.InputPartition
 
 /**
@@ -26,12 +27,17 @@ import org.apache.spark.sql.connector.read.InputPartition
  * (possibly from multiple partitioned directories).
  */
 case class PegasusPartition(index: Int, endpoint: FlightEndpoint)
-  extends Partition with InputPartition {
+
+  extends Partition with InputPartition with Logging {
 
   override def preferredLocations(): Array[String] = {
     val locations = endpoint.getLocations.asScala
+
+    logInfo("preferred partition locations " + locations)
+
     locations.map { location =>
       location.getUri.getHost
     }.toArray
   }
+
 }

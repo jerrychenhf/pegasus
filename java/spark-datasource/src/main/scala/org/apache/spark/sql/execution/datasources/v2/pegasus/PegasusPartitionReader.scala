@@ -25,14 +25,13 @@ import org.apache.arrow.memory.RootAllocator
 import org.apache.spark.sql.vectorized.{ArrowColumnVector, ColumnVector, ColumnarBatch}
 
 class PegasusPartitionReader(ticket: Ticket,
-                             defaultHost: String,
-                             defaultPort: Int,
+                             location: Location,
                              username: String,
                              password: String) {
 
   private val allocator = new RootAllocator
 
-  private val client = FlightClient.builder(allocator, Location.forGrpcInsecure(defaultHost, defaultPort)).build();
+  private val client = FlightClient.builder(allocator, location).build();
   private val stream = client.getStream(ticket)
 
   def next: Boolean = {

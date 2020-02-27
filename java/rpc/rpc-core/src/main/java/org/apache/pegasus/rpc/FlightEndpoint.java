@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableList;
 /**
  * POJO to convert to/from the underlying protobuf FlightEndpoint.
  */
-public class FlightEndpoint {
+public class FlightEndpoint implements java.io.Serializable {
   private List<Location> locations;
   private Ticket ticket;
 

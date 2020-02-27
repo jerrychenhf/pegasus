@@ -16,41 +16,58 @@
  */
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
+import org.apache.pegasus.rpc.{Location, Ticket}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.read.{InputPartition, PartitionReader, PartitionReaderFactory}
-import org.apache.spark.sql.internal.SQLConf
-import org.apache.spark.sql.util.CaseInsensitiveStringMap
 import org.apache.spark.sql.vectorized.ColumnarBatch
 
 
 /**
   * A factory used to create Pegasus Partition readers.
   *
-  * @param sqlConf SQL configuration.
   */
 case class PegasusPartitionReaderFactory(
-    options: CaseInsensitiveStringMap,
-    sqlConf: SQLConf,
-    paths: Seq[String]) extends PartitionReaderFactory with Logging {
-
-  private val pegasusDataReader = new PegasusDataSetReader(options, paths)
+    paths: Seq[String])extends PartitionReaderFactory with Logging {
 
   override def supportColumnarReads(partition: InputPartition): Boolean = true
 
+  @throws(classOf[NoSuchElementException])
   override def createColumnarReader(partition: InputPartition): PartitionReader[ColumnarBatch] = {
+
     assert(partition.isInstanceOf[PegasusPartition])
     val pegasusPartition = partition.asInstanceOf[PegasusPartition]
-    val pegasusReader = pegasusDataReader.pegasusPartitionReader(pegasusPartition)
-
-    new PartitionReader[ColumnarBatch] {
-      override def next(): Boolean = pegasusReader.next
-
-      override def get(): ColumnarBatch =
-        pegasusReader.get
-
-      override def close(): Unit = pegasusReader.close
+    val endpoint = pegasusPartition.endpoint
+    val locations = endpoint.getLocations
+    var location: Location = null
+    if (!locations.isEmpty) {
+      location = endpoint.getLocations.get(0)
+      if (location.getUri != null) {
+        if (location.getUri.getHost == null) {
+          throw new NoSuchElementException("No host name found in location.")
+        }
+        if (location.getUri.getPort == null) {
+          throw new NoSuchElementException("No host port found in location.")
+        }
+      } else {
+        throw new NoSuchElementException("No Location found in FlightEndpoint.")
+      }
+    } else {
+      throw new NoSuchElementException("No URI found in Location.")
     }
+
+    val ticket: Ticket = endpoint.getTicket
+
+    val pegasusReader = new PegasusPartitionReader(ticket, location, null, null)
+
+        new PartitionReader[ColumnarBatch] {
+          override def next(): Boolean = pegasusReader.next
+
+          override def get(): ColumnarBatch =
+            pegasusReader.get
+
+          override def close(): Unit = pegasusReader.close
+        }
   }
 
   override def createReader(partition: InputPartition): PartitionReader[InternalRow] = {

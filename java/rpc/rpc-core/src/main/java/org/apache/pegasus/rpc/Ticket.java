@@ -31,7 +31,7 @@ import com.google.protobuf.ByteString;
 /**
  * Endpoint for a particular stream.
  */
-public class Ticket {
+public class Ticket implements java.io.Serializable {
   private final byte[] datasetPath;
   private byte[] partitionIdentity;
   private List<Integer> columnIndices;
