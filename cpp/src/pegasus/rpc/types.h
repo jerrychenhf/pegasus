@@ -524,8 +524,8 @@ struct PEGASUS_RPC_EXPORT NodeInfo {
     return !(left == right);
   }
   
-  void set_cache_capacity(int64_t cache_capacity) { cache_capacity = cache_capacity; }
-  void set_cache_free(int64_t cache_free) { cache_free = cache_free; }
+  void set_cache_capacity(const int64_t& capacity) { cache_capacity = capacity; }
+  void set_cache_free(const int64_t& free) { cache_free = free; }
 };
 
 /// \brief Worker heartbeat information passed to planner
