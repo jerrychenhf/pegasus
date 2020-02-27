@@ -111,7 +111,8 @@ Status DataSetService::CacheDataSet(DataSetRequest* dataset_request, std::shared
 
 /// Build FlightInfo from DataSet.
 Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
-                                     std::unique_ptr<rpc::FlightInfo>* flight_info) {
+                                     std::unique_ptr<rpc::FlightInfo>* flight_info,
+                                     const rpc::FlightDescriptor& fldtr) {
 
   std::shared_ptr<DataSet> dataset = nullptr;
   Status st = GetDataSet(dataset_request, &dataset);
@@ -141,7 +142,8 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   dataset_request->set_column_indices(column_indices);
 
   flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdataset));
-  return flightinfo_builder_->BuildFlightInfo(flight_info, column_indices);
+  st = flightinfo_builder_->BuildFlightInfo(flight_info, column_indices, (rpc::FlightDescriptor&)fldtr);
+  return st;
 }
 
 Status DataSetService::FilterDataSet(const std::vector<Filter>& parttftr, std::shared_ptr<DataSet> dataset,

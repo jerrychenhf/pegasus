@@ -30,35 +30,30 @@ FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr
 }
 
 Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flight_info, \
-                                          std::vector<int32_t>& indices) {
-  std::unique_ptr<rpc::FlightDescriptor> flight_descriptor;
-  GetFlightDescriptor(&flight_descriptor);
+                                          std::vector<int32_t>& indices,
+                                          rpc::FlightDescriptor& fldtr) {
+//  std::unique_ptr<rpc::FlightDescriptor> flight_descriptor;
+//  GetFlightDescriptor(flight_descriptor);
   std::unique_ptr<std::vector<rpc::FlightEndpoint>> endpoints;
   GetFlightEndpoints(&endpoints, indices);
-  int64_t* total_records;
-  GetTotalRecords(total_records);
-  int64_t* total_bytes;
-  GetTotalBytes(total_bytes);
 
   rpc::FlightInfo::Data flight_data;
-//  flight_data.descriptor = *flight_descriptor;
+  flight_data.descriptor = fldtr;
   flight_data.endpoints = *endpoints;
-//  flight_data.total_records = *total_records;
-//  flight_data.total_bytes = *total_bytes;
+  flight_data.total_records = GetTotalRecords();
+  flight_data.total_bytes = GetTotalBytes();
 //  rpc::FlightInfo value(flight_data);
 //  *flight_info = std::unique_ptr<rpc::FlightInfo>(new rpc::FlightInfo(std::move(value)));
-  auto upfi = std::unique_ptr<rpc::FlightInfo>(new rpc::FlightInfo(std::move(flight_data)));
-  flight_info = &upfi;
+  *flight_info  = std::unique_ptr<rpc::FlightInfo>(new rpc::FlightInfo(std::move(flight_data)));
   return Status::OK();
 }
-
 
 Status FlightInfoBuilder::BuildFlightListing(std::unique_ptr<rpc::FlightListing>* listings) {
   
   return Status::OK();
 }
 
-Status FlightInfoBuilder::GetFlightDescriptor(std::unique_ptr<rpc::FlightDescriptor>* flight_descriptor) {
+Status FlightInfoBuilder::GetFlightDescriptor(std::unique_ptr<rpc::FlightDescriptor> flight_descriptor) {
 
   return Status::OK();
 }
@@ -92,14 +87,14 @@ Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::Fl
   return Status::OK();
 }
 
-Status FlightInfoBuilder::GetTotalRecords(int64_t* total_records) {
+int64_t FlightInfoBuilder::GetTotalRecords() {
     
-  return Status::OK();
+  return dataset_->total_records();
 }
 
-Status FlightInfoBuilder::GetTotalBytes(int64_t* total_bytes) {
-    
-  return Status::OK();
+int64_t FlightInfoBuilder::GetTotalBytes() {
+
+  return dataset_->total_bytes();
 }
 
 } // namespace pegasus

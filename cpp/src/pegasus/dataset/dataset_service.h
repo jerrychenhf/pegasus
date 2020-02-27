@@ -48,7 +48,7 @@ class DataSetService {
   Status Init();
   Status Start();
   Status Stop();
-  Status GetFlightInfo(DataSetRequest* dataset_request, std::unique_ptr<rpc::FlightInfo>* flight_info);
+  Status GetFlightInfo(DataSetRequest* dataset_request, std::unique_ptr<rpc::FlightInfo>* flight_info, const rpc::FlightDescriptor& fldtr);
   Status GetFlightListing(std::unique_ptr<rpc::FlightListing>* listings);
   Status GetDataSets( std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets);
   Status GetDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset);

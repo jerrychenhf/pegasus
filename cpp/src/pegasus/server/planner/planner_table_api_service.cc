@@ -90,7 +90,7 @@ arrow::Status PlannerTableAPIService::GetFlightInfo(const rpc::ServerCallContext
   if (!st.ok()) {
     return st;
   }
-  Status status = dataset_service_->GetFlightInfo(&dataset_request, out);
+  Status status = dataset_service_->GetFlightInfo(&dataset_request, out, request);
   return status.toArrowStatus();
 }
 
