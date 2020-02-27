@@ -86,7 +86,7 @@ TEST(DatasetServiceTest, ConHashBasic)
 
 }
 #endif
-#if 1
+#if 0
 TEST(DatasetServiceTest, DataSetStoreBasic)
 {
   Status st;
