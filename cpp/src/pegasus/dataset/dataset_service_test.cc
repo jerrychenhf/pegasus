@@ -96,7 +96,7 @@ TEST(DatasetServiceTest, DataSetStoreBasic)
   Status st;
   std::unique_ptr<PlannerExecEnv> exec_env_(new PlannerExecEnv());
   auto dataset_store_test = std::unique_ptr<DataSetStore>(new DataSetStore);
-  std::string test_dataset_path = "hostnameplusfolderpath";
+  std::string test_dataset_path = "hdfs://10.239.47.55:9000/genData2/customer";
   std::shared_ptr<DataSet> pds = nullptr;
 
   // create and insert a dataset
@@ -104,6 +104,12 @@ TEST(DatasetServiceTest, DataSetStoreBasic)
   auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager);
   DataSetRequest dataset_request;
   dataset_request.set_dataset_path(test_dataset_path);
+
+  DataSetRequest::RequestProperties properties;
+  properties[DataSetRequest::TABLE_LOCATION] = test_dataset_path;
+  properties[DataSetRequest::PROVIDER] = "SPARK";
+  dataset_request.set_properties(properties);
+
   // Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
   //                                    std::shared_ptr<DataSet>* dataset, int distpolicy)
   st = dsbuilder->BuildDataset(&dataset_request, &pds, CONHASH);
@@ -169,7 +175,7 @@ TEST(DatasetServiceTest, DatasetService)
 
   properties[DataSetRequest::TABLE_LOCATION] = test_dataset_path;
   properties[DataSetRequest::PROVIDER] = "SPARK";
-  properties[DataSetRequest::COLUMN_NAMES] = "a, b, c";
+  // properties[DataSetRequest::COLUMN_NAMES] = "a, b, c";
   dataset_request.set_properties(properties);
   rpc::FlightDescriptor fldtr;
   fldtr.type = rpc::FlightDescriptor::DescriptorType::PATH;
@@ -184,6 +190,14 @@ TEST(DatasetServiceTest, DatasetService)
 
   // check data correctness
   ASSERT_EQ(1, flight_info->endpoints().size());
+  const std::vector<rpc::FlightEndpoint> endpoints = flight_info->endpoints();
+  for (rpc::FlightEndpoint endpoint : endpoints) {
+    ASSERT_EQ(test_dataset_path, endpoint.ticket.getDatasetpath());
+    auto locations = endpoint.locations;
+    for (auto location : locations) {
+      ASSERT_EQ(30002, location.port());
+    }
+  }
   // 
 }
 #endif
