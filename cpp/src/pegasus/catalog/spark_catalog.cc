@@ -28,6 +28,8 @@ using namespace std;
 
 namespace pegasus {
 
+const std::string SparkCatalog::FILE_FORMAT_ID_PARQUET = "PARQUET";
+
 SparkCatalog::SparkCatalog() : storage_plugin_factory_(new StoragePluginFactory()) {
 
 }
@@ -72,10 +74,14 @@ Catalog::FileFormat SparkCatalog::GetFileFormat(DataSetRequest* dataset_request)
   const auto properties = dataset_request->get_properties();
   std::unordered_map<std::string, std::string>::const_iterator it = 
       properties.find(DataSetRequest::FORMAT);
-  if (it != properties.end() && it->second == "PARQUET") {
-    return FileFormat::PARQUET;
+  if (it != properties.end()) {
+    if (it->second == SparkCatalog::FILE_FORMAT_ID_PARQUET) {
+      return FileFormat::PARQUET;
+    } else {
+      return FileFormat::UNKNOWN;
+    }
   } else {
-    return FileFormat::UNKNOWN;
+    return FileFormat::PARQUET;
   }
 }
 

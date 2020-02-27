@@ -86,12 +86,14 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
     }
 
     RETURN_IF_ERROR(catalog->GetSchema(dataset_request, &schema));
+  } else {
+    return Status::Invalid("Invalid catalog type: ", catalog->GetCatalogType());
   }
 
   // allocate location for each partition
   auto vectloc = std::make_shared<std::vector<Location>>();
   distributor->GetDistLocations(partitions);
-
+ 
   // build dataset
   DataSet::Data dd;
   dd.dataset_path = dataset_request->get_dataset_path();

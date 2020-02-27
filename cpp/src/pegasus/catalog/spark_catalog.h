@@ -42,6 +42,9 @@ class SparkCatalog : public Catalog {
   
   private:
     std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
+
+  public:
+    static const std::string FILE_FORMAT_ID_PARQUET;
 };
 
 } // namespace pegasus

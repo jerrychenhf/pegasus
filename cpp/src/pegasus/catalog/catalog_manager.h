@@ -38,6 +38,10 @@ class CatalogManager {
   std::string provider_;
   std::shared_ptr<SparkCatalog> spark_catalog_;
   std::shared_ptr<PegasusCatalog> pegasus_catalog_;
+
+ public:
+  static const std::string CATALOG_ID_SPARK;
+  static const std::string CATALOG_ID_PEGASUS;
 };
 
 } // namespace pegasus
