@@ -33,10 +33,10 @@ import com.google.protobuf.ByteString;
  */
 public class Ticket implements java.io.Serializable {
   private final byte[] datasetPath;
-  private byte[] partitionIdentity;
-  private List<Integer> columnIndices;
+  private final byte[] partitionIdentity;
+  private final int[] columnIndices;
 
-  public Ticket(byte[] datasetPath, byte[] partitionIdentity, List<Integer> columnIndices) {
+  public Ticket(byte[] datasetPath, byte[] partitionIdentity, int[] columnIndices) {
     super();
     this.datasetPath = datasetPath;
     this.partitionIdentity = partitionIdentity;
@@ -51,14 +51,14 @@ public class Ticket implements java.io.Serializable {
     return partitionIdentity;
   }
 
-  public List<Integer> getcolumnIndices() {
+  public int[] getcolumnIndices() {
     return columnIndices;
   }
 
   Ticket(org.apache.pegasus.rpc.impl.Flight.Ticket ticket) {
     this.datasetPath = ticket.getDatasetPath().toByteArray();
     this.partitionIdentity = ticket.getPartitionIdentity().toByteArray();
-    this.columnIndices = ticket.getColumnIndiceList();
+    this.columnIndices = ticket.getColumnIndiceList().stream().mapToInt(i->i).toArray();
   }
 
   Flight.Ticket toProtocol() {
@@ -70,10 +70,8 @@ public class Ticket implements java.io.Serializable {
     if (partitionIdentity != null && partitionIdentity.length > 0) {
       b.setPartitionIdentity(ByteString.copyFrom(partitionIdentity));
     }
-    if (columnIndices != null && !columnIndices.isEmpty()) {
-      b.addAllColumnIndice(columnIndices.stream().collect(Collectors.toList()));
-    } else {
-      b.addAllColumnIndice(new ArrayList<>());
+    if (columnIndices != null && columnIndices.length > 0 ) {
+      b.addAllColumnIndice(Arrays.stream(columnIndices).boxed().collect(Collectors.toList()));
     }
 
     return b.build();
@@ -134,7 +132,7 @@ public class Ticket implements java.io.Serializable {
       if (other.columnIndices != null) {
         return false;
       }
-    } else if (!columnIndices.equals(other.columnIndices)) {
+    } else if (!Arrays.equals(columnIndices, other.columnIndices)) {
       return false;
     }
     return true;
