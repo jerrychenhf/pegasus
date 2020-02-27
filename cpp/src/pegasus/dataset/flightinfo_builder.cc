@@ -87,6 +87,9 @@ Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::Fl
     fep.ticket.setPartitionid(partit.GetIdentPath());
     fep.ticket.setColids(indices);
     fep.locations.push_back(partit.GetLocation());
+//    Location lcn;
+//    rpc::Location::Parse(partit.GetLocationURI(), lcn);
+//    fep.locations.push_back(lcn);
     (*endpoints)->push_back(fep);
   }
 

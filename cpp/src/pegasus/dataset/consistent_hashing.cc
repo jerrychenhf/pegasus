@@ -66,20 +66,18 @@ LOG(INFO) << "== nodecachesize(MB): " << it->node_info()->get_cache_capacity()/(
 	}
 }
 
-void ConsistentHashRing::SetupDist()
+Status ConsistentHashRing::SetupDist()
 {
-//	std::vector<std::shared_ptr<Location>> lcns;
 	if (validlocations_)
 	{
-//		for (auto lcn:(*validlocations_)) {
-//			AddLocation(lcn);
-//		}
 		for (unsigned int i=0; i<validlocations_->size(); i++)
 			AddLocation(i);
+		return Status::OK();
 	}
 	else
 	{
-		LOG(ERROR) << "ConsistentHashRing has 0 locations. Call PrepareValidLocations() first.";
+		LOG(ERROR) << "Error! ConsistentHashRing has 0 locations. Call PrepareValidLocations() first.";
+		return Status::Invalid("Error! None valid location in ConsistentHashRing.");
 	}
 	
 }
@@ -141,6 +139,7 @@ void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>
 		LOG(INFO) << "h(partt.GetIdentPath()): " << h(partt.GetIdentPath());
 	    consistent_hash_t::iterator it;
     	it = consistent_hash_.find(h(partt.GetIdentPath()));
+		LOG(INFO) << "found: " << it->second;
 		std::size_t pos = it->second.find_last_of("_");
 		std::string node = it->second.substr(0, pos);
 		LOG(INFO) << node;
@@ -149,7 +148,7 @@ void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>
 //		Location::Parse(node, &lcn);
 //std::cout << "lcn.ToString(): " << lcn.ToString() << std::endl;
 //		partt.UpdateLocation(lcn);
-		partt.UpdateLocation(node);
+		partt.UpdateLocationURI(node);
 	}
 }
 

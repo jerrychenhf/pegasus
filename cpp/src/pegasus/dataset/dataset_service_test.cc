@@ -38,14 +38,10 @@ namespace pegasus
 #if 1
 TEST(DatasetServiceTest, ConHashInit)
 {
-  // 
-//  std::cout << "ConHashInit..." << std::endl;
   auto distributor = std::make_shared<ConsistentHashRing>();
   // setup the distribution engine
-  distributor->SetupDist();
-//  std::cout << "ConHash SetupDist() done." << std::endl;
-
-//  std::cout << "...ConHashInit" << std::endl;
+  Status res = distributor->SetupDist();
+  EXPECT_ERROR(Status::Invalid(""), res.code());
 }
 #endif
 #if 1
@@ -71,7 +67,7 @@ TEST(DatasetServiceTest, ConHashBasic)
   distributor->PrepareValidLocations(validlocs, nodecacheMBs);
 
   // setup the distribution engine
-  distributor->SetupDist();
+  ASSERT_OK(distributor->SetupDist());
 
   std::string test_dataset_path = "hostnameplusfolderpath";
 

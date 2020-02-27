@@ -42,9 +42,10 @@ public:
   std::string GetIdentPath() {return identity.partition_id();}
 
   Location GetLocation() {return location;}
+  std::string GetLocationURI() {return location.ToString();}
 
-//  void UpdateLocation(Location lcn) {location = lcn;}
-  void UpdateLocation(std::string strlcn) { Location::Parse(strlcn, &location); }
+  void UpdateLocation(Location lcn) {location = lcn;}
+  void UpdateLocationURI(std::string& strURI) { Location::Parse(strURI, &location); }
 
   friend bool operator==(const Partition& left, const Partition& right) {
     return left.Equals(right);
