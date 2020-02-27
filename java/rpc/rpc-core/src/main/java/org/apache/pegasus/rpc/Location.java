@@ -17,17 +17,19 @@
 
 package org.apache.pegasus.rpc;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.util.Objects;
 
 import org.apache.pegasus.rpc.impl.Flight;
 
 /** A URI where a Flight stream is available. */
-public class Location {
+public class Location implements java.io.Serializable {
   private final URI uri;
 
   /**
@@ -38,6 +40,10 @@ public class Location {
    */
   public Location(String uri) throws URISyntaxException {
     this(new URI(uri));
+  }
+
+  Location(Flight.Location location) throws URISyntaxException {
+    uri = new URI(location.getUri());
   }
 
   /**
@@ -154,5 +160,13 @@ public class Location {
   @Override
   public int hashCode() {
     return Objects.hash(uri);
+  }
+
+  public static Location deserialize(ByteBuffer serialized) throws IOException, URISyntaxException {
+    return new Location(Flight.Location.parseFrom(serialized));
+  }
+
+  public ByteBuffer serialize() {
+    return ByteBuffer.wrap(toProtocol().toByteArray());
   }
 }

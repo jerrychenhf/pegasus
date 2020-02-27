@@ -47,7 +47,8 @@ object DataFrameExample {
       .option("provider", "SPARK")
       .option("table.location", path)
       .option("format", "PARQUET")
-      .load(path).count()
+      .load(path)
+      .count()
 
     sparkSession.stop()
   }

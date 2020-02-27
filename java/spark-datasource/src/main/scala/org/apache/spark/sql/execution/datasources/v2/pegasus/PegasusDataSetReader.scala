@@ -17,17 +17,17 @@
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
 import scala.collection.JavaConverters._
-import java.nio.charset.StandardCharsets
-import java.util
-import java.util.{ArrayList, HashMap, List, Map}
 
 import org.apache.arrow.memory.{BufferAllocator, RootAllocator}
+import org.apache.hadoop.conf.Configuration
 import org.apache.pegasus.rpc.{FlightDescriptor, FlightInfo, Location, Ticket}
-import org.apache.spark.internal.config
 import org.apache.spark.internal.config.ConfigBuilder
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
-class PegasusDataSetReader(options: CaseInsensitiveStringMap, paths: Seq[String]) {
+class PegasusDataSetReader(
+    hadoopConf: Configuration,
+    paths: Seq[String],
+    options: CaseInsensitiveStringMap) {
 
   private[spark] val PLANNER_HOST = ConfigBuilder("planner.host")
     .doc("Hostname of the planner.")
@@ -50,20 +50,22 @@ class PegasusDataSetReader(options: CaseInsensitiveStringMap, paths: Seq[String]
     .createWithDefault("")
 
   private val rootAllocator = new RootAllocator(Long.MaxValue)
-  private val allocator: BufferAllocator = rootAllocator.newChildAllocator(options.toString,
+  private val allocator: BufferAllocator = rootAllocator.newChildAllocator(paths.toString(),
     0, rootAllocator.getLimit)
 
   private val plannerHost = options.get(PLANNER_HOST.key)
   private val plannerPort = options.get(PLANNER_PORT.key)
   private val location = Location.forGrpcInsecure(plannerHost, plannerPort.toInt)
 
+  private val userName = options.get(USERNAME.key)
+  private val passWord = options.get(PASSWORD.key)
+
   private val clientFactory = new PegasusClientFactory(
-    allocator, location, options.get(USERNAME.key), options.get(PASSWORD.key))
+    allocator, location, userName, passWord)
 
   def getDataSet(): FlightInfo = {
     try {
       val client = clientFactory.apply
-
       val descriptor: FlightDescriptor = FlightDescriptor.path(paths.asJava, options)
       client.getInfo(descriptor)
     } catch {
@@ -72,18 +74,4 @@ class PegasusDataSetReader(options: CaseInsensitiveStringMap, paths: Seq[String]
     }
   }
 
-  def pegasusPartitionReader(pegasusPartition: PegasusPartition): PegasusPartitionReader = {
-
-    val endpoint = pegasusPartition.endpoint
-    val locations = endpoint.getLocations
-    var location: Location = null
-    if (locations.isEmpty) {
-      location = Location.forGrpcInsecure(location.getUri.getHost, location.getUri.getPort)
-    } else {
-      location = endpoint.getLocations.get(0)
-    }
-    val ticket: Ticket = endpoint.getTicket
-    new PegasusPartitionReader(ticket, location.getUri.getHost, location.getUri.getPort,
-      clientFactory.getUsername, clientFactory.getPassword)
-  }
 }

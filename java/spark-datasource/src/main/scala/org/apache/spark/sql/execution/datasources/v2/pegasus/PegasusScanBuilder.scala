@@ -37,6 +37,8 @@ case class PegasusScanBuilder(
   }
 
   override def build(): Scan = {
-    PegasusScan(sparkSession, hadoopConf, paths, options)
+    val pegasusDataReader = new PegasusDataSetReader(hadoopConf, paths, options)
+    val info = pegasusDataReader.getDataSet()
+    PegasusScan(sparkSession, hadoopConf, paths, options, info)
   }
 }
