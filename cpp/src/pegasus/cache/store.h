@@ -63,7 +63,6 @@ class MemoryStore : public Store {
 
  private:
   int64_t capacity_;
-  int64_t free_size_;
   int64_t used_size_;
 };
 
@@ -84,7 +83,6 @@ class DCPMMStore : public Store {
 
  private:
   int64_t capacity_;
-  int64_t free_size_;
   int64_t used_size_;
 };
 

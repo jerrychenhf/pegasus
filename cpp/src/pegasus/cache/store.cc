@@ -21,7 +21,6 @@ namespace pegasus {
 
 MemoryStore::MemoryStore(int64_t capacity)
   : capacity_(capacity),
-    free_size_(capacity),
     used_size_(0) {
 }
 
@@ -40,7 +39,6 @@ Status MemoryStore::Allocate(int64_t size, StoreRegion* store_region) {
     return Status::OutOfMemory("Allocate of size ", size, " failed");
   }
   store_region->reset_address(address, size);
-  free_size_ -= size;
   used_size_ += size;
   return Status::OK();
 }
@@ -50,13 +48,12 @@ Status MemoryStore::Free(StoreRegion* store_region) {
   
   std::free(store_region->address());
   
-  free_size_  += store_region->length();
   used_size_ -= store_region->length();
   return Status::OK();
 }
 
 int64_t MemoryStore::GetFreeSize() {
-  return free_size_; 
+  return capacity_ - used_size_; 
 }
 
 int64_t MemoryStore::GetUsedSize() {
@@ -69,7 +66,6 @@ std::string MemoryStore::GetStoreName() {
 
 DCPMMStore::DCPMMStore(int64_t capacity)
   : capacity_(capacity),
-    free_size_(capacity),
     used_size_(0) {
 }
 
@@ -88,7 +84,7 @@ Status DCPMMStore::Free(StoreRegion* store_region) {
 }
 
 int64_t DCPMMStore::GetFreeSize() {
-  return free_size_;
+  return capacity_ - used_size_;
 }
 
 int64_t DCPMMStore::GetUsedSize() {
