@@ -27,10 +27,10 @@ DataSetStore::~DataSetStore() {
 }
 
 Status DataSetStore::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
-  
-//  boost::shared_lock<boost::shared_mutex> rdlock(dssmtx);
-//  boost::lock_guard<boost::detail::spinlock> l(dssspl); //TODO: temporarily disable it for unit test
-//  boost::lock_guard<SpinLock> l(dssspl);
+
+//  boost::shared_lock<boost::shared_mutex> rdlock(l_);
+//  boost::lock_guard<boost::detail::spinlock> l(l_);
+  boost::lock_guard<SpinLock> l(l_);
   datasets->get()->reserve(planner_metadata_.size());
   for(auto entry : planner_metadata_) {
     //TODO: lockread for each dataset
@@ -41,9 +41,10 @@ Status DataSetStore::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<Dat
 
 Status DataSetStore::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset) {
 
-//  boost::shared_lock<boost::shared_mutex> rdlock(dssmtx);
-//  boost::lock_guard<boost::detail::spinlock> l(dssspl); //TODO: temp disable
-//  boost::lock_guard<SpinLock> l(dssspl);
+	LOG(INFO) << "GetDataSet()...";
+//  boost::shared_lock<boost::shared_mutex> rdlock(l_);
+//  boost::lock_guard<boost::detail::spinlock> l(l_);
+  boost::lock_guard<SpinLock> l(l_);
   auto entry = planner_metadata_.find(dataset_path);
   if (entry == planner_metadata_.end()) {
     return Status::KeyError("Could not find dataset.", dataset_path);
@@ -55,16 +56,17 @@ Status DataSetStore::GetDataSet(std::string dataset_path, std::shared_ptr<DataSe
 //  *dataset = std::shared_ptr<DataSet>(new DataSet(*find_dataset));
   }
 
+	LOG(INFO) << "...GetDataSet()";
   return Status::OK();
 }
 
 Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset) {
 
   std::string key = dataset->dataset_path();
-//  boost::unique_lock<boost::shared_mutex> wrlock(dssmtx);
-//  boost::lock_guard<boost::detail::spinlock> l(dssspl); //TODO: temp disable
-//  boost::lock_guard<SpinLock> l(dssspl);
-  planner_metadata_[key] = std::move(dataset);  // why use move here while dataset is a shared_ptr?
+//  boost::unique_lock<boost::shared_mutex> wrlock(l_);
+//  boost::lock_guard<boost::detail::spinlock> l(l_);
+  boost::lock_guard<SpinLock> l(l_);
+  planner_metadata_[key] = std::move(dataset);
   return Status::OK();
 }
 
@@ -72,14 +74,14 @@ Status DataSetStore::RemoveDataSet(std::shared_ptr<DataSet> dataset) {
 
   // TODO: lock the whole dataset_store first?
   std::string key = dataset->dataset_path();
-//  boost::unique_lock<boost::shared_mutex> wrlock(dssmtx);
-  boost::lock_guard<boost::detail::spinlock> l(dssspl);
-//  boost::lock_guard<SpinLock> l(dssspl);
+//  boost::unique_lock<boost::shared_mutex> wrlock(l_);
+//  boost::lock_guard<boost::detail::spinlock> l(l_);
+  boost::lock_guard<SpinLock> l(l_);
   planner_metadata_.erase(key);
   return Status::OK();
 }
 
-//TODO: this interface is no longer needed.
+//TODO: delete it as this interface is no longer needed.
 #if 0
 //if it is needed in future, its logic should be updated for concurrence
 Status DataSetStore::InsertEndPoint(std::string dataset_path, std::shared_ptr<Partition> new_partition) {
