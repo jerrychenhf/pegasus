@@ -88,8 +88,16 @@ class EvictionCallback : public Cache::EvictionCallback {
        || cache_manager->cache_block_manager_->cached_datasets_.size() == 0) {
         return;
       }
-      Status status = cache_manager->cache_block_manager_->DeleteColumn(
-        dataset_path, partition_path, column_id);
+       // Before insert into the column, check whether the dataset is inserted.
+      std::shared_ptr<CachedDataset> dataset;
+      cache_manager->cache_block_manager_->GetCachedDataSet(dataset_path, &dataset);
+    
+      // After check the dataset, continue to check whether the partition is inserted.
+      std::shared_ptr<CachedPartition> partition;
+      dataset->GetCachedPartition(dataset, partition_path, &partition);
+
+      Status status = partition->DeleteColumn(
+        partition, column_id);
       if (!status.ok()) {
         stringstream ss;
         ss << "Failed to delete the column when free the column";

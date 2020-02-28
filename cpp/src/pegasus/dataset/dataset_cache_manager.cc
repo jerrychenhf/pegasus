@@ -64,37 +64,39 @@ Status DatasetCacheManager::AddNewColumns(RequestIdentity* request_identity,
     // Before insert into the column, check whether the dataset is inserted.
     std::shared_ptr<CachedDataset> dataset;
     RETURN_IF_ERROR(cache_block_manager_->GetCachedDataSet(request_identity->dataset_path(), &dataset));
-    if (dataset == nullptr) {
-      // Insert new dataset.
-      std::shared_ptr<CachedDataset> new_dataset = std::shared_ptr<CachedDataset>(
-        new CachedDataset(request_identity->dataset_path()));
-      RETURN_IF_ERROR(cache_block_manager_->InsertDataSet(request_identity->dataset_path(), new_dataset));
-    }
+    
     // After check the dataset, continue to check whether the partition is inserted.
     std::shared_ptr<CachedPartition> partition;
-    RETURN_IF_ERROR(cache_block_manager_->GetCachedPartition(request_identity->dataset_path(),
+    RETURN_IF_ERROR(dataset->GetCachedPartition(dataset,
      request_identity->partition_path(), &partition));
-    if (partition == nullptr) {
-      std::shared_ptr<CachedPartition> new_partition = std::shared_ptr<CachedPartition>(
-        new CachedPartition(request_identity->dataset_path(), request_identity->partition_path()));
-      RETURN_IF_ERROR(cache_block_manager_->InsertPartition(request_identity->dataset_path(),
-     request_identity->partition_path(), new_partition));
-    }
 
     // Insert the columns into cache_block_manager_.
     for(auto iter = retrieved_columns.begin(); iter != retrieved_columns.end(); iter ++) {
-    
-      RETURN_IF_ERROR(cache_block_manager_->InsertColumn(request_identity->dataset_path(),
-        request_identity->partition_path(), iter->first, iter->second));
+      RETURN_IF_ERROR(partition->InsertColumn(partition, iter->first, iter->second));
     }
+    return Status::OK();
+}
+
+Status DatasetCacheManager::GetAllColumns(RequestIdentity* request_identity,
+ unordered_map<int, std::shared_ptr<CachedColumn>>* cached_columns) {
+    // Before insert into the column, check whether the dataset is inserted.
+    std::shared_ptr<CachedDataset> dataset;
+    RETURN_IF_ERROR(cache_block_manager_->GetCachedDataSet(
+      request_identity->dataset_path(), &dataset));
+    
+    // After check the dataset, continue to check whether the partition is inserted.
+    std::shared_ptr<CachedPartition> partition;
+    RETURN_IF_ERROR(dataset->GetCachedPartition(dataset,
+     request_identity->partition_path(), &partition));
+
+    partition->GetCachedColumns(partition, request_identity->column_indices(), cached_columns);
     return Status::OK();
 }
 
 Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
   std::unique_ptr<rpc::FlightDataStream>* data_stream) {
   unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns;
-  RETURN_IF_ERROR(cache_block_manager_->GetCachedColumns(request_identity->dataset_path(),
-     request_identity->partition_path(), request_identity->column_indices(), &cached_columns));
+  RETURN_IF_ERROR(GetAllColumns(request_identity, &cached_columns));
 
   std::shared_ptr<Table> table;
   for(auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
@@ -200,7 +202,7 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
   } else {
     // dataset is cached
     std::shared_ptr<CachedPartition> partition;
-    cache_block_manager_->GetCachedPartition(request_identity->dataset_path(),
+    dataset->GetCachedPartition(dataset,
      request_identity->partition_path(), &partition);
     if (partition == nullptr) {
       LOG(WARNING) << "The partition "<< request_identity->partition_path() 
@@ -211,8 +213,7 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
       // partition is cached.
       // Check which column is cached.
       unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns;
-      cache_block_manager_->GetCachedColumns(request_identity->dataset_path(),
-       request_identity->partition_path(), request_identity->column_indices(), &cached_columns);
+      partition->GetCachedColumns(partition, request_identity->column_indices(), &cached_columns);
       if (col_ids.size() == cached_columns.size()) {
         LOG(WARNING) << "All the columns are cached. And we will wrap the columns into Flight data stream";
         return WrapDatasetStream(request_identity, data_stream);

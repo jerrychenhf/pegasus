@@ -68,6 +68,12 @@ class CachedPartition {
  public:
   explicit CachedPartition(const std::string& dataset_path,
    const std::string& partition_path) :dataset_path_(dataset_path), partition_path_(partition_path){}
+  
+  Status GetCachedColumns(std::shared_ptr<CachedPartition> cached_partition, std::vector<int>  col_ids,
+    unordered_map<int, std::shared_ptr<CachedColumn>>* cached_columns);
+  Status InsertColumn(std::shared_ptr<CachedPartition> cached_partition,
+   int column_id, std::shared_ptr<CachedColumn> new_column);
+  Status DeleteColumn(std::shared_ptr<CachedPartition> cached_partition, int column_id);
 
   const std::string& dataset_path_;
   const std::string& partition_path_;
@@ -77,6 +83,14 @@ class CachedPartition {
 class CachedDataset {
   public:
    explicit CachedDataset(const std::string& dataset_path): dataset_path_(dataset_path) {}
+
+  Status GetCachedPartition(std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path,
+   std::shared_ptr<CachedPartition>* partition);
+
+  Status InsertPartition(std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path,
+   std::shared_ptr<CachedPartition> new_partition);
+
+  Status DeletePartition(std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path);
 
   public:
    const std::string& dataset_path_;
@@ -91,21 +105,10 @@ class DatasetCacheBlockManager {
   Status Init();
   
   Status GetCachedDataSet(const std::string& dataset_path, std::shared_ptr<CachedDataset>* dataset);
-  Status GetCachedPartition(const std::string& dataset_path, const std::string& partition_path,
-   std::shared_ptr<CachedPartition>* partitios);
-  Status GetCachedColumns(const std::string& dataset_path, const std::string& partition_path, std::vector<int>  col_ids,
-    unordered_map<int, std::shared_ptr<CachedColumn>>* cached_columns);
 
   Status InsertDataSet(const std::string& dataset_path, std::shared_ptr<CachedDataset> new_dataset);
-  Status InsertPartition(const std::string& dataset_path, const std::string& partition_path,
-   std::shared_ptr<CachedPartition> new_partition);
-  Status InsertColumn(const std::string& dataset_path, const std::string& partition_path,
-   int column_id, std::shared_ptr<CachedColumn> new_column);
 
   Status DeleteDataset(const std::string& dataset_path);
-  Status DeletePartition(const std::string& dataset_path, const std::string& partition_path);
-  Status DeleteColumn(const std::string& dataset_path, const std::string& partition_path,
-   int column_id);
  
  public: 
   std::unordered_map<DatasetKey, std::shared_ptr<CachedDataset>, hasher> cached_datasets_;

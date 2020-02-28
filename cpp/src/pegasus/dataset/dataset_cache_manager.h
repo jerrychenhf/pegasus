@@ -68,6 +68,8 @@ class DatasetCacheManager {
     std::shared_ptr<CacheEngine> cache_engine,
     unordered_map<int, std::shared_ptr<CachedColumn>>& retrieved_columns
     );
+  Status GetAllColumns(RequestIdentity* request_identity, 
+    unordered_map<int, std::shared_ptr<CachedColumn>>* cached_columns);
 };
 
 } // namespace pegasus
