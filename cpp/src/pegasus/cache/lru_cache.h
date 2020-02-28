@@ -67,7 +67,7 @@ class LRUCache {
    const std::string& partition_path_;
    int column_id_;
    int64_t occupied_size_;
-  } PACKED;
+  };
 
   // An entry that is in the process of being inserted into the block
   // cache. See the documentation above 'Allocate' below on the block
