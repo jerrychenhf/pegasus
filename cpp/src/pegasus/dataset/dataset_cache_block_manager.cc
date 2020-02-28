@@ -196,7 +196,7 @@ Status DatasetCacheBlockManager::DeleteColumn(const std::string& dataset_path, c
     return Status::UnknownError(ss.str());
   } 
   
-  partition->cached_columns_.erase(0);
+  partition->cached_columns_.erase(column_id);
  
   return Status::OK();
 }
