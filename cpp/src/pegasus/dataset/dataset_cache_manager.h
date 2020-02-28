@@ -53,8 +53,6 @@ class DatasetCacheManager {
   
   CacheEngine::CachePolicy GetCachePolicy(RequestIdentity* request_identity);
   
-  Status AddNewColumns(RequestIdentity* request_identity,
-    unordered_map<int, std::shared_ptr<CachedColumn>> retrieved_columns);
   Status WrapDatasetStream(RequestIdentity* request_identity,
     std::unique_ptr<rpc::FlightDataStream>* data_stream);
   Status GetDatasetStreamWithMissedColumns(RequestIdentity* request_identity,
@@ -68,8 +66,8 @@ class DatasetCacheManager {
     std::shared_ptr<CacheEngine> cache_engine,
     unordered_map<int, std::shared_ptr<CachedColumn>>& retrieved_columns
     );
-  Status GetAllColumns(RequestIdentity* request_identity, 
-    unordered_map<int, std::shared_ptr<CachedColumn>>* cached_columns);
+  Status GetPartition(RequestIdentity* request_identity,
+    std::shared_ptr<CachedPartition>* new_partition);
 };
 
 } // namespace pegasus

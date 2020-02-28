@@ -24,6 +24,7 @@
 #include "cache/cache_memory_pool.h"
 #include "common/logging.h"
 #include "cache/lru_cache.h"
+#include <boost/thread/mutex.hpp>
 
 namespace pegasus {
 
@@ -59,25 +60,8 @@ CacheEngine::CachePolicy DatasetCacheManager::GetCachePolicy(RequestIdentity* re
   return CacheEngine::CachePolicy::LRU;
 }
 
-Status DatasetCacheManager::AddNewColumns(RequestIdentity* request_identity,
-  unordered_map<int, std::shared_ptr<CachedColumn>> retrieved_columns) {
-  
-    std::shared_ptr<CachedDataset> dataset;
-    RETURN_IF_ERROR(cache_block_manager_->GetCachedDataSet(request_identity->dataset_path(), &dataset));
-    
-    std::shared_ptr<CachedPartition> partition;
-    RETURN_IF_ERROR(dataset->GetCachedPartition(dataset,
-     request_identity->partition_path(), &partition));
-
-    // Insert the columns into cache_block_manager_.
-    for(auto iter = retrieved_columns.begin(); iter != retrieved_columns.end(); iter ++) {
-      RETURN_IF_ERROR(partition->InsertColumn(partition, iter->first, iter->second));
-    }
-    return Status::OK();
-}
-
-Status DatasetCacheManager::GetAllColumns(RequestIdentity* request_identity,
- unordered_map<int, std::shared_ptr<CachedColumn>>* cached_columns) {
+Status DatasetCacheManager::GetPartition(RequestIdentity* request_identity,
+ std::shared_ptr<CachedPartition>* new_partition) {
     
     std::shared_ptr<CachedDataset> dataset;
     RETURN_IF_ERROR(cache_block_manager_->GetCachedDataSet(
@@ -86,15 +70,16 @@ Status DatasetCacheManager::GetAllColumns(RequestIdentity* request_identity,
     std::shared_ptr<CachedPartition> partition;
     RETURN_IF_ERROR(dataset->GetCachedPartition(dataset,
      request_identity->partition_path(), &partition));
-
-    partition->GetCachedColumns(partition, request_identity->column_indices(), cached_columns);
     return Status::OK();
 }
 
 Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
   std::unique_ptr<rpc::FlightDataStream>* data_stream) {
+  std::shared_ptr<CachedPartition> new_partition;
+  GetPartition(request_identity, &new_partition);
   unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns;
-  RETURN_IF_ERROR(GetAllColumns(request_identity, &cached_columns));
+  RETURN_IF_ERROR(new_partition->GetCachedColumns(new_partition,
+   request_identity->column_indices(), &cached_columns));
 
   std::shared_ptr<Table> table;
   for(auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
@@ -120,7 +105,6 @@ Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(RequestIdentity* r
     unordered_map<int, std::shared_ptr<CachedColumn>> retrieved_columns;
     RETURN_IF_ERROR(RetrieveColumns(request_identity, col_ids, cache_engine, retrieved_columns));
     
-    RETURN_IF_ERROR(AddNewColumns(request_identity, retrieved_columns));
     return WrapDatasetStream(request_identity, data_stream);
 }
 
@@ -144,6 +128,9 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
     
     parquet::ArrowReaderProperties properties(parquet::default_arrow_reader_properties());
     std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, memory_pool.get(), properties));
+
+    std::shared_ptr<CachedPartition> partition;
+    GetPartition(request_identity, &partition);
     
     int64_t occupied_size = 0;
     for(auto iter = col_ids.begin(); iter != col_ids.end(); iter ++) {
@@ -156,10 +143,16 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
         chunked_array, column_size);
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, colId, cache_region));
-      retrieved_columns.insert(std::make_pair(*iter, column));
-      
-      LRUCache::CacheKey key(dataset_path, partition_path, colId, column_size);
-      RETURN_IF_ERROR(cache_engine->PutValue(key));
+
+      // Insert the column if already inserted, 
+      // we do not put the column into the LRU cache.
+      // And because this column is shared ptr, so out this for clause , 
+      // it will be delete automatically.
+      bool is_inserted = partition->InsertColumn(partition, colId, column);
+      if (is_inserted) {
+        LRUCache::CacheKey key(dataset_path, partition_path, colId, column_size);
+        RETURN_IF_ERROR(cache_engine->PutValue(key));
+      }
     }
     
     return Status::OK();

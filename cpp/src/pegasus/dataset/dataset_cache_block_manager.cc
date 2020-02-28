@@ -65,19 +65,25 @@ Status DatasetCacheBlockManager::Init() {
 Status DatasetCacheBlockManager::GetCachedDataSet(const std::string& dataset_path,
  std::shared_ptr<CachedDataset>* dataset) {
   DatasetKey key(dataset_path);
-  auto entry = cached_datasets_.find(key);
+  {
+    lock_guard<mutex> l(cached_datasets_lock_);
+    auto entry = cached_datasets_.find(key);
 
-  if (entry == cached_datasets_.end()) {
+   if (entry == cached_datasets_.end()) {
     std::shared_ptr<CachedDataset> new_dataset =
      std::shared_ptr<CachedDataset>(new CachedDataset(dataset_path));
     *dataset = new_dataset;
-    InsertDataSet(dataset_path, new_dataset);
+    // Insert the dataset
+     DatasetKey key(dataset_path);
+     cached_datasets_.insert(std::make_pair(key, new_dataset));
     LOG(WARNING) << "The dataset does not exist and inserted a new dataset";
     return Status::OK(); 
+    }
+
+   auto find_cache_info = entry->second;
+   *dataset = std::shared_ptr<CachedDataset>(find_cache_info);
   }
 
-  auto find_cache_info = entry->second;
-  *dataset = std::shared_ptr<CachedDataset>(find_cache_info);
   return Status::OK();
 }
 
@@ -87,80 +93,87 @@ Status CachedDataset::GetCachedPartition(std::shared_ptr<CachedDataset> cached_d
    std::shared_ptr<CachedPartition>* partition) {
 
   DatasetKey key(partition_path);
-  auto entry = cached_dataset->cached_partitions_.find(key);
+   {
+    lock_guard<mutex> l(cached_partitions_lock_);
+    auto entry = cached_dataset->cached_partitions_.find(key);
   
-  if (entry == cached_dataset->cached_partitions_.end()) {
-    std::shared_ptr<CachedPartition> new_partition =
-     std::shared_ptr<CachedPartition>(new CachedPartition(
+    if (entry == cached_dataset->cached_partitions_.end()) {
+      std::shared_ptr<CachedPartition> new_partition =
+      std::shared_ptr<CachedPartition>(new CachedPartition(
        cached_dataset->dataset_path_, partition_path));
-    *partition = new_partition;
-    InsertPartition(cached_dataset, partition_path, new_partition);
-    LOG(WARNING) << "The partition does not exist and inserted a new partition";
-    return Status::OK(); 
-  }
+      *partition = new_partition;
 
-  auto find_cache_info = entry->second;
-  *partition = std::shared_ptr<CachedPartition>(find_cache_info);
+      // Insert partition
+      DatasetKey key(partition_path);
+      cached_dataset->cached_partitions_[key] = new_partition;
+      LOG(WARNING) << "The partition does not exist and inserted a new partition";
+      return Status::OK(); 
+    }
+
+    auto find_cache_info = entry->second;
+    *partition = std::shared_ptr<CachedPartition>(find_cache_info);
+   }
   return Status::OK();
 }
 
  Status CachedPartition::GetCachedColumns(
    std::shared_ptr<CachedPartition> cached_partition, std::vector<int>  col_ids,
-    unordered_map<int, std::shared_ptr<CachedColumn>>* cached_columns) {
-   
-  for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++)
+    unordered_map<int, std::shared_ptr<CachedColumn>>* columns) {
   {
-		auto entry = cached_partition->cached_columns_.find(*iter);
-    if (entry != cached_partition->cached_columns_.end()) {
-      auto find_column = entry->second;
-      cached_columns->insert(pair<int, std::shared_ptr<CachedColumn>>(*iter, find_column));
-    }
-	}
+    lock_guard<mutex> l(cached_columns_lock_); 
+    for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++)
+    {
+		  auto entry = cached_partition->cached_columns_.find(*iter);
+      if (entry != cached_partition->cached_columns_.end()) {
+        auto find_column = entry->second;
+        columns->insert(pair<int, std::shared_ptr<CachedColumn>>(*iter, find_column));
+       }
+	  }
+  }
   return Status::OK();
  }
 
-Status DatasetCacheBlockManager::InsertDataSet(const std::string& dataset_path,
- std::shared_ptr<CachedDataset> new_dataset) {
-    DatasetKey key(dataset_path);
-  cached_datasets_.insert(std::make_pair(key, new_dataset));
-  return Status::OK();
-}
-
-Status CachedDataset::InsertPartition(
-  std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path,
-   std::shared_ptr<CachedPartition> new_partition) {
-
-  DatasetKey key(partition_path);
-  cached_dataset->cached_partitions_[key] = new_partition;
-  return Status::OK();
-}
-
-Status CachedPartition::InsertColumn(std::shared_ptr<CachedPartition> cached_partition,
+bool CachedPartition::InsertColumn(std::shared_ptr<CachedPartition> cached_partition,
    int column_id, std::shared_ptr<CachedColumn> new_column) {
-
-  cached_partition->cached_columns_[column_id] = std::move(new_column);
-  return Status::OK();
+  {
+    lock_guard<mutex> l(cached_columns_lock_); 
+    auto entry = cached_partition->cached_columns_.find(column_id);
+    if(entry == cached_partition->cached_columns_.end()) {
+      // insert new column
+      cached_partition->cached_columns_[column_id] = std::move(new_column);
+      return true;
+    } else {
+      // the column is already existed.
+      return false;
+    }
+  }
 }
 
 Status DatasetCacheBlockManager::DeleteDataset(const std::string& dataset_path) {
-
-  DatasetKey key(dataset_path);
-  cached_datasets_.erase(key);
+  {
+    lock_guard<mutex> l(cached_datasets_lock_);
+    DatasetKey key(dataset_path);
+    cached_datasets_.erase(key);
+  }
   return Status::OK();
 }
 
 Status CachedDataset::DeletePartition(
   std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path){
-
-  DatasetKey key(partition_path); 
-  cached_dataset->cached_partitions_.erase(key);
+  {
+    lock_guard<mutex> l(cached_partitions_lock_); 
+    DatasetKey key(partition_path); 
+    cached_dataset->cached_partitions_.erase(key);
+  }
   return Status::OK();
 }
 
 Status CachedPartition::DeleteColumn(
   std::shared_ptr<CachedPartition> cached_partition, int column_id) {
-  
-  cached_partition->cached_columns_.erase(column_id);
+  {
+    lock_guard<mutex> l(cached_columns_lock_);   
+    cached_partition->cached_columns_.erase(column_id);
+  } 
   return Status::OK();
 }
 

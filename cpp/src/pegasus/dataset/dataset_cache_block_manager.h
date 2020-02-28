@@ -23,7 +23,7 @@
 #include "dataset/request_identity.h"
 #include "cache/cache_engine.h"
 #include "cache/cache_region.h"
-#include "arrow/table.h"
+#include <boost/thread/mutex.hpp>
 
 using namespace std;
 using std::string;
@@ -78,7 +78,7 @@ class CachedPartition {
   
   Status GetCachedColumns(std::shared_ptr<CachedPartition> cached_partition, std::vector<int>  col_ids,
     unordered_map<int, std::shared_ptr<CachedColumn>>* cached_columns);
-  Status InsertColumn(std::shared_ptr<CachedPartition> cached_partition,
+  bool InsertColumn(std::shared_ptr<CachedPartition> cached_partition,
    int column_id, std::shared_ptr<CachedColumn> new_column);
   Status DeleteColumn(std::shared_ptr<CachedPartition> cached_partition, int column_id);
 
@@ -91,6 +91,7 @@ class CachedPartition {
  private:
   const std::string& dataset_path_;
   const std::string& partition_path_;
+  boost::mutex cached_columns_lock_;
   unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns_;
 };
 
@@ -101,8 +102,6 @@ class CachedDataset {
   Status GetCachedPartition(std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path,
    std::shared_ptr<CachedPartition>* partition);
 
-  Status InsertPartition(std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path,
-   std::shared_ptr<CachedPartition> new_partition);
 
   Status DeletePartition(std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path);
   
@@ -113,6 +112,7 @@ class CachedDataset {
 
   private:
    const std::string& dataset_path_;
+   boost::mutex cached_partitions_lock_;
    std::unordered_map<DatasetKey, std::shared_ptr<CachedPartition>, hasher> cached_partitions_;
 };
 
@@ -125,8 +125,6 @@ class DatasetCacheBlockManager {
   
   Status GetCachedDataSet(const std::string& dataset_path, std::shared_ptr<CachedDataset>* dataset);
 
-  Status InsertDataSet(const std::string& dataset_path, std::shared_ptr<CachedDataset> new_dataset);
-
   Status DeleteDataset(const std::string& dataset_path);
 
   std::unordered_map<DatasetKey, std::shared_ptr<CachedDataset>, hasher> GetCachedDatasets() {
@@ -134,6 +132,7 @@ class DatasetCacheBlockManager {
   }
 
  private: 
+  boost::mutex cached_datasets_lock_;
   std::unordered_map<DatasetKey, std::shared_ptr<CachedDataset>, hasher> cached_datasets_;
 };
 
