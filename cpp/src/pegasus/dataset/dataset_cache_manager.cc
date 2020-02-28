@@ -67,9 +67,8 @@ Status DatasetCacheManager::GetPartition(RequestIdentity* request_identity,
     RETURN_IF_ERROR(cache_block_manager_->GetCachedDataSet(
       request_identity->dataset_path(), &dataset));
     
-    std::shared_ptr<CachedPartition> partition;
     RETURN_IF_ERROR(dataset->GetCachedPartition(dataset,
-     request_identity->partition_path(), &partition));
+     request_identity->partition_path(), new_partition));
     return Status::OK();
 }
 
@@ -185,9 +184,9 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
   
   std::shared_ptr<CachedDataset> dataset;
   cache_block_manager_->GetCachedDataSet(request_identity->dataset_path(), &dataset);
-  if (dataset == nullptr) {
+  if (dataset->GetCachedPartitions().size() == 0) {
     LOG(WARNING) << "The dataset "<< request_identity->dataset_path() 
-    <<" is nullptr. We will get all the columns from storage and"
+    <<" is new added. We will get all the columns from storage and"
      << "then insert the column into dataset cache block manager";
     return GetDatasetStreamWithMissedColumns(request_identity, col_ids, data_stream);
   } else {
@@ -195,9 +194,9 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
     std::shared_ptr<CachedPartition> partition;
     dataset->GetCachedPartition(dataset,
      request_identity->partition_path(), &partition);
-    if (partition == nullptr) {
+    if (partition->GetCachedColumns().size() == 0) {
       LOG(WARNING) << "The partition "<< request_identity->partition_path() 
-      <<" is nullptr. We will get all the columns from storage and"
+      <<" is new added. We will get all the columns from storage and"
        << "then insert the column into dataset cache block manager";
       return GetDatasetStreamWithMissedColumns(request_identity, col_ids, data_stream);
     } else {
