@@ -61,11 +61,10 @@ CacheEngine::CachePolicy DatasetCacheManager::GetCachePolicy(RequestIdentity* re
 
 Status DatasetCacheManager::AddNewColumns(RequestIdentity* request_identity,
   unordered_map<int, std::shared_ptr<CachedColumn>> retrieved_columns) {
-    // Before insert into the column, check whether the dataset is inserted.
+  
     std::shared_ptr<CachedDataset> dataset;
     RETURN_IF_ERROR(cache_block_manager_->GetCachedDataSet(request_identity->dataset_path(), &dataset));
     
-    // After check the dataset, continue to check whether the partition is inserted.
     std::shared_ptr<CachedPartition> partition;
     RETURN_IF_ERROR(dataset->GetCachedPartition(dataset,
      request_identity->partition_path(), &partition));
@@ -79,12 +78,11 @@ Status DatasetCacheManager::AddNewColumns(RequestIdentity* request_identity,
 
 Status DatasetCacheManager::GetAllColumns(RequestIdentity* request_identity,
  unordered_map<int, std::shared_ptr<CachedColumn>>* cached_columns) {
-    // Before insert into the column, check whether the dataset is inserted.
+    
     std::shared_ptr<CachedDataset> dataset;
     RETURN_IF_ERROR(cache_block_manager_->GetCachedDataSet(
       request_identity->dataset_path(), &dataset));
     
-    // After check the dataset, continue to check whether the partition is inserted.
     std::shared_ptr<CachedPartition> partition;
     RETURN_IF_ERROR(dataset->GetCachedPartition(dataset,
      request_identity->partition_path(), &partition));
