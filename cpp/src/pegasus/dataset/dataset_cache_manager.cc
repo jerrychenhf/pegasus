@@ -99,7 +99,7 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
   std::shared_ptr<Table> table;
   for(auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
     std::shared_ptr<CachedColumn> cache_column = iter->second;
-    CacheRegion* cache_region = cache_column->cache_region_;
+    CacheRegion* cache_region = cache_column->GetCacheRegion();
     
     RETURN_IF_ERROR(Status::fromArrowStatus(Table::FromChunkedStructArray(
       cache_region->chunked_array(), &table)));

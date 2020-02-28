@@ -55,7 +55,14 @@ class CachedColumn {
   partition_path_(partition_path), column_id_(column_id), cache_region_(cache_region) {}
 
   ~CachedColumn();
- public:
+
+  const std::string& GetPartitionPath() { return partition_path_; }
+  int GetColumnId() { return column_id_; }
+  CacheRegion* GetCacheRegion() {
+    return cache_region_;
+  }
+
+ private:
   const std::string& partition_path_;
   int column_id_;
   
@@ -75,6 +82,13 @@ class CachedPartition {
    int column_id, std::shared_ptr<CachedColumn> new_column);
   Status DeleteColumn(std::shared_ptr<CachedPartition> cached_partition, int column_id);
 
+  const std::string& GetDatasetPath() { return dataset_path_; }
+  const std::string& GetPartitionPath() {return partition_path_; }
+  unordered_map<int, std::shared_ptr<CachedColumn>> GetCachedColumns() {
+    return cached_columns_;
+  }
+
+ private:
   const std::string& dataset_path_;
   const std::string& partition_path_;
   unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns_;
@@ -91,8 +105,13 @@ class CachedDataset {
    std::shared_ptr<CachedPartition> new_partition);
 
   Status DeletePartition(std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path);
+  
+  const std::string& GetDatasetPath() { return dataset_path_; }
+  std::unordered_map<DatasetKey, std::shared_ptr<CachedPartition>, hasher> GetCachedPartitions() {
+    return cached_partitions_;
+  }
 
-  public:
+  private:
    const std::string& dataset_path_;
    std::unordered_map<DatasetKey, std::shared_ptr<CachedPartition>, hasher> cached_partitions_;
 };
@@ -109,8 +128,12 @@ class DatasetCacheBlockManager {
   Status InsertDataSet(const std::string& dataset_path, std::shared_ptr<CachedDataset> new_dataset);
 
   Status DeleteDataset(const std::string& dataset_path);
- 
- public: 
+
+  std::unordered_map<DatasetKey, std::shared_ptr<CachedDataset>, hasher> GetCachedDatasets() {
+    return cached_datasets_;
+  }
+
+ private: 
   std::unordered_map<DatasetKey, std::shared_ptr<CachedDataset>, hasher> cached_datasets_;
 };
 

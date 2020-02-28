@@ -85,7 +85,7 @@ class EvictionCallback : public Cache::EvictionCallback {
       WorkerExecEnv* worker_exec = WorkerExecEnv::GetInstance();
       std::shared_ptr<DatasetCacheManager> cache_manager = worker_exec->GetDatasetCacheManager();
       if (cache_manager->cache_block_manager_ == nullptr
-       || cache_manager->cache_block_manager_->cached_datasets_.size() == 0) {
+       || cache_manager->cache_block_manager_->GetCachedDatasets().size() == 0) {
         return;
       }
        // Before insert into the column, check whether the dataset is inserted.
