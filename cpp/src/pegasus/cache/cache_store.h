@@ -19,6 +19,7 @@
 #define PEGASUS_CACHE_STORE_H
 
 #include <vector>
+#include <atomic>
 
 #include "common/status.h"
 #include "cache/store.h"
@@ -41,7 +42,7 @@ class CacheStore {
   private:
   Store* store_;
   int64_t capacity_;
-  int64_t used_size_;
+  std::atomic<int64_t> used_size_;
 };
 } // namespace pegasus                              
 

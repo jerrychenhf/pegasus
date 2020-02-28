@@ -19,6 +19,8 @@
 #define PEGASUS_STORE_H
 
 #include <unordered_map>
+#include <atomic>
+
 #include "common/status.h"
 #include "cache/store_region.h"
 
@@ -63,7 +65,7 @@ class MemoryStore : public Store {
 
  private:
   int64_t capacity_;
-  int64_t used_size_;
+  std::atomic<int64_t> used_size_;
 };
 
 class DCPMMStore : public Store {
@@ -83,7 +85,7 @@ class DCPMMStore : public Store {
 
  private:
   int64_t capacity_;
-  int64_t used_size_;
+  std::atomic<int64_t> used_size_;
 };
 
 } // namespace pegasus
