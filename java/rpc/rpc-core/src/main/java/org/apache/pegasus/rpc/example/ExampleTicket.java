@@ -89,7 +89,7 @@ public class ExampleTicket {
    */
   public Ticket toTicket() {
     try {
-      return new Ticket(MAPPER.writeValueAsBytes(this), null, null);
+      return new Ticket(MAPPER.writeValueAsBytes(this), null, null, null);
     } catch (JsonProcessingException e) {
       throw Throwables.propagate(e);
     }

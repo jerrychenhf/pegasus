@@ -87,7 +87,7 @@ public class TestFlightClient {
                 new DictionaryProducer(serverAllocator)).build())) {
       final Location location = Location.forGrpcInsecure(FlightTestUtil.LOCALHOST, server.getPort());
       try (final FlightClient client = FlightClient.builder(allocator, location).build()) {
-        try (final FlightStream stream = client.getStream(new Ticket(new byte[0], new byte[0], null))) {
+        try (final FlightStream stream = client.getStream(new Ticket(new byte[0], new byte[0], new byte[0], null))) {
           Assert.assertTrue(stream.next());
           Assert.assertNotNull(stream.getDictionaryProvider().lookup(1));
           final VectorSchemaRoot root = stream.getRoot();
@@ -120,7 +120,7 @@ public class TestFlightClient {
                 new DictionaryProducer(serverAllocator)).build())) {
       final Location location = Location.forGrpcInsecure(FlightTestUtil.LOCALHOST, server.getPort());
       try (final FlightClient client = FlightClient.builder(allocator, location).build()) {
-        try (final FlightStream stream = client.getStream(new Ticket(new byte[0], new byte[0], null))) {
+        try (final FlightStream stream = client.getStream(new Ticket(new byte[0], new byte[0], new byte[0], null))) {
           Assert.assertTrue(stream.next());
           Assert.assertFalse(stream.next());
           final DictionaryProvider provider = stream.takeDictionaryOwnership();
@@ -147,7 +147,7 @@ public class TestFlightClient {
       try (final FlightClient client = FlightClient.builder(allocator, location).build()) {
         final VectorSchemaRoot root;
         final DictionaryProvider provider;
-        try (final FlightStream stream = client.getStream(new Ticket(new byte[0], new byte[0], null))) {
+        try (final FlightStream stream = client.getStream(new Ticket(new byte[0], new byte[0], new byte[0], null))) {
           final VectorUnloader unloader = new VectorUnloader(stream.getRoot());
           root = VectorSchemaRoot.create(stream.getSchema(), allocator);
           final VectorLoader loader = new VectorLoader(root);

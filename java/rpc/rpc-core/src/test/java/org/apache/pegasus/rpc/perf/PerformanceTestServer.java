@@ -156,7 +156,7 @@ public class PerformanceTestServer implements AutoCloseable {
             .setStart(0)
             .setEnd(exec.getRecordsPerStream())
             .build();
-        final Ticket ticket = new Ticket(token.toByteArray(), null, null);
+        final Ticket ticket = new Ticket(token.toByteArray(), null, null, null);
 
         List<FlightEndpoint> endpoints = new ArrayList<>();
         for (int i = 0; i < exec.getStreamCount(); i++) {

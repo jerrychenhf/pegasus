@@ -124,7 +124,7 @@ public class TestServerOptions {
                 (port) -> FlightServer.builder(a, location, producer).build()
             )) {
       try (FlightClient c = FlightClient.builder(a, location).build()) {
-        FlightStream stream = c.getStream(new Ticket(new byte[0], new byte[0], null));
+        FlightStream stream = c.getStream(new Ticket(new byte[0], new byte[0], new byte[0], null));
         VectorSchemaRoot root = stream.getRoot();
         IntVector iv = (IntVector) root.getVector("c1");
         int value = 0;

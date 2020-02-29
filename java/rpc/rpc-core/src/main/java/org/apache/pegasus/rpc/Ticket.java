@@ -34,12 +34,14 @@ import com.google.protobuf.ByteString;
 public class Ticket implements java.io.Serializable {
   private final byte[] datasetPath;
   private final byte[] partitionIdentity;
+  private final byte[] schema;
   private final int[] columnIndices;
 
-  public Ticket(byte[] datasetPath, byte[] partitionIdentity, int[] columnIndices) {
+  public Ticket(byte[] datasetPath, byte[] partitionIdentity, byte[] schema, int[] columnIndices) {
     super();
     this.datasetPath = datasetPath;
     this.partitionIdentity = partitionIdentity;
+    this.schema = schema;
     this.columnIndices = columnIndices;
   }
 
@@ -58,6 +60,7 @@ public class Ticket implements java.io.Serializable {
   Ticket(org.apache.pegasus.rpc.impl.Flight.Ticket ticket) {
     this.datasetPath = ticket.getDatasetPath().toByteArray();
     this.partitionIdentity = ticket.getPartitionIdentity().toByteArray();
+    this.schema = ticket.getSchema().toByteArray();
     this.columnIndices = ticket.getColumnIndiceList().stream().mapToInt(i->i).toArray();
   }
 
@@ -69,6 +72,9 @@ public class Ticket implements java.io.Serializable {
     }
     if (partitionIdentity != null && partitionIdentity.length > 0) {
       b.setPartitionIdentity(ByteString.copyFrom(partitionIdentity));
+    }
+    if (schema != null && schema.length > 0) {
+      b.setSchema(ByteString.copyFrom(schema));
     }
     if (columnIndices != null && columnIndices.length > 0 ) {
       b.addAllColumnIndice(Arrays.stream(columnIndices).boxed().collect(Collectors.toList()));
@@ -106,6 +112,7 @@ public class Ticket implements java.io.Serializable {
     result = prime * result
             + ((datasetPath == null) ? 0 : Arrays.hashCode(datasetPath))
             + ((partitionIdentity == null) ? 0 : Arrays.hashCode(partitionIdentity))
+            + ((schema == null) ? 0 : Arrays.hashCode(schema))
             + ((columnIndices == null ) ? 0 : columnIndices.hashCode());
     return result;
   }
@@ -126,6 +133,9 @@ public class Ticket implements java.io.Serializable {
       return false;
     }
     if (!Arrays.equals(partitionIdentity, other.partitionIdentity)) {
+      return false;
+    }
+    if (!Arrays.equals(schema, other.schema)) {
       return false;
     }
     if (columnIndices == null) {

@@ -127,7 +127,7 @@ public class TestBackPressure {
               FlightClient
                   .builder(clientAllocator, server.getLocation())
                   .build();
-          FlightStream stream = client.getStream(new Ticket(new byte[1], new byte[1], null))
+          FlightStream stream = client.getStream(new Ticket(new byte[1], new byte[1], new byte[1], null))
       ) {
         VectorSchemaRoot root = stream.getRoot();
         root.clear();
