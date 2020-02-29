@@ -147,7 +147,8 @@ arrow::Status FlightDescriptor::Deserialize(const std::string& serialized,
 bool Ticket::Equals(const Ticket& other) const {
   return dataset_path == other.dataset_path
       && partition_identity == other.partition_identity
-      && column_indices == other.column_indices; 
+      && column_indices == other.column_indices
+      && schema == other.schema; 
 }
 
 arrow::Status Ticket::SerializeToString(std::string* out) const {
@@ -166,6 +167,19 @@ arrow::Status Ticket::Deserialize(const std::string& serialized, Ticket* out) {
     return arrow::Status::Invalid("Not a valid ticket");
   }
   return internal::FromProto(pb_ticket, out);
+}
+
+arrow::Status Ticket::GetSchema(arrow::ipc::DictionaryMemo* dictionary_memo,
+                             std::shared_ptr<arrow::Schema>* out) const {
+  if (reconstructed_schema_) {
+    *out = schema_;
+    return arrow::Status::OK();
+  }
+  arrow::io::BufferReader schema_reader(schema);
+  RETURN_NOT_OK(arrow::ipc::ReadSchema(&schema_reader, dictionary_memo, &schema_));
+  reconstructed_schema_ = true;
+  *out = schema_;
+  return arrow::Status::OK();
 }
 
 arrow::Status FlightInfo::GetSchema(arrow::ipc::DictionaryMemo* dictionary_memo,

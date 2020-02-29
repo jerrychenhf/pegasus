@@ -140,12 +140,12 @@ bool TestServer::IsRunning() { return server_process_->running(); }
 int TestServer::port() const { return port_; }
 
 arrow::Status GetBatchForFlight(const Ticket& ticket, std::shared_ptr<arrow::RecordBatchReader>* out) {
-  if (ticket.partition_identity == "ticket-ints-1") {
+  if (ticket.dataset_path == "ticket-ints-1") {
     BatchVector batches;
     RETURN_NOT_OK(ExampleIntBatches(&batches));
     *out = std::make_shared<BatchIterator>(batches[0]->schema(), batches);
     return arrow::Status::OK();
-  } else if (ticket.partition_identity == "ticket-dicts-1") {
+  } else if (ticket.dataset_path == "ticket-dicts-1") {
     BatchVector batches;
     RETURN_NOT_OK(ExampleDictBatches(&batches));
     *out = std::make_shared<BatchIterator>(batches[0]->schema(), batches);
@@ -306,10 +306,15 @@ std::vector<FlightInfo> ExampleFlightInfo() {
 
   FlightInfo::Data flight1, flight2, flight3;
 
-  FlightEndpoint endpoint1({{"ticket-ints-1"}, {location1}});
-  FlightEndpoint endpoint2({{"ticket-ints-2"}, {location2}});
-  FlightEndpoint endpoint3({{"ticket-cmd"}, {location3}});
-  FlightEndpoint endpoint4({{"ticket-dicts-1"}, {location4}});
+  Ticket ticket1{"ticket-ints-1"};
+  Ticket ticket2{"ticket-ints-2"};
+  Ticket ticket3{"ticket-cmd"};
+  Ticket ticket4{"ticket-dicts-1"};
+  
+  FlightEndpoint endpoint1({ticket1, {location1}});
+  FlightEndpoint endpoint2({ticket2, {location2}});
+  FlightEndpoint endpoint3({ticket3, {location3}});
+  FlightEndpoint endpoint4({ticket4, {location4}});
 
   FlightDescriptor descr1{FlightDescriptor::PATH, "", {"examples", "ints"}};
   FlightDescriptor descr2{FlightDescriptor::CMD, "my_command", {}};

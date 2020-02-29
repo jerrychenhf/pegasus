@@ -293,7 +293,8 @@ message Location {
 message Ticket {
   bytes dataset_path = 1;
   bytes partition_identity = 2;
-  repeated int32 column_indice = 3;
+  bytes schema = 3;
+  repeated int32 column_indice = 4;
 }
 
 /*

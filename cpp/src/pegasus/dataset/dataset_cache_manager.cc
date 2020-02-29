@@ -80,16 +80,24 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
   RETURN_IF_ERROR(new_partition->GetCachedColumns(new_partition,
    request_identity->column_indices(), &cached_columns));
 
-  std::shared_ptr<Table> table;
+  // std::shared_ptr<Table> table;
+  std::vector<std::shared_ptr<ChunkedArray>> columns;
   for(auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
     std::shared_ptr<CachedColumn> cache_column = iter->second;
     CacheRegion* cache_region = cache_column->GetCacheRegion();
+    std::shared_ptr<ChunkedArray> chunked_array = cache_region->chunked_array();
+    columns.push_back(chunked_array);
     
-    RETURN_IF_ERROR(Status::fromArrowStatus(Table::FromChunkedStructArray(
-      cache_region->chunked_array(), &table)));
+    // RETURN_IF_ERROR(Status::fromArrowStatus(Table::FromChunkedStructArray(
+    //   cache_region->chunked_array(), &table)));
   }
+  auto schema = request_identity->get_schema();
+
+  std::shared_ptr<arrow::Table> table = arrow::Table::Make(schema, columns);
+
   *data_stream = std::unique_ptr<rpc::FlightDataStream>(
     new rpc::RecordBatchStream(std::shared_ptr<RecordBatchReader>(new TableBatchReader(*table))));
+  
   return Status::OK();
 }
 

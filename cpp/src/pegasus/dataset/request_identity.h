@@ -22,6 +22,7 @@
 #define PEGASUS_DATASET_REQUEST_H_
 
 #include "dataset/identity.h"
+#include <arrow/type.h>
 
 namespace pegasus {
   class RequestIdentity {
@@ -30,15 +31,18 @@ namespace pegasus {
   RequestIdentity();
   RequestIdentity(std::string dataset_path, std::string partition_path, std::vector<int> column_indices);
 
-
   const std::string& dataset_path();
   const std::vector<int>& column_indices();
   const std::string& partition_path();
+
+  void set_schema(std::shared_ptr<arrow::Schema> schema);
+  std::shared_ptr<arrow::Schema> get_schema();
 
   private:
    std::string dataset_path_;
    std::string partition_path_;
    std::vector<int> column_indices_;
+   std::shared_ptr<arrow::Schema> schema_;
 };
 
 } // namespace pegasus

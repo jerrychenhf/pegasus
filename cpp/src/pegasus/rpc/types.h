@@ -226,7 +226,22 @@ struct PEGASUS_RPC_EXPORT FlightDescriptor {
 struct PEGASUS_RPC_EXPORT Ticket {
   std::string dataset_path;
   std::string partition_identity;
+  std::string schema;
   std::vector<int32_t> column_indices;
+
+  explicit Ticket() : reconstructed_schema_(false) {
+  }
+  explicit Ticket(std::string dataset_path)
+    : dataset_path(dataset_path), reconstructed_schema_(false) {
+  }
+  explicit Ticket(std::string dataset_path, std::string partition_id,
+      std::string schema, std::vector<int32_t> column_indices) :
+    dataset_path(dataset_path),
+    partition_identity(partition_id),
+    schema(schema),
+    column_indices(column_indices),
+    reconstructed_schema_(false) {
+  }
 
   bool Equals(const Ticket& other) const;
 
@@ -256,6 +271,16 @@ struct PEGASUS_RPC_EXPORT Ticket {
   void setDatasetpath(const std::string& dspath) { dataset_path = dspath; }
   void setPartitionid(const std::string& partid) { partition_identity = partid; }
   void setColids(const std::vector<int32_t>& colids) { column_indices = colids; }
+  void setSchema(const std::string& schema_string) { schema = schema_string; }
+
+  arrow::Status GetSchema(arrow::ipc::DictionaryMemo* dictionary_memo,
+                  std::shared_ptr<arrow::Schema>* out) const;
+  
+  const std::string& serialized_schema() const { return schema; }
+
+ private:
+   mutable std::shared_ptr<arrow::Schema> schema_;
+   mutable bool reconstructed_schema_;
 };
 
 class FlightClient;

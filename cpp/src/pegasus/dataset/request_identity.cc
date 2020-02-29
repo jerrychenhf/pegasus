@@ -36,4 +36,13 @@ const std::string& RequestIdentity::partition_path() {
 const std::vector<int>& RequestIdentity::column_indices(){
   return column_indices_;
 }
+
+void RequestIdentity::set_schema(shared_ptr<arrow::Schema> schema) {
+  schema_ = schema;
+}
+
+std::shared_ptr<arrow::Schema> RequestIdentity::get_schema() {
+  return schema_;
+}
+
 } // namespace pegasus

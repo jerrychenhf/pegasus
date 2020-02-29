@@ -73,6 +73,7 @@ arrow::Status WorkerTableAPIService::DoGet(const rpc::ServerCallContext& context
     return st;
   
   Status status = dataset_cache_manager_->GetDatasetStream(&request_identity, data_stream);
+ 
   return status.toArrowStatus();
 }
 
@@ -94,6 +95,11 @@ arrow::Status WorkerTableAPIService::CreateDataRequest(const rpc::Ticket& reques
 
   *request_identity = RequestIdentity(
     request.dataset_path, request.partition_identity, request.column_indices);
+  
+  std::shared_ptr<arrow::Schema> schema;
+  arrow::ipc::DictionaryMemo dict_memo;
+  request.GetSchema(&dict_memo, &schema);
+  request_identity->set_schema(schema);
   
   return arrow::Status::OK();
 }

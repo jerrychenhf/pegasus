@@ -73,4 +73,12 @@ namespace pegasus {
     return column_indices_;
   }
 
+  void DataSetRequest::set_schema(const shared_ptr<arrow::Schema> schema) {
+    schema_ = schema;
+  }
+
+  const std::shared_ptr<arrow::Schema> DataSetRequest::get_schema() {
+   return schema_;
+  }
+
 } // namespace pegasus

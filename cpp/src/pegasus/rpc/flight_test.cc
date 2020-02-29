@@ -202,7 +202,7 @@ TEST(TestFlight, ConnectUri) {
 }
 
 TEST(TestFlight, RoundTripTypes) {
-  Ticket ticket{"aaa", "foo"};
+  Ticket ticket{"aaa"};
   std::string ticket_serialized;
   Ticket ticket_deserialized;
   ASSERT_OK(ticket.SerializeToString(&ticket_serialized));

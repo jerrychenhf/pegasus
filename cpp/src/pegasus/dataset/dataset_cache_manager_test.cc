@@ -37,10 +37,15 @@ TEST(DatasetCacheManagerTest, Unit) {
   std::string partition_path = "hdfs://10.239.47.55:9000/genData2/customer/part-00000-1fafbf9f-6edf-4f8f-8b51-268708b6f6c5-c000.snappy.parquet";
   std::vector<int> column_indices = {0};
 
-  RequestIdentity* request_identity = new RequestIdentity(dataset_path, partition_path, column_indices);
-  std::unique_ptr<rpc::FlightDataStream>* data_stream;
-  dataset_cache_manager->GetDatasetStream(request_identity, data_stream);
-  ASSERT_EQ(1, (*data_stream)->schema()->num_fields());
+  RequestIdentity request_identity = RequestIdentity(dataset_path, partition_path, column_indices);
+  
+  auto f0 = arrow::field("c_customer_sk", arrow::int64());
+  std::vector<std::shared_ptr<arrow::Field>> fields = {f0};
+  auto schema = std::make_shared<arrow::Schema>(fields);
+  request_identity.set_schema(schema);
+  std::unique_ptr<rpc::FlightDataStream> data_stream;
+  dataset_cache_manager->GetDatasetStream(&request_identity, &data_stream);
+  ASSERT_EQ(1, data_stream->schema()->num_fields());
 
  
   delete dataset_cache_manager;

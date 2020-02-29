@@ -23,6 +23,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <arrow/type.h>
 #include <boost/algorithm/string.hpp>
 
 #include "dataset/filter.h"
@@ -50,6 +51,9 @@ class DataSetRequest {
   const std::vector<int32_t>& get_column_indices();
   const std::vector<Filter>& get_filters();
 
+  void set_schema(const std::shared_ptr<arrow::Schema> schema);
+  const std::shared_ptr<arrow::Schema> get_schema();
+
   static const std::string PROVIDER;
   static const std::string FORMAT;
   static const std::string TABLE_LOCATION;
@@ -63,6 +67,7 @@ class DataSetRequest {
    std::vector<std::string> column_names_;
    std::vector<Filter> filters_;
    std::vector<std::int32_t> column_indices_;
+   std::shared_ptr<arrow::Schema> schema_;
 };
 
 

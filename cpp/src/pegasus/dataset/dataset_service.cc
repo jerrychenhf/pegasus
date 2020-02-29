@@ -133,16 +133,33 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   std::vector<std::string> column_names = dataset_request->get_column_names();
   std::vector<int32_t> column_indices;
   std::shared_ptr<arrow::Schema> schema = rdataset->get_schema();
+
   if (column_names.empty()) {
     column_names = schema->field_names();
   }
-  for(std::string column_name : column_names) {
-    column_indices.push_back(schema->GetFieldIndex(column_name));
+
+  arrow::SchemaBuilder builder;
+  for (std::string column_name : column_names) {
+    int32_t index = schema->GetFieldIndex(column_name);
+    column_indices.push_back(index);
+    builder.AddField(schema->GetFieldByName(column_name));
   }
+
+  std::shared_ptr<arrow::Schema> new_schema;
+  auto result = builder.Finish();
+  if (result.ok()) {
+    new_schema = result.ValueOrDie();
+  } else {
+    Status::Invalid("Failed to get new schema.");
+  }
+
+  // std::shared_ptr<arrow::Schema> new_schema = std::make_shared<arrow::Schema>(fields);
+  dataset_request->set_schema(new_schema);
+
   dataset_request->set_column_indices(column_indices);
 
   flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdataset));
-  RETURN_IF_ERROR(flightinfo_builder_->BuildFlightInfo(flight_info, column_indices, (rpc::FlightDescriptor&)fldtr));
+  RETURN_IF_ERROR(flightinfo_builder_->BuildFlightInfo(flight_info, new_schema, column_indices, (rpc::FlightDescriptor&)fldtr));
   return Status::OK();
 }
 

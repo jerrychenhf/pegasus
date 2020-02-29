@@ -18,6 +18,7 @@
 #include "dataset/flightinfo_builder.h"
 #include "dataset/partition.h"
 #include "rpc/types.h"
+#include "rpc/internal.h"
 
 namespace pegasus {
 
@@ -29,13 +30,15 @@ FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr
 
 }
 
-Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flight_info, \
+Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flight_info,
+                                          std::shared_ptr<arrow::Schema> schema,
                                           std::vector<int32_t>& indices,
                                           rpc::FlightDescriptor& fldtr) {
 //  std::unique_ptr<rpc::FlightDescriptor> flight_descriptor;
 //  GetFlightDescriptor(flight_descriptor);
   std::unique_ptr<std::vector<rpc::FlightEndpoint>> endpoints;
-  GetFlightEndpoints(&endpoints, indices);
+
+  GetFlightEndpoints(&endpoints, schema, indices);
 //LOG(INFO) << "endpoints->at(0).ticket.dataset_path: " << endpoints->at(0).ticket.dataset_path;
 //LOG(INFO) << "endpoints->at(0).ticket.partition_identity: " << endpoints->at(0).ticket.partition_identity;
 //LOG(INFO) << "endpoints->at(0).locations.at(0).Tostring(): " << endpoints->at(0).locations.at(0).Tostring();
@@ -64,8 +67,9 @@ Status FlightInfoBuilder::GetFlightDescriptor(std::unique_ptr<rpc::FlightDescrip
   return Status::OK();
 }
 
-Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::FlightEndpoint>>* endpoints, \
-                                              std::vector<int32_t>& indices) {
+Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::FlightEndpoint>>* endpoints,
+                                             std::shared_ptr<arrow::Schema> schema,
+                                             std::vector<int32_t>& indices) {
   // fill ticket and locations in the endpoints
   // every endpoint has 1 ticket + many locations
   // every ticket has 1 dataset_path, 1 partition_id, many column indices.
@@ -83,9 +87,14 @@ Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::Fl
     rpc::FlightEndpoint fep;
   // Ticket ticket;    std::string dataset_path;  std::string partition_identity;  std::vector<int> column_indices;
   // std::vector<Location> locations;
+    std::string schema_string;
+    // rpc::internal::SchemaToString(*(dataset_->get_schema()), &schema);
+    rpc::internal::SchemaToString(*schema, &schema_string);
+    fep.ticket.setSchema(schema_string);
     fep.ticket.setDatasetpath(dataset_->dataset_path());
     fep.ticket.setPartitionid(partit.GetIdentPath());
     fep.ticket.setColids(indices);
+
     fep.locations.push_back(partit.GetLocation());
 //    Location lcn;
 //    rpc::Location::Parse(partit.GetLocationURI(), lcn);
