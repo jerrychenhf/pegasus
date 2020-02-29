@@ -485,6 +485,9 @@ class FlightServiceImpl : public FlightService::Service {
     Ticket ticket;
     SERVICE_RETURN_NOT_OK(flight_context, internal::FromProto(*request, &ticket));
 
+    arrow::ipc::DictionaryMemo dict_memo;
+    SERVICE_RETURN_NOT_OK(flight_context, ticket.DeserializeSchema(&dict_memo));
+
     std::unique_ptr<FlightDataStream> data_stream;
     SERVICE_RETURN_NOT_OK(flight_context,
                           server_->DoGet(flight_context, ticket, &data_stream));

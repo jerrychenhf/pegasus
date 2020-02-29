@@ -169,15 +169,17 @@ arrow::Status Ticket::Deserialize(const std::string& serialized, Ticket* out) {
   return internal::FromProto(pb_ticket, out);
 }
 
-arrow::Status Ticket::GetSchema(arrow::ipc::DictionaryMemo* dictionary_memo,
-                             std::shared_ptr<arrow::Schema>* out) const {
+arrow::Status Ticket::DeserializeSchema(arrow::ipc::DictionaryMemo* dictionary_memo) const {
   if (reconstructed_schema_) {
-    *out = schema_;
     return arrow::Status::OK();
   }
   arrow::io::BufferReader schema_reader(schema);
   RETURN_NOT_OK(arrow::ipc::ReadSchema(&schema_reader, dictionary_memo, &schema_));
   reconstructed_schema_ = true;
+  return arrow::Status::OK();
+}
+
+arrow::Status Ticket::GetSchema(std::shared_ptr<arrow::Schema>* out) const {
   *out = schema_;
   return arrow::Status::OK();
 }

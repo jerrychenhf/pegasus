@@ -91,7 +91,8 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
     // RETURN_IF_ERROR(Status::fromArrowStatus(Table::FromChunkedStructArray(
     //   cache_region->chunked_array(), &table)));
   }
-  auto schema = request_identity->get_schema();
+  std::shared_ptr<arrow::Schema> schema;
+  request_identity->get_schema(&schema);
 
   std::shared_ptr<arrow::Table> table = arrow::Table::Make(schema, columns);
 

@@ -36,7 +36,7 @@ namespace pegasus {
   const std::string& partition_path();
 
   void set_schema(std::shared_ptr<arrow::Schema> schema);
-  std::shared_ptr<arrow::Schema> get_schema();
+  void get_schema(std::shared_ptr<arrow::Schema>* schema);
 
   private:
    std::string dataset_path_;

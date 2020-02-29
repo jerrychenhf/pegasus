@@ -97,10 +97,11 @@ arrow::Status WorkerTableAPIService::CreateDataRequest(const rpc::Ticket& reques
     request.dataset_path, request.partition_identity, request.column_indices);
   
   std::shared_ptr<arrow::Schema> schema;
-  arrow::ipc::DictionaryMemo dict_memo;
-  request.GetSchema(&dict_memo, &schema);
+  arrow::Status status = request.GetSchema(&schema);
+  if(!status.ok()) {
+    return status;
+  }
   request_identity->set_schema(schema);
-  
   return arrow::Status::OK();
 }
 

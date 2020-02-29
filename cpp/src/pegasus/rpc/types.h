@@ -273,8 +273,9 @@ struct PEGASUS_RPC_EXPORT Ticket {
   void setColids(const std::vector<int32_t>& colids) { column_indices = colids; }
   void setSchema(const std::string& schema_string) { schema = schema_string; }
 
-  arrow::Status GetSchema(arrow::ipc::DictionaryMemo* dictionary_memo,
-                  std::shared_ptr<arrow::Schema>* out) const;
+  arrow::Status GetSchema(std::shared_ptr<arrow::Schema>* out) const;
+  
+  arrow::Status DeserializeSchema(arrow::ipc::DictionaryMemo* dictionary_memo) const;
   
   const std::string& serialized_schema() const { return schema; }
 

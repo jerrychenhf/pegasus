@@ -41,8 +41,8 @@ void RequestIdentity::set_schema(shared_ptr<arrow::Schema> schema) {
   schema_ = schema;
 }
 
-std::shared_ptr<arrow::Schema> RequestIdentity::get_schema() {
-  return schema_;
+void RequestIdentity::get_schema(std::shared_ptr<arrow::Schema>* schema) {
+  *schema = schema_;
 }
 
 } // namespace pegasus

@@ -154,7 +154,6 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   }
 
   // std::shared_ptr<arrow::Schema> new_schema = std::make_shared<arrow::Schema>(fields);
-  dataset_request->set_schema(new_schema);
 
   dataset_request->set_column_indices(column_indices);
 

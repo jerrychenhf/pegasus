@@ -51,9 +51,6 @@ class DataSetRequest {
   const std::vector<int32_t>& get_column_indices();
   const std::vector<Filter>& get_filters();
 
-  void set_schema(const std::shared_ptr<arrow::Schema> schema);
-  const std::shared_ptr<arrow::Schema> get_schema();
-
   static const std::string PROVIDER;
   static const std::string FORMAT;
   static const std::string TABLE_LOCATION;
