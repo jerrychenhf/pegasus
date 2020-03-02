@@ -16,14 +16,15 @@
  */
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
-import org.apache.arrow.memory.BufferAllocator
+import org.apache.arrow.memory.{BufferAllocator, RootAllocator}
 import org.apache.pegasus.rpc.FlightClient
 import org.apache.pegasus.rpc.Location
 
-class PegasusClientFactory(allocator: BufferAllocator,
-                           location: Location,
+class PegasusClientFactory(location: Location,
                            username: String,
-                           password: String) {
+                           password: String) extends AutoCloseable {
+
+  private val allocator = new RootAllocator(Long.MaxValue)
 
   def apply: FlightClient = {
     val client = FlightClient.builder(allocator, location).build
@@ -34,4 +35,9 @@ class PegasusClientFactory(allocator: BufferAllocator,
   def getUsername: String = username
 
   def getPassword: String = password
+
+  @throws[Exception]
+  override def close(): Unit = {
+    allocator.close()
+  }
 }

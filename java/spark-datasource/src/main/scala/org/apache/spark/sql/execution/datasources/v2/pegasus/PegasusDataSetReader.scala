@@ -18,7 +18,6 @@ package org.apache.spark.sql.execution.datasources.v2.pegasus
 
 import scala.collection.JavaConverters._
 
-import org.apache.arrow.memory.{BufferAllocator, RootAllocator}
 import org.apache.hadoop.conf.Configuration
 import org.apache.pegasus.rpc.{FlightDescriptor, FlightInfo, Location, Ticket}
 import org.apache.spark.internal.config.ConfigBuilder
@@ -27,7 +26,7 @@ import org.apache.spark.sql.util.CaseInsensitiveStringMap
 class PegasusDataSetReader(
     hadoopConf: Configuration,
     paths: Seq[String],
-    options: CaseInsensitiveStringMap) {
+    options: CaseInsensitiveStringMap) extends AutoCloseable {
 
   private[spark] val PLANNER_HOST = ConfigBuilder("planner.host")
     .doc("Hostname of the planner.")
@@ -49,10 +48,6 @@ class PegasusDataSetReader(
     .stringConf
     .createWithDefault("")
 
-  private val rootAllocator = new RootAllocator(Long.MaxValue)
-  private val allocator: BufferAllocator = rootAllocator.newChildAllocator(paths.toString(),
-    0, rootAllocator.getLimit)
-
   private val plannerHost = options.get(PLANNER_HOST.key)
   private val plannerPort = options.get(PLANNER_PORT.key)
   private val location = Location.forGrpcInsecure(plannerHost, plannerPort.toInt)
@@ -61,16 +56,26 @@ class PegasusDataSetReader(
   private val passWord = options.get(PASSWORD.key)
 
   private val clientFactory = new PegasusClientFactory(
-    allocator, location, userName, passWord)
+      location, userName, passWord)
+  private val client = clientFactory.apply
 
   def getDataSet(): FlightInfo = {
     try {
-      val client = clientFactory.apply
       val descriptor: FlightDescriptor = FlightDescriptor.path(paths.asJava, options)
       client.getInfo(descriptor)
     } catch {
         case e: InterruptedException =>
           throw new RuntimeException(e)
+    }
+  }
+
+  @throws[Exception]
+  override def close(): Unit = {
+    if (client != null) {
+      client.close()
+    }
+    if (clientFactory != null) {
+      clientFactory.close()
     }
   }
 

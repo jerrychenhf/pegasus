@@ -28,7 +28,7 @@ import org.apache.spark.sql.vectorized.ColumnarBatch
   *
   */
 case class PegasusPartitionReaderFactory(
-    paths: Seq[String])extends PartitionReaderFactory with Logging {
+    paths: Seq[String]) extends PartitionReaderFactory with Logging {
 
   override def supportColumnarReads(partition: InputPartition): Boolean = true
 
@@ -60,14 +60,31 @@ case class PegasusPartitionReaderFactory(
 
     val pegasusReader = new PegasusPartitionReader(ticket, location, null, null)
 
-        new PartitionReader[ColumnarBatch] {
-          override def next(): Boolean = pegasusReader.next
-
-          override def get(): ColumnarBatch =
-            pegasusReader.get
-
-          override def close(): Unit = pegasusReader.close
+    new PartitionReader[ColumnarBatch] {
+      override def next(): Boolean = {
+        try {
+          pegasusReader.next
+        } catch {
+          case e: InterruptedException =>
+            throw new RuntimeException(e)
+          case e: Exception =>
+            throw new RuntimeException(e)
         }
+      }
+
+      override def get(): ColumnarBatch = {
+        try {
+          pegasusReader.get
+        } catch {
+          case e: InterruptedException =>
+            throw new RuntimeException(e)
+          case e: Exception =>
+            throw new RuntimeException(e)
+        }
+      }
+
+      override def close(): Unit = pegasusReader.close
+    }
   }
 
   override def createReader(partition: InputPartition): PartitionReader[InternalRow] = {

@@ -17,38 +17,62 @@
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
 import scala.collection.JavaConverters._
-
 import org.apache.pegasus.rpc.FlightClient
 import org.apache.pegasus.rpc.Location
 import org.apache.pegasus.rpc.Ticket
 import org.apache.arrow.memory.RootAllocator
+import org.apache.arrow.util.AutoCloseables
+import org.apache.spark.internal.Logging
 import org.apache.spark.sql.vectorized.{ArrowColumnVector, ColumnVector, ColumnarBatch}
 
 class PegasusPartitionReader(ticket: Ticket,
                              location: Location,
                              username: String,
-                             password: String) {
+                             password: String) extends Logging {
 
-  private val allocator = new RootAllocator
+  private val clientFactory = new PegasusClientFactory(
+    location, null, null)
 
-  private val client = FlightClient.builder(allocator, location).build();
+  val client = clientFactory.apply
   private val stream = client.getStream(ticket)
 
   def next: Boolean = {
-    return stream.next()
+    try {
+      stream.next()
+    } catch {
+      case e: InterruptedException =>
+        throw new RuntimeException(e)
+      case e: Exception =>
+        throw new RuntimeException(e)
+    }
   }
 
   def get: ColumnarBatch = {
-    val columns = stream.getRoot().getFieldVectors().asScala.map { vector =>
-      new ArrowColumnVector(vector).asInstanceOf[ColumnVector]
-    }.toArray
+    try {
+      val columns = stream.getRoot().getFieldVectors().asScala.map { vector =>
+        new ArrowColumnVector(vector).asInstanceOf[ColumnVector]
+      }.toArray
 
-    val batch = new ColumnarBatch(columns)
-    batch.setNumRows(stream.getRoot().getRowCount())
-    batch
+      val batch = new ColumnarBatch(columns)
+      batch.setNumRows(stream.getRoot().getRowCount())
+      batch
+    } catch {
+      case e: InterruptedException =>
+        throw new RuntimeException(e)
+      case e: Exception =>
+        throw new RuntimeException(e)
+    }
   }
 
   def close = {
-
+    if (stream != null) {
+      stream.close()
+    }
+//    if (client != null) {
+//      client.close()
+//    }
+//    if (clientFactory != null) {
+//      clientFactory.close()
+//    }
   }
 }
