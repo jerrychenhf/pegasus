@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -ldl") 
+
 add_custom_target(gen-deps ALL DEPENDS boost_ep glog_ep)
 #add_custom_target(gen-deps ALL DEPENDS boost_ep gflags_ep)
 add_custom_target(pegasus)
