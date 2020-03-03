@@ -42,4 +42,8 @@ std::shared_ptr<arrow::ChunkedArray>  CacheRegion::chunked_array() const {
     return chunked_array_;
 }
 
+std::shared_ptr<CacheMemoryPool> CacheRegion::memory_pool() const {
+ return memory_pool_;
+}
+
 } // namespace pegasus

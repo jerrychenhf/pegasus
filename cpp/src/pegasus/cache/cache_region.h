@@ -42,6 +42,7 @@ class CacheRegion {
   
   int64_t size() const;
   std::shared_ptr<arrow::ChunkedArray> chunked_array() const;
+  std::shared_ptr<CacheMemoryPool> memory_pool() const;
  private:
   // the pool object associated to the chunked array
   // use shared ptr to managed the life time
