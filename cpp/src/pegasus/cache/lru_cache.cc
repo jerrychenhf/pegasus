@@ -144,15 +144,16 @@ Status LRUCache::Init() {
 }
 
 LRUCache::~LRUCache() {
-  if (eviction_callback_ != nullptr) {
-    delete eviction_callback_;
-    eviction_callback_ = nullptr;
-  }
-
-  if (dataset_cache_block_manager_ != nullptr) {
-    delete dataset_cache_block_manager_;
-    dataset_cache_block_manager_ = nullptr;
-  }
+  // the eviction call back may be not need to delete??
+  // if (eviction_callback_ != nullptr) {
+  //   delete eviction_callback_;
+  //   eviction_callback_ = nullptr;
+  // }
+  // here the cache block manager will be delete in cache manager.
+  // if (dataset_cache_block_manager_ != nullptr) {
+  //   delete dataset_cache_block_manager_;
+  //   dataset_cache_block_manager_ = nullptr;
+  // }
 }
 
 LRUCache::PendingEntry LRUCache::Allocate(const CacheKey& key, size_t lru_size) {

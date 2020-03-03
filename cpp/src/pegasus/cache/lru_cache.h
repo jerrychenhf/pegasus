@@ -84,10 +84,18 @@ class LRUCache {
       const std::string& dataset_path = entry_ptr->dataset_path_;
       const std::string& partition_path = entry_ptr->partition_path_;
       int column_id = entry_ptr->column_id_;
+      if (cache_->dataset_cache_block_manager_ == nullptr ||
+       cache_->dataset_cache_block_manager_->GetCachedDatasets().size() == 0) {
+        return;
+      }
 
        // Before insert into the column, check whether the dataset is inserted.
       std::shared_ptr<CachedDataset> dataset;
       cache_->dataset_cache_block_manager_->GetCachedDataSet(dataset_path, &dataset);
+
+      if(dataset->GetCachedPartitions().size() == 0) {
+        return;
+      }
     
       // After check the dataset, continue to check whether the partition is inserted.
       std::shared_ptr<CachedPartition> partition;
