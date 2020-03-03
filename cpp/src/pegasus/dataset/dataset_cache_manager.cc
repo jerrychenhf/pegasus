@@ -82,11 +82,9 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
 
   // std::shared_ptr<Table> table;
   std::vector<std::shared_ptr<ChunkedArray>> columns;
-  unordered_map<int, std::shared_ptr<CacheMemoryPool>> memory_pools;
   for(auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
     std::shared_ptr<CachedColumn> cache_column = iter->second;
     CacheRegion* cache_region = cache_column->GetCacheRegion();
-    memory_pools.insert(std::make_pair(iter->first, cache_region->memory_pool()));
     std::shared_ptr<ChunkedArray> chunked_array = cache_region->chunked_array();
     columns.push_back(chunked_array);
     
@@ -100,7 +98,7 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
 
   *data_stream = std::unique_ptr<rpc::FlightDataStream>(
     new rpc::RecordBatchStream(std::shared_ptr<RecordBatchReader>(
-      new TableBatchReader(*table)), memory_pools[0].get()));
+      new TableBatchReader(*table))));
   
   return Status::OK();
 }
