@@ -14,10 +14,21 @@ out-of-source. If you are not familiar with this terminology:
 
 ### Prerequisites
 
-#### Apache Arrow
-You should have Apache Arrow C++ package installed in your building machine.
+#### Apache Spark
+You should have Apache Spark packages installed in your building machine.
 
-#### Building from Source Code
+##### Building Spark from Source Code
+
+```
+git clone https://github.com/Intel-bigdata/spark-master.git -b pegasus-spark-3.0
+cd spark
+mvn -DskipTests clean install
+```
+
+#### Apache Arrow
+You should have Apache Arrow C++ package and Java package installed in your building machine.
+
+##### Building C++ package from Source Code
 Refer to [Arrow Building document](https://arrow.apache.org/docs/developers/cpp.html#building) for the detail steps and prerequisties for building Arrow.
 
 A few notes for building:
@@ -41,6 +52,14 @@ make install
 Setting up ARROW_HOME variable, add the following command to ~/.bashrc file.
 ```
 export ARROW_HOME=/usr/local
+```
+
+##### Building Java package from Source Code
+
+```
+git clone https://github.com/Intel-bigdata/arrow-master.git -b pegasus-branch
+cd arrow/java
+mvn -DskipTests clean install
 ```
 
 ### Building pegasus C++
