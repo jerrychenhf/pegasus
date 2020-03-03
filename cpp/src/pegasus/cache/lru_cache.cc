@@ -36,6 +36,9 @@
 #include "util/string_case.h"
 #include "common/logging.h"
 
+#include "runtime/worker_exec_env.h"
+#include "dataset/dataset_cache_manager.h"
+
 DEFINE_int64(lru_cache_capacity_mb, 512, "lru cache capacity in MB");
 TAG_FLAG(lru_cache_capacity_mb, stable);
 
@@ -134,9 +137,9 @@ LRUCache::LRUCache(size_t capacity)
     : cache_(CreateCache(capacity)) {
 }
 
-Status LRUCache::Init(
-  DatasetCacheBlockManager* dataset_cache_block_manage) {
-  dataset_cache_block_manager_ = dataset_cache_block_manage;
+Status LRUCache::Init() {
+  WorkerExecEnv* env = WorkerExecEnv::GetInstance();
+  dataset_cache_block_manager_ = env->GetDatasetCacheManager()->cache_block_manager_;
   eviction_callback_ = new LRUEvictionCallback(this);
 }
 

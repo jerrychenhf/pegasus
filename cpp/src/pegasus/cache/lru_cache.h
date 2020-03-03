@@ -197,7 +197,7 @@ class LRUCache {
   // entry in the cache.
   void Insert(PendingEntry* entry, LRUCacheHandle* inserted);
 
-  Status Init(DatasetCacheBlockManager* dataset_cache_block_manage);
+  Status Init();
 
   ~LRUCache();
 

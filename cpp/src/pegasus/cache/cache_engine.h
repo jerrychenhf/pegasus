@@ -30,12 +30,10 @@ namespace pegasus {
 
 class CacheEngineInfo;
 class CacheStoreManager;
-class DatasetCacheManager;
 
 class CacheEngine {
  public:
- virtual Status Init(const std::shared_ptr<CacheEngineInfo>& info,
-   std::shared_ptr<DatasetCacheManager> cache_manager) = 0;
+ virtual Status Init(const std::shared_ptr<CacheEngineInfo>& info) = 0;
  virtual Status GetCacheStore(CacheStore** cache_store) = 0;
  virtual Status PutValue(LRUCache::CacheKey key) = 0;
 
@@ -58,8 +56,7 @@ class LruCacheEngine : public CacheEngine {
     }
   }
   
-  virtual Status Init(const std::shared_ptr<CacheEngineInfo>& info,
-   std::shared_ptr<DatasetCacheManager> cache_manager);
+  virtual Status Init(const std::shared_ptr<CacheEngineInfo>& info);
   
   Status GetCacheStore(CacheStore** cache_store) override;
 
@@ -76,8 +73,7 @@ class NonEvictionCacheEngine : public CacheEngine {
   NonEvictionCacheEngine() {};
   ~NonEvictionCacheEngine() {};
 
-  virtual Status Init(const std::shared_ptr<CacheEngineInfo>& info,
-   std::shared_ptr<DatasetCacheManager> cache_manager) {
+  virtual Status Init(const std::shared_ptr<CacheEngineInfo>& info) {
     return Status::OK();
   }
   
