@@ -28,9 +28,9 @@
 
 namespace pegasus {
 
-DatasetCacheManager::DatasetCacheManager() {
-   ExecEnv* env =  ExecEnv::GetInstance();
-   storage_plugin_factory_ = env->get_storage_plugin_factory();
+DatasetCacheManager::DatasetCacheManager()
+  : cache_engine_manager_(nullptr),
+    cache_block_manager_(nullptr) {
 }
 
 DatasetCacheManager::~DatasetCacheManager() {
@@ -46,6 +46,9 @@ DatasetCacheManager::~DatasetCacheManager() {
 }
 
 Status DatasetCacheManager::Init() {
+  ExecEnv* env =  ExecEnv::GetInstance();
+  storage_plugin_factory_ = env->get_storage_plugin_factory();
+   
   cache_block_manager_ = new DatasetCacheBlockManager();
   cache_engine_manager_ = new DatasetCacheEngineManager();
    
