@@ -50,7 +50,7 @@ Status DatasetCacheEngineManager::Init() {
         new NonEvictionCacheEngine());
     }
     
-    RETURN_IF_ERROR(cache_engine->Init(cache_engine_info));
+    RETURN_IF_ERROR(cache_engine->Init(cache_engine_info, env->GetDatasetCacheManager()));
     cached_engines_.insert(std::make_pair(it->first, cache_engine));
   }
   return Status::OK();

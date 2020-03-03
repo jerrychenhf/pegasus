@@ -18,6 +18,7 @@
 #include "cache/cache_engine.h"
 #include "runtime/worker_config.h"
 #include "cache/cache_store_manager.h"
+#include "dataset/dataset_cache_manager.h"
 
 using namespace std;
 
@@ -28,8 +29,10 @@ LruCacheEngine::LruCacheEngine(int64_t capacity)
   lru_cache_ = new LRUCache(capacity);
 }
 
-Status LruCacheEngine::Init(const std::shared_ptr<CacheEngineInfo>& info) {
+Status LruCacheEngine::Init(const std::shared_ptr<CacheEngineInfo>& info,
+   std::shared_ptr<DatasetCacheManager> cache_manager) {
   RETURN_IF_ERROR(cache_store_manager_->Init(info->cache_stores()));
+  RETURN_IF_ERROR(lru_cache_->Init(cache_manager->cache_block_manager_));
   return Status::OK();
 }
 

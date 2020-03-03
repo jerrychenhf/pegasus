@@ -16,6 +16,7 @@
 // under the License.
 
 #include "dataset/dataset_cache_block_manager.h"
+#include <boost/thread/lock_guard.hpp>
 #include "common/logging.h"
 
 using namespace pegasus;
@@ -66,7 +67,7 @@ Status DatasetCacheBlockManager::GetCachedDataSet(const std::string& dataset_pat
  std::shared_ptr<CachedDataset>* dataset) {
   DatasetKey key(dataset_path);
   {
-    lock_guard<mutex> l(cached_datasets_lock_);
+    boost::lock_guard<boost::mutex> l(cached_datasets_lock_);
     auto entry = cached_datasets_.find(key);
 
    if (entry == cached_datasets_.end()) {
@@ -94,7 +95,7 @@ Status CachedDataset::GetCachedPartition(std::shared_ptr<CachedDataset> cached_d
 
   DatasetKey key(partition_path);
    {
-    lock_guard<mutex> l(cached_partitions_lock_);
+    boost::lock_guard<boost::mutex> l(cached_partitions_lock_);
     auto entry = cached_dataset->cached_partitions_.find(key);
   
     if (entry == cached_dataset->cached_partitions_.end()) {
@@ -120,7 +121,7 @@ Status CachedDataset::GetCachedPartition(std::shared_ptr<CachedDataset> cached_d
    std::shared_ptr<CachedPartition> cached_partition, std::vector<int>  col_ids,
     unordered_map<int, std::shared_ptr<CachedColumn>>* columns) {
   {
-    lock_guard<mutex> l(cached_columns_lock_); 
+    boost::lock_guard<boost::mutex> l(cached_columns_lock_); 
     for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++)
     {
 		  auto entry = cached_partition->cached_columns_.find(*iter);
@@ -136,7 +137,7 @@ Status CachedDataset::GetCachedPartition(std::shared_ptr<CachedDataset> cached_d
 bool CachedPartition::InsertColumn(std::shared_ptr<CachedPartition> cached_partition,
    int column_id, std::shared_ptr<CachedColumn> new_column) {
   {
-    lock_guard<mutex> l(cached_columns_lock_); 
+    boost::lock_guard<boost::mutex> l(cached_columns_lock_); 
     auto entry = cached_partition->cached_columns_.find(column_id);
     if(entry == cached_partition->cached_columns_.end()) {
       // insert new column
@@ -151,7 +152,7 @@ bool CachedPartition::InsertColumn(std::shared_ptr<CachedPartition> cached_parti
 
 Status DatasetCacheBlockManager::DeleteDataset(const std::string& dataset_path) {
   {
-    lock_guard<mutex> l(cached_datasets_lock_);
+    boost::lock_guard<boost::mutex> l(cached_datasets_lock_);
     DatasetKey key(dataset_path);
     cached_datasets_.erase(key);
   }
@@ -161,7 +162,7 @@ Status DatasetCacheBlockManager::DeleteDataset(const std::string& dataset_path) 
 Status CachedDataset::DeletePartition(
   std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path){
   {
-    lock_guard<mutex> l(cached_partitions_lock_); 
+    boost::lock_guard<boost::mutex> l(cached_partitions_lock_); 
     DatasetKey key(partition_path); 
     cached_dataset->cached_partitions_.erase(key);
   }
@@ -171,7 +172,7 @@ Status CachedDataset::DeletePartition(
 Status CachedPartition::DeleteColumn(
   std::shared_ptr<CachedPartition> cached_partition, int column_id) {
   {
-    lock_guard<mutex> l(cached_columns_lock_);   
+    boost::lock_guard<boost::mutex> l(cached_columns_lock_);   
     cached_partition->cached_columns_.erase(column_id);
   } 
   return Status::OK();

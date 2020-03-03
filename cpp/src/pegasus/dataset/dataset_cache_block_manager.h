@@ -19,11 +19,10 @@
 #define PEGASUS_DATASET_CACHE_BLOCK_MANAGER_H
 
 #include <unordered_map>
+#include <boost/thread/mutex.hpp>
 
 #include "dataset/request_identity.h"
-#include "cache/cache_engine.h"
 #include "cache/cache_region.h"
-#include <boost/thread/mutex.hpp>
 
 using namespace std;
 using std::string;

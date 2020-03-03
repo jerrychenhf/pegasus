@@ -36,8 +36,6 @@
 #include "util/string_case.h"
 #include "common/logging.h"
 
-#include "cache/lru_eviction_callback.h"
-
 DEFINE_int64(lru_cache_capacity_mb, 512, "lru cache capacity in MB");
 TAG_FLAG(lru_cache_capacity_mb, stable);
 
@@ -136,6 +134,24 @@ LRUCache::LRUCache(size_t capacity)
     : cache_(CreateCache(capacity)) {
 }
 
+Status LRUCache::Init(
+  DatasetCacheBlockManager* dataset_cache_block_manage) {
+  dataset_cache_block_manager_ = dataset_cache_block_manage;
+  eviction_callback_ = new LRUEvictionCallback(this);
+}
+
+LRUCache::~LRUCache() {
+  if (eviction_callback_ != nullptr) {
+    delete eviction_callback_;
+    eviction_callback_ = nullptr;
+  }
+
+  if (dataset_cache_block_manager_ != nullptr) {
+    delete dataset_cache_block_manager_;
+    dataset_cache_block_manager_ = nullptr;
+  }
+}
+
 LRUCache::PendingEntry LRUCache::Allocate(const CacheKey& key, size_t lru_size) {
   Slice key_slice(reinterpret_cast<const uint8_t*>(&key), sizeof(key));
   return PendingEntry(cache_->Allocate(key_slice, lru_size, key.occupied_size_));
@@ -154,7 +170,7 @@ bool LRUCache::Lookup(const CacheKey& key, Cache::CacheBehavior behavior,
 
 void LRUCache::Insert(LRUCache::PendingEntry* entry, LRUCacheHandle* inserted) {
   auto h(cache_->Insert(std::move(entry->handle_),
-                        new LRUEvictionCallback()));
+                        eviction_callback_));
   inserted->SetHandle(std::move(h));
 }
 

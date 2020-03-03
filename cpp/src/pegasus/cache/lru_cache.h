@@ -28,6 +28,8 @@
 #include "util/cache.h"
 #include "util/slice.h"
 
+#include "dataset/dataset_cache_block_manager.h"
+
 template <class T> class scoped_refptr;
 
 namespace pegasus {
@@ -35,8 +37,6 @@ namespace pegasus {
 class MetricEntity;
 
 class LRUCacheHandle;
-
-class DatasetCacheBlockManager;
 
 // Wrapper around pegasus::Cache specifically for caching blocks of CFiles.
 // Provides a singleton and LRU cache for CFile blocks.
@@ -67,6 +67,44 @@ class LRUCache {
    const std::string& partition_path_;
    int column_id_;
    int64_t occupied_size_;
+  };
+
+  class LRUEvictionCallback : public Cache::EvictionCallback {
+   public:
+    explicit LRUEvictionCallback(
+        LRUCache* cache):
+         cache_(cache) {
+           DCHECK(cache_);
+    }
+
+    void EvictedEntry(Slice key, Slice val) override {
+      // VLOG(2) << strings::Substitute("EvictedEntry callback for key '$0'",
+      //                                key.ToString());
+      auto* entry_ptr = reinterpret_cast<LRUCache::CacheKey*>(val.mutable_data());
+      const std::string& dataset_path = entry_ptr->dataset_path_;
+      const std::string& partition_path = entry_ptr->partition_path_;
+      int column_id = entry_ptr->column_id_;
+
+       // Before insert into the column, check whether the dataset is inserted.
+      std::shared_ptr<CachedDataset> dataset;
+      cache_->dataset_cache_block_manager_->GetCachedDataSet(dataset_path, &dataset);
+    
+      // After check the dataset, continue to check whether the partition is inserted.
+      std::shared_ptr<CachedPartition> partition;
+      dataset->GetCachedPartition(dataset, partition_path, &partition);
+
+      Status status = partition->DeleteColumn(
+        partition, column_id);
+      if (!status.ok()) {
+        stringstream ss;
+        ss << "Failed to delete the column when free the column";
+        LOG(ERROR) << ss.str();
+      }
+    }
+
+   private:
+    DISALLOW_COPY_AND_ASSIGN(LRUEvictionCallback);
+    LRUCache* cache_;
   };
 
   // An entry that is in the process of being inserted into the block
@@ -159,6 +197,10 @@ class LRUCache {
   // entry in the cache.
   void Insert(PendingEntry* entry, LRUCacheHandle* inserted);
 
+  Status Init(DatasetCacheBlockManager* dataset_cache_block_manage);
+
+  ~LRUCache();
+
  private:
   friend class Singleton<LRUCache>;
   LRUCache();
@@ -166,6 +208,9 @@ class LRUCache {
   DISALLOW_COPY_AND_ASSIGN(LRUCache);
 
   gscoped_ptr<Cache> cache_;
+
+  DatasetCacheBlockManager* dataset_cache_block_manager_;
+  LRUEvictionCallback* eviction_callback_;
 };
 
 // Scoped reference to a block from the block cache.
