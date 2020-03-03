@@ -38,7 +38,7 @@ A few notes for building:
 Here are simple steps of building and installing from source.
 
 ```
-git clone https://github.com/Intel-bigdata/arrow-master.git -b pegasus-branch
+git clone https://github.com/Intel-bigdata/arrow-master.git -b pegasus-arrow-1.0
 cd arrow/cpp
 mkdir build-arrow
 cd build-arrow
@@ -57,7 +57,7 @@ export ARROW_HOME=/usr/local
 ##### Building Java package from Source Code
 
 ```
-git clone https://github.com/Intel-bigdata/arrow-master.git -b pegasus-branch
+git clone https://github.com/Intel-bigdata/arrow-master.git -b pegasus-arrow-1.0
 cd arrow/java
 mvn -DskipTests clean install
 ```
