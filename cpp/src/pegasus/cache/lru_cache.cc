@@ -139,21 +139,8 @@ LRUCache::LRUCache(size_t capacity)
 
 Status LRUCache::Init() {
   WorkerExecEnv* env = WorkerExecEnv::GetInstance();
-  dataset_cache_block_manager_ = env->GetDatasetCacheManager()->cache_block_manager_;
-  eviction_callback_ = new LRUEvictionCallback(this);
-}
-
-LRUCache::~LRUCache() {
-  // the eviction call back may be not need to delete??
-  // if (eviction_callback_ != nullptr) {
-  //   delete eviction_callback_;
-  //   eviction_callback_ = nullptr;
-  // }
-  // here the cache block manager will be delete in cache manager.
-  // if (dataset_cache_block_manager_ != nullptr) {
-  //   delete dataset_cache_block_manager_;
-  //   dataset_cache_block_manager_ = nullptr;
-  // }
+  eviction_callback_ = new LRUEvictionCallback(
+    env->GetDatasetCacheManager()->cache_block_manager_);
 }
 
 LRUCache::PendingEntry LRUCache::Allocate(const CacheKey& key, size_t lru_size) {

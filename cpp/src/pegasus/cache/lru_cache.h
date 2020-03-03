@@ -72,9 +72,16 @@ class LRUCache {
   class LRUEvictionCallback : public Cache::EvictionCallback {
    public:
     explicit LRUEvictionCallback(
-        LRUCache* cache):
-         cache_(cache) {
-           DCHECK(cache_);
+        DatasetCacheBlockManager* cache_block_manager):
+         cache_block_manager_(cache_block_manager) {
+           DCHECK(cache_block_manager_);
+    }
+
+    ~LRUEvictionCallback() {
+      if(cache_block_manager_ != nullptr) {
+        delete cache_block_manager_;
+        cache_block_manager_ = nullptr;
+      }
     }
 
     void EvictedEntry(Slice key, Slice val) override {
@@ -84,14 +91,14 @@ class LRUCache {
       const std::string& dataset_path = entry_ptr->dataset_path_;
       const std::string& partition_path = entry_ptr->partition_path_;
       int column_id = entry_ptr->column_id_;
-      if (cache_->dataset_cache_block_manager_ == nullptr ||
-       cache_->dataset_cache_block_manager_->GetCachedDatasets().size() == 0) {
+      if (cache_block_manager_ == nullptr ||
+       cache_block_manager_->GetCachedDatasets().size() == 0) {
         return;
       }
 
        // Before insert into the column, check whether the dataset is inserted.
       std::shared_ptr<CachedDataset> dataset;
-      cache_->dataset_cache_block_manager_->GetCachedDataSet(dataset_path, &dataset);
+      cache_block_manager_->GetCachedDataSet(dataset_path, &dataset);
 
       if(dataset->GetCachedPartitions().size() == 0) {
         return;
@@ -112,7 +119,7 @@ class LRUCache {
 
    private:
     DISALLOW_COPY_AND_ASSIGN(LRUEvictionCallback);
-    LRUCache* cache_;
+    DatasetCacheBlockManager* cache_block_manager_;
   };
 
   // An entry that is in the process of being inserted into the block
@@ -207,8 +214,6 @@ class LRUCache {
 
   Status Init();
 
-  ~LRUCache();
-
  private:
   friend class Singleton<LRUCache>;
   LRUCache();
@@ -217,7 +222,6 @@ class LRUCache {
 
   gscoped_ptr<Cache> cache_;
 
-  DatasetCacheBlockManager* dataset_cache_block_manager_;
   LRUEvictionCallback* eviction_callback_;
 };
 
