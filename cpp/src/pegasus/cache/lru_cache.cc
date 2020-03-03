@@ -36,9 +36,7 @@
 #include "util/string_case.h"
 #include "common/logging.h"
 
-#include "dataset/dataset_cache_manager.h"
-#include "dataset/dataset_cache_block_manager.h"
-#include "runtime/worker_exec_env.h"
+#include "cache/lru_eviction_callback.h"
 
 DEFINE_int64(lru_cache_capacity_mb, 512, "lru cache capacity in MB");
 TAG_FLAG(lru_cache_capacity_mb, stable);
@@ -68,47 +66,6 @@ template <class T> class scoped_refptr;
 namespace pegasus {
 
 class MetricEntity;
-
-class EvictionCallback : public Cache::EvictionCallback {
-   public:
-    explicit EvictionCallback() {
-    }
-
-    void EvictedEntry(Slice key, Slice val) override {
-      // VLOG(2) << strings::Substitute("EvictedEntry callback for key '$0'",
-      //                                key.ToString());
-      auto* entry_ptr = reinterpret_cast<LRUCache::CacheKey*>(val.mutable_data());
-      const std::string& dataset_path = entry_ptr->dataset_path_;
-      const std::string& partition_path = entry_ptr->partition_path_;
-      int column_id = entry_ptr->column_id_;
-
-      WorkerExecEnv* worker_exec = WorkerExecEnv::GetInstance();
-      std::shared_ptr<DatasetCacheManager> cache_manager = worker_exec->GetDatasetCacheManager();
-      if (cache_manager->cache_block_manager_ == nullptr
-       || cache_manager->cache_block_manager_->GetCachedDatasets().size() == 0) {
-        return;
-      }
-       // Before insert into the column, check whether the dataset is inserted.
-      std::shared_ptr<CachedDataset> dataset;
-      cache_manager->cache_block_manager_->GetCachedDataSet(dataset_path, &dataset);
-    
-      // After check the dataset, continue to check whether the partition is inserted.
-      std::shared_ptr<CachedPartition> partition;
-      dataset->GetCachedPartition(dataset, partition_path, &partition);
-
-      Status status = partition->DeleteColumn(
-        partition, column_id);
-      if (!status.ok()) {
-        stringstream ss;
-        ss << "Failed to delete the column when free the column";
-        LOG(ERROR) << ss.str();
-      }
-    }
-
-   private:
-    DISALLOW_COPY_AND_ASSIGN(EvictionCallback);
-};
-
 
 Cache* CreateCache(int64_t capacity) {
   const auto mem_type = LRUCache::GetConfiguredCacheMemoryTypeOrDie();
@@ -197,7 +154,7 @@ bool LRUCache::Lookup(const CacheKey& key, Cache::CacheBehavior behavior,
 
 void LRUCache::Insert(LRUCache::PendingEntry* entry, LRUCacheHandle* inserted) {
   auto h(cache_->Insert(std::move(entry->handle_),
-                        new EvictionCallback()));
+                        new LRUEvictionCallback()));
   inserted->SetHandle(std::move(h));
 }
 
