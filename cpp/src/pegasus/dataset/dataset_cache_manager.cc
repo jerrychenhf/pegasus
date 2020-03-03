@@ -99,10 +99,12 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
 
   std::shared_ptr<arrow::Table> table = arrow::Table::Make(schema, columns);
 
+  // *data_stream = std::unique_ptr<rpc::FlightDataStream>(
+  //   new rpc::RecordBatchStream(std::shared_ptr<RecordBatchReader>(
+  //     new TableBatchReader(*table))));
   *data_stream = std::unique_ptr<rpc::FlightDataStream>(
-    new rpc::RecordBatchStream(std::shared_ptr<RecordBatchReader>(
-      new TableBatchReader(*table))));
-  
+  new rpc::TableRecordBatchStream(table));
+
   return Status::OK();
 }
 

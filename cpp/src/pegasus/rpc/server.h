@@ -32,6 +32,7 @@
 #include "arrow/ipc/dictionary.h"
 #include "arrow/memory_pool.h"
 #include "arrow/record_batch.h"
+#include "arrow/table.h"
 
 namespace pegasus {
 
@@ -77,6 +78,16 @@ class PEGASUS_RPC_EXPORT RecordBatchStream : public FlightDataStream {
  private:
   class RecordBatchStreamImpl;
   std::unique_ptr<RecordBatchStreamImpl> impl_;
+};
+
+class PEGASUS_RPC_EXPORT TableRecordBatchStream : public RecordBatchStream {
+ public:
+  /// \param[in] reader produces a sequence of record batches
+  /// \param[in,out] pool a MemoryPool to use for allocations
+  explicit TableRecordBatchStream(std::shared_ptr<arrow::Table> table);
+
+ private:
+  std::shared_ptr<arrow::Table> table_;
 };
 
 /// \brief A reader for IPC payloads uploaded by a client. Also allows
