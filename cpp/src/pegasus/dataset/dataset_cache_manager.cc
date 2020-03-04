@@ -86,16 +86,21 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
   // std::shared_ptr<Table> table;
   std::vector<std::shared_ptr<ChunkedArray>> chunked_arrays;
   std::vector<std::shared_ptr<CachedColumn>> columns;
-  for(auto iter = cached_columns.begin(); iter != cached_columns.end(); iter ++) {
-    std::shared_ptr<CachedColumn> cache_column = iter->second;
-    CacheRegion* cache_region = cache_column->GetCacheRegion();
-    std::shared_ptr<ChunkedArray> chunked_array = cache_region->chunked_array();
-    chunked_arrays.push_back(chunked_array);
-    columns.push_back(cache_column);
-    
-    // RETURN_IF_ERROR(Status::fromArrowStatus(Table::FromChunkedStructArray(
-    //   cache_region->chunked_array(), &table)));
+
+  std::vector<int> col_ids = request_identity->column_indices();
+  for(int index : col_ids) {
+    auto iter = cached_columns.find(index);
+    if (iter != cached_columns.end()) {
+      std::shared_ptr<CachedColumn> cache_column = iter->second;
+      CacheRegion* cache_region = cache_column->GetCacheRegion();
+      std::shared_ptr<ChunkedArray> chunked_array = cache_region->chunked_array();
+      chunked_arrays.push_back(chunked_array);
+      columns.push_back(cache_column);
+    } else {
+      return Status::ObjectNotFound("can't find the cached column.");
+    }
   }
+
   std::shared_ptr<arrow::Schema> schema;
   request_identity->get_schema(&schema);
 
