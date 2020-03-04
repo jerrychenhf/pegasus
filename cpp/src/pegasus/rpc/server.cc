@@ -916,8 +916,10 @@ arrow::Status RecordBatchStream::GetSchemaPayload(FlightPayload* payload) {
 
 arrow::Status RecordBatchStream::Next(FlightPayload* payload) { return impl_->Next(payload); }
 
-TableRecordBatchStream::TableRecordBatchStream(std::shared_ptr<arrow::Table> table) :
-  RecordBatchStream(std::make_shared<arrow::TableBatchReader>(*table)), table_(table) {
+TableRecordBatchStream::TableRecordBatchStream(std::shared_ptr<arrow::Table> table,
+ std::vector<std::shared_ptr<CachedColumn>> columns) :
+  RecordBatchStream(std::make_shared<arrow::TableBatchReader>(*table)),
+   table_(table), columns_(columns) {
 }
 
 }  // namespace rpc

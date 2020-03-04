@@ -30,7 +30,7 @@ TEST(DatasetCacheManagerTest, Unit) {
 
   WorkerExecEnv exec_env;
   ABORT_IF_ERROR(exec_env.Init());
-  DatasetCacheManager* dataset_cache_manager = new DatasetCacheManager();
+  std::shared_ptr<DatasetCacheManager> dataset_cache_manager(new DatasetCacheManager());
   dataset_cache_manager->Init();
   
   std::string dataset_path = "hdfs://10.239.47.55:9000/genData2/customer";
@@ -46,9 +46,6 @@ TEST(DatasetCacheManagerTest, Unit) {
   std::unique_ptr<rpc::FlightDataStream> data_stream;
   dataset_cache_manager->GetDatasetStream(&request_identity, &data_stream);
   ASSERT_EQ(1, data_stream->schema()->num_fields());
-
- 
-  delete dataset_cache_manager;
 }
 
 }

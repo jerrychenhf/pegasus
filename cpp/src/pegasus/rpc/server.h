@@ -39,6 +39,7 @@ namespace pegasus {
 class MemoryPool;
 class Schema;
 class Status;
+class CachedColumn;
 
 namespace rpc {
 
@@ -84,10 +85,12 @@ class PEGASUS_RPC_EXPORT TableRecordBatchStream : public RecordBatchStream {
  public:
   /// \param[in] reader produces a sequence of record batches
   /// \param[in,out] pool a MemoryPool to use for allocations
-  explicit TableRecordBatchStream(std::shared_ptr<arrow::Table> table);
+  explicit TableRecordBatchStream(std::shared_ptr<arrow::Table> table,
+   std::vector<std::shared_ptr<CachedColumn>> columns);
 
  private:
   std::shared_ptr<arrow::Table> table_;
+  std::vector<std::shared_ptr<CachedColumn>> columns_;
 };
 
 /// \brief A reader for IPC payloads uploaded by a client. Also allows

@@ -19,14 +19,22 @@
 
 #include <dlfcn.h>
 #include <mutex>
+#include <glog/logging.h>
+
 #include "gutil/strings/substitute.h"
 #include "util/scoped_cleanup.h"
+#include "util/flag_tags.h"
+
+#include "cache/store_manager.h"
 
 #ifndef MEMKIND_PMEM_MIN_SIZE
 #define MEMKIND_PMEM_MIN_SIZE (1024 * 1024 * 16) // Taken from memkind 1.9.0.
 #endif
 
-struct memkind;
+DEFINE_bool(dcpmm_cache_simulate_allocation_failure, false,
+            "If true, the dcpmm cache will inject failures in calls to memkind_malloc "
+            "for testing.");
+TAG_FLAG(dcpmm_cache_simulate_allocation_failure, unsafe);
 
 namespace pegasus {
 
@@ -162,16 +170,69 @@ DCPMMStore::DCPMMStore(int64_t capacity)
 }
 
 Status DCPMMStore::Init(const std::unordered_map<string, string>* properties) {
-  //TODO
+  // Get the dcpmm path from properties
+  auto entry  = properties->find(StoreManager::STORE_PROPERTY_PATH);
+
+  if (entry == properties->end()) {
+    return Status::Invalid("Need to specific the DCPMM path first.");
+  }
+  
+  std::string dcpmm_path = entry->second;
+
   // initialize the DCPMM
+  std::call_once(g_memkind_ops_flag, InitMemkindOps);
+
+  // TODO(adar): we should plumb the failure up the call stack, but at the time
+  // of writing the dcpmm cache is only usable by the block cache, and its use of
+  // the singleton pattern prevents the surfacing of errors.
+  CHECK(g_memkind_available) << "Memkind not available!";
+
+  // memkind_create_pmem() will fail if the capacity is too small, but with
+  // an inscrutable error. So, we'll check ourselves.
+  CHECK_GE(capacity_, MEMKIND_PMEM_MIN_SIZE)
+    << "configured capacity " << capacity_ << " bytes is less than "
+    << "the minimum capacity for an dcpmm cache: " << MEMKIND_PMEM_MIN_SIZE;
+  
+  memkind* vmp;
+  int err = CALL_MEMKIND(memkind_create_pmem, dcpmm_path.c_str(), capacity_, &vmp);
+  
+  // If we cannot create the cache pool we should not retry.
+  PLOG_IF(FATAL, err) << "Could not initialize DCPMM cache library in path "
+                           << dcpmm_path.c_str();
   return Status::OK();
 }
 
 Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
+  if (PREDICT_FALSE(FLAGS_dcpmm_cache_simulate_allocation_failure)) {
+    return Status::Invalid("Failed to allocate in DCPMM store");
+  }
+
+  void* p = CALL_MEMKIND(memkind_malloc, vmp_, size);
+
+  uint8_t* address = reinterpret_cast<uint8_t*>(p);
+
+  if (address == nullptr) {
+    return Status::OutOfMemory("Allocate of size ", size, " failed in DCPMM");
+  }
+
+  store_region->reset_address(address, size);
+
+  size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, p);
+  used_size_ += occupied_size;
+
   return Status::OK();
 }
 
 Status DCPMMStore::Free(StoreRegion* store_region) {
+  DCHECK(store_region != NULL);
+  
+  uint8_t* address = store_region->address();
+  
+  used_size_ -= store_region->length();
+  
+  void* p = reinterpret_cast<void*>(address);
+  CALL_MEMKIND(memkind_free, vmp_, p);
+
   return Status::OK();
 }
 

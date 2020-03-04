@@ -24,6 +24,8 @@
 #include "common/status.h"
 #include "cache/store_region.h"
 
+struct memkind;
+
 namespace pegasus {
 
 class Store {
@@ -86,6 +88,7 @@ class DCPMMStore : public Store {
  private:
   int64_t capacity_;
   std::atomic<int64_t> used_size_;
+  memkind* vmp_;
 };
 
 } // namespace pegasus
