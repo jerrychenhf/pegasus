@@ -208,13 +208,11 @@ Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
   }
 
   void* p = CALL_MEMKIND(memkind_malloc, vmp_, size);
+  // if (p == NULL) {
+  //   return Status::OutOfMemory("Allocate of size ", size, " failed in DCPMM");
+  // }
 
   uint8_t* address = reinterpret_cast<uint8_t*>(p);
-
-  if (address == nullptr) {
-    return Status::OutOfMemory("Allocate of size ", size, " failed in DCPMM");
-  }
-
   store_region->reset_address(address, size);
 
   size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, p);
