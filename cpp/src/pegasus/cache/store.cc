@@ -25,16 +25,11 @@
 #include "util/scoped_cleanup.h"
 #include "util/flag_tags.h"
 
+#include "cache/store_manager.h"
+
 #ifndef MEMKIND_PMEM_MIN_SIZE
 #define MEMKIND_PMEM_MIN_SIZE (1024 * 1024 * 16) // Taken from memkind 1.9.0.
 #endif
-
-// Useful in tests that require accurate cache capacity accounting.
-DECLARE_bool(cache_force_single_shard);
-
-DEFINE_string(dcpmm_cache_path, "/pmem",
-              "The path at which the dcpmm cache will try to allocate its memory. "
-              "This can be a tmpfs or ramfs for testing purposes.");
 
 DEFINE_bool(dcpmm_cache_simulate_allocation_failure, false,
             "If true, the dcpmm cache will inject failures in calls to memkind_malloc "
@@ -175,6 +170,15 @@ DCPMMStore::DCPMMStore(int64_t capacity)
 }
 
 Status DCPMMStore::Init(const std::unordered_map<string, string>* properties) {
+  // Get the dcpmm path from properties
+  auto entry  = properties->find(StoreManager::STORE_PROPERTY_PATH);
+
+  if (entry == properties->end()) {
+    return Status::Invalid("Need to specific the DCPMM path first.");
+  }
+  
+  std::string dcpmm_path = entry->second;
+
   // initialize the DCPMM
   std::call_once(g_memkind_ops_flag, InitMemkindOps);
 
@@ -188,13 +192,13 @@ Status DCPMMStore::Init(const std::unordered_map<string, string>* properties) {
   CHECK_GE(capacity_, MEMKIND_PMEM_MIN_SIZE)
     << "configured capacity " << capacity_ << " bytes is less than "
     << "the minimum capacity for an dcpmm cache: " << MEMKIND_PMEM_MIN_SIZE;
-
+  
   memkind* vmp;
-  int err = CALL_MEMKIND(memkind_create_pmem, FLAGS_dcpmm_cache_path.c_str(), capacity_, &vmp);
+  int err = CALL_MEMKIND(memkind_create_pmem, dcpmm_path.c_str(), capacity_, &vmp);
   
   // If we cannot create the cache pool we should not retry.
   PLOG_IF(FATAL, err) << "Could not initialize DCPMM cache library in path "
-                           << FLAGS_dcpmm_cache_path.c_str();
+                           << dcpmm_path.c_str();
   return Status::OK();
 }
 
@@ -228,7 +232,7 @@ Status DCPMMStore::Free(StoreRegion* store_region) {
   
   void* p = reinterpret_cast<void*>(address);
   CALL_MEMKIND(memkind_free, vmp_, p);
-  
+
   return Status::OK();
 }
 
