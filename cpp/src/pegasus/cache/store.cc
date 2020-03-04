@@ -166,7 +166,8 @@ std::string MemoryStore::GetStoreName() {
 
 DCPMMStore::DCPMMStore(int64_t capacity)
   : capacity_(capacity),
-    used_size_(0) {
+    used_size_(0),
+    vmp_(nullptr) {
 }
 
 Status DCPMMStore::Init(const std::unordered_map<string, string>* properties) {
@@ -193,8 +194,7 @@ Status DCPMMStore::Init(const std::unordered_map<string, string>* properties) {
     << "configured capacity " << capacity_ << " bytes is less than "
     << "the minimum capacity for an dcpmm cache: " << MEMKIND_PMEM_MIN_SIZE;
   
-  memkind* vmp;
-  int err = CALL_MEMKIND(memkind_create_pmem, dcpmm_path.c_str(), capacity_, &vmp);
+  int err = CALL_MEMKIND(memkind_create_pmem, dcpmm_path.c_str(), capacity_, &vmp_);
   
   // If we cannot create the cache pool we should not retry.
   PLOG_IF(FATAL, err) << "Could not initialize DCPMM cache library in path "
