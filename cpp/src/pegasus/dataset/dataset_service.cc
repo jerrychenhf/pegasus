@@ -141,8 +141,17 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   arrow::SchemaBuilder builder;
   for (std::string column_name : column_names) {
     int32_t index = schema->GetFieldIndex(column_name);
-    column_indices.push_back(index);
-    builder.AddField(schema->GetFieldByName(column_name));
+    if (index != -1) {
+      column_indices.push_back(index);
+      std::shared_ptr<arrow::Field> field = schema->GetFieldByName(column_name);
+      if (nullptr != field) {
+        builder.AddField(field);
+      } else {
+        Status::Invalid("column name: ", column_name, "can't find in table.");
+      }
+    } else {
+      Status::Invalid("column name: ", column_name, "can't find in table.");
+    }
   }
 
   std::shared_ptr<arrow::Schema> new_schema;
