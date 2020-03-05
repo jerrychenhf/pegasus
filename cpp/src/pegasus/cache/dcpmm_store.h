@@ -15,41 +15,40 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_STORE_H
-#define PEGASUS_STORE_H
+#ifndef PEGASUS_DCPMM_STORE_H
+#define PEGASUS_DCPMM_STORE_H
 
 #include <unordered_map>
 #include <atomic>
 
+#include "cache/store.h"
 #include "common/status.h"
 #include "cache/store_region.h"
 
 struct memkind;
 
 namespace pegasus {
-
-class Store {
+class DCPMMStore : public Store {
  public:
- 
-  virtual Status Init(const std::unordered_map<string, string>* properties) = 0;
-
-  virtual Status Allocate(int64_t size, StoreRegion* store_region) = 0;
-  virtual Status Free(StoreRegion* store_region) = 0;
+  DCPMMStore(int64_t capacity);
   
-  virtual int64_t GetCapacity() = 0;
-  virtual int64_t GetFreeSize() = 0;
-  virtual int64_t GetUsedSize() = 0;
+  virtual Status Init(const std::unordered_map<string, string>* properties);
   
-  virtual std::string GetStoreName() = 0;
+  virtual Status Allocate(int64_t size, StoreRegion* store_region) override;
+  virtual Status Free(StoreRegion* store_region) override;
+  
+  virtual int64_t GetCapacity()override { return capacity_; }
+  virtual int64_t GetFreeSize() override;
+  virtual int64_t GetUsedSize() override;
+  
+  virtual std::string GetStoreName() override;
 
-  enum StoreType {
-    MEMORY,
-    DCPMM,
-    FILE
-  };
-
+ private:
+  int64_t capacity_;
+  std::atomic<int64_t> used_size_;
+  memkind* vmp_;
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_STORE_H
+#endif  // PEGASUS_DCPMM_STORE_H

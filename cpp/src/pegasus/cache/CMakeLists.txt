@@ -23,7 +23,6 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/cache")
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/cache")
 
 add_library(Cache
-  store.cc
   store_manager.cc
   cache_region.cc
   cache_memory_pool.cc
@@ -33,6 +32,7 @@ add_library(Cache
   cache_store.cc
   cache_store_manager.cc
   memory_store.cc
+  dcpmm_store.cc
 )
 add_dependencies(Cache gen-deps)
 
