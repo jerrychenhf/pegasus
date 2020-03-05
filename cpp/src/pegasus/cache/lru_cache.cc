@@ -84,13 +84,13 @@ Cache* CreateCache(int64_t capacity) {
 }
 
 bool ValidateLRUCacheCapacity() {
-  if (FLAGS_force_lru_cache_capacity) {
-    return true;
-  }
-  if (FLAGS_lru_cache_type != "DRAM") {
-    return true;
-  }
-  int64_t capacity = FLAGS_lru_cache_capacity_mb * 1024 * 1024;
+  // if (FLAGS_force_lru_cache_capacity) {
+  //   return true;
+  // }
+  // if (FLAGS_lru_cache_type != "DRAM") {
+  //   return true;
+  // }
+  // int64_t capacity = FLAGS_lru_cache_capacity_mb * 1024 * 1024;
 //   int64_t mpt = process_memory::MemoryPressureThreshold();
 //   if (capacity > mpt) {
 //     LOG(ERROR) << Substitute("lru cache capacity exceeds the memory pressure "
