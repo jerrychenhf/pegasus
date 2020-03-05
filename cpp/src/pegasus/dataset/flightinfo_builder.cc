@@ -42,8 +42,12 @@ Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flig
 //LOG(INFO) << "endpoints->at(0).ticket.dataset_path: " << endpoints->at(0).ticket.dataset_path;
 //LOG(INFO) << "endpoints->at(0).ticket.partition_identity: " << endpoints->at(0).ticket.partition_identity;
 //LOG(INFO) << "endpoints->at(0).locations.at(0).Tostring(): " << endpoints->at(0).locations.at(0).Tostring();
+ 
+  std::string schema_string;
+  rpc::internal::SchemaToString(*(dataset_->get_schema()), &schema_string);
 
   rpc::FlightInfo::Data flight_data;
+  flight_data.schema = schema_string;
   flight_data.descriptor = fldtr;
   flight_data.endpoints = *endpoints;
   flight_data.total_records = GetTotalRecords();
