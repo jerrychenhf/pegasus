@@ -20,6 +20,8 @@
 
 #include <string>
 
+#include <arrow/result.h>
+
 #include "catalog/catalog_manager.h"
 #include "dataset/dataset.h"
 #include "dataset/dataset_store.h"

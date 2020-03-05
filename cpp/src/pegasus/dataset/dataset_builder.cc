@@ -20,7 +20,6 @@
 #include "dataset/consistent_hashing.h"
 #include "dataset/dataset_request.h"
 #include "dataset/partition.h"
-#include "parquet/parquet_metadata.h"
 #include "runtime/planner_exec_env.h"
 
 namespace pegasus {

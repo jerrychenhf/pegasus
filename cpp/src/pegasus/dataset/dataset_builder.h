@@ -21,7 +21,6 @@
 #include "catalog/catalog_manager.h"
 #include "dataset/dataset.h"
 #include "dataset/dataset_request.h"
-#include "parquet/parquet_metadata.h"
 #include "storage/storage_plugin.h"
 #include "storage/storage_plugin_factory.h"
 
