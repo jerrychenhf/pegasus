@@ -59,6 +59,27 @@ Status PlannerTableAPIService::Serve() {
   return Status::OK();
 }
 
+arrow::Status PlannerTableAPIService::GetSchema(const rpc::ServerCallContext& context,
+                                   const rpc::FlightDescriptor& request,
+                                   std::unique_ptr<rpc::SchemaResult>* schema) {
+
+  DataSetRequest dataset_request;
+  LOG(INFO) << "Requesting schema.";
+  arrow::Status st = CreateDataSetRequest(request, &dataset_request);
+
+  if (!st.ok()) {
+    return st;
+  }
+  std::unique_ptr<rpc::FlightInfo> info;
+  Status status = dataset_service_->GetFlightInfo(&dataset_request, &info, request);
+  if (!st.ok()) {
+    return st;
+  }
+  *schema = std::unique_ptr<rpc::SchemaResult>(
+    new rpc::SchemaResult(info->serialized_schema()));
+  return arrow::Status::OK();
+}
+
 /// \brief Retrieve a list of available fields given an optional opaque
 /// criteria
 /// \param[in] context The call context.

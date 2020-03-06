@@ -52,6 +52,10 @@ class PEGASUS_EXPORT PlannerTableAPIService : public rpc::FlightServerBase {
 
   Status Serve();
 
+  arrow::Status GetSchema(const rpc::ServerCallContext& context,
+                           const rpc::FlightDescriptor& request,
+                           std::unique_ptr<rpc::SchemaResult>* schema);
+
   arrow::Status ListFlights(const rpc::ServerCallContext& context, const rpc::Criteria* criteria,
                              std::unique_ptr<rpc::FlightListing>* listings) override;
 
