@@ -14,17 +14,6 @@ out-of-source. If you are not familiar with this terminology:
 
 ### Prerequisites
 
-#### Apache Spark
-You should have Apache Spark packages installed in your building machine.
-
-##### Building Spark from Source Code
-
-```
-git clone https://github.com/Intel-bigdata/spark-master.git -b pegasus-spark-3.0
-cd spark
-mvn -DskipTests clean install
-```
-
 #### Apache Arrow
 You should have Apache Arrow C++ package and Java package installed in your building machine.
 
@@ -57,8 +46,19 @@ export ARROW_HOME=/usr/local
 ##### Building Java package from Source Code
 
 ```
-git clone https://github.com/Intel-bigdata/arrow-master.git -b pegasus-arrow-1.0
+git clone https://github.com/Intel-bigdata/arrow.git -b branch-1.0-pegasus
 cd arrow/java
+mvn -DskipTests clean install
+```
+
+#### Apache Spark
+You should have Apache Spark packages installed in your building machine.
+
+##### Building Spark from Source Code
+
+```
+git clone https://github.com/Intel-bigdata/spark.git -b branch-3.0-pegasus
+cd spark
 mvn -DskipTests clean install
 ```
 
