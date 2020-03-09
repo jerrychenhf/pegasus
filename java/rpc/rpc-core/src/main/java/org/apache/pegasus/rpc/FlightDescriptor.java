@@ -39,6 +39,12 @@ import com.google.protobuf.ByteString;
  */
 public class FlightDescriptor {
 
+  public static final String COLUMN_NAMES = "column.names";
+  public static final String TABLE_LOCATION = "table.location";
+  public static final String PROVIDER = "provider";
+  public static final String PROVIDER_SPARK = "SPARK";
+  public static final String PROVIDER_PEGASUS = "PEGASUS";
+
   private boolean isCmd;
   private List<String> path;
   private byte[] cmd;

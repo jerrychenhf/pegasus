@@ -17,8 +17,11 @@
 
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
+import org.apache.pegasus.rpc.FlightInfo
+import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.connector.read.{Scan, ScanBuilder}
+import org.apache.spark.sql.connector.read.{Scan, ScanBuilder, SupportsPushDownRequiredColumns}
+import org.apache.spark.sql.execution.datasources.PartitioningUtils
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 
@@ -27,9 +30,13 @@ import scala.collection.JavaConverters._
 case class PegasusScanBuilder(
                                sparkSession: SparkSession,
                                paths: Seq[String],
-                               schema: StructType,
-                               options: CaseInsensitiveStringMap)
-  extends ScanBuilder {
+                               dataSchema: StructType,
+                               options: CaseInsensitiveStringMap) extends ScanBuilder
+  with SupportsPushDownRequiredColumns with Logging {
+
+  protected val supportsNestedSchemaPruning = true
+  protected var requiredSchema: StructType = dataSchema
+
   lazy val hadoopConf = {
     val caseSensitiveMap = options.asCaseSensitiveMap.asScala.toMap
     // Hadoop Configurations are case sensitive.
@@ -37,12 +44,23 @@ case class PegasusScanBuilder(
   }
 
   override def build(): Scan = {
-    val pegasusDataSetReader = new PegasusDataSetReader(hadoopConf, paths, options)
-    try {
-      val info = pegasusDataSetReader.getDataSet()
-      PegasusScan(sparkSession, hadoopConf, paths, options, info)
-    } finally {
-      pegasusDataSetReader.close()
+    PegasusScan(sparkSession, hadoopConf, paths, dataSchema, readDataSchema(), options)
+  }
+
+  override def pruneColumns(requiredSchema: StructType): Unit = {
+    this.requiredSchema = requiredSchema
+    logInfo("required schema: " + requiredSchema)
+  }
+
+  /**
+   * Returns the required data schema
+   */
+  protected def readDataSchema(): StructType = {
+    if (supportsNestedSchemaPruning && requiredSchema.length != 0) {
+      requiredSchema
+    } else {
+      dataSchema
     }
   }
+
 }

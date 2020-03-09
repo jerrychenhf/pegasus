@@ -18,10 +18,11 @@ package org.apache.spark.sql.execution.datasources.v2.pegasus
 
 import java.util
 
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{AnalysisException, SparkSession}
 import org.apache.spark.sql.connector.catalog.{SupportsRead, Table, TableCapability}
+import org.apache.spark.sql.execution.streaming.MetadataLogFileIndex
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.util.CaseInsensitiveStringMap
+import org.apache.spark.sql.util.{ArrowUtils, CaseInsensitiveStringMap}
 
 import scala.collection.JavaConverters._
 
@@ -36,9 +37,41 @@ case class PegasusTable(
   override def newScanBuilder(options: CaseInsensitiveStringMap): PegasusScanBuilder =
     new PegasusScanBuilder(sparkSession, paths, schema, options)
 
-  override def schema(): StructType = StructType(Seq())
-
   override def capabilities(): util.Set[TableCapability] = {
     Set(TableCapability.BATCH_READ, TableCapability.ACCEPT_ANY_SCHEMA).asJava
   }
+
+  override lazy val schema: StructType = {
+    val schema = userSpecifiedSchema.map { schema =>
+      StructType(schema)
+    }.orElse {
+      inferSchema()
+    }.getOrElse {
+      throw new AnalysisException(
+        s"Unable to infer schema. It must be specified manually.")
+    }
+    schema
+  }
+
+  def inferSchema(): Option[StructType] = {
+
+    val pegasusDataSetReader = new PegasusDataSetReader(sparkSession, paths, options.asScala.toMap)
+    val schema  = {
+      try {
+        pegasusDataSetReader.getSchema()
+      } catch {
+        case e: Exception =>
+          throw new RuntimeException(e)
+      } finally {
+        pegasusDataSetReader.close()
+      }
+    }
+
+    if (schema != null && schema.getSchema != null) {
+      Some(ArrowUtils.fromArrowSchema(schema.getSchema))
+    } else {
+      Some(StructType(Seq()))
+    }
+  }
+
 }

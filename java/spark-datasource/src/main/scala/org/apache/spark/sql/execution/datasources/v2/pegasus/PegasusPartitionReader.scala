@@ -37,6 +37,7 @@ class PegasusPartitionReader(ticket: Ticket,
   private val stream = client.getStream(ticket)
 
   def next: Boolean = {
+    logInfo("partition schema: " + stream.getRoot.getSchema)
     try {
       stream.next()
     } catch {
@@ -68,11 +69,11 @@ class PegasusPartitionReader(ticket: Ticket,
     if (stream != null) {
       stream.close()
     }
-//    if (client != null) {
-//      client.close()
-//    }
-//    if (clientFactory != null) {
-//      clientFactory.close()
-//    }
+    if (client != null) {
+      client.close()
+    }
+    if (clientFactory != null) {
+      clientFactory.close()
+    }
   }
 }

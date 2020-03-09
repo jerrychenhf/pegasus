@@ -18,9 +18,12 @@ package org.apache.spark.examples
 
 import java.util.Properties
 
+import org.apache.spark
 import org.apache.spark.SparkConf
 import org.apache.spark.internal.config.UI.UI_ENABLED
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.internal.SQLConf
+import org.apache.spark.sql.functions._
 
 object DataFrameExample {
 
@@ -36,20 +39,18 @@ object DataFrameExample {
       .set("spark.testing.memory", "10240000000")
 
     val sparkSession = SparkSession.builder.config(conf).getOrCreate()
-
     val sqlContext = sparkSession.sqlContext
-    val reader = sqlContext.read.format("pegasus")
 
-//    val path = "hdfs://10.239.47.55:9000/genData2/customer"
-    val path = "hdfs://10.239.47.55:9000/genData2/income_band"
-    val count = reader
-      .option("planner.port", "30001")
-      .option("planner.host", "localhost")
-      .option("provider", "SPARK")
-      .option("table.location", path)
+    val reader = sqlContext.read.format("pegasus")
+    val path = "hdfs://10.239.47.55:9000/genData2/customer"
+//    val path = "hdfs://10.239.47.55:9000/genData2/income_band"
+    val df = reader
       .option("format", "PARQUET")
       .load(path)
-      .count()
+
+    val df1 = df.select("c_customer_sk")
+    df1.printSchema()
+    println("table first row: " + df1.head().toString())
 
     sparkSession.stop()
   }

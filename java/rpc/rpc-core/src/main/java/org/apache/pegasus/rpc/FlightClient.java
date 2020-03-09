@@ -68,6 +68,7 @@ import io.netty.handler.ssl.SslContextBuilder;
  * Client for Flight services.
  */
 public class FlightClient implements AutoCloseable {
+
   private static final int PENDING_REQUESTS = 5;
   /** The maximum number of trace events to keep on the gRPC Channel. This value disables channel tracing. */
   private static final int MAX_CHANNEL_TRACE_EVENTS = 0;

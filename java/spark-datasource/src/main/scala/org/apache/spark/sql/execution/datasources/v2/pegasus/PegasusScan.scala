@@ -19,7 +19,7 @@ package org.apache.spark.sql.execution.datasources.v2.pegasus
 import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
-import org.apache.pegasus.rpc.{FlightInfo, Location, Ticket}
+import org.apache.pegasus.rpc.{FlightDescriptor, FlightInfo, Location, Ticket}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.read.{Batch, InputPartition, PartitionReaderFactory, Scan}
@@ -34,8 +34,9 @@ case class PegasusScan(
     sparkSession: SparkSession,
     hadoopConf: Configuration,
     paths: Seq[String],
-    options: CaseInsensitiveStringMap,
-    flightInfo: FlightInfo)
+    dataSchema: StructType,
+    readDataSchema: StructType,
+    options: CaseInsensitiveStringMap)
   extends Scan with Batch with Logging {
 
 
@@ -44,10 +45,10 @@ case class PegasusScan(
     */
   def isSplitable(path: Path): Boolean = true
 
-  /**
-    * Returns the required data schema
-    */
-  def readDataSchema: StructType = StructType(Seq())
+//  /**
+//    * Returns the required data schema
+//    */
+//  def readDataSchema: StructType = StructType(Seq())
 
   override def createReaderFactory(): PartitionReaderFactory = {
 
@@ -80,6 +81,27 @@ case class PegasusScan(
   }
 
   protected def partitions: Seq[PegasusPartition] = {
+    val fieldsString = readDataSchema.fields.map {
+      col => col.name
+    }.mkString(",")
+
+    val properties: Map[String, String] = Seq(
+      FlightDescriptor.COLUMN_NAMES -> fieldsString).toMap
+
+    logInfo("partition fields: " + fieldsString)
+
+    val pegasusDataSetReader = new PegasusDataSetReader(sparkSession, paths,
+      options.asScala.toMap ++ properties)
+    val flightInfo = {
+      try {
+        pegasusDataSetReader.getDataSet()
+      } catch {
+        case e: Exception =>
+          throw new RuntimeException(e)
+      } finally {
+        pegasusDataSetReader.close()
+      }
+    }
 
     val partitions = new ArrayBuffer[PegasusPartition]
     val endpoints = flightInfo.getEndpoints.asScala
@@ -98,7 +120,8 @@ case class PegasusScan(
 
   override def toBatch: Batch = this
 
-  override def readSchema(): StructType =
+  override def readSchema(): StructType = {
     StructType(readDataSchema.fields)
+  }
 
 }

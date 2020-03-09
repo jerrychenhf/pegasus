@@ -17,56 +17,43 @@
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
 import scala.collection.JavaConverters._
-
-import org.apache.hadoop.conf.Configuration
-import org.apache.pegasus.rpc.{FlightDescriptor, FlightInfo, Location, Ticket}
-import org.apache.spark.internal.config.ConfigBuilder
-import org.apache.spark.sql.util.CaseInsensitiveStringMap
+import org.apache.pegasus.rpc.{FlightDescriptor, FlightInfo, Location, SchemaResult}
+import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.internal.PegasusConf
 
 class PegasusDataSetReader(
-    hadoopConf: Configuration,
+    sparkSession: SparkSession,
     paths: Seq[String],
-    options: CaseInsensitiveStringMap) extends AutoCloseable {
+    options: Map[String, String]) extends AutoCloseable {
 
-  private[spark] val PLANNER_HOST = ConfigBuilder("planner.host")
-    .doc("Hostname of the planner.")
-    .stringConf
-    .createWithDefault("localhost")
+  private val plannerHost = sparkSession.conf.get(
+    PegasusConf.PLANNER_HOST.key, PegasusConf.PLANNER_HOST.defaultValue.get)
+  private val plannerPort = sparkSession.conf.get(
+    PegasusConf.PLANNER_PORT.key, PegasusConf.PLANNER_PORT.defaultValue.get)
 
-  private[spark] val PLANNER_PORT = ConfigBuilder("planner.port")
-    .doc("Port of the planner.")
-    .stringConf
-    .createWithDefault("30001")
-
-  private[spark] val USERNAME = ConfigBuilder("username")
-    .doc("username to access the planner.")
-    .stringConf
-    .createWithDefault("anonymous")
-
-  private[spark] val PASSWORD = ConfigBuilder("password")
-    .doc("password to access the planner.")
-    .stringConf
-    .createWithDefault("")
-
-  private val plannerHost = options.get(PLANNER_HOST.key)
-  private val plannerPort = options.get(PLANNER_PORT.key)
   private val location = Location.forGrpcInsecure(plannerHost, plannerPort.toInt)
 
-  private val userName = options.get(USERNAME.key)
-  private val passWord = options.get(PASSWORD.key)
+  private val userName = sparkSession.conf.get(
+    PegasusConf.USERNAME.key, PegasusConf.USERNAME.defaultValue.get)
+  private val passWord = sparkSession.conf.get(
+    PegasusConf.PASSWORD.key, PegasusConf.PASSWORD.defaultValue.get)
 
   private val clientFactory = new PegasusClientFactory(
       location, userName, passWord)
   private val client = clientFactory.apply
 
+  private val properties: Map[String, String] = Seq(
+    FlightDescriptor.PROVIDER -> FlightDescriptor.PROVIDER_SPARK,
+    FlightDescriptor.TABLE_LOCATION -> paths(0)).toMap
+
   def getDataSet(): FlightInfo = {
-    try {
-      val descriptor: FlightDescriptor = FlightDescriptor.path(paths.asJava, options)
-      client.getInfo(descriptor)
-    } catch {
-        case e: InterruptedException =>
-          throw new RuntimeException(e)
-    }
+    val descriptor: FlightDescriptor = FlightDescriptor.path(paths.asJava, (properties ++ options).asJava)
+    client.getInfo(descriptor)
+  }
+
+  def getSchema(): SchemaResult = {
+    val descriptor = FlightDescriptor.path(paths.asJava, (properties ++ options).asJava)
+    client.getSchema(descriptor)
   }
 
   @throws[Exception]
@@ -78,5 +65,4 @@ class PegasusDataSetReader(
       clientFactory.close()
     }
   }
-
 }
