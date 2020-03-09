@@ -27,7 +27,7 @@ A few notes for building:
 Here are simple steps of building and installing from source.
 
 ```
-git clone https://github.com/Intel-bigdata/arrow-master.git -b pegasus-arrow-1.0
+git clone https://github.com/Intel-bigdata/arrow.git -b branch-1.0-pegasus
 cd arrow/cpp
 mkdir build-arrow
 cd build-arrow
