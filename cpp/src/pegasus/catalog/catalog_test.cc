@@ -33,7 +33,7 @@ namespace pegasus {
 TEST(SpakrCatalogTest, Unit) {
 
   //TODO: create a test file.
-  std::string dataset_path = "hdfs://10.239.47.55:9000/genData2/customer";
+  std::string dataset_path = "hdfs://10.239.47.55:9000/genData1000/customer";
 
   DataSetRequest dataset_request;
   dataset_request.set_dataset_path(dataset_path);
