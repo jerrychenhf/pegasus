@@ -46,6 +46,13 @@ Status DataSetService::Init() {
   return Status::OK();
 }
 
+Status DataSetService::NotifyWorkersChange() {
+
+  //
+  dataset_store_->InvalidateAll();
+  return Status::OK();
+}
+
 Status DataSetService::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
 
   dataset_store_->GetDataSets(datasets);
@@ -82,7 +89,28 @@ Status DataSetService::GetDataSet(DataSetRequest* dataset_request, std::shared_p
     (*dataset)->unlockwrite();
     // End Write
   }
-  else
+  else if (pds->needRefresh())
+  {
+//    auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
+    // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
+//    dsbuilder->BuildDataset(dataset_request, dataset, CONHASH);
+    auto distributor = std::make_shared<ConsistentHashRing>(); 
+    distributor->PrepareValidLocations(nullptr, nullptr);
+    distributor->SetupDist();
+    auto partitions = std::make_shared<std::vector<Partition>>();
+    for (auto ptt : pds->partitions()) {
+      Partition partition = Partition(Identity(pds->dataset_path(), ptt.GetIdentPath()));
+      partitions->push_back(partition);
+    }
+
+    // keep the existing dataset pointer in dataset_store, only update data
+    pds->lockwrite();
+    //replacePartitions(std::vector<Partition> partits)
+    pds->replacePartitions(*partitions);
+    pds->resetRefreshFlag();
+    pds->unlockwrite();
+  }
+  else  // exists and is uptodate
   {
     pds->lockread();
 //    *dataset = std::shared_ptr<DataSet>(new DataSet(*pds));
@@ -107,6 +135,47 @@ Status DataSetService::CacheDataSet(DataSetRequest* dataset_request, std::shared
   dataset_store_->InsertDataSet(std::shared_ptr<DataSet>(*dataset));
   (*dataset)->unlockwrite();
   // End Write
+
+  return Status::OK();
+}
+
+Status DataSetService::UpdateDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset, int distpolicy) {
+#if 0
+  // (ToBeUpdated: build the dataset and replace the corresponding pointer in dataset store.)
+  std::shared_ptr<DataSet> pds = NULL;
+  std::string dataset_path = dataset_request->get_dataset_path();
+  dataset_store_->GetDataSet(dataset_path, &pds);
+  if (pds == NULL) {
+    LOG(ERROR) << "UpdateDataSet():GetDataSet() get null pointer for dataset " << dataset_path;
+    return Status::Invalid("UpdateDataSet():GetDataSet() get null pointer.");
+  }
+  else
+  {
+    
+  }
+  
+
+  auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
+  // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
+  RETURN_IF_ERROR(dsbuilder->BuildDataset(dataset_request, dataset, distpolicy));
+  // Begin Write
+  (*dataset)->lockwrite();
+  dataset_store_->UpdateDataSet(std::shared_ptr<DataSet>(*dataset));
+  (*dataset)->unlockwrite();
+  // End Write
+#endif
+  return Status::OK();
+}
+
+Status DataSetService::RemoveDataSet(DataSetRequest* dataset_request) {
+
+  std::shared_ptr<DataSet> pds = NULL;
+  std::string dataset_path = dataset_request->get_dataset_path();
+  dataset_store_->GetDataSet(dataset_path, &pds);
+//Status DataSetStore::RemoveDataSet(std::shared_ptr<DataSet> dataset)
+  pds->lockwrite();
+  dataset_store_->RemoveDataSet(pds);
+  pds->unlockwrite();
 
   return Status::OK();
 }

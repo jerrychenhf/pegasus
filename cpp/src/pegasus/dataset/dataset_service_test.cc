@@ -160,7 +160,7 @@ TEST(DatasetServiceTest, DatasetService)
 
 //  std::string test_dataset_path = "hostnameplusfolderpath";
 //  std::string test_dataset_path = "hdfs://10.239.47.55:9000/genData2/customer/part-00000-1fafbf9f-6edf-4f8f-8b51-268708b6f6c5-c000.snappy.parquet";
-  std::string test_dataset_path = "hdfs://10.239.47.55:9000/genData2/customer";
+  std::string test_dataset_path = "hdfs://10.239.47.55:9000/genData1000/customer";
   auto parttftrs = std::make_shared<std::vector<Filter>>();
 
   std::unique_ptr<rpc::FlightInfo> flight_info;
@@ -185,7 +185,7 @@ TEST(DatasetServiceTest, DatasetService)
   ASSERT_OK(st);
 
   // check data correctness
-  ASSERT_EQ(1, flight_info->endpoints().size());
+  ASSERT_EQ(6, flight_info->endpoints().size());
   const std::vector<rpc::FlightEndpoint> endpoints = flight_info->endpoints();
   for (rpc::FlightEndpoint endpoint : endpoints) {
     ASSERT_EQ(test_dataset_path, endpoint.ticket.getDatasetpath());

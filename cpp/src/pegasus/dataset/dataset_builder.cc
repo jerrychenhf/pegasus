@@ -62,7 +62,7 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
   distributor->SetupDist();
 
   // create partitions with identities
-  auto vectident = std::make_shared<std::vector<Identity>>();
+//  auto vectident = std::make_shared<std::vector<Identity>>();
   auto partitions = std::make_shared<std::vector<Partition>>();
   
   // setup the identity vector for ondisk dataset
@@ -71,14 +71,17 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
 
   std::shared_ptr<arrow::Schema> schema;
 
+LOG(INFO) << "Getting catalog ...";
   if (catalog->GetCatalogType() == Catalog::SPARK) {
     std::string table_location;
     RETURN_IF_ERROR(catalog->GetTableLocation(dataset_request, table_location));
     std::shared_ptr<StoragePlugin> storage_plugin;
+LOG(INFO) << "Getting storage plugin ...";
     RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(table_location, &storage_plugin));
     std::vector<std::string> file_list;
     RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list));
 
+LOG(INFO) << "Filling partitions ...";
     for (auto filepath : file_list) {
       Partition partition = Partition(Identity(table_location, filepath));
       partitions->push_back(partition);
@@ -89,6 +92,7 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
     return Status::Invalid("Invalid catalog type: ", catalog->GetCatalogType());
   }
 
+LOG(INFO) << "Getting distLocations from distributor...";
   // allocate location for each partition
 //  auto vectloc = std::make_shared<std::vector<Location>>();
   distributor->GetDistLocations(partitions);
