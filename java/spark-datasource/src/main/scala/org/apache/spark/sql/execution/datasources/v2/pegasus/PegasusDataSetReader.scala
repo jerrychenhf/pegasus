@@ -18,13 +18,14 @@ package org.apache.spark.sql.execution.datasources.v2.pegasus
 
 import scala.collection.JavaConverters._
 import org.apache.pegasus.rpc.{FlightDescriptor, FlightInfo, Location, SchemaResult}
+import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.internal.PegasusConf
 
 class PegasusDataSetReader(
     sparkSession: SparkSession,
     paths: Seq[String],
-    options: Map[String, String]) extends AutoCloseable {
+    options: Map[String, String]) extends AutoCloseable with Logging  {
 
   private val plannerHost = sparkSession.conf.get(
     PegasusConf.PLANNER_HOST.key, PegasusConf.PLANNER_HOST.defaultValue.get)
@@ -43,7 +44,7 @@ class PegasusDataSetReader(
   private val client = clientFactory.apply
 
   private val properties: Map[String, String] = Seq(
-    FlightDescriptor.PROVIDER -> FlightDescriptor.PROVIDER_SPARK,
+    FlightDescriptor.CATALOG_PROVIDER -> FlightDescriptor.CATALOG_PROVIDER_SPARK,
     FlightDescriptor.TABLE_LOCATION -> paths(0)).toMap
 
   def getDataSet(): FlightInfo = {

@@ -20,7 +20,6 @@ import java.util
 
 import org.apache.spark.sql.{AnalysisException, SparkSession}
 import org.apache.spark.sql.connector.catalog.{SupportsRead, Table, TableCapability}
-import org.apache.spark.sql.execution.streaming.MetadataLogFileIndex
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.util.{ArrowUtils, CaseInsensitiveStringMap}
 

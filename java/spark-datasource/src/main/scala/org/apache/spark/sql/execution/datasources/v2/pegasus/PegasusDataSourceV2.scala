@@ -66,7 +66,7 @@ class PegasusDataSourceV2 extends TableProvider with DataSourceRegister {
     val paths = Option(map.get("paths")).map { pathStr =>
       objectMapper.readValue(pathStr, classOf[Array[String]]).toSeq
     }.getOrElse(Seq.empty)
-    paths ++ Option(map.get("path")).toSeq
+    paths ++ Option(map.get("path")).toSeq ++ Option(map.get("location")).toSeq
   }
 
   protected def getTableName(paths: Seq[String]): String = {
