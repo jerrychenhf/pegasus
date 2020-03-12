@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.arrow.memory.BufferAllocator;
@@ -314,6 +315,9 @@ class ArrowMessage implements AutoCloseable {
           size += paddingBytes;
           allBufs.add(PADDING_BUFFERS.get(paddingBytes).retain());
         }
+        // gRPC/Netty will decrement the reference count (via the ByteBufInputStream below) when written, so increment
+        // the reference count
+        b.getReferenceManager().retain();
       }
       // rawvarint is used for length definition.
       cos.writeUInt32NoTag(size);
@@ -332,7 +336,7 @@ class ArrowMessage implements AutoCloseable {
 
   }
 
-  private class DrainableByteBufInputStream extends ByteBufInputStream implements Drainable {
+  private static class DrainableByteBufInputStream extends ByteBufInputStream implements Drainable {
 
     private final CompositeByteBuf buf;
 
@@ -387,9 +391,6 @@ class ArrowMessage implements AutoCloseable {
 
   @Override
   public void close() throws Exception {
-    AutoCloseables.close(bufs);
-    if (appMetadata != null) {
-      appMetadata.close();
-    }
+    AutoCloseables.close(Iterables.concat(bufs, Collections.singletonList(appMetadata)));
   }
 }

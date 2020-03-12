@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.stream.Collectors;
 
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.util.AutoCloseables;
@@ -41,8 +40,6 @@ import org.apache.arrow.vector.util.DictionaryUtility;
 import org.apache.pegasus.rpc.ArrowMessage.HeaderType;
 import org.apache.pegasus.rpc.grpc.StatusUtils;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.SettableFuture;
 
 import io.grpc.stub.StreamObserver;
@@ -53,14 +50,15 @@ import io.netty.buffer.ArrowBuf;
  */
 public class FlightStream implements AutoCloseable {
 
-
-  private final Object DONE = new Object();
-  private final Object DONE_EX = new Object();
-
+  // Use AutoCloseable sentinel objects to simplify logic in #close
+  private final AutoCloseable DONE = () -> {
+  };
+  private final AutoCloseable DONE_EX = () -> {
+  };
 
   private final BufferAllocator allocator;
   private final Cancellable cancellable;
-  private final LinkedBlockingQueue<Object> queue = new LinkedBlockingQueue<>();
+  private final LinkedBlockingQueue<AutoCloseable> queue = new LinkedBlockingQueue<>();
   private final SettableFuture<VectorSchemaRoot> root = SettableFuture.create();
   private final int pendingTarget;
   private final Requestor requestor;
@@ -72,7 +70,6 @@ public class FlightStream implements AutoCloseable {
   private volatile VectorLoader loader;
   private volatile Throwable ex;
   private volatile FlightDescriptor descriptor;
-  private volatile Schema schema;
   private volatile ArrowBuf applicationMetadata = null;
 
   /**
@@ -92,7 +89,7 @@ public class FlightStream implements AutoCloseable {
   }
 
   public Schema getSchema() {
-    return schema;
+    return getRoot().getSchema();
   }
 
   /**
@@ -131,7 +128,13 @@ public class FlightStream implements AutoCloseable {
     return provider;
   }
 
+  /**
+   * Get the descriptor for this stream. Only applicable on the server side of a DoPut operation. Will block until the
+   * client sends the descriptor.
+   */
   public FlightDescriptor getDescriptor() {
+    // This blocks until the schema message (with the descriptor) is sent.
+    getRoot();
     return descriptor;
   }
 
@@ -141,23 +144,21 @@ public class FlightStream implements AutoCloseable {
    * <p>If the stream is isn't complete and is cancellable this method will cancel the stream first.</p>
    */
   public void close() throws Exception {
-    if (!completed && cancellable != null) {
-      cancel("Stream closed before end.", null);
+    final List<AutoCloseable> closeables = new ArrayList<>();
+    // cancellation can throw, but we still want to clean up resources, so make it an AutoCloseable too
+    closeables.add(() -> {
+      if (!completed && cancellable != null) {
+        cancel("Stream closed before end.", /* no exception to report */ null);
+      }
+    });
+    closeables.add(root.get());
+    closeables.add(applicationMetadata);
+    closeables.addAll(queue);
+    if (dictionaries != null) {
+      dictionaries.getDictionaryIds().forEach(id -> closeables.add(dictionaries.lookup(id).getVector()));
     }
-    List<AutoCloseable> closeables = ImmutableList.copyOf(queue.toArray()).stream()
-        .filter(t -> AutoCloseable.class.isAssignableFrom(t.getClass()))
-        .map(t -> ((AutoCloseable) t))
-        .collect(Collectors.toList());
 
-    final List<FieldVector> dictionaryVectors =
-        dictionaries == null ? Collections.emptyList() : dictionaries.getDictionaryIds().stream()
-        .map(id -> dictionaries.lookup(id).getVector()).collect(Collectors.toList());
-
-    // Must check for null since ImmutableList doesn't accept nulls
-    AutoCloseables.close(Iterables.concat(closeables,
-        dictionaryVectors,
-        applicationMetadata != null ? ImmutableList.of(root.get(), applicationMetadata)
-            : ImmutableList.of(root.get())));
+    AutoCloseables.close(closeables);
   }
 
   /**
@@ -235,7 +236,14 @@ public class FlightStream implements AutoCloseable {
     }
   }
 
-  /** Get the current vector data from the stream. */
+  /**
+   * Get the current vector data from the stream.
+   *
+   * <p>The data in the root may change at any time. Clients should NOT modify the root, but instead unload the data
+   * into their own root.
+   *
+   * @throws FlightRuntimeException if there was an error reading the schema from the stream.
+   */
   public VectorSchemaRoot getRoot() {
     try {
       return root.get();
@@ -266,7 +274,7 @@ public class FlightStream implements AutoCloseable {
 
   private class Observer implements StreamObserver<ArrowMessage> {
 
-    public Observer() {
+    Observer() {
       super();
     }
 
@@ -275,7 +283,7 @@ public class FlightStream implements AutoCloseable {
       requestOutstanding();
       switch (msg.getMessageType()) {
         case SCHEMA: {
-          schema = msg.asSchema();
+          Schema schema = msg.asSchema();
           final List<Field> fields = new ArrayList<>();
           final Map<Long, Dictionary> dictionaryMap = new HashMap<>();
           for (final Field originalField : schema.getFields()) {

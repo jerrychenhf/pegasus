@@ -19,9 +19,7 @@ package org.apache.pegasus.rpc;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.pegasus.rpc.impl.Flight;
