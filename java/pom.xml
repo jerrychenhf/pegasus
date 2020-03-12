@@ -30,9 +30,8 @@
     <dep.junit.platform.version>1.4.0</dep.junit.platform.version>
     <dep.junit.jupiter.version>5.4.0</dep.junit.jupiter.version>
     <dep.guava.version>20.0</dep.guava.version>
-    <dep.netty.version>4.1.27.Final</dep.netty.version>
+    <dep.netty.version>4.1.38.Final</dep.netty.version>
     <dep.jackson.version>2.10.0</dep.jackson.version>
-    <dep.hadoop.version>2.7.1</dep.hadoop.version>
     <dep.fbs.version>1.9.0</dep.fbs.version>
     <dep.flatc.version>1.9.0</dep.flatc.version>
     <arrow.vector.classifier />
@@ -48,11 +47,73 @@
     <log4j.version>1.2.17</log4j.version>
     <slf4j.version>1.7.16</slf4j.version>
     <spark.version>3.1.0-SNAPSHOT</spark.version>
+    <hadoop.version>2.7.4</hadoop.version>
+    <commons.version>3.9</commons.version>
   </properties>
 
   <repositories>
-
+    <repository>
+      <id>gcs-maven-central-mirror</id>
+      <!--
+        Google Mirror of Maven Central, placed first so that it's used instead of flaky Maven Central.
+        See https://storage-download.googleapis.com/maven-central/index.html
+      -->
+      <name>GCS Maven Central mirror</name>
+      <url>https://maven-central.storage-download.googleapis.com/maven2/</url>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
+    </repository>
+    <repository>
+      <!--
+        This is used as a fallback when the first try fails.
+      -->
+      <id>central</id>
+      <name>Maven Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
+    </repository>
   </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>gcs-maven-central-mirror</id>
+      <!--
+        Google Mirror of Maven Central, placed first so that it's used instead of flaky Maven Central.
+        See https://storage-download.googleapis.com/maven-central/index.html
+      -->
+      <name>GCS Maven Central mirror</name>
+      <url>https://maven-central.storage-download.googleapis.com/maven2/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+    <pluginRepository>
+      <id>central</id>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 
   <build>
 
@@ -188,11 +249,8 @@
               <rules>
                 <bannedDependencies>
                   <excludes>
-                    <exclude>commons-logging</exclude>
-                    <exclude>javax.servlet:servlet-api</exclude>
                     <exclude>org.mortbay.jetty:servlet-api</exclude>
                     <exclude>org.mortbay.jetty:servlet-api-2.5</exclude>
-                    <exclude>log4j:log4j</exclude>
                   </excludes>
                 </bannedDependencies>
               </rules>
@@ -257,11 +315,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${dep.guava.version}</version>
-          </dependency>
-          <dependency>
-              <groupId>org.slf4j</groupId>
-              <artifactId>jcl-over-slf4j</artifactId>
-              <version>1.7.5</version>
           </dependency>
         </dependencies>
         <executions>
@@ -591,6 +644,12 @@
         <version>3.0.8</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.scalactic</groupId>
+        <artifactId>scalactic_${scala.binary.version}</artifactId>
+        <version>3.0.8</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -607,22 +666,6 @@
       <artifactId>slf4j-log4j12</artifactId>
       <version>${slf4j.version}</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jul-to-slf4j</artifactId>
-      <version>${slf4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-      <version>${slf4j.version}</version>
-      <!-- runtime scope is appropriate, but causes SBT build problems -->
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>${log4j.version}</version>
     </dependency>
 
     <dependency>
