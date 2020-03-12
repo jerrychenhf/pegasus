@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <memory>
 #include <iostream>
+#include <chrono>
 #include <gtest/gtest.h>
 #include "test/gtest-util.h"
 #include "dataset/dataset_service.h"
@@ -157,6 +158,7 @@ TEST(DatasetServiceTest, DatasetService)
   exec_env_->get_worker_manager()->Heartbeat(hbinfo, &hbresult);
   hbinfo.type = rpc::HeartbeatInfo::HeartbeatType::HEARTBEAT;
   exec_env_->get_worker_manager()->Heartbeat(hbinfo, &hbresult);
+LOG(INFO) << "=== node1 registered === : " << hbinfo.hostname;
 
 //  std::string test_dataset_path = "hostnameplusfolderpath";
 //  std::string test_dataset_path = "hdfs://10.239.47.55:9000/genData2/customer/part-00000-1fafbf9f-6edf-4f8f-8b51-268708b6f6c5-c000.snappy.parquet";
@@ -178,11 +180,17 @@ TEST(DatasetServiceTest, DatasetService)
   fldtr.cmd = "testcmd";
   fldtr.path.push_back("a sample path");
 //  fldtr.properties;
+
+  { // first read
+LOG(INFO) << "=== GetFlightInfo === ";
+  std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
   // Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   //                                   std::unique_ptr<rpc::FlightInfo>* flight_info)
   //                                   const rpc::FlightDescriptor& fldtr);
   Status st = dataset_service_->GetFlightInfo(&dataset_request, &flight_info, fldtr);
   ASSERT_OK(st);
+  std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+LOG(INFO) << "time span: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " microseconds";
 
   // check data correctness
   ASSERT_EQ(6, flight_info->endpoints().size());
@@ -194,6 +202,158 @@ TEST(DatasetServiceTest, DatasetService)
       ASSERT_EQ(10010, location.port());
     }
   }
+  } // first read
+
+  { // second read
+LOG(INFO) << "=== GetFlightInfo again === ";
+  // get flightinfo again, this time the data should be read from datastore
+  flight_info.reset();
+  std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+  Status st = dataset_service_->GetFlightInfo(&dataset_request, &flight_info, fldtr);
+  ASSERT_OK(st);
+  std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+LOG(INFO) << "time span: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " microseconds";
+
+  // check data correctness
+  ASSERT_EQ(6, flight_info->endpoints().size());
+  const std::vector<rpc::FlightEndpoint> endpoints = flight_info->endpoints();
+  for (rpc::FlightEndpoint endpoint : endpoints) {
+    ASSERT_EQ(test_dataset_path, endpoint.ticket.getDatasetpath());
+    auto locations = endpoint.locations;
+    for (auto location : locations) {
+      ASSERT_EQ(10010, location.port());
+    }
+  }
+  } // second read
+}
+#endif
+#if 1
+TEST(DatasetServiceTest, WorkerNodesChange)
+{
+  std::unique_ptr<PlannerExecEnv> exec_env_(new PlannerExecEnv());
+  auto dataset_service_ = std::unique_ptr<DataSetService>(new DataSetService());
+  dataset_service_->Init();
+//  std::cout << "addressof dataset_service_: " << std::addressof(dataset_service_) << std::endl;
+  //  std::cout << "value dataset_service_: " << std::static_cast<uint64_t>(dataset_service_) << std::endl;
+//  std::cout << "dataset_service_.get(): " << dataset_service_.get() << std::endl;
+
+  rpc::HeartbeatInfo hbinfo;
+  std::unique_ptr<rpc::HeartbeatResult> hbresult;
+/*
+  HeartbeatType type;
+  std::string hostname;
+  std::shared_ptr<Location> address;
+  std::shared_ptr<NodeInfo> node_info;
+    int64_t cache_capacity;
+    int64_t cache_free;
+*/
+  // the first worker node
+  hbinfo.type = rpc::HeartbeatInfo::HeartbeatType::REGISTRATION;
+  hbinfo.hostname = "localhost:10011";
+  Location location1;
+  Location::ForGrpcTcp("localhost", 10011, &location1);
+  hbinfo.address = std::make_shared<Location>(location1);
+  hbinfo.node_info = std::make_shared<rpc::NodeInfo>();
+  hbinfo.node_info->cache_capacity = 1024*1024*1024; //bytes
+  hbinfo.node_info->cache_free = 1024*1024*1024; //bytes
+
+//Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info, std::unique_ptr<rpc::HeartbeatResult>* result)
+  exec_env_->get_worker_manager()->Heartbeat(hbinfo, &hbresult);
+  hbinfo.type = rpc::HeartbeatInfo::HeartbeatType::HEARTBEAT;
+  exec_env_->get_worker_manager()->Heartbeat(hbinfo, &hbresult);
+LOG(INFO) << "=== worker node1 added === : " << hbinfo.hostname;
+
+  // the 2nd worker node
+  hbinfo.type = rpc::HeartbeatInfo::HeartbeatType::REGISTRATION;
+  hbinfo.hostname = "127.0.0.1:10012";
+  Location location2;
+  Location::ForGrpcTcp("127.0.0.1", 10012, &location2);
+  hbinfo.address = std::make_shared<Location>(location2);
+  hbinfo.node_info = std::make_shared<rpc::NodeInfo>();
+  hbinfo.node_info->cache_capacity = (int64_t)(2)*(1024*1024*1024); //bytes
+  hbinfo.node_info->cache_free = (int64_t)(2)*(1024*1024*1024); //bytes
+
+//  std::unique_ptr<rpc::HeartbeatResult> hbresult;
+//Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info, std::unique_ptr<rpc::HeartbeatResult>* result)
+  exec_env_->get_worker_manager()->Heartbeat(hbinfo, &hbresult);
+  hbinfo.type = rpc::HeartbeatInfo::HeartbeatType::HEARTBEAT;
+  exec_env_->get_worker_manager()->Heartbeat(hbinfo, &hbresult);
+LOG(INFO) << "=== worker node2 added === : " << hbinfo.hostname;
+
+//  std::string test_dataset_path = "hostnameplusfolderpath";
+//  std::string test_dataset_path = "hdfs://10.239.47.55:9000/genData2/customer/part-00000-1fafbf9f-6edf-4f8f-8b51-268708b6f6c5-c000.snappy.parquet";
+  std::string test_dataset_path = "hdfs://10.239.47.55:9000/genData1000/customer";
+  auto parttftrs = std::make_shared<std::vector<Filter>>();
+
+  std::unique_ptr<rpc::FlightInfo> flight_info;
+
+  DataSetRequest dataset_request;
+  dataset_request.set_dataset_path(test_dataset_path);
+  DataSetRequest::RequestProperties properties;
+
+  properties[DataSetRequest::TABLE_LOCATION] = test_dataset_path;
+  properties[DataSetRequest::CATALOG_PROVIDER] = "SPARK";
+  // properties[DataSetRequest::COLUMN_NAMES] = "a, b, c";
+  dataset_request.set_properties(properties);
+  rpc::FlightDescriptor fldtr;
+  fldtr.type = rpc::FlightDescriptor::DescriptorType::PATH;
+  fldtr.cmd = "testcmd";
+  fldtr.path.push_back("a sample path");
+//  fldtr.properties;
+  { // 1st read
+LOG(INFO) << "=== GetFlightInfo 1st time === ";
+  std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+  // Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
+  //                                   std::unique_ptr<rpc::FlightInfo>* flight_info)
+  //                                   const rpc::FlightDescriptor& fldtr);
+  Status st = dataset_service_->GetFlightInfo(&dataset_request, &flight_info, fldtr);
+  ASSERT_OK(st);
+  std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+LOG(INFO) << "time span: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " microseconds";
+  }
+
+  // worker node3 is added
+  // the 3rd worker node
+  hbinfo.type = rpc::HeartbeatInfo::HeartbeatType::REGISTRATION;
+  hbinfo.hostname = "127.0.0.3:10013";
+  Location location3;
+  Location::ForGrpcTcp("127.0.0.3", 10013, &location3);
+  hbinfo.address = std::make_shared<Location>(location3);
+  hbinfo.node_info = std::make_shared<rpc::NodeInfo>();
+  hbinfo.node_info->cache_capacity = (int64_t)(2)*(1024*1024*1024); //bytes
+  hbinfo.node_info->cache_free = (int64_t)(2)*(1024*1024*1024); //bytes
+
+//  std::unique_ptr<rpc::HeartbeatResult> hbresult;
+//Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info, std::unique_ptr<rpc::HeartbeatResult>* result)
+  exec_env_->get_worker_manager()->Heartbeat(hbinfo, &hbresult);
+  hbinfo.type = rpc::HeartbeatInfo::HeartbeatType::HEARTBEAT;
+  exec_env_->get_worker_manager()->Heartbeat(hbinfo, &hbresult);
+LOG(INFO) << "=== worker node3 added === : " << hbinfo.hostname;
+  dataset_service_->NotifyWorkersChange();
+LOG(INFO) << "=== Notified dataset service module on the change === : " << hbinfo.hostname;
+
+  { // read again
+LOG(INFO) << "=== GetFlightInfo after new worker node added === ";
+  flight_info.reset();
+  std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+  Status st = dataset_service_->GetFlightInfo(&dataset_request, &flight_info, fldtr);
+  ASSERT_OK(st);
+  std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+LOG(INFO) << "time span: " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " microseconds";
+  }
+
+#if 0
+  // check data correctness
+  ASSERT_EQ(6, flight_info->endpoints().size());
+  const std::vector<rpc::FlightEndpoint> endpoints = flight_info->endpoints();
+  for (rpc::FlightEndpoint endpoint : endpoints) {
+    ASSERT_EQ(test_dataset_path, endpoint.ticket.getDatasetpath());
+    auto locations = endpoint.locations;
+    for (auto location : locations) {
+      ASSERT_EQ(10011, location.port());
+    }
+  }
+#endif
   // 
 }
 #endif

@@ -83,6 +83,7 @@ LOG(INFO) << "Getting storage plugin ...";
 
 LOG(INFO) << "Filling partitions ...";
     for (auto filepath : file_list) {
+LOG(INFO) << "\t" << filepath;
       Partition partition = Partition(Identity(table_location, filepath));
       partitions->push_back(partition);
     }

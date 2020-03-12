@@ -66,6 +66,7 @@ Status DataSetService::GetDataSet(DataSetRequest* dataset_request, std::shared_p
   dataset_store_->GetDataSet(dataset_path, &pds);
 
   if (pds == NULL) {
+LOG(INFO) << "=== Not found, creating new dataset ...";
     // === CacheDataSet(dataset_path, dataset, CONHASH);
     // build the dataset and insert it to dataset store.
     auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
@@ -91,6 +92,7 @@ Status DataSetService::GetDataSet(DataSetRequest* dataset_request, std::shared_p
   }
   else if (pds->needRefresh())
   {
+LOG(INFO) << "=== Found but not uptodate, refreshing ...";
 //    auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
     // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
 //    dsbuilder->BuildDataset(dataset_request, dataset, CONHASH);
@@ -108,10 +110,12 @@ Status DataSetService::GetDataSet(DataSetRequest* dataset_request, std::shared_p
     //replacePartitions(std::vector<Partition> partits)
     pds->replacePartitions(*partitions);
     pds->resetRefreshFlag();
+    *dataset = pds;
     pds->unlockwrite();
   }
   else  // exists and is uptodate
   {
+LOG(INFO) << "=== Found and uptodate";
     pds->lockread();
 //    *dataset = std::shared_ptr<DataSet>(new DataSet(*pds));
     *dataset = std::make_shared<DataSet>(pds->GetData());
@@ -185,9 +189,11 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
                                      std::unique_ptr<rpc::FlightInfo>* flight_info,
                                      const rpc::FlightDescriptor& fldtr) {
 
+LOG(INFO) << "GetFlightInfo()...";
   std::shared_ptr<DataSet> dataset = nullptr;
   RETURN_IF_ERROR(GetDataSet(dataset_request, &dataset));
 
+LOG(INFO) << "Filtering the dataSet";
   std::shared_ptr<ResultDataSet> rdataset;
   // Filter dataset
   dataset->lockread();
@@ -199,6 +205,7 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
   }
 
   // map the column names to column indices
+LOG(INFO) << "Mapping the column names to column indices";
   std::vector<std::string> column_names = dataset_request->get_column_names();
   std::vector<int32_t> column_indices;
   std::shared_ptr<arrow::Schema> schema = rdataset->get_schema();
@@ -235,6 +242,7 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
 
   dataset_request->set_column_indices(column_indices);
 
+LOG(INFO) << "Building flightinfo";
   flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdataset));
   RETURN_IF_ERROR(flightinfo_builder_->BuildFlightInfo(flight_info, new_schema, column_indices, (rpc::FlightDescriptor&)fldtr));
   return Status::OK();
@@ -243,6 +251,7 @@ Status DataSetService::GetFlightInfo(DataSetRequest* dataset_request,
 Status DataSetService::FilterDataSet(const std::vector<Filter>& parttftr, std::shared_ptr<DataSet> dataset,
                                      std::shared_ptr<ResultDataSet>* resultdataset)
 {
+LOG(INFO) << "FilterDataSet()...";
   //TODO: filter the dataset
   ResultDataSet::Data rdata;
   rdata.dataset_path = dataset->dataset_path();
@@ -253,6 +262,7 @@ Status DataSetService::FilterDataSet(const std::vector<Filter>& parttftr, std::s
   *resultdataset = std::make_shared<ResultDataSet>(std::move(rdata));
   (*resultdataset)->set_schema(dataset->get_schema());
 
+LOG(INFO) << "...FilterDataSet()";
   return Status::OK();
 }
 

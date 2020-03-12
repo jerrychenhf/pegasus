@@ -68,10 +68,14 @@ LOG(INFO) << "== nodecachesize(MB): " << it->node_info()->get_cache_capacity()/(
 
 Status ConsistentHashRing::SetupDist()
 {
+LOG(INFO) << "SetupDist()...";
 	if (validlocations_)
 	{
 		for (unsigned int i=0; i<validlocations_->size(); i++)
+		{
 			AddLocation(i);
+LOG(INFO) << "Added location: " << i;
+		}
 		return Status::OK();
 	}
 	else
@@ -84,12 +88,16 @@ Status ConsistentHashRing::SetupDist()
 
 void ConsistentHashRing::AddLocation(unsigned int locidx)
 {
-	int num_vn = nodecacheMB_->at(locidx) / 1000;
+	int num_vn = nodecacheMB_->at(locidx) / 100;
 	num_vn = std::max(MIN_VIRT_NODE_NUM, num_vn);
 	num_vn = std::min(MAX_VIRT_NODE_NUM, num_vn);
 
-	std::string node = validlocations_->at(locidx).ToString() + "_" + std::to_string(num_vn);
-	consistent_hash_.insert(node);
+	for (int i=0; i<num_vn; i++)
+	{
+		std::string node = validlocations_->at(locidx).ToString() + "_" + std::to_string(i);
+LOG(INFO) << "consistent_hash_.insert(" << node << ");";
+		consistent_hash_.insert(node);
+	}
 }
 
 void ConsistentHashRing::AddLocation(Location location)

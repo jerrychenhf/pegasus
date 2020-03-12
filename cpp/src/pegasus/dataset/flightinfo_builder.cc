@@ -34,6 +34,8 @@ Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flig
                                           std::shared_ptr<arrow::Schema> schema,
                                           std::vector<int32_t>& indices,
                                           rpc::FlightDescriptor& fldtr) {
+
+LOG(INFO) << "BuildFlightInfo()...";
 //  std::unique_ptr<rpc::FlightDescriptor> flight_descriptor;
 //  GetFlightDescriptor(flight_descriptor);
   std::unique_ptr<std::vector<rpc::FlightEndpoint>> endpoints;
@@ -57,7 +59,6 @@ Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flig
   *flight_info  = std::unique_ptr<rpc::FlightInfo>(new rpc::FlightInfo(std::move(flight_data)));
 
 LOG(INFO) << "FlightInfoBuilder::BuildFlightInfo() finished successfully.";
-
   return Status::OK();
 }
 
@@ -74,6 +75,8 @@ Status FlightInfoBuilder::GetFlightDescriptor(std::unique_ptr<rpc::FlightDescrip
 Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::FlightEndpoint>>* endpoints,
                                              std::shared_ptr<arrow::Schema> schema,
                                              std::vector<int32_t>& indices) {
+
+LOG(INFO) << "GetFlightEndpoints()...";
   // fill ticket and locations in the endpoints
   // every endpoint has 1 ticket + many locations
   // every ticket has 1 dataset_path, 1 partition_id, many column indices.
@@ -106,8 +109,7 @@ Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::Fl
     (*endpoints)->push_back(fep);
   }
 
-LOG(INFO) << "GetFlightEndpoints() finished successfully.";
-
+LOG(INFO) << "...GetFlightEndpoints()";
   return Status::OK();
 }
 
