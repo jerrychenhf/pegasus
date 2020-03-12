@@ -39,7 +39,7 @@ add_library(DataSet
   dataset_cache_engine_manager.cc
   request_identity.cc
 )
-add_dependencies(DataSet gen-deps)
+add_dependencies(DataSet gen-deps pegasus_grpc_gen)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++0x")
 
