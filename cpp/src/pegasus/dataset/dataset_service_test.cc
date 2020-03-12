@@ -103,7 +103,7 @@ TEST(DatasetServiceTest, DataSetStoreBasic)
 
   DataSetRequest::RequestProperties properties;
   properties[DataSetRequest::TABLE_LOCATION] = test_dataset_path;
-  properties[DataSetRequest::PROVIDER] = "SPARK";
+  properties[DataSetRequest::CATALOG_PROVIDER] = "SPARK";
   dataset_request.set_properties(properties);
 
   // Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
@@ -170,7 +170,7 @@ TEST(DatasetServiceTest, DatasetService)
   DataSetRequest::RequestProperties properties;
 
   properties[DataSetRequest::TABLE_LOCATION] = test_dataset_path;
-  properties[DataSetRequest::PROVIDER] = "SPARK";
+  properties[DataSetRequest::CATALOG_PROVIDER] = "SPARK";
   // properties[DataSetRequest::COLUMN_NAMES] = "a, b, c";
   dataset_request.set_properties(properties);
   rpc::FlightDescriptor fldtr;
