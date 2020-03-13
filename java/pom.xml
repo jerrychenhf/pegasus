@@ -34,8 +34,10 @@
     <dep.jackson.version>2.10.0</dep.jackson.version>
     <dep.fbs.version>1.9.0</dep.fbs.version>
     <dep.flatc.version>1.9.0</dep.flatc.version>
+    <dep.protobuf.version>3.7.1</dep.protobuf.version>
     <arrow.vector.classifier />
     <forkCount>2</forkCount>
+
     <checkstyle.failOnViolation>false</checkstyle.failOnViolation>
     <errorprone.javac.version>9+181-r4173-1</errorprone.javac.version>
     <arrow.version>0.16.0</arrow.version>
