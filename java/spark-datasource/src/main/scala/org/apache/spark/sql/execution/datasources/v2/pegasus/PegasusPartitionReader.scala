@@ -62,14 +62,14 @@ class PegasusPartitionReader(ticket: Ticket,
   }
 
   def close = {
+    if (stream != null) {
+      stream.close()
+    }
     if (clientFactory != null) {
       clientFactory.close()
     }
     if (client != null) {
       client.close()
-    }
-    if (stream != null) {
-      stream.close()
     }
   }
 }
