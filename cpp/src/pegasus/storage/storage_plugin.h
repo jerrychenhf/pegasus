@@ -26,11 +26,13 @@ namespace pegasus {
 using HadoopFileSystem = arrow::io::HadoopFileSystem;
 using HdfsConnectionConfig = arrow::io::HdfsConnectionConfig;
 using HdfsReadableFile = arrow::io::HdfsReadableFile;
+using HdfsPathInfo = arrow::io::HdfsPathInfo;
 
 class StoragePlugin {
  public:
   virtual Status Init(std::string host, int32_t port) = 0;
   virtual Status Connect() = 0;
+  virtual Status GetPathInfo(std::string dataset_path, HdfsPathInfo* file_info) = 0;
   virtual Status ListFiles(std::string dataset_path, std::vector<std::string>* file_list) = 0;
   virtual Status GetReadableFile(std::string file_path, std::shared_ptr<HdfsReadableFile>* file) = 0;
     
@@ -52,6 +54,7 @@ class HDFSStoragePlugin : public StoragePlugin {
   ~HDFSStoragePlugin();
   Status Init(std::string host, int32_t port) override;
   Status Connect() override;
+  Status GetPathInfo(std::string dataset_path, HdfsPathInfo* file_info) override;
   Status ListFiles(std::string dataset_path, std::vector<std::string>* file_list) override;
   Status GetReadableFile(std::string file_path, std::shared_ptr<HdfsReadableFile>* file) override;
   StoragePluginType GetPluginType() override;

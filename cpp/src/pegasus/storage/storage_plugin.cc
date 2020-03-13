@@ -76,13 +76,18 @@ Status HDFSStoragePlugin::Connect() {
   return Status::OK();
 }
 
+Status HDFSStoragePlugin::GetPathInfo(std::string dataset_path, HdfsPathInfo* file_info) {
+
+  arrow::Status arrowStatus = client_->GetPathInfo(dataset_path, file_info);
+  RETURN_IF_ERROR(Status::fromArrowStatus(arrowStatus));;
+  return Status::OK();
+}
+
 Status HDFSStoragePlugin::ListFiles(std::string dataset_path, std::vector<std::string>* file_list) {
   
-  Status status;
   std::vector<HdfsPathInfo> children;
   arrow::Status arrowStatus = client_->ListDirectory(dataset_path, &children);
-  status = Status::fromArrowStatus(arrowStatus);
-  RETURN_IF_ERROR(status);
+  RETURN_IF_ERROR(Status::fromArrowStatus(arrowStatus));;
 
   for (const auto& child_info : children) {
 
