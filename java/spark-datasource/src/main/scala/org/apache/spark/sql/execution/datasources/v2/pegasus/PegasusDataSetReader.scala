@@ -59,11 +59,11 @@ class PegasusDataSetReader(
 
   @throws[Exception]
   override def close(): Unit = {
-    if (client != null) {
-      client.close()
-    }
     if (clientFactory != null) {
       clientFactory.close()
+    }
+    if (client != null) {
+      client.close()
     }
   }
 }

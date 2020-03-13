@@ -22,7 +22,6 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.read.{InputPartition, PartitionReader, PartitionReaderFactory}
 import org.apache.spark.sql.vectorized.ColumnarBatch
 
-
 /**
   * A factory used to create Pegasus Partition readers.
   *
@@ -62,25 +61,11 @@ case class PegasusPartitionReaderFactory(
 
     new PartitionReader[ColumnarBatch] {
       override def next(): Boolean = {
-        try {
-          pegasusReader.next
-        } catch {
-          case e: InterruptedException =>
-            throw new RuntimeException(e)
-          case e: Exception =>
-            throw new RuntimeException(e)
-        }
+        pegasusReader.next
       }
 
       override def get(): ColumnarBatch = {
-        try {
-          pegasusReader.get
-        } catch {
-          case e: InterruptedException =>
-            throw new RuntimeException(e)
-          case e: Exception =>
-            throw new RuntimeException(e)
-        }
+        pegasusReader.get
       }
 
       override def close(): Unit = pegasusReader.close

@@ -41,8 +41,6 @@ class PegasusPartitionReader(ticket: Ticket,
     try {
       stream.next()
     } catch {
-      case e: InterruptedException =>
-        throw new RuntimeException(e)
       case e: Exception =>
         throw new RuntimeException(e)
     }
@@ -58,22 +56,20 @@ class PegasusPartitionReader(ticket: Ticket,
       batch.setNumRows(stream.getRoot().getRowCount())
       batch
     } catch {
-      case e: InterruptedException =>
-        throw new RuntimeException(e)
       case e: Exception =>
         throw new RuntimeException(e)
     }
   }
 
   def close = {
-    if (stream != null) {
-      stream.close()
+    if (clientFactory != null) {
+      clientFactory.close()
     }
     if (client != null) {
       client.close()
     }
-    if (clientFactory != null) {
-      clientFactory.close()
+    if (stream != null) {
+      stream.close()
     }
   }
 }
