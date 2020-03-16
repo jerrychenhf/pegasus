@@ -64,12 +64,13 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
   // create partitions with identities
 //  auto vectident = std::make_shared<std::vector<Identity>>();
   auto partitions = std::make_shared<std::vector<Partition>>();
-  
+
   // setup the identity vector for ondisk dataset
   std::shared_ptr<Catalog> catalog;
   RETURN_IF_ERROR(catalog_manager_->GetCatalog(dataset_request, &catalog));
 
   std::shared_ptr<arrow::Schema> schema;
+  uint64_t timestamp = 0;
 
 LOG(INFO) << "Getting catalog ...";
   if (catalog->GetCatalogType() == Catalog::SPARK) {
@@ -89,11 +90,13 @@ LOG(INFO) << "\t" << filepath;
     }
 
     RETURN_IF_ERROR(catalog->GetSchema(dataset_request, &schema));
+
+    RETURN_IF_ERROR(storage_plugin->GetModifedTime(table_location, &timestamp));
   } else {
     return Status::Invalid("Invalid catalog type: ", catalog->GetCatalogType());
   }
 
-LOG(INFO) << "Getting distLocations from distributor...";
+LOG(INFO) << "Updating distLocations from distributor...";
   // allocate location for each partition
 //  auto vectloc = std::make_shared<std::vector<Location>>();
   distributor->GetDistLocations(partitions);
@@ -106,11 +109,40 @@ LOG(INFO) << "Getting distLocations from distributor...";
 
   *dataset = std::make_shared<DataSet>(dd);
   (*dataset)->set_schema(schema);
+  (*dataset)->setTimestamp(timestamp);
 
 LOG(INFO) << "BuildDataset() finished successfully.";
 
   return Status::OK();
 }
+
+Status DataSetBuilder::BuildDatasetPartitions(std::string table_location, std::shared_ptr<StoragePlugin> storage_plugin, 
+                                              std::shared_ptr<std::vector<Partition>> partitions,
+                                              int distpolicy)
+{
+  auto distributor = std::make_shared<ConsistentHashRing>(); 
+  // TODO: get locations here to decouple distributor from workermanager
+  distributor->PrepareValidLocations(nullptr, nullptr);
+  distributor->SetupDist();
+
+  std::vector<std::string> file_list;
+  RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list));
+
+LOG(INFO) << "Filling partitions ...";
+  for (auto filepath : file_list) {
+LOG(INFO) << "\t" << filepath;
+    Partition partition = Partition(Identity(table_location, filepath));
+    partitions->push_back(partition);
+  }
+
+LOG(INFO) << "Updating distLocations from distributor...";
+
+  distributor->GetDistLocations(partitions);
+
+LOG(INFO) << "BuildDataset() finished successfully.";
+  return Status::OK();
+}
+
 
 Status DataSetBuilder::GetTotalRecords(int64_t* total_records) {
 //  *total_records = file_list_->size();  //TODO: need to confirm

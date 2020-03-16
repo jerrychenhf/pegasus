@@ -75,7 +75,7 @@ Status DataSetStore::InvalidateAll() {
   boost::lock_guard<SpinLock> l(l_);
   for (auto i : planner_metadata_)
   {
-    i.second->setRefreshFlag();
+    i.second->setRefreshFlag(DSRF_WORKERSET_CHG);
   }
   return Status::OK();
 }

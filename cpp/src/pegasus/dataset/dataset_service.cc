@@ -39,14 +39,14 @@ DataSetService::~DataSetService() {
 }
 
 Status DataSetService::Init() {
-  PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
+//  PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
   dataset_store_ = std::unique_ptr<DataSetStore>(new DataSetStore);
-  worker_manager_ = env->GetInstance()->get_worker_manager();
+//  worker_manager_ = env->GetInstance()->get_worker_manager();
   catalog_manager_ = std::make_shared<CatalogManager>();
   return Status::OK();
 }
 
-Status DataSetService::NotifyWorkersChange() {
+Status DataSetService::NotifyWorkersetChange() {
 
   //
   dataset_store_->InvalidateAll();
@@ -90,38 +90,83 @@ LOG(INFO) << "=== Not found, creating new dataset ...";
     (*dataset)->unlockwrite();
     // End Write
   }
-  else if (pds->needRefresh())
+  else
   {
-LOG(INFO) << "=== Found but not uptodate, refreshing ...";
-//    auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
-    // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
-//    dsbuilder->BuildDataset(dataset_request, dataset, CONHASH);
-    auto distributor = std::make_shared<ConsistentHashRing>(); 
-    distributor->PrepareValidLocations(nullptr, nullptr);
-    distributor->SetupDist();
-    auto partitions = std::make_shared<std::vector<Partition>>();
-    for (auto ptt : pds->partitions()) {
-      Partition partition = Partition(Identity(pds->dataset_path(), ptt.GetIdentPath()));
-      partitions->push_back(partition);
+LOG(INFO) << "=== Found, check timestamp and update refresh flag...";
+    // check timestamp and update refresh flag
+    uint64_t timestamp = 0;
+
+    std::shared_ptr<Catalog> catalog;
+    std::string table_location;
+    std::shared_ptr<StoragePlugin> storage_plugin;
+    RETURN_IF_ERROR(catalog_manager_->GetCatalog(dataset_request, &catalog));
+LOG(INFO) << "Getting storage plugin ...";
+    if (catalog->GetCatalogType() == Catalog::SPARK) {
+      RETURN_IF_ERROR(catalog->GetTableLocation(dataset_request, table_location));
+      RETURN_IF_ERROR(PlannerExecEnv::GetInstance()->get_storage_plugin_factory()->GetStoragePlugin(table_location, &storage_plugin));
+    }
+LOG(INFO) << "Got.";
+
+    storage_plugin->GetModifedTime(pds->dataset_path(), &timestamp);
+LOG(INFO) << "timestamp: " << timestamp;
+    if (timestamp > pds->getTimestamp())
+    {
+LOG(INFO) << "=== filesystem timestamp changed, set refresh flag";
+      pds->lockwrite();
+      pds->setRefreshFlag(DSRF_FILES_APPEND);
+LOG(INFO) << "pds->getRefreshFlag(): " << pds->getRefreshFlag();
+      pds->setTimestamp(timestamp);
+      pds->unlockwrite();
     }
 
-    // keep the existing dataset pointer in dataset_store, only update data
-    pds->lockwrite();
-    //replacePartitions(std::vector<Partition> partits)
-    pds->replacePartitions(*partitions);
-    pds->resetRefreshFlag();
-    *dataset = pds;
-    pds->unlockwrite();
-  }
-  else  // exists and is uptodate
-  {
-LOG(INFO) << "=== Found and uptodate";
-    pds->lockread();
-//    *dataset = std::shared_ptr<DataSet>(new DataSet(*pds));
-    *dataset = std::make_shared<DataSet>(pds->GetData());
-    (*dataset)->set_schema(pds->get_schema());
-    pds->unlockread();
-  }
+    // if need refresh
+    if (pds->needRefresh())
+    {
+LOG(INFO) << "=== Need to refresh, refreshing ...";
+      auto partitions = std::make_shared<std::vector<Partition>>();
+
+LOG(INFO) << "pds->getRefreshFlag(): " << pds->getRefreshFlag();
+      if (pds->getRefreshFlag() & DSRF_FILES_APPEND)
+      {
+LOG(INFO) << "=== DSRF_FILES_APPEND";
+        auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
+        dsbuilder->BuildDatasetPartitions(table_location, storage_plugin, partitions, CONHASH);
+      }
+      else if (pds->getRefreshFlag() & DSRF_WORKERSET_CHG)
+      {
+LOG(INFO) << "=== DSRF_WORKERSET_CHG";
+        auto distributor = std::make_shared<ConsistentHashRing>(); 
+        distributor->PrepareValidLocations(nullptr, nullptr);
+        distributor->SetupDist();
+        for (auto ptt : pds->partitions()) {
+          Partition partition = Partition(Identity(pds->dataset_path(), ptt.GetIdentPath()));
+          partitions->push_back(partition);
+        }
+        distributor->GetDistLocations(partitions);
+      }
+      else
+      {
+        LOG(ERROR) << "Unknown dataset refresh flag type!";
+      }
+
+      // keep the existing dataset pointer in dataset_store, only update data
+      pds->lockwrite();
+      //replacePartitions(std::vector<Partition> partits)
+      pds->replacePartitions(*partitions);
+      pds->resetRefreshFlag();
+      *dataset = pds;
+      pds->unlockwrite();
+    } //if need refresh
+    else  // found and is uptodate
+    {
+LOG(INFO) << "=== Up-to-date";
+      pds->lockread();
+  //    *dataset = std::shared_ptr<DataSet>(new DataSet(*pds));
+      *dataset = std::make_shared<DataSet>(pds->GetData());
+      (*dataset)->set_schema(pds->get_schema());
+      pds->unlockread();
+    }
+  } // pds is not NULL
 
 LOG(INFO) << "DataSetService::GetDataSet() finished successfully.";
 

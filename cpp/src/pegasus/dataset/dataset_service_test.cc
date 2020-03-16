@@ -329,7 +329,7 @@ LOG(INFO) << "time span: " << std::chrono::duration_cast<std::chrono::microsecon
   hbinfo.type = rpc::HeartbeatInfo::HeartbeatType::HEARTBEAT;
   exec_env_->get_worker_manager()->Heartbeat(hbinfo, &hbresult);
 LOG(INFO) << "=== worker node3 added === : " << hbinfo.hostname;
-  dataset_service_->NotifyWorkersChange();
+  dataset_service_->NotifyWorkersetChange();
 LOG(INFO) << "=== Notified dataset service module on the change === : " << hbinfo.hostname;
 
   { // read again

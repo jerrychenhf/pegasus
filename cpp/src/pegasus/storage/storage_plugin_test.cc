@@ -43,7 +43,7 @@ TEST(StoragePluginTest, Unit) {
   ASSERT_NE(nullptr, planner_storage_plugin);
   ASSERT_EQ(StoragePlugin::HDFS, planner_storage_plugin->GetPluginType());
 
-  int64_t time;
+  uint64_t time;
   ASSERT_OK(planner_storage_plugin->GetModifedTime(table_location, &time));
   ASSERT_NE(0, time);
 

@@ -76,7 +76,7 @@ Status HDFSStoragePlugin::Connect() {
   return Status::OK();
 }
 
-Status HDFSStoragePlugin::GetModifedTime(std::string dataset_path, int64_t* modified_time) {
+Status HDFSStoragePlugin::GetModifedTime(std::string dataset_path, uint64_t* modified_time) {
 
   std::vector<int32_t> modified_time_list;
   RETURN_IF_ERROR(ListModifiedTimes(dataset_path, &modified_time_list));

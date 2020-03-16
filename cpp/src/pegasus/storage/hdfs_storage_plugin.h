@@ -35,7 +35,7 @@ class HDFSStoragePlugin : public StoragePlugin {
   ~HDFSStoragePlugin();
   Status Init(std::string host, int32_t port) override;
   Status Connect() override;
-  Status GetModifedTime(std::string dataset_path, int64_t* modified_time) override;
+  Status GetModifedTime(std::string dataset_path, uint64_t* modified_time) override;
   Status ListFiles(std::string dataset_path, std::vector<std::string>* file_list) override;
   StoragePluginType GetPluginType() override;
 

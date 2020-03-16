@@ -92,6 +92,11 @@ private:
     int writeCount;
 };
 
+#define  DSRF_FILES_APPEND ((uint64_t)1)
+#define  DSRF_WORKERSET_CHG ((uint64_t)2)
+//#define  DSRF_XXX (4)
+//#define  DSRF_XXX (8)
+
 /// \brief The access coordinates for retireval of a dataset
 class PEGASUS_EXPORT DataSet {
  public:
@@ -104,9 +109,9 @@ class PEGASUS_EXPORT DataSet {
     int64_t total_bytes;
   };
 
-  explicit DataSet(const Data& data) : data_(data) { needRefresh_ = 0; }
+  explicit DataSet(const Data& data) : data_(data) { refreshFlag_ = 0; }
   explicit DataSet(Data&& data)
-      : data_(std::move(data)) { needRefresh_ = 0; }
+      : data_(std::move(data)) { refreshFlag_ = 0; }
 
   /// Get the data_
   const Data& GetData() {return data_;}
@@ -133,9 +138,13 @@ class PEGASUS_EXPORT DataSet {
   /// The total number of bytes in the dataset. If unknown, set to -1
   int64_t total_bytes() const { return data_.total_bytes; }
 
-  bool needRefresh() const { return needRefresh_; }
-  void setRefreshFlag() { needRefresh_ = true; }
-  void resetRefreshFlag() { needRefresh_ = false; }
+  bool needRefresh() const { return (0==refreshFlag_) ? false : true; }
+  void setRefreshFlag(uint64_t rf) { refreshFlag_ |= rf; }
+  void resetRefreshFlag() { refreshFlag_ = 0; }
+  uint64_t getRefreshFlag() { return refreshFlag_; }
+
+  uint64_t getTimestamp() const { return data_.timestamp; }
+  void setTimestamp(uint64_t ts) { data_.timestamp = ts; }
 
   void lockread() { dslock.lockread(); }
   void unlockread() { dslock.unlockread(); }
@@ -146,7 +155,8 @@ class PEGASUS_EXPORT DataSet {
   rwlock dslock;
   Data data_;
   std::shared_ptr<arrow::Schema> schema_;
-  bool needRefresh_;
+//  bool needRefresh_;
+  uint64_t refreshFlag_;  //DSRF_FILES_APPEND, DSRF_WORKERSET_CHG, ...
 };
 
 class PEGASUS_EXPORT ResultDataSet {

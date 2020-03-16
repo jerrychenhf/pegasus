@@ -52,7 +52,7 @@ class DataSetService {
   Status Stop();
   Status GetFlightInfo(DataSetRequest* dataset_request, std::unique_ptr<rpc::FlightInfo>* flight_info, const rpc::FlightDescriptor& fldtr);
   Status GetFlightListing(std::unique_ptr<rpc::FlightListing>* listings);
-  Status NotifyWorkersChange();
+  Status NotifyWorkersetChange();
   Status GetDataSets( std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets);
   Status GetDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset);
   Status CacheDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset, int distpolicy);
@@ -60,7 +60,7 @@ class DataSetService {
   Status RemoveDataSet(DataSetRequest* dataset_request);
   Status FilterDataSet(const std::vector<Filter>& parttftr, std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet>* resultdataset);
  private:
-  std::shared_ptr<WorkerManager> worker_manager_;
+//  std::shared_ptr<WorkerManager> worker_manager_;
   std::shared_ptr<FlightInfoBuilder> flightinfo_builder_;
   std::shared_ptr<DataSetStore> dataset_store_;
   std::shared_ptr<CatalogManager> catalog_manager_;
