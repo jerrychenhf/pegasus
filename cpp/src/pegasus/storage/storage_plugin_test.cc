@@ -71,7 +71,8 @@ TEST(StoragePluginTest, Unit) {
     std::string file_path = uri.path();
 
     std::shared_ptr<HdfsReadableFile> file;
-    ASSERT_OK(worker_storage_plugin->GetReadableFile(file_path, &file));
+    ASSERT_OK(std::dynamic_pointer_cast<HDFSStoragePlugin>(worker_storage_plugin)
+        ->GetReadableFile(file_path, &file));
   }
 }
 

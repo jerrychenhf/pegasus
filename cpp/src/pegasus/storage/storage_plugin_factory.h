@@ -19,7 +19,7 @@
 #define PEGASUS_STORAGE_PLUGIN_FACTORY_H
 
 #include <string>
-#include "storage/storage_plugin.h"
+#include "storage/hdfs_storage_plugin.h"
 
 namespace pegasus {
 class StoragePluginFactory {

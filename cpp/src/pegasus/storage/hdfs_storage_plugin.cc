@@ -22,7 +22,7 @@
 #include "arrow/status.h"
 #include "arrow/util/uri.h"
 
-#include "storage/storage_plugin.h"
+#include "storage/hdfs_storage_plugin.h"
 #include "dataset/consistent_hashing.h"
 
 #include <boost/algorithm/string.hpp>
@@ -146,7 +146,8 @@ Status HDFSStoragePlugin::ListFiles(std::string dataset_path, std::vector<std::s
   return Status::OK();
 }
 
-Status HDFSStoragePlugin::GetReadableFile(std::string file_path, std::shared_ptr<HdfsReadableFile>* file) {
+Status HDFSStoragePlugin::GetReadableFile(std::string file_path,
+    std::shared_ptr<HdfsReadableFile>* file) {
 
   arrow::Status arrowStatus = client_->OpenReadable(file_path, file);
   return Status::fromArrowStatus(arrowStatus);

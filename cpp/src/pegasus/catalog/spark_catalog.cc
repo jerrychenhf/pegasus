@@ -60,12 +60,16 @@ Status SparkCatalog::GetSchema(DataSetRequest* dataset_request,
   std::vector<std::string> file_list;
   RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list));
 
-  std::shared_ptr<HdfsReadableFile> file;
-  RETURN_IF_ERROR(storage_plugin->GetReadableFile(file_list[0], &file));
-  parquet::ArrowReaderProperties properties = parquet::default_arrow_reader_properties();
-  arrow::MemoryPool *pool = arrow::default_memory_pool();
-  std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, pool, properties));
-  RETURN_IF_ERROR(parquet_reader->GetSchema(schema));
+  if (storage_plugin->GetPluginType() == StoragePlugin::HDFS) {
+    std::shared_ptr<HdfsReadableFile> file;
+    RETURN_IF_ERROR(std::dynamic_pointer_cast<HDFSStoragePlugin>(storage_plugin)
+        ->GetReadableFile(file_list[0], &file));
+
+    parquet::ArrowReaderProperties properties = parquet::default_arrow_reader_properties();
+    arrow::MemoryPool *pool = arrow::default_memory_pool();
+    std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, pool, properties));
+    RETURN_IF_ERROR(parquet_reader->GetSchema(schema));
+  }
 
   return Status::OK();
 }

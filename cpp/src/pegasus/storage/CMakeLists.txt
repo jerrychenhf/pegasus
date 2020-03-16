@@ -23,7 +23,7 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/storage")
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/storage")
 
 add_library(StoragePlugin
-  storage_plugin.cc
+  hdfs_storage_plugin.cc
   storage_plugin_factory.cc
 )
 add_dependencies(StoragePlugin gen-deps)

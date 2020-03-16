@@ -43,7 +43,8 @@ TEST(ParquetReaderTest, Unit) {
   ASSERT_EQ(StoragePlugin::HDFS, worker_storage_plugin->GetPluginType());
 
   std::shared_ptr<HdfsReadableFile> file;
-  ASSERT_OK(worker_storage_plugin->GetReadableFile(partition_path, &file));
+  ASSERT_OK(std::dynamic_pointer_cast<HDFSStoragePlugin>(worker_storage_plugin)
+      ->GetReadableFile(partition_path, &file));
 
   parquet::ArrowReaderProperties properties = parquet::default_arrow_reader_properties();
   // static parquet::ArrowReaderProperties properties;

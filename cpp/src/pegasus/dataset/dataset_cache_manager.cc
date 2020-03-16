@@ -142,19 +142,22 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
     std::string dataset_path = request_identity->dataset_path();
     std::string partition_path = request_identity->partition_path();
 
-    // Get the ReadableFile
-    std::shared_ptr<StoragePlugin> storage_plugin;
-    RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(partition_path, &storage_plugin));
-    std::shared_ptr<HdfsReadableFile> file;
-    RETURN_IF_ERROR(storage_plugin->GetReadableFile(partition_path, &file));
-    
     // Read the columns into ChunkArray.
     // Asumming the cache memory pool is only in same store.
     CacheMemoryPool* memory_pool = new CacheMemoryPool(cache_engine);
     RETURN_IF_ERROR(memory_pool->Create());
-    
-    parquet::ArrowReaderProperties properties(parquet::default_arrow_reader_properties());
-    std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, memory_pool, properties));
+    std::unique_ptr<ParquetReader> parquet_reader;
+    // Get the ReadableFile
+    std::shared_ptr<StoragePlugin> storage_plugin;
+    RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(partition_path, &storage_plugin));
+    if (storage_plugin->GetPluginType() == StoragePlugin::HDFS) {
+      std::shared_ptr<HdfsReadableFile> file;
+      RETURN_IF_ERROR(std::dynamic_pointer_cast<HDFSStoragePlugin>(storage_plugin)
+          ->GetReadableFile(partition_path, &file));
+      parquet::ArrowReaderProperties properties(parquet::default_arrow_reader_properties());
+      parquet_reader = std::unique_ptr<ParquetReader>(
+        new ParquetReader(file, memory_pool, properties));
+    }
 
     std::shared_ptr<CachedPartition> partition;
     GetPartition(request_identity, &partition);
