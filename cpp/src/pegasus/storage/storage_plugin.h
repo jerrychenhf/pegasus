@@ -32,7 +32,7 @@ class StoragePlugin {
  public:
   virtual Status Init(std::string host, int32_t port) = 0;
   virtual Status Connect() = 0;
-  virtual Status GetPathInfo(std::string dataset_path, HdfsPathInfo* file_info) = 0;
+  virtual Status GetModifedTime(std::string dataset_path, int64_t* modified_time) = 0;
   virtual Status ListFiles(std::string dataset_path, std::vector<std::string>* file_list) = 0;
   virtual Status GetReadableFile(std::string file_path, std::shared_ptr<HdfsReadableFile>* file) = 0;
     
@@ -54,10 +54,14 @@ class HDFSStoragePlugin : public StoragePlugin {
   ~HDFSStoragePlugin();
   Status Init(std::string host, int32_t port) override;
   Status Connect() override;
-  Status GetPathInfo(std::string dataset_path, HdfsPathInfo* file_info) override;
+  Status GetModifedTime(std::string dataset_path, int64_t* modified_time) override;
   Status ListFiles(std::string dataset_path, std::vector<std::string>* file_list) override;
   Status GetReadableFile(std::string file_path, std::shared_ptr<HdfsReadableFile>* file) override;
   StoragePluginType GetPluginType() override;
+
+  Status GetPathInfo(std::string dataset_path, HdfsPathInfo* file_info);
+  Status ListModifiedTimes(std::string dataset_path, std::vector<int32_t>* modified_time_list) ;
+  Status ListSubDirectoryModifiedTimes(std::string dataset_path, std::vector<int32_t>* modified_time_list);
 
  private:
   std::shared_ptr<HadoopFileSystem> client_;

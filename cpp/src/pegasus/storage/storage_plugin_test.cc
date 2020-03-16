@@ -43,9 +43,9 @@ TEST(StoragePluginTest, Unit) {
   ASSERT_NE(nullptr, planner_storage_plugin);
   ASSERT_EQ(StoragePlugin::HDFS, planner_storage_plugin->GetPluginType());
 
-  arrow::io::HdfsPathInfo path_info;
-  ASSERT_OK(planner_storage_plugin->GetPathInfo(table_location, &path_info));
-  ASSERT_NE(0, path_info.last_modified_time);
+  int64_t time;
+  ASSERT_OK(planner_storage_plugin->GetModifedTime(table_location, &time));
+  ASSERT_NE(0, time);
 
   auto partitions = std::make_shared<std::vector<Partition>>();
 

@@ -76,10 +76,51 @@ Status HDFSStoragePlugin::Connect() {
   return Status::OK();
 }
 
+Status HDFSStoragePlugin::GetModifedTime(std::string dataset_path, int64_t* modified_time) {
+
+  std::vector<int32_t> modified_time_list;
+  RETURN_IF_ERROR(ListModifiedTimes(dataset_path, &modified_time_list));
+  *modified_time = *std::max_element(modified_time_list.begin(),
+      modified_time_list.end());
+  
+  return Status::OK();
+}
+
 Status HDFSStoragePlugin::GetPathInfo(std::string dataset_path, HdfsPathInfo* file_info) {
 
   arrow::Status arrowStatus = client_->GetPathInfo(dataset_path, file_info);
   RETURN_IF_ERROR(Status::fromArrowStatus(arrowStatus));;
+  return Status::OK();
+}
+
+Status HDFSStoragePlugin::ListModifiedTimes(std::string dataset_path,
+    std::vector<int32_t>* modified_time_list) {
+
+  arrow::io::HdfsPathInfo path_info;
+  RETURN_IF_ERROR(GetPathInfo(dataset_path, &path_info));
+  modified_time_list->push_back(path_info.last_modified_time);
+  RETURN_IF_ERROR(ListSubDirectoryModifiedTimes(dataset_path, modified_time_list));
+
+  return Status::OK();
+}
+
+Status HDFSStoragePlugin::ListSubDirectoryModifiedTimes(std::string dataset_path,
+    std::vector<int32_t>* modified_time_list) {
+
+  std::vector<HdfsPathInfo> children;
+  arrow::Status arrowStatus = client_->ListDirectory(dataset_path, &children);
+  RETURN_IF_ERROR(Status::fromArrowStatus(arrowStatus));;
+  for (const auto& child_info : children) {
+    arrow::internal::Uri uri;
+    uri.Parse(child_info.name);
+    std::string child_path = uri.path();
+
+    if(child_info.kind == ObjectType::DIRECTORY) {
+      modified_time_list->push_back(child_info.last_modified_time);
+      ListSubDirectoryModifiedTimes(child_path, modified_time_list);
+    }
+  }
+
   return Status::OK();
 }
 
