@@ -105,6 +105,7 @@ Status WorkerManager::RegisterWorker(const rpc::HeartbeatInfo& info) {
     worker_failure_detector_->UpdateHeartbeat(id);
   }
 
+  NotifyObservers(WMEVENT_WORKERNODE_ADDED);
   LOG(INFO) << "Worker '" << id << "' registered with address: " << address_str;
   return Status::OK();
 }
@@ -150,6 +151,8 @@ Status WorkerManager::UnregisterWorker(const WorkerId& id) {
   worker_failure_detector_->EvictPeer(id);
 
   workers_.erase(id);
+
+  NotifyObservers(WMEVENT_WORKERNODE_REMOVED);
   return Status::OK();
 }
 

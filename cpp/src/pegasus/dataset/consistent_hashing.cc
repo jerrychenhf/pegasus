@@ -56,9 +56,9 @@ LOG(INFO) << "node count from workerregistration vector: " << wregs.size();
 			for (auto it:wregs)
 			{
 				validlocations_->push_back(it->address());
-LOG(INFO) << "== insert location: " << it->address().ToString();
+LOG(INFO) << "- insert location: " << it->address().ToString();
 				nodecacheMB_->push_back(it->node_info()->get_cache_capacity()/(1024*1024));
-LOG(INFO) << "== nodecachesize(MB): " << it->node_info()->get_cache_capacity()/(1024*1024);
+LOG(INFO) << "- nodecachesize(MB): " << it->node_info()->get_cache_capacity()/(1024*1024);
 //				nodecacheMB_->push_back(1024);
 //LOG(INFO) << "== nodecachesize(MB): fake 1024";
 			}

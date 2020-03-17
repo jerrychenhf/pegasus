@@ -34,12 +34,21 @@ using namespace std;
 
 namespace pegasus {
 
+#define WMEVENT_WORKERNODE_ADDED  1
+#define WMEVENT_WORKERNODE_REMOVED  2
+
 class WorkerFailureDetector;
 
 /// A SubscriberId uniquely identifies a single subscriber, and is
 /// provided by the subscriber at registration time.
 typedef std::string WorkerId;
-    
+
+
+class IWMObserver {
+ public:
+  virtual void update(int wmevent) = 0;
+};  //WMObserver
+
 class WorkerRegistration {
 public:
   enum WorkerState {
@@ -82,15 +91,24 @@ class WorkerManager {
   
   // Notified by failure detector that the worker failed
   Status OnWorkerFailed(const WorkerId& id);
-  
+
+  void RegisterObserver(IWMObserver *obs) { vobservers_.push_back(obs); }
+  void UnregisterObserver(IWMObserver *obs) {
+    vobservers_.erase(std::remove(vobservers_.begin(), vobservers_.end(), obs), vobservers_.end());
+  }
+  void NotifyObservers(int wmevent) {
+    for (auto ob : vobservers_)
+      ob->update(wmevent);
+  }
+
  private:
   std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations;
-  
+
   Status RegisterWorker(const rpc::HeartbeatInfo& info);
   Status HeartbeatWorker(const rpc::HeartbeatInfo& info);
-  
+
   Status UnregisterWorker(const WorkerId& id);
-  
+
   typedef boost::unordered_map<WorkerId, std::shared_ptr<WorkerRegistration>>
     WorkerRegistrationMap;
   WorkerRegistrationMap workers_;
@@ -99,6 +117,8 @@ class WorkerManager {
   boost::mutex workers_lock_;
   
   boost::scoped_ptr<WorkerFailureDetector> worker_failure_detector_;
+
+  std::vector<IWMObserver *> vobservers_;
 };
 
 } // namespace pegasus

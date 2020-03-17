@@ -43,14 +43,14 @@ Status DataSetService::Init() {
   dataset_store_ = std::unique_ptr<DataSetStore>(new DataSetStore);
 //  worker_manager_ = env->GetInstance()->get_worker_manager();
   catalog_manager_ = std::make_shared<CatalogManager>();
+  PlannerExecEnv::GetInstance()->get_worker_manager()->RegisterObserver(this);
+
   return Status::OK();
 }
 
-Status DataSetService::NotifyWorkersetChange() {
-
-  //
-  dataset_store_->InvalidateAll();
-  return Status::OK();
+void DataSetService::update(int wmevent) {
+  if ((WMEVENT_WORKERNODE_ADDED==wmevent) || (WMEVENT_WORKERNODE_REMOVED==wmevent))
+    dataset_store_->InvalidateAll();
 }
 
 Status DataSetService::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
