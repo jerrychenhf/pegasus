@@ -212,6 +212,8 @@ class LRUCache {
   // entry in the cache.
   void Insert(PendingEntry* entry, LRUCacheHandle* inserted);
 
+  void Erase(const CacheKey& key);
+
   Status Init();
 
  private:
