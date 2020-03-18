@@ -35,10 +35,10 @@ sh start_worker.sh --hostname=localhost --worker_port=30002 --planner_hostname=l
 
 Step 1. Make the following configuration changes in Spark configuration file `$SPARK_HOME/conf/spark-defaults.conf`. 
 ```
-spark.files                       /home/pegasus/jars/pegasus-spark-datasource-1.0.0-SNAPSHOT-with-spark-3.1.0-SNAPSHOT.jar     # absolute path of PEGASUS jar on your working node
-spark.executor.extraClassPath     ./pegasus-spark-datasource-1.0.0-SNAPSHOT-with-spark-3.1.0-SNAPSHOT.jar
+spark.files                       /home/pegasus/jars/pegasus-spark-datasource-1.0.0-SNAPSHOT-with-spark-3.0.0.jar     # absolute path of PEGASUS jar on your working node
+spark.executor.extraClassPath     ./pegasus-spark-datasource-1.0.0-SNAPSHOT-with-spark-3.0.0.jar
                 # relative path of PEGASUS jar
-spark.driver.extraClassPath       /home/pegasus/jars/pegasus-spark-datasource-1.0.0-SNAPSHOT-with-spark-3.1.0-SNAPSHOT.jar
+spark.driver.extraClassPath       /home/pegasus/jars/pegasus-spark-datasource-1.0.0-SNAPSHOT-with-spark-3.0.0.jar
      # absolute path of PEGASUS jar on your working node
 
 Step 2. Launch Spark ***ThriftServer***
