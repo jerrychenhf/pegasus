@@ -28,28 +28,28 @@ import org.apache.spark.network.util.ByteUnit
 object PegasusConf {
 
   val PLANNER_HOST =
-    SQLConf.buildConf("planner.host")
+    SQLConf.buildConf("spark.planner.host")
       .internal()
       .doc("Hostname of the Pegasus Planner.")
       .stringConf
       .createWithDefault("localhost")
 
   val PLANNER_PORT =
-    SQLConf.buildConf("planner.port")
+    SQLConf.buildConf("spark.planner.port")
     .internal()
     .doc("Port of the Pegasus Planner.")
     .stringConf
     .createWithDefault("30001")
 
   val USERNAME =
-    SQLConf.buildConf("username")
+    SQLConf.buildConf("spark.planner.username")
     .internal()
     .doc("username to access the planner.")
     .stringConf
     .createWithDefault("anonymous")
 
   val PASSWORD =
-    SQLConf.buildConf("password")
+    SQLConf.buildConf("spark.planner.password")
     .internal()
     .doc("password to access the planner.")
     .stringConf
