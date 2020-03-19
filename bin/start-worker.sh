@@ -15,14 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Starts up a Pegasus Planner
+# Starts up a Pegasus Worker
 
-set -e
-set -u
+if [ -z "${PEGASUS_HOME}" ]; then
+  export PEGASUS_HOME="$(cd "`dirname "$0"`"/..; pwd)"
+fi
+
+# Load the PEGASUS configuration
+. "${PEGASUS_HOME}/bin/pegasus-config.sh"
+. "${PEGASUS_HOME}/bin/load-pegasus-env.sh"
 
 BUILD_TYPE=release
-PLANNER_ARGS=""
-BINARY_BASE_DIR=${PEGASUS_HOME}/build
+WORKER_ARGS=""
+BINARY_BASE_DIR=${PEGASUS_HOME}/cpp/build
 
 # Everything except for -build_type should be passed as a plannerd argument
 for ARG in $*
@@ -39,11 +44,32 @@ do
       exit 1
       ;;
     *)
-      PLANNER_ARGS="${PLANNER_ARGS} ${ARG}"
+      WORKER_ARGS="${WORKER_ARGS} ${ARG}"
   esac
 done
 
-set -u
+# Find the port number for the worker
+if [ "$PEGASUS_WORKER_PORT" = "" ]; then
+  PEGASUS_WORKER_PORT=30002
+fi
 
-exec ${BINARY_BASE_DIR}/${BUILD_TYPE}/planner/plannerd ${PLANNER_ARGS}
+if [ "$PEGASUS_WORKER_HOST" = "" ]; then
+  case `uname` in
+      (SunOS)
+	  PEGASUS_WORKER_HOST="`/usr/sbin/check-hostname | awk '{print $NF}'`"
+	  ;;
+      (*)
+	  PEGASUS_WORKER_HOST="`hostname -f`"
+	  ;;
+  esac
+fi
 
+function start_worker() {
+  WORKER_ARGS="--worker_port $PEGASUS_WORKER_PORT $WORKER_ARGS"
+  WORKER_ARGS="--hostname $PEGASUS_WORKER_HOST $WORKER_ARGS"
+  exec ${BINARY_BASE_DIR}/${BUILD_TYPE}/worker/workerd ${WORKER_ARGS} &
+  sleep 2
+}
+
+# Start Worker
+start_worker
