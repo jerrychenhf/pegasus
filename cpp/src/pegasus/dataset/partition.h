@@ -23,38 +23,46 @@
 #include "dataset/identity.h"
 #include "common/location.h"
 
-namespace pegasus {
+namespace pegasus
+{
 
 /// \brief A identity and location where the identity can be redeemed
-class Partition {
+class Partition
+{
   ///  identify;
   Identity identity;
-  /// The location where identity can be redeemed. 
+  /// The location where identity can be redeemed.
   Location location;
 
 public:
-  Partition(Identity id): identity(id) {};
-  Partition(Identity id, Location loc): identity(id), location(loc) {};
+  Partition(Identity id) : identity(id){};
+  Partition(Identity id, Location loc) : identity(id), location(loc){};
   ~Partition();
 
-  bool Equals(const Partition& other) const;
+  bool Equals(const Partition &other) const;
 
-  std::string GetIdentPath() {return identity.partition_id();}
+  std::string GetDataSetPath() { return identity.dataset_path(); }
 
-  Location GetLocation() {return location;}
-  std::string GetLocationURI() {return location.ToString();}
+  std::string GetIdentPath() { return identity.partition_id(); }
 
-  void UpdateLocation(Location lcn) {location = lcn;}
-  void UpdateLocationURI(std::string& strURI) { Location::Parse(strURI, &location); }
+  Location GetLocation() { return location; }
+  std::string GetLocationURI() { return location.ToString(); }
+  std::string GetLocationHostname() { return location.host(); }
+  std::string GetLocationHostnamePort() { return location.host() + ":" + std::to_string(location.port()); }
 
-  friend bool operator==(const Partition& left, const Partition& right) {
+  void UpdateLocation(Location lcn) { location = lcn; }
+  void UpdateLocationURI(std::string &strURI) { Location::Parse(strURI, &location); }
+
+  friend bool operator==(const Partition &left, const Partition &right)
+  {
     return left.Equals(right);
   }
-  friend bool operator!=(const Partition& left, const Partition& right) {
+  friend bool operator!=(const Partition &left, const Partition &right)
+  {
     return !(left == right);
   }
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_ENDPOINT_H
+#endif // PEGASUS_ENDPOINT_H

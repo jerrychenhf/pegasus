@@ -47,7 +47,7 @@ Status WorkerManager::GetWorkerRegistrations(
 }
 
 Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info,
-  std::unique_ptr<rpc::HeartbeatResult>* result){
+                                std::unique_ptr<rpc::HeartbeatResult>* result) {
   Status status = Status::OK();
   if(info.type == rpc::HeartbeatInfo::REGISTRATION) {
     status = RegisterWorker(info);
@@ -55,13 +55,27 @@ Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info,
     status = HeartbeatWorker(info);
   }
   RETURN_IF_ERROR(status);
-  
+
+  auto hbrc = std::make_shared<rpc::HeartbeatResultCmd>();
   std::unique_ptr<rpc::HeartbeatResult> r =
     std::unique_ptr<rpc::HeartbeatResult>(new rpc::HeartbeatResult());
   if(info.type == rpc::HeartbeatInfo::REGISTRATION) {
     r->result_code = rpc::HeartbeatResult::REGISTERED;
   } else  if(info.type == rpc::HeartbeatInfo::HEARTBEAT) {
     r->result_code = rpc::HeartbeatResult::HEARTBEATED;
+    if (NeedtoDropCache(info.hostname))
+    {
+      LOG(INFO) << "Yes, " << info.hostname << " has data cache to drop. Building rpc cmd...";
+      hbrc->hbrc_action = rpc::HeartbeatResultCmd::DROPCACHE;
+      auto sppartlist = std::make_shared<WorkerCacheDropList>();
+      RETURN_IF_ERROR(GetCacheDropList(info.hostname, sppartlist));
+      hbrc->hbrc_parameters = sppartlist->GetPartstodrop();
+      r->result_hascmd = true;
+      r->result_command = std::move(*hbrc);
+    } else {
+      LOG(INFO) << "No need to drop cache for " << info.hostname;
+      r->result_hascmd = false;
+    }
   } else {
     r->result_code = rpc::HeartbeatResult::UNKNOWN;
   }
@@ -69,6 +83,7 @@ Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info,
   *result = std::move(r);
   return Status::OK();
 }
+
 
 Status WorkerManager::RegisterWorker(const rpc::HeartbeatInfo& info) {
   WorkerId id = info.hostname;

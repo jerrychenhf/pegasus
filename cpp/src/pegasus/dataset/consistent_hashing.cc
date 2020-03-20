@@ -16,12 +16,13 @@
 // under the License.
 
 #include <iostream>
+#include <iomanip>
 #include "consistent_hashing.h"
 #include "runtime/planner_exec_env.h"
 #include "server/planner/worker_manager.h"
 
-namespace pegasus {
-
+namespace pegasus
+{
 
 ConsistentHashRing::ConsistentHashRing()
 {
@@ -33,34 +34,34 @@ ConsistentHashRing::~ConsistentHashRing()
 {
 }
 
-void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations, 
-											std::shared_ptr<std::vector<int64_t>> nodecacheMB)
+void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations,
+											   std::shared_ptr<std::vector<int64_t>> nodecacheMB)
 {
 	if (nullptr != locations)
 	{
 		validlocations_ = locations;
 		nodecacheMB_ = nodecacheMB;
 	}
-	else	// If the locations are not provided, get the worker locations from worker_manager
+	else // If the locations are not provided, get the worker locations from worker_manager
 	{
-		std::shared_ptr<WorkerManager> worker_manager = PlannerExecEnv::GetInstance()->GetInstance()->get_worker_manager();
+		std::shared_ptr<WorkerManager> worker_manager = PlannerExecEnv::GetInstance()->get_worker_manager();
 		//Status WorkerManager::GetWorkerRegistrations(std::vector<std::shared_ptr<WorkerRegistration>>& registrations)
 		std::vector<std::shared_ptr<WorkerRegistration>> wregs;
 		worker_manager->GetWorkerRegistrations(wregs);
-//std::cout << "node count from workerregistration vector: " << wregs.size() << std::endl;
-LOG(INFO) << "node count from workerregistration vector: " << wregs.size();
+		//std::cout << "node count from workerregistration vector: " << wregs.size() << std::endl;
+		LOG(INFO) << "node count from workerregistration vector: " << wregs.size();
 		if (wregs.size() > 0)
 		{
 			validlocations_ = std::make_shared<std::vector<Location>>();
 			nodecacheMB_ = std::make_shared<std::vector<int64_t>>();
-			for (auto it:wregs)
+			for (auto it : wregs)
 			{
 				validlocations_->push_back(it->address());
-LOG(INFO) << "- insert location: " << it->address().ToString();
-				nodecacheMB_->push_back(it->node_info()->get_cache_capacity()/(1024*1024));
-LOG(INFO) << "- nodecachesize(MB): " << it->node_info()->get_cache_capacity()/(1024*1024);
-//				nodecacheMB_->push_back(1024);
-//LOG(INFO) << "== nodecachesize(MB): fake 1024";
+				LOG(INFO) << "- insert location: " << it->address().ToString();
+				nodecacheMB_->push_back(it->node_info()->get_cache_capacity() / (1024 * 1024));
+				LOG(INFO) << "- nodecachesize(MB): " << it->node_info()->get_cache_capacity() / (1024 * 1024);
+				//				nodecacheMB_->push_back(1024);
+				//LOG(INFO) << "== nodecachesize(MB): fake 1024";
 			}
 		}
 	}
@@ -68,14 +69,21 @@ LOG(INFO) << "- nodecachesize(MB): " << it->node_info()->get_cache_capacity()/(1
 
 Status ConsistentHashRing::SetupDist()
 {
-LOG(INFO) << "SetupDist()...";
+	LOG(INFO) << "SetupDist()...";
 	if (validlocations_)
 	{
-		for (unsigned int i=0; i<validlocations_->size(); i++)
+		for (unsigned int i = 0; i < validlocations_->size(); i++)
 		{
 			AddLocation(i);
-LOG(INFO) << "Added location: " << i;
+			LOG(INFO) << "Added location: #" << i;
 		}
+#if 1 // for debug, iterate the empty conhash
+		LOG(INFO) << "Iterate the conhash:";
+		for (auto it = consistent_hash_.begin(); it != consistent_hash_.end(); ++it)
+		{
+			LOG(INFO) << "node: " << it->second << "\t" << std::right << std::setw(10) << it->first;
+		}
+#endif
 		return Status::OK();
 	}
 	else
@@ -83,7 +91,6 @@ LOG(INFO) << "Added location: " << i;
 		LOG(ERROR) << "Error! ConsistentHashRing has 0 locations. Call PrepareValidLocations() first.";
 		return Status::Invalid("Error! None valid location in ConsistentHashRing.");
 	}
-	
 }
 
 void ConsistentHashRing::AddLocation(unsigned int locidx)
@@ -92,10 +99,10 @@ void ConsistentHashRing::AddLocation(unsigned int locidx)
 	num_vn = std::max(MIN_VIRT_NODE_NUM, num_vn);
 	num_vn = std::min(MAX_VIRT_NODE_NUM, num_vn);
 
-	for (int i=0; i<num_vn; i++)
+	for (int i = 0; i < num_vn; i++)
 	{
 		std::string node = validlocations_->at(locidx).ToString() + "_" + std::to_string(i);
-LOG(INFO) << "consistent_hash_.insert(" << node << ");";
+		//LOG(INFO) << "consistent_hash_.insert(" << node << ");";
 		consistent_hash_.insert(node);
 	}
 }
@@ -121,9 +128,9 @@ Location ConsistentHashRing::GetLocation(Identity identity)
 {
 	crc32_hasher h;
 	LOG(INFO) << "h(identity.partition_id()): " << h(identity.partition_id());
-    consistent_hash_t::iterator it;
-    it = consistent_hash_.find(h(identity.partition_id()));
-    LOG(INFO) << boost::format("node:%1%, %2%") % it->second % it->first;
+	consistent_hash_t::iterator it;
+	it = consistent_hash_.find(h(identity.partition_id()));
+	LOG(INFO) << boost::format("node:%1%, %2%") % it->second % it->first;
 
 	std::size_t pos = it->second.find_last_of("_");
 	std::string node = it->second.substr(0, pos);
@@ -134,28 +141,28 @@ Location ConsistentHashRing::GetLocation(Identity identity)
 	return lcn;
 }
 
-void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, \
-								std::shared_ptr<std::vector<Location>> vectloc)
+void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident,
+										  std::shared_ptr<std::vector<Location>> vectloc)
 {
 }
 
 void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions)
 {
 	crc32_hasher h;
-	for (auto partt:(*partitions))
+	for (auto partt : (*partitions))
 	{
 		LOG(INFO) << "h(partt.GetIdentPath()): " << h(partt.GetIdentPath());
-	    consistent_hash_t::iterator it;
-    	it = consistent_hash_.find(h(partt.GetIdentPath()));
+		consistent_hash_t::iterator it;
+		it = consistent_hash_.find(h(partt.GetIdentPath()));
 		LOG(INFO) << "found: " << it->second;
 		std::size_t pos = it->second.find_last_of("_");
 		std::string node = it->second.substr(0, pos);
-		LOG(INFO) << node;
+		//		LOG(INFO) << node;
 		// create the location object and fill with phynode's location (uri).
-//		Location lcn;
-//		Location::Parse(node, &lcn);
-//std::cout << "lcn.ToString(): " << lcn.ToString() << std::endl;
-//		partt.UpdateLocation(lcn);
+		//		Location lcn;
+		//		Location::Parse(node, &lcn);
+		//std::cout << "lcn.ToString(): " << lcn.ToString() << std::endl;
+		//		partt.UpdateLocation(lcn);
 		partt.UpdateLocationURI(node);
 	}
 }

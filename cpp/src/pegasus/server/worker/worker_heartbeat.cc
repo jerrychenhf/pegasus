@@ -274,14 +274,27 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
   status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);
   
-  if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION &&
+  if (heartbeat.heartbeatType == HeartbeatType::REGISTRATION &&
     result->result_code == rpc::HeartbeatResult::REGISTERED) {
     registered_ = true;
     LOG(INFO) << "Worker registered successfully.";
-  } else {
+  } else if (heartbeat.heartbeatType == HeartbeatType::HEARTBEAT &&
+    result->result_code == rpc::HeartbeatResult::HEARTBEATED) {
     LOG(INFO) << "Worker heartbeat to " << planner_address_ << " successfully.";
+    if (result->result_hascmd) {
+      LOG(INFO) << "Worker got command to execute:";
+      switch (result->result_command.hbrc_action) {
+        case rpc::HeartbeatResultCmd::DROPCACHE:
+          LOG(INFO) << "HeartbeatResultCmd: DROPCACHE";
+          // TODO: execute the command
+          break;
+        default:
+          LOG(ERROR) << "Unknown HeartbeatResultCmd.";
+          break;
+      }
+    } //if hascmd
   }
-  
+
   if (has_node_info) {
     // update
     HeartbeatedNodeInfo(ts);

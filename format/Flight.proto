@@ -381,6 +381,36 @@ message HeartbeatInfo {
   NodeInfo node_info = 4;
 }
 
+message PartsDropListofDataset {
+  /*
+   * one dataset path (string) with multiple partition ids (strings)
+   */
+  bytes datasetpath = 1;
+  repeated bytes partitions = 2;
+};
+
+message HeartbeatResultCmd {
+  /*
+   * Result command of heartbeat
+   */
+   enum HeartbeatResultCmdAction {
+    // Protobuf pattern, not used.
+    UNKNOWN = 0;
+    /*
+     * no action
+     */
+    NOACTION = 1;
+    /*
+     * drop cache action
+     */
+    DROPCACHE = 2;
+  }
+
+  HeartbeatResultCmdAction hbrc_action = 1;
+
+  repeated PartsDropListofDataset hbrc_parameters = 2;
+};
+
 message HeartbeatResult {
   /*
    * Result code of heartbeat
@@ -402,4 +432,8 @@ message HeartbeatResult {
   }
 
   HeartbeatResultCode result_code = 1;
+
+  bool result_hascmd = 2;
+  HeartbeatResultCmd result_command = 3;
+
 }

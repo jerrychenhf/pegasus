@@ -467,6 +467,56 @@ arrow::Status ToProto(const HeartbeatInfo& info, pb::HeartbeatInfo* pb_info) {
   return arrow::Status::OK();
 }
 
+// PartsDropListofDataset
+arrow::Status FromProto(const pb::PartsDropListofDataset& pb_partsdroplist, PartsDropListofDataset* partsdroplist) {
+  partsdroplist->datasetpath = pb_partsdroplist.datasetpath();
+  for (int i=0; i<pb_partsdroplist.partitions_size(); i++) {
+    partsdroplist->partitions.emplace_back(pb_partsdroplist.partitions(i));
+  }
+  return arrow::Status::OK();
+}
+
+arrow::Status ToProto(const PartsDropListofDataset& partsdroplist, pb::PartsDropListofDataset* pb_partsdroplist) {
+  pb_partsdroplist->set_datasetpath(partsdroplist.datasetpath);
+  for (auto part : partsdroplist.partitions) {
+    pb_partsdroplist->add_partitions(part);
+  }
+  return arrow::Status::OK();
+}
+
+// HeartbeatResultCmd
+arrow::Status FromProto(const pb::HeartbeatResultCmd& pb_resultcmd, HeartbeatResultCmd* resultcmd) {
+  if (pb_resultcmd.hbrc_action() == pb::HeartbeatResultCmd::NOACTION) {
+    resultcmd->hbrc_action = HeartbeatResultCmd::NOACTION;
+  } else if (pb_resultcmd.hbrc_action() == pb::HeartbeatResultCmd::DROPCACHE) {
+    resultcmd->hbrc_action = HeartbeatResultCmd::DROPCACHE;
+  } else {
+    resultcmd->hbrc_action = HeartbeatResultCmd::UNKNOWN;
+  }
+  resultcmd->hbrc_parameters.resize(pb_resultcmd.hbrc_parameters_size());
+  for (int i=0; i<pb_resultcmd.hbrc_parameters_size(); i++) {
+    FromProto(pb_resultcmd.hbrc_parameters(i), &(resultcmd->hbrc_parameters[i]));
+  }
+
+  return arrow::Status::OK();
+}
+
+arrow::Status ToProto(const HeartbeatResultCmd& resultcmd, pb::HeartbeatResultCmd* pb_resultcmd) {
+  if (resultcmd.hbrc_action == HeartbeatResultCmd::NOACTION) {
+    pb_resultcmd->set_hbrc_action(pb::HeartbeatResultCmd::NOACTION);
+  } else if (resultcmd.hbrc_action == HeartbeatResultCmd::DROPCACHE) {
+    pb_resultcmd->set_hbrc_action(pb::HeartbeatResultCmd::DROPCACHE);
+  } else {
+    pb_resultcmd->set_hbrc_action(pb::HeartbeatResultCmd::UNKNOWN);
+  }
+  pb_resultcmd->clear_hbrc_parameters();
+  for (auto partlistofds : resultcmd.hbrc_parameters) {
+    ToProto(partlistofds, pb_resultcmd->add_hbrc_parameters());
+  }
+
+  return arrow::Status::OK();
+}
+
 // HeartbeatResult
 arrow::Status FromProto(const pb::HeartbeatResult& pb_result, HeartbeatResult* result) {
   if (pb_result.result_code() == pb::HeartbeatResult::REGISTERED) {
@@ -476,6 +526,14 @@ arrow::Status FromProto(const pb::HeartbeatResult& pb_result, HeartbeatResult* r
   } else {
     result->result_code = HeartbeatResult::UNKNOWN;
   }
+
+  if (pb_result.result_hascmd() == true) {
+    result->result_hascmd = true;
+    FromProto(pb_result.result_command(), &(result->result_command));
+  } else {
+    result->result_hascmd = false;
+  }
+
   return arrow::Status::OK();
 }
 
@@ -487,6 +545,14 @@ arrow::Status ToProto(const HeartbeatResult& result, pb::HeartbeatResult* pb_res
   } else {
     pb_result->set_result_code(pb::HeartbeatResult::UNKNOWN);
   }
+
+  if (result.result_hascmd == true) {
+    pb_result->set_result_hascmd(true);
+    ToProto(result.result_command, pb_result->mutable_result_command());
+  } else {
+    pb_result->set_result_hascmd(false);
+  }
+
   return arrow::Status::OK();
 }
 

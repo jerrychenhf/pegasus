@@ -599,6 +599,22 @@ struct PEGASUS_RPC_EXPORT HeartbeatInfo {
   }
 };
 
+struct PEGASUS_RPC_EXPORT PartsDropListofDataset {
+  std::string datasetpath;
+  std::vector<std::string> partitions;
+};
+
+struct PEGASUS_RPC_EXPORT HeartbeatResultCmd {
+  enum HeartbeatResultCmdAction {
+    UNKNOWN = 0,  /// Unused
+    NOACTION = 1,
+    DROPCACHE = 2
+  };
+
+  HeartbeatResultCmdAction hbrc_action;
+  std::vector<PartsDropListofDataset> hbrc_parameters;
+};
+
 /// \brief Worker heartbeat result
 struct PEGASUS_RPC_EXPORT HeartbeatResult {
   enum HeartbeatResultCode {
@@ -609,6 +625,9 @@ struct PEGASUS_RPC_EXPORT HeartbeatResult {
 
   /// The heartbeat type
   HeartbeatResultCode result_code;
+
+  bool result_hascmd;
+  HeartbeatResultCmd result_command;
 
   bool Equals(const HeartbeatResult& other) const;
 

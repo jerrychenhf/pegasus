@@ -29,6 +29,7 @@
 #include "common/location.h"
 #include "rpc/types.h"
 #include "server/planner/worker_failure_detector.h"
+#include "dataset/dataset.h"
 
 using namespace std;
 
@@ -43,11 +44,36 @@ class WorkerFailureDetector;
 /// provided by the subscriber at registration time.
 typedef std::string WorkerId;
 
-
 class IWMObserver {
  public:
-  virtual void update(int wmevent) = 0;
+  virtual void WkMngObsUpdate(int wmevent) = 0;
 };  //WMObserver
+
+// <datasetpath_string, partitionidstring_vector>
+//typedef std::vector<std::string, std::vector<std::string>> PartitionsDropMap;
+class WorkerCacheDropList {
+public:
+  WorkerCacheDropList() {}
+
+  Status InsertPartition(Partition& part) {
+
+    // TODO: concurrent access control
+
+    for (auto it = partstodrop_.begin(); it != partstodrop_.end(); it++) {
+      if (it->datasetpath == part.GetDataSetPath()) {
+        it->partitions.push_back(part.GetIdentPath());
+        break;
+      }
+    }
+
+    return Status::OK();
+  }
+
+  std::vector<rpc::PartsDropListofDataset>& GetPartstodrop() { return partstodrop_; }
+
+private:
+  std::vector<rpc::PartsDropListofDataset> partstodrop_;
+};
 
 class WorkerRegistration {
 public:
@@ -60,7 +86,7 @@ public:
   WorkerRegistration(const WorkerId& id)
     : id_(id), state_(WorkerState::UNKNOWN), last_heartbeat_time_(0) {
   }
-  
+
   const WorkerId& id() const { return id_; }
   const rpc::Location& address() const { return address_; }
   WorkerState state() const { return state_; }
@@ -69,10 +95,10 @@ public:
 public:
   WorkerId id_;
   rpc::Location address_;
-  
+
   WorkerState state_;
   int64_t last_heartbeat_time_;
-  
+
   // concurrent update and access
   // the internal pointer may be updated
   std::shared_ptr<rpc::NodeInfo> node_info_;
@@ -98,7 +124,57 @@ class WorkerManager {
   }
   void NotifyObservers(int wmevent) {
     for (auto ob : vobservers_)
-      ob->update(wmevent);
+      ob->WkMngObsUpdate(wmevent);
+  }
+
+  Status UpdateCacheDropLists(std::shared_ptr<std::vector<Partition>> partits) {
+
+    // concurrent control
+
+    // for each partition, add it to corresponding worker-cachedroplist
+    for (auto part : (*partits))
+    {
+      // get workerid (location hostname)
+      WorkerId wkid = part.GetLocationHostname();
+      // add this partition to WorkerCacheDropList, first check if it exists
+      auto it = mapwkcachedroplist_.find(wkid);
+      if (it == mapwkcachedroplist_.end())
+      {
+        mapwkcachedroplist_[wkid] = std::make_shared<WorkerCacheDropList>();
+      }
+      mapwkcachedroplist_[wkid]->InsertPartition(part);
+    }
+
+    // debug output
+    LOG(INFO) << "mapwkcachedroplist_:";
+    for (auto it : mapwkcachedroplist_) {
+      LOG(INFO) << it.first;
+    }
+
+    return Status::OK();
+  }
+
+  bool NeedtoDropCache(const WorkerId& id) {
+    LOG(INFO) << "Checking if " << id << " has partitions to drop...";
+    auto it = mapwkcachedroplist_.find(id);
+    if (it != mapwkcachedroplist_.end())
+      return true;
+    else
+      return false;
+  }
+
+  Status GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList> sppartlist) {
+
+    // concurrent control
+
+    auto it = mapwkcachedroplist_.find(id);
+    if (it != mapwkcachedroplist_.end())
+    {
+      sppartlist = std::move(mapwkcachedroplist_[id]);
+      mapwkcachedroplist_[id] = nullptr;
+    }
+
+    return Status::OK();
   }
 
  private:
@@ -112,13 +188,17 @@ class WorkerManager {
   typedef boost::unordered_map<WorkerId, std::shared_ptr<WorkerRegistration>>
     WorkerRegistrationMap;
   WorkerRegistrationMap workers_;
-  
+
   /// Protects access to workers
   boost::mutex workers_lock_;
-  
+
   boost::scoped_ptr<WorkerFailureDetector> worker_failure_detector_;
 
   std::vector<IWMObserver *> vobservers_;
+
+  typedef boost::unordered_map<WorkerId, std::shared_ptr<WorkerCacheDropList>>
+                 WorkerCacheDropListMap;
+  WorkerCacheDropListMap mapwkcachedroplist_;
 };
 
 } // namespace pegasus

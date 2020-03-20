@@ -34,34 +34,37 @@
 
 using namespace std;
 
-namespace pegasus {
+namespace pegasus
+{
 
-namespace rpc {
+namespace rpc
+{
 
 class FlightInfo;
 class FlightListing;
 
-}  // namespace rpc
+} // namespace rpc
 
-class DataSetService : IWMObserver {
- public:
+class DataSetService : IWMObserver
+{
+public:
   DataSetService();
   ~DataSetService();
   Status Init();
   Status Start();
   Status Stop();
-  Status GetFlightInfo(DataSetRequest* dataset_request, std::unique_ptr<rpc::FlightInfo>* flight_info, const rpc::FlightDescriptor& fldtr);
-  Status GetFlightListing(std::unique_ptr<rpc::FlightListing>* listings);
-  Status GetDataSets( std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets);
-  Status GetDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset);
-  Status CacheDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset, int distpolicy);
-  Status UpdateDataSet(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset, int distpolicy);
-  Status RemoveDataSet(DataSetRequest* dataset_request);
-  Status FilterDataSet(const std::vector<Filter>& parttftr, std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet>* resultdataset);
-  void update(int wmevent);
+  Status GetFlightInfo(DataSetRequest *dataset_request, std::unique_ptr<rpc::FlightInfo> *flight_info, const rpc::FlightDescriptor &fldtr);
+  Status GetFlightListing(std::unique_ptr<rpc::FlightListing> *listings);
+  Status GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> *datasets);
+  Status GetDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset);
+  Status CacheDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset, int distpolicy);
+  Status UpdateDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset, int distpolicy);
+  Status RemoveDataSet(DataSetRequest *dataset_request);
+  Status FilterDataSet(const std::vector<Filter> &parttftr, std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet> *resultdataset);
+  void WkMngObsUpdate(int wmevent);
 
- private:
-//  std::shared_ptr<WorkerManager> worker_manager_;
+private:
+  //  std::shared_ptr<WorkerManager> worker_manager_;
   std::shared_ptr<FlightInfoBuilder> flightinfo_builder_;
   std::shared_ptr<DataSetStore> dataset_store_;
   std::shared_ptr<CatalogManager> catalog_manager_;
@@ -69,4 +72,4 @@ class DataSetService : IWMObserver {
 
 } // namespace pegasus
 
-#endif  // PEGASUS_DATASET_SERVICE_H
+#endif // PEGASUS_DATASET_SERVICE_H
