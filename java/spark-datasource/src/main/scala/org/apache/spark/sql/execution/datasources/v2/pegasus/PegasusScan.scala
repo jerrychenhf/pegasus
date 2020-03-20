@@ -39,20 +39,14 @@ case class PegasusScan(
     options: CaseInsensitiveStringMap)
   extends Scan with Batch with Logging {
 
-
   /**
     * Returns whether a file with `path` could be split or not.
     */
   def isSplitable(path: Path): Boolean = true
 
-//  /**
-//    * Returns the required data schema
-//    */
-//  def readDataSchema: StructType = StructType(Seq())
-
   override def createReaderFactory(): PartitionReaderFactory = {
 
-    PegasusPartitionReaderFactory(paths)
+    PegasusPartitionReaderFactory(paths, sparkSession.sessionState.conf, readDataSchema)
   }
 
   override def equals(obj: Any): Boolean = obj match {

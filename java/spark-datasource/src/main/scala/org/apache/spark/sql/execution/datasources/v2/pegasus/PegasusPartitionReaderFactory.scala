@@ -20,16 +20,28 @@ import org.apache.pegasus.rpc.{Location, Ticket}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.read.{InputPartition, PartitionReader, PartitionReaderFactory}
+import org.apache.spark.sql.internal.SQLConf
+import org.apache.spark.sql.types.{AtomicType, StructType}
 import org.apache.spark.sql.vectorized.ColumnarBatch
 
 /**
   * A factory used to create Pegasus Partition readers.
   *
+  * * @param paths locations.
+  * * @param sqlConf SQL configuration.
+  * * @param readDataSchema Required data schema in the batch scan.
+  *
   */
 case class PegasusPartitionReaderFactory(
-    paths: Seq[String]) extends PartitionReaderFactory with Logging {
+    paths: Seq[String],
+    sqlConf: SQLConf,
+    readDataSchema: StructType) extends PartitionReaderFactory with Logging {
 
-  override def supportColumnarReads(partition: InputPartition): Boolean = true
+  override def supportColumnarReads(partition: InputPartition): Boolean = {
+    sqlConf.wholeStageEnabled &&
+      readDataSchema.length <= sqlConf.wholeStageMaxNumFields &&
+      readDataSchema.forall(_.dataType.isInstanceOf[AtomicType])
+  }
 
   @throws(classOf[NoSuchElementException])
   override def createColumnarReader(partition: InputPartition): PartitionReader[ColumnarBatch] = {
