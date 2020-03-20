@@ -38,17 +38,10 @@ Status LruCacheEngine::GetCacheStore(CacheStore** cache_store) {
   return cache_store_manager_->GetCacheStore(cache_store);
 }
   
-Status LruCacheEngine::PutValue(LRUCache::CacheKey key) {
-  LRUCache::PendingEntry pending_entry = lru_cache_->Allocate(key, sizeof(key));
-
-  LRUCacheHandle inserted_handle;
-  lru_cache_->Insert(&pending_entry, &inserted_handle);
-
-  if (!pending_entry.valid() && inserted_handle.valid()) {
-    return Status::OK();
-  } else {
-    return Status::Invalid("Failed to insert the cached colmn into lru cache");
-  }
+Status LruCacheEngine::PutValue(LRUCache::CacheKey* key) {
+ 
+  lru_cache_->Insert(key);
+  return Status::OK();
 }
 
 } // namespace pegasus

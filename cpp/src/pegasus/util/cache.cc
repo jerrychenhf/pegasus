@@ -34,6 +34,8 @@
 #include "util/alignment.h"
 #include "util/test_util_prod.h"
 
+#include "common/logging.h"
+
 // Useful in tests that require accurate cache capacity accounting.
 DEFINE_bool(cache_force_single_shard, true,
             "Override all cache implementations to use just one shard");
@@ -121,6 +123,7 @@ class HandleTable {
 
   RLHandle* Insert(RLHandle* h) {
     RLHandle** ptr = FindPointer(h->key(), h->hash);
+  
     RLHandle* old = *ptr;
     h->next_hash = (old == nullptr ? nullptr : old->next_hash);
     *ptr = h;
@@ -286,9 +289,11 @@ bool CacheShard<policy>::Unref(RLHandle* e) {
 template<Cache::EvictionPolicy policy>
 void CacheShard<policy>::FreeEntry(RLHandle* e) {
   DCHECK_EQ(e->refs.load(std::memory_order_relaxed), 0);
+
   if (e->eviction_callback) {
     e->eviction_callback->EvictedEntry(e->key(), e->value());
   }
+ 
   delete [] e;
 }
 
@@ -350,6 +355,7 @@ template<Cache::EvictionPolicy policy>
 Cache::Handle* CacheShard<policy>::Insert(
     RLHandle* handle,
     Cache::EvictionCallback* eviction_callback) {
+ 
   // Set the remaining RLHandle members which were not already allocated during
   // Allocate().
   handle->eviction_callback = eviction_callback;
@@ -371,7 +377,8 @@ Cache::Handle* CacheShard<policy>::Insert(
       }
     }
 
-    while (usage_ > capacity_ && rl_.next != &rl_) {
+    while (usage_ > capacity_ * 0.9 && rl_.next != &rl_) {
+      LOG(INFO) << "begin evict and the usage is " << usage_;
       RLHandle* old = rl_.next;
       RL_Remove(old);
       table_.Remove(old->key(), old->hash);
@@ -496,6 +503,7 @@ class BlockCache : public Cache {
     handle->charge = (charge == kAutomaticCharge) ? pegasus_malloc_usable_size(h.get())
                                                   : charge;
     handle->hash = HashSlice(key);
+
     memcpy(handle->kv_data, key.data(), key_len);
 
     return h;
@@ -533,6 +541,7 @@ class BlockCache : public Cache {
   UniqueHandle Insert(
     UniquePendingHandle handle,
     Cache::EvictionCallback* eviction_callback) override {
+   
     RLHandle* h = reinterpret_cast<RLHandle*>(DCHECK_NOTNULL(handle.release()));
     // Set the remaining RLHandle members which were not already allocated during
     // Allocate().
@@ -555,7 +564,7 @@ class BlockCache : public Cache {
         }
       }
 
-     while (usage_ > capacity_ && rl_.next != &rl_) {
+     while (usage_ > capacity_ * 0.9 && rl_.next != &rl_) {
         RLHandle* old = rl_.next;
         RL_Remove(old);
         table_.Remove(old->key(), old->hash);
@@ -570,6 +579,7 @@ class BlockCache : public Cache {
     // performance reasons
     while (to_remove_head != nullptr) {
       RLHandle* next = to_remove_head->next;
+     
       FreeEntry(to_remove_head);
       to_remove_head = next;
     }
@@ -675,6 +685,7 @@ protected:
     RLHandle* e = reinterpret_cast<RLHandle*>(handle);
     bool last_reference = Unref(e);
     if (last_reference) {
+     
       FreeEntry(e);
     }
   }
@@ -685,8 +696,8 @@ protected:
   }
 
 private:
-  static inline uint32_t HashSlice(const Slice& s) {
-      return util_hash::CityHash64(
+  static inline uint32_t HashSlice(Slice s) {
+    return util_hash::CityHash64(
         reinterpret_cast<const char *>(s.data()), s.size());
   }
 
@@ -804,7 +815,7 @@ class ShardedCache : public Cache {
   }
 
  private:
-  static inline uint32_t HashSlice(const Slice& s) {
+  static inline uint32_t HashSlice(Slice s) {
     return util_hash::CityHash64(
       reinterpret_cast<const char *>(s.data()), s.size());
   }

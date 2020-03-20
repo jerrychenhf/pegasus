@@ -56,15 +56,15 @@ class LRUCache {
   // important that the layout be fixed and kept compatible for all
   // future releases.
   struct CacheKey {
-    CacheKey(const std::string& dataset_path, const std::string& partition_path,
+    CacheKey(std::string dataset_path, std::string partition_path,
      int column_id, int64_t occupied_size) :
       dataset_path_(dataset_path),
       partition_path_(partition_path),
       column_id_(column_id),
       occupied_size_(occupied_size){}
 
-   const std::string& dataset_path_;
-   const std::string& partition_path_;
+   std::string dataset_path_;
+   std::string partition_path_;
    int column_id_;
    int64_t occupied_size_;
   };
@@ -88,17 +88,20 @@ class LRUCache {
       // VLOG(2) << strings::Substitute("EvictedEntry callback for key '$0'",
       //                                key.ToString());
       auto* entry_ptr = reinterpret_cast<LRUCache::CacheKey*>(key.mutable_data());
+  
       std::string dataset_path = entry_ptr->dataset_path_;
       std::string partition_path = entry_ptr->partition_path_;
       int column_id = entry_ptr->column_id_;
+    
       if (cache_block_manager_ == nullptr ||
        cache_block_manager_->GetCachedDatasets().size() == 0) {
         return;
       }
-
+      
        // Before insert into the column, check whether the dataset is inserted.
       std::shared_ptr<CachedDataset> dataset;
       cache_block_manager_->GetCachedDataSet(dataset_path, &dataset);
+     
 
       if(dataset->GetCachedPartitions().size() == 0) {
         return;
@@ -115,11 +118,12 @@ class LRUCache {
         ss << "Failed to delete the column when free the column";
         LOG(ERROR) << ss.str();
       }
-    }
+  }
 
    private:
     DISALLOW_COPY_AND_ASSIGN(LRUEvictionCallback);
     DatasetCacheBlockManager* cache_block_manager_;
+    
   };
 
   // An entry that is in the process of being inserted into the block
@@ -187,30 +191,9 @@ class LRUCache {
   // Calling StartInstrumentation multiple times will reset the metrics each time.
   void StartInstrumentation(const scoped_refptr<MetricEntity>& metric_entity);
 
-  // Insertion path
-  // --------------------
-  // Block cache entries are written in two phases. First, a pending entry must be
-  // constructed. The data to be cached then must be copied directly into
-  // this pending entry before being inserted. For example:
-  //
-  //   // Allocate space in the cache for a block of 'data_size' bytes.
-  //   PendingEntry entry = cache->Allocate(my_cache_key, data_size);
-  //   // Check for allocation failure.
-  //   if (!entry.valid()) {
-  //     // if there is no space left in the cache, handle the error.
-  //   }
-  //   // Read the actual block into the allocated buffer.
-  //   RETURN_NOT_OK(ReadDataFromDiskIntoBuffer(entry.val_ptr()));
-  //   // "Commit" the entry to the cache
-  //   LRUCacheHandle bch;
-  //   cache->Insert(&entry, &bch);
-
-  // Allocate a new entry to be inserted into the cache.
-  PendingEntry Allocate(const CacheKey& key, size_t block_size);
-
   // Insert the given block into the cache. 'inserted' is set to refer to the
   // entry in the cache.
-  void Insert(PendingEntry* entry, LRUCacheHandle* inserted);
+  void Insert(const CacheKey* key);
 
   void Erase(const CacheKey& key);
 

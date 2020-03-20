@@ -145,11 +145,6 @@ Status LRUCache::Init() {
   return Status::OK();
 }
 
-LRUCache::PendingEntry LRUCache::Allocate(const CacheKey& key, size_t lru_size) {
-  Slice key_slice(reinterpret_cast<const uint8_t*>(&key), sizeof(key));
-  return PendingEntry(cache_->Allocate(key_slice, lru_size, key.occupied_size_));
-}
-
 bool LRUCache::Lookup(const CacheKey& key, Cache::CacheBehavior behavior,
                         LRUCacheHandle* handle) {
   auto h(cache_->Lookup(
@@ -161,10 +156,15 @@ bool LRUCache::Lookup(const CacheKey& key, Cache::CacheBehavior behavior,
   return false;
 }
 
-void LRUCache::Insert(LRUCache::PendingEntry* entry, LRUCacheHandle* inserted) {
-  auto h(cache_->Insert(std::move(entry->handle_),
+void LRUCache::Insert(const CacheKey* key) {
+  
+  Slice key_slice(reinterpret_cast<const uint8_t*>(key), sizeof(CacheKey));
+
+  auto handle(cache_->Allocate(key_slice, 0, key->occupied_size_));
+  CHECK(handle);
+  
+  auto h(cache_->Insert(std::move(handle),
                         eviction_callback_));
-  inserted->SetHandle(std::move(h));
 }
 
 void LRUCache::Erase(const CacheKey& key) {

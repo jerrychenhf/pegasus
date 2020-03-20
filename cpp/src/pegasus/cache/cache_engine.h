@@ -35,7 +35,7 @@ class CacheEngine {
  public:
  virtual Status Init(const std::shared_ptr<CacheEngineInfo>& info) = 0;
  virtual Status GetCacheStore(CacheStore** cache_store) = 0;
- virtual Status PutValue(LRUCache::CacheKey key) = 0;
+ virtual Status PutValue(LRUCache::CacheKey* key) = 0;
 
   enum CachePolicy {
     LRU,
@@ -60,7 +60,7 @@ class LruCacheEngine : public CacheEngine {
   
   Status GetCacheStore(CacheStore** cache_store) override;
 
-  Status PutValue(LRUCache::CacheKey key) override;
+  Status PutValue(LRUCache::CacheKey* key) override;
 
  public:
   std::shared_ptr<CacheStoreManager> cache_store_manager_;
@@ -80,7 +80,7 @@ class NonEvictionCacheEngine : public CacheEngine {
   Status GetCacheStore(CacheStore** cache_store) override {
     return Status::NotImplemented("Not yet implemented.");
   }
-  Status PutValue(LRUCache::CacheKey key) override {
+  Status PutValue(LRUCache::CacheKey* key) override {
     return Status::NotImplemented("Not yet implemented.");
   }
 };
