@@ -52,7 +52,7 @@ class DataSetRequest {
   const std::vector<Filter>& get_filters();
 
   static const std::string CATALOG_PROVIDER;
-  static const std::string FORMAT;
+  static const std::string FILE_FORMAT;
   static const std::string TABLE_LOCATION;
   static const std::string COLUMN_NAMES;
 

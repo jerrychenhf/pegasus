@@ -78,7 +78,7 @@ Status SparkCatalog::GetSchema(DataSetRequest* dataset_request,
 Catalog::FileFormat SparkCatalog::GetFileFormat(DataSetRequest* dataset_request) {
   const auto properties = dataset_request->get_properties();
   std::unordered_map<std::string, std::string>::const_iterator it = 
-      properties.find(DataSetRequest::FORMAT);
+      properties.find(DataSetRequest::FILE_FORMAT);
   if (it != properties.end()) {
     if (it->second == SparkCatalog::FILE_FORMAT_ID_PARQUET) {
       return FileFormat::PARQUET;
