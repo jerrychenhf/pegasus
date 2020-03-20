@@ -41,6 +41,8 @@ public class FlightDescriptor {
 
   public static final String COLUMN_NAMES = "column.names";
   public static final String TABLE_LOCATION = "table.location";
+  public static final String FILE_FORMAT = "file.format";
+  public static final String FILE_FORMAT_PARQUET = "PARQUET";
   public static final String CATALOG_PROVIDER = "catalog.provider";
   public static final String CATALOG_PROVIDER_SPARK = "SPARK";
   public static final String CATALOG_PROVIDER_PEGASUS = "PEGASUS";
