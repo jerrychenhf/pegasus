@@ -64,7 +64,8 @@ Status WorkerTableAPIService::Serve() {
 /// \param[out] stream the returned stream provider
 /// \return Status
 arrow::Status WorkerTableAPIService::DoGet(const rpc::ServerCallContext& context,
-  const rpc::Ticket& request, std::unique_ptr<rpc::FlightDataStream>* data_stream) {
+                                           const rpc::Ticket& request,
+                                           std::unique_ptr<rpc::FlightDataStream>* data_stream) {
 
   RequestIdentity request_identity;
   arrow::Status st = CreateDataRequest(request, &request_identity);
@@ -83,8 +84,8 @@ arrow::Status WorkerTableAPIService::DoGet(const rpc::ServerCallContext& context
 /// \param[in] writer send metadata back to the client
 /// \return Status
 arrow::Status WorkerTableAPIService::DoPut(const rpc::ServerCallContext& context,
-               std::unique_ptr<rpc::FlightMessageReader> reader,
-               std::unique_ptr<rpc::FlightMetadataWriter> writer) {
+                                           std::unique_ptr<rpc::FlightMessageReader> reader,
+                                           std::unique_ptr<rpc::FlightMetadataWriter> writer) {
 
 //TODO
   return arrow::Status::OK();

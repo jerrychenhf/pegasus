@@ -124,7 +124,8 @@ Status HDFSStoragePlugin::ListSubDirectoryModifiedTimes(std::string dataset_path
   return Status::OK();
 }
 
-Status HDFSStoragePlugin::ListFiles(std::string dataset_path, std::vector<std::string>* file_list) {
+Status HDFSStoragePlugin::ListFiles(std::string dataset_path,
+                                    std::vector<std::string>* file_list) {
   
   std::vector<HdfsPathInfo> children;
   arrow::Status arrowStatus = client_->ListDirectory(dataset_path, &children);
@@ -147,7 +148,7 @@ Status HDFSStoragePlugin::ListFiles(std::string dataset_path, std::vector<std::s
 }
 
 Status HDFSStoragePlugin::GetReadableFile(std::string file_path,
-    std::shared_ptr<HdfsReadableFile>* file) {
+                                          std::shared_ptr<HdfsReadableFile>* file) {
 
   arrow::Status arrowStatus = client_->OpenReadable(file_path, file);
   return Status::fromArrowStatus(arrowStatus);

@@ -42,7 +42,8 @@ class HDFSStoragePlugin : public StoragePlugin {
   Status GetReadableFile(std::string file_path, std::shared_ptr<HdfsReadableFile>* file);
   Status GetPathInfo(std::string dataset_path, HdfsPathInfo* file_info);
   Status ListModifiedTimes(std::string dataset_path, std::vector<int32_t>* modified_time_list) ;
-  Status ListSubDirectoryModifiedTimes(std::string dataset_path, std::vector<int32_t>* modified_time_list);
+  Status ListSubDirectoryModifiedTimes(std::string dataset_path,
+                                       std::vector<int32_t>* modified_time_list);
 
  private:
   std::shared_ptr<HadoopFileSystem> client_;

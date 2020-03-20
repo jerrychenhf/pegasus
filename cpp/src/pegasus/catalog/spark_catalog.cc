@@ -38,7 +38,8 @@ SparkCatalog::~SparkCatalog() {
     
 }
 
-Status SparkCatalog::GetTableLocation(DataSetRequest* dataset_request, std::string& table_location) {
+Status SparkCatalog::GetTableLocation(DataSetRequest* dataset_request,
+                                      std::string& table_location) {
   const auto properties = dataset_request->get_properties();
   std::unordered_map<std::string, std::string>::const_iterator it = 
       properties.find(DataSetRequest::TABLE_LOCATION);
@@ -51,7 +52,7 @@ Status SparkCatalog::GetTableLocation(DataSetRequest* dataset_request, std::stri
 }
 
 Status SparkCatalog::GetSchema(DataSetRequest* dataset_request,
-    std::shared_ptr<arrow::Schema>* schema) {
+                               std::shared_ptr<arrow::Schema>* schema) {
   
   std::string table_location;
   RETURN_IF_ERROR(GetTableLocation(dataset_request, table_location));
@@ -88,7 +89,6 @@ Catalog::FileFormat SparkCatalog::GetFileFormat(DataSetRequest* dataset_request)
     return FileFormat::PARQUET;
   }
 }
-
 
 Catalog::CatalogType SparkCatalog::GetCatalogType() {
    return CatalogType::SPARK;

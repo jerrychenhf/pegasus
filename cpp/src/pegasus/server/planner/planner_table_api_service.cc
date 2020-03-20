@@ -60,8 +60,8 @@ Status PlannerTableAPIService::Serve() {
 }
 
 arrow::Status PlannerTableAPIService::GetSchema(const rpc::ServerCallContext& context,
-                                   const rpc::FlightDescriptor& request,
-                                   std::unique_ptr<rpc::SchemaResult>* schema) {
+                                                const rpc::FlightDescriptor& request,
+                                                std::unique_ptr<rpc::SchemaResult>* schema) {
 
   DataSetRequest dataset_request;
   LOG(INFO) << "Requesting schema.";
@@ -86,8 +86,9 @@ arrow::Status PlannerTableAPIService::GetSchema(const rpc::ServerCallContext& co
 /// \param[in] criteria may be null
 /// \param[out] listings the returned listings iterator
 /// \return Status
-arrow::Status PlannerTableAPIService::ListFlights(const rpc::ServerCallContext& context, const rpc::Criteria* criteria,
-                     std::unique_ptr<rpc::FlightListing>* listings) {
+arrow::Status PlannerTableAPIService::ListFlights(const rpc::ServerCallContext& context,
+                                                  const rpc::Criteria* criteria,
+                                                  std::unique_ptr<rpc::FlightListing>* listings) {
     
   dataset_service_->GetFlightListing(listings);
 

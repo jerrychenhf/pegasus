@@ -27,7 +27,7 @@ CatalogManager::CatalogManager()
 }
 
 Status CatalogManager::GetCatalog(DataSetRequest* dataset_request,
-    std::shared_ptr<Catalog>* catalog) {
+                                  std::shared_ptr<Catalog>* catalog) {
   
   const auto properties = dataset_request->get_properties();
   std::unordered_map<std::string, std::string>::const_iterator it = 
