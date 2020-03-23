@@ -64,11 +64,37 @@ if [ "$PEGASUS_WORKER_HOST" = "" ]; then
   esac
 fi
 
+if [ "$PEGASUS_PID_DIR" = "" ]; then
+  PEGASUS_PID_DIR=/tmp
+fi
+
+pid="$PEGASUS_PID_DIR/pegasus-worker.pid"
+
 function start_worker() {
+  mkdir -p "$PEGASUS_PID_DIR"
+
+  if [ -f "$pid" ]; then
+    TARGET_ID="$(cat "$pid")"
+    if [[ $(ps -p "$TARGET_ID" -o comm=) =~ "workerd" ]]; then
+      echo "pegasus worker running as process $TARGET_ID.  Stop it first."
+      exit 1
+    fi
+  fi
+
   WORKER_ARGS="--worker_port $PEGASUS_WORKER_PORT $WORKER_ARGS"
   WORKER_ARGS="--hostname $PEGASUS_WORKER_HOST $WORKER_ARGS"
   exec ${BINARY_BASE_DIR}/${BUILD_TYPE}/worker/workerd ${WORKER_ARGS} &
-  sleep 2
+  newpid="$!"
+  echo "$newpid" > "$pid"
+
+  # Poll for up to 5 seconds for the worker to start
+  for i in {1..10}
+  do
+    if [[ $(ps -p "$newpid" -o comm=) =~ "workerd" ]]; then
+      break
+    fi
+    sleep 0.5
+  done
 }
 
 # Start Worker

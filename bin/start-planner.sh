@@ -25,9 +25,6 @@ fi
 . "${PEGASUS_HOME}/bin/pegasus-config.sh"
 . "${PEGASUS_HOME}/bin/load-pegasus-env.sh"
 
-set -e
-set -u
-
 BUILD_TYPE=release
 PLANNER_ARGS=""
 BINARY_BASE_DIR=${PEGASUS_HOME}/cpp/build
@@ -51,8 +48,6 @@ do
   esac
 done
 
-set -u
-
 # Find the port number for the planner
 if [ "$PEGASUS_PLANNER_PORT" = "" ]; then
   PEGASUS_PLANNER_PORT=30001
@@ -69,10 +64,36 @@ if [ "$PEGASUS_PLANNER_HOST" = "" ]; then
   esac
 fi
 
+if [ "$PEGASUS_PID_DIR" = "" ]; then
+  PEGASUS_PID_DIR=/tmp
+fi
+
+pid="$PEGASUS_PID_DIR/pegasus-planner.pid"
+
 function start_planner() {
+  mkdir -p "$PEGASUS_PID_DIR"
+
+  if [ -f "$pid" ]; then
+    TARGET_ID="$(cat "$pid")"
+    if [[ $(ps -p "$TARGET_ID" -o comm=) =~ "plannerd" ]]; then
+      echo "pegasus planner running as process $TARGET_ID.  Stop it first."
+      exit 1
+    fi
+  fi
+
   PLANNER_ARGS="$PLANNER_ARGS --hostname $PEGASUS_PLANNER_HOST"
   PLANNER_ARGS="$PLANNER_ARGS --planner_port $PEGASUS_PLANNER_PORT"
   exec ${BINARY_BASE_DIR}/${BUILD_TYPE}/planner/plannerd ${PLANNER_ARGS} &
+  newpid="$!"
+  echo "$newpid" > "$pid"
+  # Poll for up to 5 seconds for the worker to start
+  for i in {1..10}
+  do
+    if [[ $(ps -p "$newpid" -o comm=) =~ "plannerd" ]]; then
+      break
+    fi
+    sleep 0.5
+  done
 }
 
 # Start Planner
