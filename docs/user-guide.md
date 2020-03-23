@@ -65,7 +65,7 @@ After the connection is established, execute the following command to check the 
 Step 4. Run query to create table. For example,
 
 ```
-> CREATE TABLE pegasusitem USING PEGASUS LOCATION 'hdfs://10.239.47.55:9000/genData1000/item';
+> CREATE TABLE pegasusitem USING PARQUET LOCATION 'hdfs://10.239.47.55:9000/genData1000/item';
 ```
 
 Step 5. Run queries on table. For example,
