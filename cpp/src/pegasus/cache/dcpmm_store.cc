@@ -211,8 +211,7 @@ Status DCPMMStore::Free(StoreRegion* store_region) {
   
   used_size_ -= store_region->length();
   
-  void* p = reinterpret_cast<void*>(address);
-  CALL_MEMKIND(memkind_free, vmp_, p);
+  CALL_MEMKIND(memkind_free, vmp_, address);
 
   return Status::OK();
 }
