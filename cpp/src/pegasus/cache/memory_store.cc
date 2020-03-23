@@ -25,6 +25,7 @@ MemoryStore::MemoryStore(int64_t capacity)
 }
 
 Status MemoryStore::Init(const std::unordered_map<string, string>* properties) {
+  LOG(INFO) << "Init the memory store";
   return Status::OK();
 }
 

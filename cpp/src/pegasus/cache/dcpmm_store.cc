@@ -128,6 +128,7 @@ DCPMMStore::DCPMMStore(int64_t capacity)
 }
 
 Status DCPMMStore::Init(const std::unordered_map<string, string>* properties) {
+  LOG(INFO) << "Init dcpmm store";
   // Get the dcpmm path from properties
   auto entry  = properties->find(StoreManager::STORE_PROPERTY_PATH);
 
