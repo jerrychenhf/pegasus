@@ -161,6 +161,8 @@ Status DCPMMStore::Init(const std::unordered_map<string, string>* properties) {
 }
 
 Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
+  DCHECK(store_region != NULL);
+
   int64_t available_size = capacity_ - used_size_;
   if (size > available_size) {
     return Status::Invalid("Request dcpmm size" , size, "is large than available size.");
@@ -171,12 +173,12 @@ Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
   }
 
   void* p = CALL_MEMKIND(memkind_malloc, vmp_, size);
-
-  uint8_t* address = reinterpret_cast<uint8_t*>(p);
  
-  size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, address);
+  size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, p);
 
   LOG(INFO) << "Allocate method: the request size is " << size << " and the occupied size is " << occupied_size;
+
+  uint8_t* address = reinterpret_cast<uint8_t*>(p);
   store_region->reset_address(address, occupied_size);
   used_size_ += occupied_size;
 
@@ -191,27 +193,33 @@ Status DCPMMStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* s
   if ((new_size - old_size) > available_size) {
     return Status::Invalid("Request memory size" , (new_size - old_size), "is large than available size.");
   }
-
-  void* p = CALL_MEMKIND(memkind_realloc, vmp_, store_region->address(), new_size);
   
-  uint8_t* new_address = reinterpret_cast<uint8_t*>(p);
+  void* old_ptr = reinterpret_cast<void*>(store_region->address());
+  size_t size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, old_ptr);
 
-  size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, new_address);
+  void* new_ptr = CALL_MEMKIND(memkind_malloc, vmp_, new_size);
+  memcpy(new_ptr, old_ptr, size);
+  
+  // free the old address
+  CALL_MEMKIND(memkind_free, vmp_, old_ptr);
+
+  size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, new_ptr);
   
   LOG(INFO) << "Reallocate method: the request size is " << new_size << " and the occupied size is " << occupied_size;
+
+  uint8_t* new_address = reinterpret_cast<uint8_t*>(new_ptr);
   store_region->reset_address(new_address, occupied_size);
-  used_size_ += occupied_size;
+  used_size_ += (occupied_size - size);
   return Status::OK();
 }
 
 Status DCPMMStore::Free(StoreRegion* store_region) {
   DCHECK(store_region != NULL);
   
-  uint8_t* address = store_region->address();
-  
   used_size_ -= store_region->length();
   
-  CALL_MEMKIND(memkind_free, vmp_, address);
+  void* ptr = reinterpret_cast<void*>(store_region->address());
+  CALL_MEMKIND(memkind_free, vmp_, ptr);
 
   return Status::OK();
 }
