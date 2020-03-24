@@ -171,14 +171,13 @@ Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
   }
 
   void* p = CALL_MEMKIND(memkind_malloc, vmp_, size);
-  // if (p == NULL) {
-  //   return Status::OutOfMemory("Allocate of size ", size, " failed in DCPMM");
-  // }
 
   uint8_t* address = reinterpret_cast<uint8_t*>(p);
-  store_region->reset_address(address, size);
+ 
+  size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, address);
 
-  size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, p);
+  LOG(INFO) << "Allocate method: the request size is " << size << " and the occupied size is " << occupied_size;
+  store_region->reset_address(address, occupied_size);
   used_size_ += occupied_size;
 
   return Status::OK();
@@ -196,10 +195,11 @@ Status DCPMMStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* s
   void* p = CALL_MEMKIND(memkind_realloc, vmp_, store_region->address(), new_size);
   
   uint8_t* new_address = reinterpret_cast<uint8_t*>(p);
-  
-  store_region->reset_address(new_address, new_size);
 
-  size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, p);
+  size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, new_address);
+  
+  LOG(INFO) << "Reallocate method: the request size is " << new_size << " and the occupied size is " << occupied_size;
+  store_region->reset_address(new_address, occupied_size);
   used_size_ += occupied_size;
   return Status::OK();
 }
