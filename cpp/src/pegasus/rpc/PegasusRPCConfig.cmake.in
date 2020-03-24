@@ -21,8 +21,8 @@
 #
 # This config sets the following targets in your project::
 #
-#   arrow_flight_shared - for linked as shared library if shared library is built
-#   arrow_flight_static - for linked as static library if static library is built
+#   pegasus_rpc_shared - for linked as shared library if shared library is built
+#   pegasus_rpc_static - for linked as static library if static library is built
 
 @PACKAGE_INIT@
 
