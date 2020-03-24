@@ -98,6 +98,8 @@ if (ARROW_FOUND)
       message(STATUS "Found the Arrow header: ${ARROW_HEADER}")
     else ()
       message(STATUS "Found the Arrow library: ${ARROW_LIB_PATH}")
+      message(STATUS "Found the Arrow static library: ${ARROW_STATIC_LIB}")
+      message(STATUS "Found the Arrow shared library: ${ARROW_SHARED_LIB}"
     endif ()
   endif ()
 else()

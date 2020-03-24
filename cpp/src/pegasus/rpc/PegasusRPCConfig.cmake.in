@@ -15,9 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-# This config sets the following variables in your project::
-#
-#   ArrowFlight_FOUND - true if Arrow Flight found on the system
 #
 # This config sets the following targets in your project::
 #
