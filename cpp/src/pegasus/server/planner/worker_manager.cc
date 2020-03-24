@@ -181,4 +181,59 @@ Status WorkerManager::OnWorkerFailed(const WorkerId& id) {
   return Status::OK();
 }
 
+Status WorkerManager::UpdateCacheDropLists(std::shared_ptr<std::vector<Partition>> partits) {
+
+  // concurrent control
+  lock_guard<mutex> l(mapcachedrop_lock_);
+
+  // for each partition, add it to corresponding worker-cachedroplist
+  for (auto part : (*partits))
+  {
+    // get workerid (location hostname)
+    WorkerId wkid = part.GetLocationHostname();
+    // add this partition to WorkerCacheDropList, first check if it exists
+    auto it = mapwkcachedroplist_.find(wkid);
+    if (it == mapwkcachedroplist_.end())
+    {
+      mapwkcachedroplist_[wkid] = std::make_shared<WorkerCacheDropList>();
+    }
+    mapwkcachedroplist_[wkid]->InsertPartition(part);
+  }
+
+  // debug output
+  LOG(INFO) << "mapwkcachedroplist_:";
+  for (auto it : mapwkcachedroplist_) {
+    LOG(INFO) << it.first;
+  }
+
+  return Status::OK();
+}
+
+bool WorkerManager::NeedtoDropCache(const WorkerId& id) {
+  LOG(INFO) << "Checking if " << id << " has partitions to drop...";
+
+  lock_guard<mutex> l(mapcachedrop_lock_);
+
+  auto it = mapwkcachedroplist_.find(id);
+  if (it != mapwkcachedroplist_.end())
+    return true;
+  else
+    return false;
+}
+
+Status WorkerManager::GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList> sppartlist) {
+
+  // concurrent control
+  lock_guard<mutex> l(mapcachedrop_lock_);
+
+  auto it = mapwkcachedroplist_.find(id);
+  if (it != mapwkcachedroplist_.end())
+  {
+    sppartlist = std::move(mapwkcachedroplist_[id]);
+    mapwkcachedroplist_[id] = nullptr;
+  }
+
+  return Status::OK();
+}
+
 } // namespace pegasus

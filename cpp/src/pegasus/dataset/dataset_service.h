@@ -56,9 +56,10 @@ public:
   Status GetFlightInfo(DataSetRequest *dataset_request, std::unique_ptr<rpc::FlightInfo> *flight_info, const rpc::FlightDescriptor &fldtr);
   Status GetFlightListing(std::unique_ptr<rpc::FlightListing> *listings);
   Status GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> *datasets);
+  Status NotifyDataCacheDrop(std::shared_ptr<DataSet> pds, std::shared_ptr<std::vector<Partition>> partitions);
+  Status RefreshDataSet(DataSetRequest *dataset_request, std::string table_location, std::shared_ptr<StoragePlugin> storage_plugin, std::shared_ptr<DataSet> pds, std::shared_ptr<DataSet> *dataset);
   Status GetDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset);
   Status CacheDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset, int distpolicy);
-  Status UpdateDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset, int distpolicy);
   Status RemoveDataSet(DataSetRequest *dataset_request);
   Status FilterDataSet(const std::vector<Filter> &parttftr, std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet> *resultdataset);
   void WkMngObsUpdate(int wmevent);

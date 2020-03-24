@@ -287,6 +287,8 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
         case rpc::HeartbeatResultCmd::DROPCACHE:
           LOG(INFO) << "HeartbeatResultCmd: DROPCACHE";
           // TODO: execute the command
+//          WorkerExecEnv::GetInstance()->GetDatasetCacheManager()->cache_block_manager_;
+//          fn(std::vector<PartsDropListofDataset> hbrc_parameters);
           break;
         default:
           LOG(ERROR) << "Unknown HeartbeatResultCmd.";

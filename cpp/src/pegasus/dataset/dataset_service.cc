@@ -63,6 +63,74 @@ Status DataSetService::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<D
   return Status::OK();
 }
 
+Status DataSetService::NotifyDataCacheDrop(std::shared_ptr<DataSet> pds, std::shared_ptr<std::vector<Partition>> partitions)
+{
+  // generate the list of partitions which needs to notify workernode to drop the cached data
+  LOG(INFO) << "Generating list of partitions to drop cached data...";
+  auto partstodrop = std::make_shared<std::vector<Partition>>();
+  for (auto pttold : pds->partitions())
+  {
+    for (auto ptit = partitions->begin(); ptit != partitions->end(); ptit++)
+    {
+      if ((pttold.GetIdentPath() == ptit->GetIdentPath()) && (pttold.GetLocationURI() != ptit->GetLocationURI()))
+      {
+        partstodrop->push_back(pttold);
+        break;
+      }
+    }
+  }
+  LOG(INFO) << "Generated drop list (locationuri partitionid):";
+  for (auto ptt : *partstodrop)
+  {
+    LOG(INFO) << ptt.GetLocationURI() << "\t" << ptt.GetIdentPath();
+  }
+  PlannerExecEnv::GetInstance()->get_worker_manager()->UpdateCacheDropLists(partstodrop);
+
+  return Status::OK();
+}
+
+Status DataSetService::RefreshDataSet(DataSetRequest *dataset_request, std::string table_location, std::shared_ptr<StoragePlugin> storage_plugin, std::shared_ptr<DataSet> pds, std::shared_ptr<DataSet> *dataset)
+{
+  auto partitions = std::make_shared<std::vector<Partition>>();
+
+  LOG(INFO) << "pds->getRefreshFlag(): " << pds->getRefreshFlag();
+  if (pds->getRefreshFlag() & DSRF_FILES_APPEND)
+  {
+    LOG(INFO) << "=== DSRF_FILES_APPEND";
+    auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
+    dsbuilder->BuildDatasetPartitions(table_location, storage_plugin, partitions, CONHASH);
+  }
+  else if (pds->getRefreshFlag() & DSRF_WORKERSET_CHG)
+  {
+    LOG(INFO) << "=== DSRF_WORKERSET_CHG";
+    auto distributor = std::make_shared<ConsistentHashRing>();
+    distributor->PrepareValidLocations(nullptr, nullptr);
+    distributor->SetupDist();
+    for (auto ptt : pds->partitions())
+    {
+      Partition partition = Partition(Identity(pds->dataset_path(), ptt.GetIdentPath()));
+      partitions->push_back(partition);
+    }
+    distributor->GetDistLocations(partitions);
+
+    NotifyDataCacheDrop(pds, partitions);
+  }
+  else
+  {
+    LOG(ERROR) << "Unknown dataset refresh flag type!";
+  }
+
+  // keep the existing dataset pointer in dataset_store, only update data
+  pds->lockwrite();
+  //replacePartitions(std::vector<Partition> partits)
+  pds->replacePartitions(*partitions);
+  pds->resetRefreshFlag();
+  *dataset = pds;
+  pds->unlockwrite();
+
+  return Status::OK();
+}
+
 Status DataSetService::GetDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset)
 {
 
@@ -130,61 +198,7 @@ Status DataSetService::GetDataSet(DataSetRequest *dataset_request, std::shared_p
     if (pds->needRefresh())
     {
       LOG(INFO) << "=== Need to refresh, refreshing ...";
-      auto partitions = std::make_shared<std::vector<Partition>>();
-
-      LOG(INFO) << "pds->getRefreshFlag(): " << pds->getRefreshFlag();
-      if (pds->getRefreshFlag() & DSRF_FILES_APPEND)
-      {
-        LOG(INFO) << "=== DSRF_FILES_APPEND";
-        auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
-        dsbuilder->BuildDatasetPartitions(table_location, storage_plugin, partitions, CONHASH);
-      }
-      else if (pds->getRefreshFlag() & DSRF_WORKERSET_CHG)
-      {
-        LOG(INFO) << "=== DSRF_WORKERSET_CHG";
-        auto distributor = std::make_shared<ConsistentHashRing>();
-        distributor->PrepareValidLocations(nullptr, nullptr);
-        distributor->SetupDist();
-        for (auto ptt : pds->partitions())
-        {
-          Partition partition = Partition(Identity(pds->dataset_path(), ptt.GetIdentPath()));
-          partitions->push_back(partition);
-        }
-        distributor->GetDistLocations(partitions);
-
-        // generate the list of partitions which needs to notify workernode to drop the cached data
-        LOG(INFO) << "Generating list of partitions to drop cached data...";
-        auto partstodrop = std::make_shared<std::vector<Partition>>();
-        for (auto pttold : pds->partitions())
-        {
-          for (auto ptit = partitions->begin(); ptit != partitions->end(); ptit++)
-          {
-            if ((pttold.GetIdentPath() == ptit->GetIdentPath()) && (pttold.GetLocationURI() != ptit->GetLocationURI()))
-            {
-              partstodrop->push_back(pttold);
-              break;
-            }
-          }
-        }
-        LOG(INFO) << "Generated drop list (locationuri partitionid):";
-        for (auto ptt : *partstodrop)
-        {
-          LOG(INFO) << ptt.GetLocationURI() << "\t" << ptt.GetIdentPath();
-        }
-        PlannerExecEnv::GetInstance()->get_worker_manager()->UpdateCacheDropLists(partstodrop);
-      }
-      else
-      {
-        LOG(ERROR) << "Unknown dataset refresh flag type!";
-      }
-
-      // keep the existing dataset pointer in dataset_store, only update data
-      pds->lockwrite();
-      //replacePartitions(std::vector<Partition> partits)
-      pds->replacePartitions(*partitions);
-      pds->resetRefreshFlag();
-      *dataset = pds;
-      pds->unlockwrite();
+      RefreshDataSet(dataset_request, table_location, storage_plugin, pds, dataset);
     }    //if need refresh
     else // found and is uptodate
     {
@@ -215,35 +229,6 @@ Status DataSetService::CacheDataSet(DataSetRequest *dataset_request, std::shared
   (*dataset)->unlockwrite();
   // End Write
 
-  return Status::OK();
-}
-
-Status DataSetService::UpdateDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset, int distpolicy)
-{
-#if 0
-  // (ToBeUpdated: build the dataset and replace the corresponding pointer in dataset store.)
-  std::shared_ptr<DataSet> pds = NULL;
-  std::string dataset_path = dataset_request->get_dataset_path();
-  dataset_store_->GetDataSet(dataset_path, &pds);
-  if (pds == NULL) {
-    LOG(ERROR) << "UpdateDataSet():GetDataSet() get null pointer for dataset " << dataset_path;
-    return Status::Invalid("UpdateDataSet():GetDataSet() get null pointer.");
-  }
-  else
-  {
-    
-  }
-  
-
-  auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
-  // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
-  RETURN_IF_ERROR(dsbuilder->BuildDataset(dataset_request, dataset, distpolicy));
-  // Begin Write
-  (*dataset)->lockwrite();
-  dataset_store_->UpdateDataSet(std::shared_ptr<DataSet>(*dataset));
-  (*dataset)->unlockwrite();
-  // End Write
-#endif
   return Status::OK();
 }
 

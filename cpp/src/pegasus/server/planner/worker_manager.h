@@ -127,55 +127,9 @@ class WorkerManager {
       ob->WkMngObsUpdate(wmevent);
   }
 
-  Status UpdateCacheDropLists(std::shared_ptr<std::vector<Partition>> partits) {
-
-    // concurrent control
-
-    // for each partition, add it to corresponding worker-cachedroplist
-    for (auto part : (*partits))
-    {
-      // get workerid (location hostname)
-      WorkerId wkid = part.GetLocationHostname();
-      // add this partition to WorkerCacheDropList, first check if it exists
-      auto it = mapwkcachedroplist_.find(wkid);
-      if (it == mapwkcachedroplist_.end())
-      {
-        mapwkcachedroplist_[wkid] = std::make_shared<WorkerCacheDropList>();
-      }
-      mapwkcachedroplist_[wkid]->InsertPartition(part);
-    }
-
-    // debug output
-    LOG(INFO) << "mapwkcachedroplist_:";
-    for (auto it : mapwkcachedroplist_) {
-      LOG(INFO) << it.first;
-    }
-
-    return Status::OK();
-  }
-
-  bool NeedtoDropCache(const WorkerId& id) {
-    LOG(INFO) << "Checking if " << id << " has partitions to drop...";
-    auto it = mapwkcachedroplist_.find(id);
-    if (it != mapwkcachedroplist_.end())
-      return true;
-    else
-      return false;
-  }
-
-  Status GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList> sppartlist) {
-
-    // concurrent control
-
-    auto it = mapwkcachedroplist_.find(id);
-    if (it != mapwkcachedroplist_.end())
-    {
-      sppartlist = std::move(mapwkcachedroplist_[id]);
-      mapwkcachedroplist_[id] = nullptr;
-    }
-
-    return Status::OK();
-  }
+  Status UpdateCacheDropLists(std::shared_ptr<std::vector<Partition>> partits);
+  bool NeedtoDropCache(const WorkerId& id);
+  Status GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList> sppartlist);
 
  private:
   std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations;
@@ -199,6 +153,7 @@ class WorkerManager {
   typedef boost::unordered_map<WorkerId, std::shared_ptr<WorkerCacheDropList>>
                  WorkerCacheDropListMap;
   WorkerCacheDropListMap mapwkcachedroplist_;
+  boost::mutex mapcachedrop_lock_;
 };
 
 } // namespace pegasus
