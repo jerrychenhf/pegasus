@@ -99,7 +99,7 @@ if (ARROW_FOUND)
     else ()
       message(STATUS "Found the Arrow library: ${ARROW_LIB_PATH}")
       message(STATUS "Found the Arrow static library: ${ARROW_STATIC_LIB}")
-      message(STATUS "Found the Arrow shared library: ${ARROW_SHARED_LIB}"
+      message(STATUS "Found the Arrow shared library: ${ARROW_SHARED_LIB}")
     endif ()
   endif ()
 else()
