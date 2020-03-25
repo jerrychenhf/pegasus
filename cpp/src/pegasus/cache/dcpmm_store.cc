@@ -177,12 +177,18 @@ Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
 
  // void* p = CALL_MEMKIND(memkind_malloc, vmp_, size);
 
-  void* p = NULL;
-  CALL_MEMKIND(memkind_posix_memalign, vmp_, &p, 64, size);
- 
+  void* p;
+  int err = CALL_MEMKIND(memkind_posix_memalign, vmp_, &p, 64, size);
+
+  if (err) {
+    return Status::OutOfMemory("Allocate of size ", size, " failed in DCPMM store");
+  }
+
   size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, p);
 
-  LOG(INFO) << "Allocate method: the request size is " << size << " and the occupied size is " << occupied_size;
+  if (occupied_size < size) {
+    return Status::OutOfMemory("Allocate of size ", size, " failed in DCPMM store");
+  }
 
   uint8_t* address = reinterpret_cast<uint8_t*>(p);
   store_region->reset_address(address, occupied_size);
@@ -203,18 +209,22 @@ Status DCPMMStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* s
   void* old_ptr = reinterpret_cast<void*>(store_region->address());
   size_t size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, old_ptr);
 
- //  void* new_ptr = CALL_MEMKIND(memkind_malloc, vmp_, new_size);
+  void* new_ptr;
+  int err = CALL_MEMKIND(memkind_posix_memalign, vmp_, &new_ptr, 64, new_size);
+  if (err) {
+    return Status::OutOfMemory("Reallocate of size ", new_size, " failed in DCPMM store");
+  }
 
-  void* new_ptr = NULL;
-  CALL_MEMKIND(memkind_posix_memalign, vmp_, &new_ptr, 64, new_size);
   memcpy(new_ptr, old_ptr, size);
   
   // free the old address
   CALL_MEMKIND(memkind_free, vmp_, old_ptr);
 
   size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, new_ptr);
-  
-  LOG(INFO) << "Reallocate method: the request size is " << new_size << " and the occupied size is " << occupied_size;
+
+  if (occupied_size < new_size) {
+    return Status::OutOfMemory("Reallocate of size ", new_size, " failed in DCPMM store");
+  }
 
   uint8_t* new_address = reinterpret_cast<uint8_t*>(new_ptr);
   store_region->reset_address(new_address, occupied_size);
