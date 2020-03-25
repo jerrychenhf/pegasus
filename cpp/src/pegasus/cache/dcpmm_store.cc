@@ -48,6 +48,7 @@ typedef void* (*memkind_malloc)(memkind*, size_t);
 typedef void* (*memkind_realloc)(memkind*, void*, size_t);
 typedef size_t (*memkind_malloc_usable_size)(memkind*, void*);
 typedef void (*memkind_free)(memkind*, void*);
+typedef int (*memkind_posix_memalign)(memkind*, void**, size_t, size_t);
 #define CALL_MEMKIND(func_name, ...) ((func_name)g_##func_name)(__VA_ARGS__)
 
 // Function pointers into memkind; set by InitMemkindOps().
@@ -56,6 +57,7 @@ void* g_memkind_destroy_kind;
 void* g_memkind_malloc;
 void* g_memkind_realloc;
 void* g_memkind_malloc_usable_size;
+void* g_memkind_posix_memalign;
 void* g_memkind_free;
 
 // After InitMemkindOps() is called, true if memkind is available and safe
@@ -110,6 +112,7 @@ void InitMemkindOps() {
   DLSYM_OR_RETURN("memkind_create_pmem", &g_memkind_create_pmem);
   DLSYM_OR_RETURN("memkind_destroy_kind", &g_memkind_destroy_kind);
   DLSYM_OR_RETURN("memkind_malloc", &g_memkind_malloc);
+  DLSYM_OR_RETURN("memkind_posix_memalign", &g_memkind_posix_memalign);
   DLSYM_OR_RETURN("memkind_malloc_usable_size", &g_memkind_malloc_usable_size);
   DLSYM_OR_RETURN("memkind_free", &g_memkind_free);
 #undef DLSYM_OR_RETURN
@@ -172,7 +175,10 @@ Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
     return Status::Invalid("Failed to allocate in DCPMM store");
   }
 
-  void* p = CALL_MEMKIND(memkind_malloc, vmp_, size);
+ // void* p = CALL_MEMKIND(memkind_malloc, vmp_, size);
+
+  void* p = NULL;
+  CALL_MEMKIND(memkind_posix_memalign, vmp_, &p, 64, size);
  
   size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, p);
 
@@ -197,7 +203,10 @@ Status DCPMMStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* s
   void* old_ptr = reinterpret_cast<void*>(store_region->address());
   size_t size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, old_ptr);
 
-  void* new_ptr = CALL_MEMKIND(memkind_malloc, vmp_, new_size);
+ //  void* new_ptr = CALL_MEMKIND(memkind_malloc, vmp_, new_size);
+
+  void* new_ptr = NULL;
+  CALL_MEMKIND(memkind_posix_memalign, vmp_, &new_ptr, 64, new_size);
   memcpy(new_ptr, old_ptr, size);
   
   // free the old address
