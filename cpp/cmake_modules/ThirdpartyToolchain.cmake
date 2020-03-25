@@ -1623,7 +1623,8 @@ include_directories(SYSTEM "${HADOOP_HOME}/include")
 macro(build_arrow)
   message(STATUS "Building Arrow from source")
 
-  set(ARROW_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/arrow_ep-prefix/src/arrow_ep")
+  # set(ARROW_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/arrow_ep-prefix/src/arrow_ep")
+  set(ARROW_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/arrow_ep-install")
   set(ARROW_INCLUDE_DIR "${ARROW_PREFIX}/include")
 
   set(ARROW_LIB_DIR "${ARROW_PREFIX}")
@@ -1631,9 +1632,19 @@ macro(build_arrow)
     set(ARROW_SHARED_LIB "${ARROW_PREFIX}/bin/arrow.dll")
     set(ARROW_SHARED_IMPLIB "${ARROW_LIB_DIR}/arrow.lib")
     set(ARROW_STATIC_LIB "${ARROW_LIB_DIR}/arrow_static.lib")
+    set(PARQUET_SHARED_LIB "${ARROW_LIB_DIR}/parquet.dll")
+    set(PARQUET_SHARED_IMPLIB "${ARROW_LIB_DIR}/parquet.lib")
+    set(PARQUET_STATIC_LIB "${ARROW_LIB_DIR}/parquet.lib")
+    set(ARROW_TESTING_SHARED_LIB "${ARROW_PREFIX}/bin/arrow_testing.dll")
+    set(ARROW_TESTING_SHARED_IMPLIB "${ARROW_LIB_DIR}/arrow_testing.lib")
+    set(ARROW_TESTING_STATIC_LIB "${ARROW_LIB_DIR}/arrow_testing_static.lib")
   else()
     set(ARROW_SHARED_LIB "${ARROW_LIB_DIR}/libarrow${CMAKE_SHARED_LIBRARY_SUFFIX}")
     set(ARROW_STATIC_LIB "${ARROW_LIB_DIR}/libarrow.a")
+    set(PARQUET_SHARED_LIB "${ARROW_LIB_DIR}/libparquet${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    set(PARQUET_STATIC_LIB "${ARROW_LIB_DIR}/libparquet.a")
+    set(ARROW_TESTING_SHARED_LIB "${ARROW_LIB_DIR}/libarrow_testing${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    set(ARROW_TESTING_STATIC_LIB "${ARROW_LIB_DIR}/libarrow_testing.a")
   endif()
   
   set(ARROW_CMAKE_ARGS
@@ -1642,13 +1653,11 @@ macro(build_arrow)
     -DCMAKE_C_FLAGS=${EP_C_FLAGS}
     -DCMAKE_INSTALL_PREFIX=${ARROW_PREFIX}
     -DCMAKE_INSTALL_LIBDIR=${ARROW_LIB_DIR}
-    -DARROW_JEMALLOC=OFF
     -DARROW_PARQUET=ON
     -DARROW_FLIGHT=ON
+    -DARROW_WITH_SNAPPY=ON
     -DARROW_HDFS=ON
-    -DARROW_BUILD_SHARED=${PEGASUS_BUILD_SHARED}
-    -DARROW_BOOST_USE_SHARED=${PEGASUS_BOOST_USE_SHARED}
-    -DARROW_BUILD_TESTS=OFF)
+    -DARROW_BUILD_TESTS=ON)
   
   if (MSVC AND PARQUET_USE_STATIC_CRT)
     set(ARROW_CMAKE_ARGS ${ARROW_CMAKE_ARGS} -DARROW_USE_STATIC_CRT=ON)
@@ -1661,7 +1670,8 @@ macro(build_arrow)
   endif()
   message(STATUS "Building Apache Arrow from commit: ${ARROW_VERSION}")
   
-  set(ARROW_URL "https://github.com/apache/arrow/archive/${ARROW_VERSION}.tar.gz")
+  # set(ARROW_URL "https://github.com/apache/arrow/archive/${ARROW_VERSION}.tar.gz")
+  set(ARROW_URL "https://github.com/Intel-bigdata/arrow/archive/branch-1.0-pegasus.zip")
   
   if (CMAKE_VERSION VERSION_GREATER "3.7")
     set(ARROW_CONFIGURE SOURCE_SUBDIR "cpp" CMAKE_ARGS ${ARROW_CMAKE_ARGS})
