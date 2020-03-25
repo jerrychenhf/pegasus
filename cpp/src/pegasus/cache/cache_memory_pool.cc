@@ -20,10 +20,6 @@
 
 namespace pegasus {
 
-static constexpr uint8_t kAllocPoison = 0xBC;
-static constexpr uint8_t kReallocPoison = 0xBD;
-static constexpr uint8_t kDeallocPoison = 0xBE;
-
 CacheMemoryPool::CacheMemoryPool(std::shared_ptr<CacheEngine> cache_engine)
   : cache_engine_(cache_engine), occupied_size_(0) {
 }
@@ -57,22 +53,12 @@ arrow::Status CacheMemoryPool::Allocate(int64_t size, uint8_t** out) {
   
   *out = store_region.address();
 
-  if (size > 0 && out != nullptr) {
-    (*out)[0] = kAllocPoison;
-    (*out)[size - 1] = kAllocPoison;
-  }
-
   occupied_size_ += size;
   LOG(INFO) << "Allocate memory in cache memory pool and the allocated size is " << size;
   return arrow::Status::OK();
 }
 
 void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
-
-  if (size > 0 && buffer != nullptr) {
-    buffer[0] = kDeallocPoison;
-    buffer[size - 1] = kDeallocPoison;
-  }
 
   if (cache_store_ == nullptr)
     return;
@@ -107,11 +93,6 @@ arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, ui
   }
 
   *ptr = store_region.address();
-
-  if (new_size > old_size && ptr != nullptr) {
-    (*ptr)[old_size] = kReallocPoison;
-    (*ptr)[new_size - 1] = kReallocPoison;
-  }
 
   occupied_size_ += (new_size - old_size);
   LOG(INFO) << "Reallocate memory in cache memory pool and the reallocate new size is "
