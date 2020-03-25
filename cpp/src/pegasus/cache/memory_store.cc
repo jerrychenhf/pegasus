@@ -37,12 +37,19 @@ Status MemoryStore::Allocate(int64_t size, StoreRegion* store_region) {
   if (size > available_size) {
     return Status::Invalid("Request memory size" , size, "is large than available size.");
   }
+  
+  uint8_t* out;
+  const int result = posix_memalign(reinterpret_cast<void**>(&out), 64,
+                                      static_cast<size_t>(size));
+  if (result == ENOMEM) {
+    return Status::OutOfMemory("malloc of size ", size, " failed");
+   }
 
-  uint8_t* address = reinterpret_cast<uint8_t*>(std::malloc(size));
-  if (address == NULL) {
-    return Status::OutOfMemory("Allocate of size ", size, " failed");
+  if (result == EINVAL) {
+    return Status::Invalid("invalid alignment parameter: ", 64);
   }
-  store_region->reset_address(address, size);
+
+  store_region->reset_address(out, size);
   used_size_ += size;
   return Status::OK();
 }
@@ -56,13 +63,22 @@ Status MemoryStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* 
     return Status::Invalid("Request memory size" , (new_size - old_size), "is large than available size.");
   }
 
-  uint8_t* new_address = reinterpret_cast<uint8_t*>(
-    std::realloc(store_region->address(), new_size));
-  if(new_address == NULL) {
-    return Status::OutOfMemory("Reallocate of size ", new_size, " failed");
+  uint8_t* out;
+  const int result = posix_memalign(reinterpret_cast<void**>(&out), 64,
+                                      static_cast<size_t>(new_size));
+  if (result == ENOMEM) {
+    return Status::OutOfMemory("malloc of size ", new_size, " failed");
+   }
+
+  if (result == EINVAL) {
+    return Status::Invalid("invalid alignment parameter: ", 64);
   }
 
-  store_region->reset_address(new_address, new_size);
+  uint8_t* old_address = store_region->address();
+  memcpy(out, old_address, static_cast<size_t>(old_size));
+  free(old_address);
+
+  store_region->reset_address(out, new_size);
   used_size_ += (new_size - old_size);
   return Status::OK();
 }
