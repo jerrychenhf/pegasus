@@ -1,5 +1,9 @@
 # User Guide
 ### Runtime requirements
+By default, the HDFS client C++ class uses the libhdfs JNI
+interface to the Java Hadoop client. This library is loaded **at runtime**
+(rather than at link / library load time, since the library may not be in your
+LD_LIBRARY_PATH), and relies on some environment variables.
 
 * `HADOOP_HOME`: the root of your installed Hadoop distribution. Often has
 `lib/native/libhdfs.so`.
@@ -8,7 +12,7 @@
 ```shell
 export CLASSPATH=`$HADOOP_HOME/bin/hadoop classpath --glob`
 ```
-* `ARROW_LIBHDFS_DIR`: explicit location of `libhdfs.so` if it is
+* `ARROW_LIBHDFS_DIR` (optional): explicit location of `libhdfs.so` if it is
 installed somewhere other than `$HADOOP_HOME/lib/native`
 
 ### Export PEGASUS_HOME
@@ -29,6 +33,27 @@ sh start-planner.sh --hostname=localhost --planner_port=30001
 ```
 cd pegasus/bin
 sh start-worker.sh --hostname=localhost --worker_port=30002 --planner_hostname=localhost --planner_port=30001
+```
+
+### Cluster Launch Scripts
+To launch a Pegasus cluster with the launch scripts, you should create a file called conf/workers in your Pegasus directory, which must contain the hostnames of all the machines where you intend to start Pegasus workers, one per line. If conf/workers does not exist, the launch scripts defaults to a single machine (localhost). And copy pegasus folder to all your worker machines.
+
+Note, the planner machine accesses each of the worker machines via ssh. By default, ssh is run in parallel and requires password-less (using a private key) access to be setup.
+
+Once you’ve set up this file, you can launch or stop your cluster with the following shell scripts, available in PEGASUS_HOME/bin:
+
+bin/start-planner.sh - Starts a planner instance on the machine the script is executed on.
+bin/start-workers.sh - Starts a worker instance on each machine specified in the conf/workers file.
+bin/start-worker.sh - Starts a worker instance on the machine the script is executed on.
+bin/start-all.sh - Starts both a planner and a number of workers as described above.
+bin/stop-planner.sh - Stops the planner that was started via the bin/start-master.sh script.
+bin/stop-workers.sh - Stops all workers instances on the machines specified in the conf/workers file.
+bin/stop-all.sh - Stops both the planner and the workers as described above.
+
+You can optionally configure the cluster further by setting environment variables in conf/pegasus-env.sh. The following settings are available:
+```
+PEGASUS_PLANNER_PORT   start the planner on a different port (default: 30001).
+PEGASUS_WORKER_PORT    start the worker on a different port (default: 30002).
 ```
 
 ### Spark Configurations for PEGASUS
