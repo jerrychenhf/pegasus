@@ -115,12 +115,9 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
 Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(RequestIdentity* request_identity,
   std::vector<int> col_ids,
   unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns,
+  std::shared_ptr<CacheEngine> cache_engine,
   std::unique_ptr<rpc::FlightDataStream>* data_stream) {
-     // Get cache engine.
-    std::shared_ptr<CacheEngine> cache_engine;
-    CacheEngine::CachePolicy cache_policy = GetCachePolicy(request_identity);
-    RETURN_IF_ERROR(cache_engine_manager_->GetCacheEngine(cache_policy, &cache_engine));
-
+  
     unordered_map<int, std::shared_ptr<CachedColumn>> retrieved_columns;
     RETURN_IF_ERROR(RetrieveColumns(request_identity, col_ids, cache_engine, retrieved_columns));
 
@@ -137,7 +134,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
   const std::vector<int>& col_ids,
   std::shared_ptr<CacheEngine> cache_engine,
   unordered_map<int, std::shared_ptr<CachedColumn>>& retrieved_columns) {
-    LOG(WARNING) << "Retrieve the columns from storage and insert the"
+    LOG(WARNING) << "Retrieve the columns from storage and insert the "
      << "retrieved columns into dataset block manager and cache engine";
     std::string dataset_path = request_identity->dataset_path();
     std::string partition_path = request_identity->partition_path();
@@ -167,6 +164,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
     for(auto iter = col_ids.begin(); iter != col_ids.end(); iter ++) {
       int colId = *iter;
       std::shared_ptr<arrow::ChunkedArray> chunked_array;
+      LOG(INFO) << "Begin read the column chunk with col ID " << colId << " partition path " << partition_path;
       RETURN_IF_ERROR(parquet_reader->ReadColumnChunk(*iter, &chunked_array));
       int64_t column_size = memory_pool->bytes_allocated() - occupied_size;
       occupied_size += column_size;
@@ -216,6 +214,11 @@ std::vector<int> DatasetCacheManager::GetMissedColumnsIds(std::vector<int> col_i
 //         2. Call DatasetCacheEngineManager#GetCacheEngine method to get CacheEngine;
 Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
  std::unique_ptr<rpc::FlightDataStream>* data_stream) {
+  // Get cache engine.
+  std::shared_ptr<CacheEngine> cache_engine;
+  CacheEngine::CachePolicy cache_policy = GetCachePolicy(request_identity);
+  RETURN_IF_ERROR(cache_engine_manager_->GetCacheEngine(cache_policy, &cache_engine));
+
   // Check whether the dataset is cached.
   
   std::vector<int> col_ids = request_identity->column_indices();
@@ -227,7 +230,8 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
     LOG(WARNING) << "The dataset "<< request_identity->dataset_path() 
     <<" is new added. We will get all the columns from storage and"
      << " then insert the column into dataset cache block manager";
-    return GetDatasetStreamWithMissedColumns(request_identity, col_ids, cached_columns, data_stream);
+    return GetDatasetStreamWithMissedColumns(request_identity,
+     col_ids, cached_columns, cache_engine, data_stream);
   } else {
     // dataset is cached
     std::shared_ptr<CachedPartition> partition;
@@ -237,11 +241,13 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
       LOG(WARNING) << "The partition "<< request_identity->partition_path() 
       <<" is new added. We will get all the columns from storage and"
        << "then insert the column into dataset cache block manager";
-      return GetDatasetStreamWithMissedColumns(request_identity, col_ids, cached_columns, data_stream);
+      return GetDatasetStreamWithMissedColumns(request_identity, col_ids,
+       cached_columns, cache_engine, data_stream);
     } else {
       // partition is cached.
       // Check which column is cached.
-      partition->GetCachedColumns(partition, request_identity->column_indices(), &cached_columns);
+      partition->GetCachedColumns(partition, request_identity->column_indices(),
+       cache_engine, &cached_columns);
       if (col_ids.size() == cached_columns.size()) {
         LOG(WARNING) << "All the columns are cached. And we will wrap the columns into Flight data stream";
         return WrapDatasetStream(request_identity, cached_columns, data_stream);
@@ -250,7 +256,8 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
         // Get the not cached col_ids.
         std::vector<int> missed_col_ids = GetMissedColumnsIds(col_ids, cached_columns);
         LOG(WARNING) << "Partial columns is cached and we will get the missed columns from storage";
-        return GetDatasetStreamWithMissedColumns(request_identity, missed_col_ids, cached_columns, data_stream);
+        return GetDatasetStreamWithMissedColumns(request_identity, missed_col_ids,
+         cached_columns, cache_engine, data_stream);
       }
    }
   }

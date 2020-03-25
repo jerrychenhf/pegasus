@@ -175,16 +175,6 @@ class LRUCache {
 
   explicit LRUCache(size_t capacity);
 
-  // Lookup the given block in the cache.
-  //
-  // If the entry is found, then sets *handle to refer to the entry.
-  // This object's destructor will release the cache entry so it may be freed again.
-  // Alternatively,  handle->Release() may be used to explicitly release it.
-  //
-  // Returns true to indicate that the entry was found, false otherwise.
-  bool Lookup(const CacheKey& key, Cache::CacheBehavior behavior,
-              LRUCacheHandle* handle);
-
   // Pass a metric entity to the cache to start recording metrics.
   // This should be called before the block cache starts serving blocks.
   // Not calling StartInstrumentation will simply result in no block cache-related metrics.
@@ -194,6 +184,8 @@ class LRUCache {
   // Insert the given block into the cache. 'inserted' is set to refer to the
   // entry in the cache.
   void Insert(const CacheKey* key);
+
+  void Touch(const CacheKey* key);
 
   void Erase(const CacheKey& key);
 

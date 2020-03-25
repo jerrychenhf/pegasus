@@ -19,6 +19,8 @@
 #include <boost/thread/lock_guard.hpp>
 #include "common/logging.h"
 
+#include "cache/cache_engine.h"
+
 using namespace pegasus;
 
 namespace pegasus {
@@ -119,15 +121,26 @@ Status CachedDataset::GetCachedPartition(std::shared_ptr<CachedDataset> cached_d
 
  Status CachedPartition::GetCachedColumns(
    std::shared_ptr<CachedPartition> cached_partition, std::vector<int>  col_ids,
+   std::shared_ptr<CacheEngine> cache_engine,
     unordered_map<int, std::shared_ptr<CachedColumn>>* columns) {
   {
     boost::lock_guard<boost::mutex> l(cached_columns_lock_); 
+    std::string dataset_path = cached_partition->dataset_path_;
+    std::string partition_path = cached_partition->partition_path_;
+
     for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++)
     {
 		  auto entry = cached_partition->cached_columns_.find(*iter);
       if (entry != cached_partition->cached_columns_.end()) {
+        int colId = *iter;
         auto find_column = entry->second;
-        columns->insert(pair<int, std::shared_ptr<CachedColumn>>(*iter, find_column));
+        int64_t column_size = find_column->GetCacheRegion()->size();
+
+        LRUCache::CacheKey* key = new LRUCache::CacheKey(dataset_path, partition_path, colId, column_size);
+        // Touch value in lru cache when access the cached column.
+        cache_engine->TouchValue(key);
+
+        columns->insert(pair<int, std::shared_ptr<CachedColumn>>(colId, find_column));
        }
 	  }
   }
