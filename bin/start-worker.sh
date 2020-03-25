@@ -87,13 +87,13 @@ function start_worker() {
   newpid="$!"
   echo "$newpid" > "$pid"
 
-  # Poll for up to 5 seconds for the worker to start
+  # Poll for up to 10 seconds for the worker to start
   for i in {1..10}
   do
+    sleep 1
     if [[ $(ps -p "$newpid" -o comm=) =~ "workerd" ]]; then
       break
     fi
-    sleep 0.5
   done
 }
 

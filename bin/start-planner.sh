@@ -86,13 +86,13 @@ function start_planner() {
   exec ${BINARY_BASE_DIR}/${BUILD_TYPE}/planner/plannerd ${PLANNER_ARGS} &
   newpid="$!"
   echo "$newpid" > "$pid"
-  # Poll for up to 5 seconds for the worker to start
+  # Poll for up to 10 seconds for the worker to start
   for i in {1..10}
   do
+    sleep 1
     if [[ $(ps -p "$newpid" -o comm=) =~ "plannerd" ]]; then
       break
     fi
-    sleep 0.5
   done
 }
 

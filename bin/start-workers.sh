@@ -24,6 +24,22 @@ fi
 . "${PEGASUS_HOME}/bin/pegasus-config.sh"
 . "${PEGASUS_HOME}/bin/load-pegasus-env.sh"
 
+# Find the port number for the planner
+if [ "$PEGASUS_PLANNER_PORT" = "" ]; then
+  PEGASUS_PLANNER_PORT=30001
+fi
+
+if [ "$PEGASUS_PLANNER_HOST" = "" ]; then
+  case `uname` in
+      (SunOS)
+	  PEGASUS_PLANNER_HOST="`/usr/sbin/check-hostname | awk '{print $NF}'`"
+	  ;;
+      (*)
+	  PEGASUS_PLANNER_HOST="`hostname -f`"
+	  ;;
+  esac
+fi
+
 # Launch the workers
 "${PEGASUS_HOME}/bin/workers.sh" cd "${PEGASUS_HOME}" \;"${PEGASUS_HOME}/bin/start-worker.sh"  "--planner_hostname $PEGASUS_PLANNER_HOST --planner_port $PEGASUS_PLANNER_PORT"
 
