@@ -186,7 +186,7 @@ Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
 
   size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, p);
 
-  if (occupied_size < size) {
+  if (occupied_size < static_cast<size_t>(size)) {
     return Status::OutOfMemory("Allocate of size ", size, " failed in DCPMM store");
   }
 
@@ -222,7 +222,7 @@ Status DCPMMStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* s
 
   size_t occupied_size = CALL_MEMKIND(memkind_malloc_usable_size, vmp_, new_ptr);
 
-  if (occupied_size < new_size) {
+  if (occupied_size < static_cast<size_t>(new_size)) {
     return Status::OutOfMemory("Reallocate of size ", new_size, " failed in DCPMM store");
   }
 
