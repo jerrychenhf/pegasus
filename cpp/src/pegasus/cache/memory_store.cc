@@ -49,7 +49,7 @@ Status MemoryStore::Allocate(int64_t size, StoreRegion* store_region) {
     return Status::Invalid("invalid alignment parameter: ", 64);
   }
 
-  store_region->reset_address(out, size);
+  store_region->reset_address(out, size, size);
   used_size_ += size;
   return Status::OK();
 }
@@ -75,20 +75,21 @@ Status MemoryStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* 
   }
 
   uint8_t* old_address = store_region->address();
-  memcpy(out, old_address, static_cast<size_t>(old_size));
+  memcpy(out, old_address, static_cast<size_t>(std::min(new_size, old_size)));
   free(old_address);
 
-  store_region->reset_address(out, new_size);
+  store_region->reset_address(out, new_size, new_size);
   used_size_ += (new_size - old_size);
   return Status::OK();
 }
 
 Status MemoryStore::Free(StoreRegion* store_region) {
   DCHECK(store_region != NULL);
+
+  used_size_ -= store_region->occupies_size();
   
   std::free(store_region->address());
   
-  used_size_ -= store_region->length();
   return Status::OK();
 }
 

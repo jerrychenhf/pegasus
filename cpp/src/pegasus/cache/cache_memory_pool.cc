@@ -20,6 +20,12 @@
 
 namespace pegasus {
 
+constexpr size_t kAlignment = 64;
+
+// A static piece of memory for 0-size allocations, so as to return
+// an aligned non-null pointer.
+alignas(kAlignment) static uint8_t zero_size_area[1];
+
 CacheMemoryPool::CacheMemoryPool(std::shared_ptr<CacheEngine> cache_engine)
   : cache_engine_(cache_engine), occupied_size_(0) {
 }
@@ -44,6 +50,11 @@ arrow::Status CacheMemoryPool::Allocate(int64_t size, uint8_t** out) {
   if (size < 0) {
     return arrow::Status::Invalid("negative malloc size");
   }
+
+  if (size == 0) {
+    *out = zero_size_area;
+    return arrow::Status::OK();
+  }
   
   StoreRegion store_region;
   Status status = GetCacheRegion(size, &store_region);
@@ -62,6 +73,11 @@ void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
 
   if (cache_store_ == nullptr)
     return;
+  
+  if (buffer == zero_size_area) {
+    DCHECK_EQ(size, 0);
+    return;
+  }
     
   StoreRegion storeRegion(buffer, size, size);
   cache_store_->Free(&storeRegion);
@@ -70,20 +86,33 @@ void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
 }
 
 arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
-  uint8_t* previous_ptr = *ptr;
-  if (cache_store_ == nullptr)
-    return arrow::Status::Invalid("Cache store is not correctly initialized.");
+  if (new_size < 0) {
+    return arrow::Status::Invalid("negative realloc size");
+  }
 
-  if(new_size <= old_size) {
-    *ptr = previous_ptr;
-    stringstream ss;
-    ss << "The reallocate new size is smaller than the old size";
-    LOG(INFO) << ss.str();
+  if (static_cast<uint64_t>(new_size) >= std::numeric_limits<size_t>::max()) {
+    return arrow::Status::CapacityError("realloc overflows size_t");
+  }
+
+  uint8_t* previous_ptr = *ptr;
+
+  if (previous_ptr == zero_size_area) {
+    DCHECK_EQ(old_size, 0);
+    return Allocate(new_size, ptr);
+  }
+
+  if (new_size == 0) {
+    Free(previous_ptr, old_size);
+    *ptr = zero_size_area;
     return arrow::Status::OK();
   }
 
+  if (cache_store_ == nullptr)
+    return arrow::Status::Invalid("Cache store is not correctly initialized.");
+
+
   StoreRegion store_region;
-  store_region.reset_address(*ptr, old_size);
+  store_region.reset_address(*ptr, old_size, old_size);
 
   Status status = cache_store_->Reallocate(old_size, new_size, &store_region);
 

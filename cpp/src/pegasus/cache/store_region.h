@@ -31,9 +31,11 @@ class StoreRegion {
   
   ~StoreRegion();
   
-  void reset_address(uint8_t* address, int64_t length) {
+  void reset_address(uint8_t* address,
+   int64_t length, int64_t occupied_size) {
     address_ = address;
     length_ = length;
+    occupied_size_ = occupied_size;
   }
   
   uint8_t* address() const;
