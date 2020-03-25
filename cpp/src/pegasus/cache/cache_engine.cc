@@ -44,4 +44,10 @@ Status LruCacheEngine::PutValue(LRUCache::CacheKey* key) {
   return Status::OK();
 }
 
+Status LruCacheEngine::TouchValue(LRUCache::CacheKey* key) {
+  
+  lru_cache_->Touch(key);
+  return Status::OK();
+}
+
 } // namespace pegasus

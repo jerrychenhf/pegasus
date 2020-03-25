@@ -145,17 +145,6 @@ Status LRUCache::Init() {
   return Status::OK();
 }
 
-bool LRUCache::Lookup(const CacheKey& key, Cache::CacheBehavior behavior,
-                        LRUCacheHandle* handle) {
-  auto h(cache_->Lookup(
-      Slice(reinterpret_cast<const uint8_t*>(&key), sizeof(key)), behavior));
-  if (h) {
-    handle->SetHandle(std::move(h));
-    return true;
-  }
-  return false;
-}
-
 void LRUCache::Insert(const CacheKey* key) {
   
   Slice key_slice(reinterpret_cast<const uint8_t*>(key), sizeof(CacheKey));
@@ -165,11 +154,21 @@ void LRUCache::Insert(const CacheKey* key) {
   
   auto h(cache_->Insert(std::move(handle),
                         eviction_callback_));
+  return;
+}
+
+void LRUCache::Touch(const CacheKey* key) {
+  LOG(INFO) << "Begin call the Touch method in lru cache";
+  cache_->Lookup(Slice(reinterpret_cast<const uint8_t*>(key),
+   sizeof(CacheKey)), Cache::CacheBehavior::EXPECT_IN_CACHE);
+  LOG(INFO) << "End call the Touch method in lru cache";
+  return;
 }
 
 void LRUCache::Erase(const CacheKey& key) {
   Slice key_slice(reinterpret_cast<const uint8_t*>(&key), sizeof(key));
   cache_->Erase(key_slice);
+  return;
 }
 
 } // namespace pegasus

@@ -29,6 +29,8 @@ using std::string;
 
 namespace pegasus {
 
+class CacheEngine;
+
 struct DatasetKey {
  public:
   explicit DatasetKey(const std::string& identity) : identity_(identity) {}
@@ -76,6 +78,7 @@ class CachedPartition {
    const std::string& partition_path) :dataset_path_(dataset_path), partition_path_(partition_path){}
   
   Status GetCachedColumns(std::shared_ptr<CachedPartition> cached_partition, std::vector<int>  col_ids,
+    std::shared_ptr<CacheEngine> cache_engine,
     unordered_map<int, std::shared_ptr<CachedColumn>>* cached_columns);
   bool InsertColumn(std::shared_ptr<CachedPartition> cached_partition,
    int column_id, std::shared_ptr<CachedColumn> new_column, std::shared_ptr<CachedColumn>* cached_column);

@@ -59,6 +59,7 @@ class DatasetCacheManager {
   Status GetDatasetStreamWithMissedColumns(RequestIdentity* request_identity,
     std::vector<int> col_ids,
     unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns,
+    std::shared_ptr<CacheEngine> cache_engine,
     std::unique_ptr<rpc::FlightDataStream>* data_stream);
   std::vector<int> GetMissedColumnsIds(std::vector<int> col_ids,
     unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns);
