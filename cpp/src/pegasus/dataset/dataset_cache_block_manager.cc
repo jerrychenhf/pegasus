@@ -92,22 +92,25 @@ Status DatasetCacheBlockManager::GetCachedDataSet(const std::string& dataset_pat
 }
 
 
-Status CachedDataset::GetCachedPartition(std::shared_ptr<CachedDataset> cached_dataset,
+Status CachedDataset::GetCachedPartition(
  const std::string& partition_path,
    std::shared_ptr<CachedPartition>* partition) {
 
    {
     boost::lock_guard<boost::mutex> l(cached_partitions_lock_);
-    auto entry = cached_dataset->cached_partitions_.find(partition_path);
+    auto entry = cached_partitions_.find(partition_path);
   
-    if (entry == cached_dataset->cached_partitions_.end()) {
+    if (entry == cached_partitions_.end()) {
       std::shared_ptr<CachedPartition> new_partition =
       std::shared_ptr<CachedPartition>(new CachedPartition(
-       cached_dataset->dataset_path_, partition_path));
+       dataset_path_, partition_path));
+       if (new_partition == nullptr) {
+         return Status::Invalid("The new partition is nullptr");
+       }
       *partition = new_partition;
 
       // Insert partition
-      cached_dataset->cached_partitions_[partition_path] = new_partition;
+      cached_partitions_[partition_path] = new_partition;
       LOG(WARNING) << "The partition does not exist and insert a new partition";
       return Status::OK(); 
     }
@@ -120,18 +123,18 @@ Status CachedDataset::GetCachedPartition(std::shared_ptr<CachedDataset> cached_d
 }
 
  Status CachedPartition::GetCachedColumns(
-   std::shared_ptr<CachedPartition> cached_partition, std::vector<int>  col_ids,
+   std::vector<int>  col_ids,
    std::shared_ptr<CacheEngine> cache_engine,
     unordered_map<int, std::shared_ptr<CachedColumn>>* columns) {
   {
     boost::lock_guard<boost::mutex> l(cached_columns_lock_); 
-    std::string dataset_path = cached_partition->dataset_path_;
-    std::string partition_path = cached_partition->partition_path_;
+    std::string dataset_path = dataset_path_;
+    std::string partition_path = partition_path_;
 
     for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++)
     {
-		  auto entry = cached_partition->cached_columns_.find(*iter);
-      if (entry != cached_partition->cached_columns_.end()) {
+		  auto entry = cached_columns_.find(*iter);
+      if (entry != cached_columns_.end()) {
         int colId = *iter;
         auto find_column = entry->second;
         int64_t column_size = find_column->GetCacheRegion()->size();

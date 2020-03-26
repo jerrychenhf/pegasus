@@ -109,7 +109,7 @@ class LRUCache {
     
       // After check the dataset, continue to check whether the partition is inserted.
       std::shared_ptr<CachedPartition> partition;
-      dataset->GetCachedPartition(dataset, partition_path, &partition);
+      dataset->GetCachedPartition(partition_path, &partition);
 
       Status status = partition->DeleteColumn(
         partition, column_id);

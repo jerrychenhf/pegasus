@@ -70,7 +70,7 @@ Status DatasetCacheManager::GetPartition(RequestIdentity* request_identity,
     RETURN_IF_ERROR(cache_block_manager_->GetCachedDataSet(
       request_identity->dataset_path(), &dataset));
     
-    RETURN_IF_ERROR(dataset->GetCachedPartition(dataset,
+    RETURN_IF_ERROR(dataset->GetCachedPartition(
      request_identity->partition_path(), new_partition));
     return Status::OK();
 }
@@ -223,19 +223,20 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
   
   std::vector<int> col_ids = request_identity->column_indices();
   unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns;
-
+  
   std::shared_ptr<CachedDataset> dataset;
   cache_block_manager_->GetCachedDataSet(request_identity->dataset_path(), &dataset);
   if (dataset->GetCachedPartitions().size() == 0) {
     LOG(WARNING) << "The dataset "<< request_identity->dataset_path() 
     <<" is new added. We will get all the columns from storage and"
      << " then insert the column into dataset cache block manager";
+     
     return GetDatasetStreamWithMissedColumns(request_identity,
      col_ids, cached_columns, cache_engine, data_stream);
   } else {
     // dataset is cached
     std::shared_ptr<CachedPartition> partition;
-    dataset->GetCachedPartition(dataset,
+    dataset->GetCachedPartition(
      request_identity->partition_path(), &partition);
     if (partition->GetCachedColumns().size() == 0) {
       LOG(WARNING) << "The partition "<< request_identity->partition_path() 
@@ -246,7 +247,7 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
     } else {
       // partition is cached.
       // Check which column is cached.
-      partition->GetCachedColumns(partition, request_identity->column_indices(),
+      partition->GetCachedColumns(request_identity->column_indices(),
        cache_engine, &cached_columns);
       if (col_ids.size() == cached_columns.size()) {
         LOG(WARNING) << "All the columns are cached. And we will wrap the columns into Flight data stream";

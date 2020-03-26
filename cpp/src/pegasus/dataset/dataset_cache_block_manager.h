@@ -77,7 +77,7 @@ class CachedPartition {
   explicit CachedPartition(const std::string& dataset_path,
    const std::string& partition_path) :dataset_path_(dataset_path), partition_path_(partition_path){}
   
-  Status GetCachedColumns(std::shared_ptr<CachedPartition> cached_partition, std::vector<int>  col_ids,
+  Status GetCachedColumns(std::vector<int>  col_ids,
     std::shared_ptr<CacheEngine> cache_engine,
     unordered_map<int, std::shared_ptr<CachedColumn>>* cached_columns);
   bool InsertColumn(std::shared_ptr<CachedPartition> cached_partition,
@@ -101,7 +101,7 @@ class CachedDataset {
   public:
    explicit CachedDataset(const std::string& dataset_path): dataset_path_(dataset_path) {}
 
-  Status GetCachedPartition(std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path,
+  Status GetCachedPartition(const std::string& partition_path,
    std::shared_ptr<CachedPartition>* partition);
 
 
