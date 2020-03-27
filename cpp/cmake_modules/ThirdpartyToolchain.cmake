@@ -297,9 +297,16 @@ if(DEFINED ENV{PEGASUS_URIPARSER_URL})
 else()
   set(
     URIPARSER_SOURCE_URL
-
     "https://github.com/uriparser/uriparser/archive/uriparser-${URIPARSER_VERSION}.tar.gz"
     )
+endif()
+
+if(DEFINED ENV{PEGASUS_ARROW_URL})
+  set(ARROW_SOURCE_URL "$ENV{PEGASUS_ARROW_URL}")
+else()
+# set(ARROW_SOURCE_URL "https://github.com/apache/arrow/archive/${ARROW_VERSION}.tar.gz")
+  set(ARROW_SOURCE_URL
+     "https://github.com/Intel-bigdata/arrow/archive/branch-1.0-pegasus.zip")
 endif()
 
 # ----------------------------------------------------------------------
@@ -1663,16 +1670,6 @@ macro(build_arrow)
     set(ARROW_CMAKE_ARGS ${ARROW_CMAKE_ARGS} -DARROW_USE_STATIC_CRT=ON)
   endif()
   
-  if ("$ENV{PEGASUS_ARROW_VERSION}" STREQUAL "")
-    set(ARROW_VERSION "apache-arrow-0.15.1")
-  else()
-    set(ARROW_VERSION "$ENV{PEGASUS_ARROW_VERSION}")
-  endif()
-  message(STATUS "Building Apache Arrow from commit: ${ARROW_VERSION}")
-  
-  # set(ARROW_URL "https://github.com/apache/arrow/archive/${ARROW_VERSION}.tar.gz")
-  set(ARROW_URL "https://github.com/Intel-bigdata/arrow/archive/branch-1.0-pegasus.zip")
-  
   if (CMAKE_VERSION VERSION_GREATER "3.7")
     set(ARROW_CONFIGURE SOURCE_SUBDIR "cpp" CMAKE_ARGS ${ARROW_CMAKE_ARGS})
   else()
@@ -1681,7 +1678,7 @@ macro(build_arrow)
   endif()
   
   ExternalProject_Add(arrow_ep
-    URL ${ARROW_URL}
+    URL ${ARROW_SOURCE_URL}
     ${ARROW_CONFIGURE}
     BUILD_BYPRODUCTS "${ARROW_SHARED_LIB}" "${ARROW_STATIC_LIB}")
   
