@@ -65,7 +65,7 @@ Status DatasetCacheBlockManager::Init() {
   return Status::OK();
 }
 
-Status DatasetCacheBlockManager::GetCachedDataSet(const std::string& dataset_path,
+Status DatasetCacheBlockManager::GetCachedDataSet(const std::string dataset_path,
  std::shared_ptr<CachedDataset>* dataset) {
  
   {
@@ -93,7 +93,7 @@ Status DatasetCacheBlockManager::GetCachedDataSet(const std::string& dataset_pat
 
 
 Status CachedDataset::GetCachedPartition(
- const std::string& partition_path,
+ const std::string partition_path,
    std::shared_ptr<CachedPartition>* partition) {
 
    {
@@ -150,16 +150,16 @@ Status CachedDataset::GetCachedPartition(
   return Status::OK();
  }
 
-bool CachedPartition::InsertColumn(std::shared_ptr<CachedPartition> cached_partition,
+bool CachedPartition::InsertColumn(
    int column_id, std::shared_ptr<CachedColumn> new_column,
     std::shared_ptr<CachedColumn>* cached_column) {
   {
     boost::lock_guard<boost::mutex> l(cached_columns_lock_); 
-    auto entry = cached_partition->cached_columns_.find(column_id);
-    if(entry == cached_partition->cached_columns_.end()) {
+    auto entry = cached_columns_.find(column_id);
+    if(entry == cached_columns_.end()) {
       // insert new column
       LOG(WARNING) << "The column does not exist and insert new column";
-      cached_partition->cached_columns_[column_id] = std::move(new_column);
+      cached_columns_[column_id] = std::move(new_column);
       *cached_column = nullptr;
       return true;
     } else {
@@ -171,7 +171,7 @@ bool CachedPartition::InsertColumn(std::shared_ptr<CachedPartition> cached_parti
   }
 }
 
-Status DatasetCacheBlockManager::DeleteDataset(const std::string& dataset_path) {
+Status DatasetCacheBlockManager::DeleteDataset(const std::string dataset_path) {
   {
     boost::lock_guard<boost::mutex> l(cached_datasets_lock_);
     LOG(WARNING) << "Delete the dataset";
@@ -181,7 +181,7 @@ Status DatasetCacheBlockManager::DeleteDataset(const std::string& dataset_path) 
 }
 
 Status CachedDataset::DeletePartition(
-  std::shared_ptr<CachedDataset> cached_dataset, const std::string& partition_path){
+  std::shared_ptr<CachedDataset> cached_dataset, const std::string partition_path){
   {
     boost::lock_guard<boost::mutex> l(cached_partitions_lock_); 
     LOG(WARNING) << "Delete the partition";

@@ -178,7 +178,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       // And because this column is shared ptr, so out this for clause , 
       // it will be delete automatically.
       std::shared_ptr<CachedColumn> cached_column;
-      bool is_inserted = partition->InsertColumn(partition, colId, column, &cached_column);
+      bool is_inserted = partition->InsertColumn(colId, column, &cached_column);
       if (is_inserted && cached_column == nullptr) {
         LRUCache::CacheKey* key = new LRUCache::CacheKey(dataset_path, partition_path, colId, column_size);
         LOG(WARNING) << "Put the cached column into cache engine";
