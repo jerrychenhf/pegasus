@@ -104,15 +104,17 @@ bash-style environment variable statements at the end to use for your build
 script.
 ```
 cd pegasus/cpp
-# Download tarballs into /path/to/pegasus-thirdparty
-./thirdparty/download_dependencies.sh /path/to/pegasus-thirdparty 
+# Download tarballs into /path/to/pegasus-thirdparty and export the environment variables
+./thirdparty/download_dependencies.sh /path/to/pegasus-thirdparty > pegasus_env.conf
+source pegasus_env.conf
 ```
 
 We also prepared a script for Arrow build ``thirdparty/download_arrow_dependencies.sh`` which will download the correct version of each dependency to a directory of your choosing.
 ```
 cd pegasus/cpp
-# Download tarballs into /path/to/arrow-thirdparty
-./thirdparty/download_arrow_dependencies.sh /path/to/arrow-thirdparty 
+# Download tarballs into /path/to/arrow-thirdparty and export the environment variables
+./thirdparty/download_arrow_dependencies.sh /path/to/arrow-thirdparty > arrow_env.conf
+source arrow_env.conf
 ```
 
 ### Run unit tests
