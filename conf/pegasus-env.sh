@@ -27,3 +27,15 @@ export PEGASUS_WORKER_PORT=30002
 # Generic options for the daemons used in the standalone deploy mode
 # - PEGASUS_CONF_DIR      Alternate conf dir. (Default: ${PEGASUS_HOME}/conf)
 # - PEGASUS_LOG_DIR       Where log files are stored.  (Default: ${PEGASUS_HOME}/logs)
+
+# STORE options
+# - STORE_TYPES                Store types. (Default: MEMORY)
+# - STORE_DRAM_ENABLED         If true, enable DRAM store. (Default: true)
+# - STORE_DRAM_CAPACITY_GB     The DRAM store capacity in GB. (Default: 10)
+# - STORE_DCPMM_ENABLED        If true, enable DCPMM store. (Default: false)
+# - STORAGE_DCPMM_PATH         The DCPMM device path.
+# - STORE_DCPMM_CAPACITY_GB    The DCPMM store capacity in GB.(Default: 100)
+# - FORCE_LRU_CACHE_CAPACITY   Force pegasus to accept the lru cache size, even if it is unsafe.(Default: true))
+# - LRU_CACHE_CAPACITY_MB      lru cache capacity in MB.(Default: 512)
+# - LRU_CACHE_TYPE             Which type of lru cache to use for caching data.(Default: DRAM)
+# - CACHE_FORCE_SINGLE_SHARD   Override all cache implementations to use just one shard.(Default: ture)
