@@ -136,7 +136,6 @@ foreach(LIB_TARGET ${PEGASUS_RPC_TESTING_LIBRARIES})
   target_compile_definitions(${LIB_TARGET} PRIVATE PEGASUS_RPC_EXPORTING)
 endforeach()
 
-
 # Build test server for unit tests or benchmarks
 if(PEGASUS_BUILD_TESTS)
   if(PEGASUS_TEST_LINKAGE STREQUAL "static")

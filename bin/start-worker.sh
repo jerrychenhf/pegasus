@@ -64,6 +64,26 @@ if [ "$PEGASUS_WORKER_HOST" = "" ]; then
   esac
 fi
 
+if [ "$STORE_TYPES" = "" ]; then
+  STORE_TYPES="MEMORY"
+fi
+
+if [ "$STORE_DRAM_CAPACITY_GB" = "" ]; then
+  STORE_DRAM_CAPACITY_GB=10
+fi
+
+if [ "$STORE_DCPMM_CAPACITY_GB" = "" ]; then
+  STORE_DCPMM_CAPACITY_GB=100
+fi
+
+if [ "$LRU_CACHE_CAPACITY_MB" = "" ]; then
+  LRU_CACHE_CAPACITY_MB=512
+fi
+
+if [ "$LRU_CACHE_TYPE" = "" ]; then
+  LRU_CACHE_TYPE="DRAM"
+fi
+
 if [ "$PEGASUS_PID_DIR" = "" ]; then
   PEGASUS_PID_DIR=/tmp
 fi
@@ -81,8 +101,29 @@ function start_worker() {
     fi
   fi
 
-  WORKER_ARGS="--worker_port $PEGASUS_WORKER_PORT $WORKER_ARGS"
-  WORKER_ARGS="--hostname $PEGASUS_WORKER_HOST $WORKER_ARGS"
+  WORKER_ARGS="$WORKER_ARGS --hostname $PEGASUS_WORKER_HOST"
+  WORKER_ARGS="$WORKER_ARGS --worker_port $PEGASUS_WORKER_PORT"
+  WORKER_ARGS="$WORKER_ARGS --store_types $STORE_TYPES"
+  if [ "$STORE_DRAM_ENABLED" = "true" ]; then
+    WORKER_ARGS="$WORKER_ARGS --store_dram_enabled"
+  fi
+  WORKER_ARGS="$WORKER_ARGS --store_dram_capacity_gb $STORE_DRAM_CAPACITY_GB"
+  if [ "$STORE_DCPMM_ENABLED" = "true" ]; then
+    WORKER_ARGS="$WORKER_ARGS --store_dcpmm_enabled"
+  fi
+  if [ "$STORAGE_DCPMM_PATH" != "" ]; then
+    WORKER_ARGS="$WORKER_ARGS --storage_dcpmm_path $STORAGE_DCPMM_PATH"
+  fi
+  WORKER_ARGS="$WORKER_ARGS --store_dcpmm_capacity_gb $STORE_DCPMM_CAPACITY_GB"
+  if [ "$FORCE_LRU_CACHE_CAPACITY" = "true" ]; then
+    WORKER_ARGS="$WORKER_ARGS --force_lru_cache_capacity"
+  fi
+  WORKER_ARGS="$WORKER_ARGS --lru_cache_capacity_mb $LRU_CACHE_CAPACITY_MB"
+  WORKER_ARGS="$WORKER_ARGS --lru_cache_type $LRU_CACHE_TYPE"
+  if [ "$CACHE_FORCE_SINGLE_SHARD" = "true" ]; then
+    WORKER_ARGS="$WORKER_ARGS --cache_force_single_shard"
+  fi
+
   exec ${BINARY_BASE_DIR}/${BUILD_TYPE}/worker/workerd ${WORKER_ARGS} &
   newpid="$!"
   echo "$newpid" > "$pid"
