@@ -289,6 +289,15 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
           // TODO: execute the command
 //          WorkerExecEnv::GetInstance()->GetDatasetCacheManager()->cache_block_manager_;
 //          fn(std::vector<PartsDropListofDataset> hbrc_parameters);
+          // for debug, print the parameters
+          LOG(INFO) << "result->result_command.hbrc_parameters.size(): " \
+                    << result->result_command.hbrc_parameters.size();
+          for (auto itds : result->result_command.hbrc_parameters) {
+            LOG(INFO) << "dataset: " << itds.datasetpath;
+            for (auto itpt : itds.partitions) {
+              LOG(INFO) << "\t" << itpt;
+            }
+          }
           break;
         default:
           LOG(ERROR) << "Unknown HeartbeatResultCmd.";

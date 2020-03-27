@@ -203,7 +203,7 @@ Status WorkerManager::UpdateCacheDropLists(std::shared_ptr<std::vector<Partition
   // debug output
   LOG(INFO) << "mapwkcachedroplist_:";
   for (auto it : mapwkcachedroplist_) {
-    LOG(INFO) << it.first;
+    LOG(INFO) << "\t" << it.first << ", with " << it.second->GetPartstodrop().size() << " partition(s).";
   }
 
   return Status::OK();
@@ -221,7 +221,7 @@ bool WorkerManager::NeedtoDropCache(const WorkerId& id) {
     return false;
 }
 
-Status WorkerManager::GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList> sppartlist) {
+Status WorkerManager::GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList>& sppartlist) {
 
   // concurrent control
   lock_guard<mutex> l(mapcachedrop_lock_);
@@ -229,11 +229,10 @@ Status WorkerManager::GetCacheDropList(const WorkerId& id, std::shared_ptr<Worke
   auto it = mapwkcachedroplist_.find(id);
   if (it != mapwkcachedroplist_.end())
   {
+    LOG(INFO) << "Fetching " << id << " from mapwkcachedroplist_...";
     sppartlist = std::move(mapwkcachedroplist_[id]);
-    LOG(INFO) << "Removing " << id << " from mapwkcachedroplist_...";
-    LOG(INFO) << "mapwkcachedroplist_[id] was " << mapwkcachedroplist_[id];
     mapwkcachedroplist_.erase(it);
-    LOG(INFO) << "Removed.";
+    LOG(INFO) << "Fetched.";
   }
 
   return Status::OK();

@@ -58,12 +58,18 @@ public:
   Status InsertPartition(Partition& part) {
 
     // TODO: concurrent access control
-
-    for (auto it = partstodrop_.begin(); it != partstodrop_.end(); it++) {
+    auto it = partstodrop_.begin();
+    for (; it != partstodrop_.end(); it++) {
       if (it->datasetpath == part.GetDataSetPath()) {
         it->partitions.push_back(part.GetIdentPath());
-        break;
+        return Status::OK();
       }
+    }
+    if (it == partstodrop_.end()) {
+      rpc::PartsDropListofDataset pdod;
+      pdod.datasetpath = part.GetDataSetPath();
+      pdod.partitions.push_back(part.GetIdentPath());
+      partstodrop_.push_back(pdod);
     }
 
     return Status::OK();
@@ -129,7 +135,7 @@ class WorkerManager {
 
   Status UpdateCacheDropLists(std::shared_ptr<std::vector<Partition>> partits);
   bool NeedtoDropCache(const WorkerId& id);
-  Status GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList> sppartlist);
+  Status GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList>& sppartlist);
 
  private:
   std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations;
