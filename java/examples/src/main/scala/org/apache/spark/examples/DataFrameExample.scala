@@ -42,15 +42,23 @@ object DataFrameExample {
     val sqlContext = sparkSession.sqlContext
 
     val reader = sqlContext.read.format("pegasus")
-    val path = "hdfs://10.239.47.55:9000/genData2/customer"
-//    val path = "hdfs://10.239.47.55:9000/genData2/income_band"
-    val df = reader
-      .option("format", "PARQUET")
-      .load(path)
 
+    val path = "hdfs://10.239.47.55:9000/genData10/customer"
+//    val path = "hdfs://10.239.47.55:9000/genData2/income_band"
+    val df = reader.option("format", "PARQUET").load(path)
     val df1 = df.select("c_customer_sk")
     df1.printSchema()
     println("table first row: " + df1.head().toString())
+
+    println("==================================================================")
+    println("Sleep 7 seconds ...")
+    println("==================================================================")
+    Thread.sleep(7000L)
+
+    val df_ = reader.option("format", "PARQUET").load(path)
+    val df2 = df_.select("c_customer_sk")
+    df2.printSchema()
+    println("table first row: " + df2.head().toString())
 
     sparkSession.stop()
   }

@@ -230,7 +230,10 @@ Status WorkerManager::GetCacheDropList(const WorkerId& id, std::shared_ptr<Worke
   if (it != mapwkcachedroplist_.end())
   {
     sppartlist = std::move(mapwkcachedroplist_[id]);
-    mapwkcachedroplist_[id] = nullptr;
+    LOG(INFO) << "Removing " << id << " from mapwkcachedroplist_...";
+    LOG(INFO) << "mapwkcachedroplist_[id] was " << mapwkcachedroplist_[id];
+    mapwkcachedroplist_.erase(it);
+    LOG(INFO) << "Removed.";
   }
 
   return Status::OK();
