@@ -47,17 +47,17 @@ TEST(ConsistentHashMapTest, Unit) {
     boost::format node_fmt("192.168.1.%1%");
 
     std::cout<<"setup conhash:"<<std::endl;
-    for(std::size_t i=0;i<3;++i) {
+    for(std::size_t i=0;i<30;++i) {
         std::string node = boost::str(node_fmt % i);
         consistent_hash_.insert(node);
-        std::cout<<boost::format("add node: %1%") % node << std::endl;
+        std::cout << boost::format("add node: %1%") % node << std::endl;
     }
 
 {
     std::cout<<"========================================================="<<std::endl;
     std::cout<<"iterate the conhash:"<<std::endl;
     for(consistent_hash_t::iterator it = consistent_hash_.begin();it != consistent_hash_.end(); ++it) {
-        std::cout<<boost::format("node:%1%,%2%") % it->second % it->first << std::endl;
+        std::cout<<boost::format("node:%1%") % it->second << "\t" << std::right << std::setfill('0') << std::setw(10) << it->first << std::endl;
     }
 }
 
