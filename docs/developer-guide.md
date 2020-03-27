@@ -91,6 +91,29 @@ Note: Set BUILD_WARNING_LEVEL=production to disable -Werror ("treat warning as a
 ```
 cmake -DPEGASUS_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 ```
+#### Offline Builds
+
+To enable offline builds, you can download the source artifacts yourself and
+use environment variables of the form ``PEGASUS_$LIBRARY_URL`` to direct the
+build system to read from a local file rather than accessing the internet.
+
+To make this easier for you, we have prepared a script
+``thirdparty/download_dependencies.sh`` which will download the correct version
+of each dependency to a directory of your choosing. It will print a list of
+bash-style environment variable statements at the end to use for your build
+script.
+```
+cd pegasus/cpp
+# Download tarballs into /path/to/pegasus-thirdparty
+./thirdparty/download_dependencies.sh /path/to/pegasus-thirdparty 
+```
+
+We also prepared a script for Arrow build ``thirdparty/download_arrow_dependencies.sh`` which will download the correct version of each dependency to a directory of your choosing.
+```
+cd pegasus/cpp
+# Download tarballs into /path/to/arrow-thirdparty
+./thirdparty/download_arrow_dependencies.sh /path/to/arrow-thirdparty 
+```
 
 ### Run unit tests
 To run all the tests:
