@@ -46,6 +46,8 @@ DEFINE_double(cache_memtracker_approximation_ratio, 0.01,
               "this ratio to improve performance. For tests.");
 TAG_FLAG(cache_memtracker_approximation_ratio, hidden);
 
+DECLARE_double(cache_available_ratio);
+
 using std::atomic;
 using std::shared_ptr;
 using std::string;
@@ -377,8 +379,8 @@ Cache::Handle* CacheShard<policy>::Insert(
       }
     }
 
-    while (usage_ > capacity_ * 0.9 && rl_.next != &rl_) {
-      LOG(INFO) << "begin evict and the usage is " << usage_;
+    while (usage_ > capacity_ * FLAGS_cache_available_ratio && rl_.next != &rl_) {
+      LOG(INFO) << "begin evict and the usage is " << usage_ << " and the cache available ratio is " << FLAGS_cache_available_ratio;
       RLHandle* old = rl_.next;
       RL_Remove(old);
       table_.Remove(old->key(), old->hash);

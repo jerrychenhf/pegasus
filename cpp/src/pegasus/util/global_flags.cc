@@ -62,7 +62,12 @@ DEFINE_int32(store_dram_capacity_gb, 10,
 
 DEFINE_bool(store_dcpmm_enabled, false,
     "If true, enable DCPMM store.");
-DEFINE_int32(store_dcpmm_capacity_gb, 100,
-    "The DCPMM store capacity in GB.");
+DEFINE_int32(store_dcpmm_initial_capacity_gb, 100,
+    "The DCPMM store initial capacity in GB.");
+DEFINE_int32(store_dcpmm_reserved_capacity_gb, 100,
+    "The DCPMM store reserved capacity in GB.");
 DEFINE_string(storage_dcpmm_path, "",
     "The DCPMM device path.");
+
+DEFINE_double(cache_available_ratio, 0.8,
+    "The available cache ratio. It will begin evict when exceeded.");

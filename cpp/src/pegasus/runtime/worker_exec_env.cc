@@ -31,7 +31,8 @@ DECLARE_bool(store_dram_enabled);
 DECLARE_int32(store_dram_capacity_gb);
 
 DECLARE_bool(store_dcpmm_enabled);
-DECLARE_int32(store_dcpmm_capacity_gb);
+DECLARE_int32(store_dcpmm_initial_capacity_gb);
+DECLARE_int32(store_dcpmm_reserved_capacity_gb);
 DECLARE_string(storage_dcpmm_path);
 
 namespace pegasus {
@@ -72,7 +73,16 @@ Status WorkerExecEnv::InitStoreInfo() {
   // if DCPMM store configured
   if(FLAGS_store_dcpmm_enabled) {
     // read capacity
-    int64_t capacity = ((int64_t) FLAGS_store_dcpmm_capacity_gb) * StoreManager::GIGABYTE;
+    int64_t initial_capacity = ((int64_t) FLAGS_store_dcpmm_initial_capacity_gb) * StoreManager::GIGABYTE;
+    int64_t reserved_capacity = ((int64_t) FLAGS_store_dcpmm_reserved_capacity_gb) * StoreManager::GIGABYTE;
+    int available_capacity = initial_capacity - reserved_capacity;
+    
+    LOG(INFO) << "The initial capacity is " << initial_capacity << " reserved capacity is " 
+    << reserved_capacity << " and the available capacity is " << available_capacity;
+
+    if (available_capacity <= 0) {
+      return Status::Invalid("The available capacity must be > 0 when dcpmm enabled");
+    }
     
     std::shared_ptr<StoreProperties> properties = std::make_shared<StoreProperties>();
     // read properties
@@ -80,7 +90,7 @@ Status WorkerExecEnv::InitStoreInfo() {
     
     std::shared_ptr<StoreInfo> store_info(
       new StoreInfo(StoreManager::STORE_ID_DCPMM, Store::StoreType::DCPMM,
-      capacity, properties));
+      available_capacity, properties));
     stores_.insert(std::make_pair(StoreManager::STORE_ID_DCPMM, store_info));
   }
   

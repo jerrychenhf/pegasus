@@ -34,7 +34,8 @@ export PEGASUS_WORKER_PORT=30002
 # - STORE_DRAM_CAPACITY_GB     The DRAM store capacity in GB. (Default: 10)
 # - STORE_DCPMM_ENABLED        If true, enable DCPMM store. (Default: false)
 # - STORAGE_DCPMM_PATH         The DCPMM device path.
-# - STORE_DCPMM_CAPACITY_GB    The DCPMM store capacity in GB.(Default: 100)
+# - STORE_DCPMM_INITIAL_CAPACITY_GB    The DCPMM store initial capacity in GB.(Default: 100)
+# - STORE_DCPMM_RESERVED_CAPACITY_GB    The DCPMM store reserved capacity in GB.(Default: 40)
 # - FORCE_LRU_CACHE_CAPACITY   Force pegasus to accept the lru cache size, even if it is unsafe.(Default: true))
 # - LRU_CACHE_CAPACITY_MB      lru cache capacity in MB.(Default: 512)
 # - LRU_CACHE_TYPE             Which type of lru cache to use for caching data.(Default: DRAM)

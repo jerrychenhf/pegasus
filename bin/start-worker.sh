@@ -72,8 +72,12 @@ if [ "$STORE_DRAM_CAPACITY_GB" = "" ]; then
   STORE_DRAM_CAPACITY_GB=10
 fi
 
-if [ "$STORE_DCPMM_CAPACITY_GB" = "" ]; then
-  STORE_DCPMM_CAPACITY_GB=100
+if [ "$STORE_DCPMM_INITIAL_CAPACITY_GB" = "" ]; then
+  STORE_DCPMM_INITIAL_CAPACITY_GB=100
+fi
+
+if [ "$STORE_DCPMM_RESERVED_CAPACITY_GB" = "" ]; then
+  STORE_DCPMM_RESERVED_CAPACITY_GB=40
 fi
 
 if [ "$LRU_CACHE_CAPACITY_MB" = "" ]; then
@@ -114,7 +118,8 @@ function start_worker() {
   if [ "$STORAGE_DCPMM_PATH" != "" ]; then
     WORKER_ARGS="$WORKER_ARGS --storage_dcpmm_path $STORAGE_DCPMM_PATH"
   fi
-  WORKER_ARGS="$WORKER_ARGS --store_dcpmm_capacity_gb $STORE_DCPMM_CAPACITY_GB"
+  WORKER_ARGS="$WORKER_ARGS --store_dcpmm_initial_capacity_gb $STORE_DCPMM_INITIAL_CAPACITY_GB"
+  WORKER_ARGS="$WORKER_ARGS --store_dcpmm_reserved_capacity_gb $STORE_DCPMM_RESERVED_CAPACITY_GB"
   if [ "$FORCE_LRU_CACHE_CAPACITY" = "true" ]; then
     WORKER_ARGS="$WORKER_ARGS --force_lru_cache_capacity"
   fi
