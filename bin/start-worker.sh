@@ -114,6 +114,8 @@ function start_worker() {
   WORKER_ARGS="$WORKER_ARGS --store_types $STORE_TYPES"
   if [ "$STORE_DRAM_ENABLED" = "true" ]; then
     WORKER_ARGS="$WORKER_ARGS --store_dram_enabled"
+  else
+    WORKER_ARGS="$WORKER_ARGS --store_dram_enabled=false"
   fi
   WORKER_ARGS="$WORKER_ARGS --store_dram_capacity_gb $STORE_DRAM_CAPACITY_GB"
   if [ "$STORE_DCPMM_ENABLED" = "true" ]; then
