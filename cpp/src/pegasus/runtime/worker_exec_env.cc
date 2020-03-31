@@ -75,8 +75,8 @@ Status WorkerExecEnv::InitStoreInfo() {
     // read capacity
     int64_t initial_capacity = ((int64_t) FLAGS_store_dcpmm_initial_capacity_gb) * StoreManager::GIGABYTE;
     int64_t reserved_capacity = ((int64_t) FLAGS_store_dcpmm_reserved_capacity_gb) * StoreManager::GIGABYTE;
-    int available_capacity = initial_capacity - reserved_capacity;
-    
+    int64_t available_capacity = initial_capacity - reserved_capacity;
+
     LOG(INFO) << "The initial capacity is " << initial_capacity << " reserved capacity is " 
     << reserved_capacity << " and the available capacity is " << available_capacity;
 
