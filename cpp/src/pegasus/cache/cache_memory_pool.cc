@@ -27,7 +27,7 @@ constexpr size_t kAlignment = 64;
 alignas(kAlignment) static uint8_t zero_size_area[1];
 
 CacheMemoryPool::CacheMemoryPool(std::shared_ptr<CacheEngine> cache_engine)
-  : cache_engine_(cache_engine), occupied_size_(0) {
+  : cache_engine_(cache_engine) {
 }
 CacheMemoryPool::~CacheMemoryPool() {}
 
@@ -64,7 +64,7 @@ arrow::Status CacheMemoryPool::Allocate(int64_t size, uint8_t** out) {
   
   *out = store_region.address();
 
-  occupied_size_ += size;
+  stats_.UpdateAllocatedBytes(size);
   LOG(INFO) << "Allocate memory in cache memory pool and the allocated size is " << size;
   return arrow::Status::OK();
 }
@@ -82,7 +82,8 @@ void CacheMemoryPool::Free(uint8_t* buffer, int64_t size)  {
   StoreRegion storeRegion(buffer, size, size);
   cache_store_->Free(&storeRegion);
   LOG(INFO) << "Free memory in cache memory pool and the free size is " << size;
-  occupied_size_ -= size;
+ 
+  stats_.UpdateAllocatedBytes(-size);
 }
 
 arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, uint8_t** ptr) {
@@ -123,18 +124,18 @@ arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, ui
 
   *ptr = store_region.address();
 
-  occupied_size_ += (new_size - old_size);
+  stats_.UpdateAllocatedBytes(new_size - old_size);
   LOG(INFO) << "Reallocate memory in cache memory pool and the reallocate new size is "
    << new_size << " and the old size is " << old_size;
   return arrow::Status::OK();
 }
 
 int64_t CacheMemoryPool::bytes_allocated() const  {
-  return occupied_size_;
+  return stats_.bytes_allocated();;
 }
   
 int64_t CacheMemoryPool::max_memory() const {
-  return cache_store_->GetCapacity();
+  return stats_.max_memory();
 }
 
 std::string CacheMemoryPool::backend_name() const {

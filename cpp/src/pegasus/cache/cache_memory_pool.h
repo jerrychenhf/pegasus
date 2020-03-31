@@ -30,6 +30,28 @@ using namespace arrow;
 namespace pegasus
 {
 
+class MemoryPoolStats {
+ public:
+  MemoryPoolStats() : bytes_allocated_(0), max_memory_(0) {}
+
+  int64_t max_memory() const { return max_memory_.load(); }
+
+  int64_t bytes_allocated() const { return bytes_allocated_.load(); }
+
+  inline void UpdateAllocatedBytes(int64_t diff) {
+    auto allocated = bytes_allocated_.fetch_add(diff) + diff;
+    // "maximum" allocated memory is ill-defined in multi-threaded code,
+    // so don't try to be too rigorous here
+    if (diff > 0 && allocated > max_memory_) {
+      max_memory_ = allocated;
+    }
+  }
+
+ protected:
+  std::atomic<int64_t> bytes_allocated_;
+  std::atomic<int64_t> max_memory_;
+};
+
 class CacheMemoryPool : public arrow::MemoryPool
 {
 public:
@@ -54,7 +76,7 @@ public:
   private:
     std::shared_ptr<CacheEngine> cache_engine_;
     CacheStore* cache_store_;
-    std::atomic<int64_t> occupied_size_;
+    MemoryPoolStats stats_;
     
     Status GetCacheRegion(int64_t size, StoreRegion* store_region);
 };
