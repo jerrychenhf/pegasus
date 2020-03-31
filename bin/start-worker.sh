@@ -80,6 +80,10 @@ if [ "$STORE_DCPMM_RESERVED_CAPACITY_GB" = "" ]; then
   STORE_DCPMM_RESERVED_CAPACITY_GB=40
 fi
 
+if [ "$STORE_CACHE_RATIO" = "" ]; then
+  STORE_CACHE_RATIO=0.8
+fi
+
 if [ "$LRU_CACHE_CAPACITY_MB" = "" ]; then
   LRU_CACHE_CAPACITY_MB=512
 fi
@@ -120,6 +124,7 @@ function start_worker() {
   fi
   WORKER_ARGS="$WORKER_ARGS --store_dcpmm_initial_capacity_gb $STORE_DCPMM_INITIAL_CAPACITY_GB"
   WORKER_ARGS="$WORKER_ARGS --store_dcpmm_reserved_capacity_gb $STORE_DCPMM_RESERVED_CAPACITY_GB"
+  WORKER_ARGS="$WORKER_ARGS --store_cache_ratio $STORE_CACHE_RATIO"
   if [ "$FORCE_LRU_CACHE_CAPACITY" = "true" ]; then
     WORKER_ARGS="$WORKER_ARGS --force_lru_cache_capacity"
   fi

@@ -69,5 +69,5 @@ DEFINE_int32(store_dcpmm_reserved_capacity_gb, 100,
 DEFINE_string(storage_dcpmm_path, "",
     "The DCPMM device path.");
 
-DEFINE_double(cache_available_ratio, 0.8,
+DEFINE_double(store_cache_ratio, 0.8,
     "The available cache ratio. It will begin evict when exceeded.");
