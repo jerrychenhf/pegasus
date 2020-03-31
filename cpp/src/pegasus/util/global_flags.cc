@@ -64,7 +64,7 @@ DEFINE_bool(store_dcpmm_enabled, false,
     "If true, enable DCPMM store.");
 DEFINE_int32(store_dcpmm_initial_capacity_gb, 100,
     "The DCPMM store initial capacity in GB.");
-DEFINE_int32(store_dcpmm_reserved_capacity_gb, 100,
+DEFINE_int32(store_dcpmm_reserved_capacity_gb, 40,
     "The DCPMM store reserved capacity in GB.");
 DEFINE_string(storage_dcpmm_path, "",
     "The DCPMM device path.");
