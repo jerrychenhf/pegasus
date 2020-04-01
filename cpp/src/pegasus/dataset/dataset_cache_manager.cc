@@ -26,6 +26,8 @@
 #include "cache/lru_cache.h"
 #include <boost/thread/mutex.hpp>
 
+DEFINE_int64(chunk_size, 2048, "The maximum chunk size of record batches");
+
 namespace pegasus {
 
 DatasetCacheManager::DatasetCacheManager()
@@ -80,7 +82,6 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
   std::unique_ptr<rpc::FlightDataStream>* data_stream) {
   LOG(WARNING) << "Wrap the dataset into flight data stream";
 
-  // std::shared_ptr<Table> table;
   std::vector<std::shared_ptr<ChunkedArray>> chunked_arrays;
   std::vector<std::shared_ptr<CachedColumn>> columns;
 
@@ -103,11 +104,10 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
 
   std::shared_ptr<arrow::Table> table = arrow::Table::Make(schema, chunked_arrays);
 
-  // *data_stream = std::unique_ptr<rpc::FlightDataStream>(
-  //   new rpc::RecordBatchStream(std::shared_ptr<RecordBatchReader>(
-  //     new TableBatchReader(*table))));
+  std::shared_ptr<arrow::TableBatchReader> reader = std::make_shared<arrow::TableBatchReader>(*table);
+  reader->set_chunksize(FLAGS_chunk_size);
   *data_stream = std::unique_ptr<rpc::FlightDataStream>(
-  new rpc::TableRecordBatchStream(columns, table));
+  new rpc::TableRecordBatchStream(reader, columns, table));
 
   return Status::OK();
 }
