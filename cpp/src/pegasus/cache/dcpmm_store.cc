@@ -36,6 +36,8 @@ DEFINE_bool(dcpmm_cache_simulate_allocation_failure, false,
             "for testing.");
 TAG_FLAG(dcpmm_cache_simulate_allocation_failure, unsafe);
 
+DECLARE_int32(store_dcpmm_initial_capacity_gb);
+
 namespace pegasus {
 
 // Taken together, these typedefs and this macro make it easy to call a
@@ -131,7 +133,6 @@ DCPMMStore::DCPMMStore(int64_t capacity)
 }
 
 Status DCPMMStore::Init(const std::unordered_map<string, string>* properties) {
-  LOG(INFO) << "Init dcpmm store";
   // Get the dcpmm path from properties
   auto entry  = properties->find(StoreManager::STORE_PROPERTY_PATH);
 
@@ -149,17 +150,20 @@ Status DCPMMStore::Init(const std::unordered_map<string, string>* properties) {
   // the singleton pattern prevents the surfacing of errors.
   CHECK(g_memkind_available) << "Memkind not available!";
 
+  int64_t initial_capacity = ((int64_t) FLAGS_store_dcpmm_initial_capacity_gb) * StoreManager::GIGABYTE;
+
   // memkind_create_pmem() will fail if the capacity is too small, but with
   // an inscrutable error. So, we'll check ourselves.
-  CHECK_GE(capacity_, MEMKIND_PMEM_MIN_SIZE)
+  CHECK_GE(initial_capacity, MEMKIND_PMEM_MIN_SIZE)
     << "configured capacity " << capacity_ << " bytes is less than "
     << "the minimum capacity for an dcpmm cache: " << MEMKIND_PMEM_MIN_SIZE;
   
-  int err = CALL_MEMKIND(memkind_create_pmem, dcpmm_path.c_str(), capacity_, &vmp_);
+  int err = CALL_MEMKIND(memkind_create_pmem, dcpmm_path.c_str(), initial_capacity, &vmp_);
   
   // If we cannot create the cache pool we should not retry.
   PLOG_IF(FATAL, err) << "Could not initialize DCPMM cache library in path "
                            << dcpmm_path.c_str();
+  LOG(INFO) << "Successfully init dcpmm store. And the initial capacity is " << initial_capacity;
   return Status::OK();
 }
 
