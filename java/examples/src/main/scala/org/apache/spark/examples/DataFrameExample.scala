@@ -37,9 +37,11 @@ object DataFrameExample {
       .set("spark.driver.memory", "3g")
       .set("spark.executor.memory", "3g")
       .set("spark.testing.memory", "10240000000")
+//      .set("spark.planner.host", "bdpe822n3")
 
     val sparkSession = SparkSession.builder.config(conf).getOrCreate()
     val sqlContext = sparkSession.sqlContext
+    sparkSession.sparkContext.getConf.getAll.foreach(println)
 
     val reader = sqlContext.read.format("pegasus")
 
