@@ -171,7 +171,7 @@ Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
     ss << "Allocate failed in DCPMM store when the available size < allocated size. The allocated size: "
      << size << ". The available size: " << (capacity_ - used_size_);
     LOG(ERROR) << ss.str();
-    return Status::Invalid("Request dcpmm size" , size, "is large than available size.");
+    return Status::Invalid("Request dcpmm size" , size, "is larger than available size.");
   }
 
  // void* p = CALL_MEMKIND(memkind_malloc, vmp_, size);
@@ -200,7 +200,7 @@ Status DCPMMStore::Allocate(int64_t size, StoreRegion* store_region) {
   uint8_t* address = reinterpret_cast<uint8_t*>(p);
   store_region->reset_address(address, size, occupied_size);
   used_size_ += occupied_size;
-
+  LOG(INFO) << "Successfully allocated in dcpmm store. And the allocated size is " << size;
   return Status::OK();
 }
 
@@ -210,10 +210,10 @@ Status DCPMMStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* s
   //check the free size. If no free size available, fail
   if (new_size > (capacity_ - used_size_)) {
     stringstream ss;
-    ss << "Reallocate failed in DCPMM store when the available size < allocated size. The allocated size: "
+    ss << "Reallocate failed in DCPMM store when the available size < allocated size. The new allocated size: "
      << new_size << ". The available size: " << (capacity_ - used_size_);
     LOG(ERROR) << ss.str();
-    return Status::Invalid("Request memory size" , new_size, "is large than available size.");
+    return Status::Invalid("Request memory size" , new_size, "is larger than available size.");
   }
   
   void* old_ptr = reinterpret_cast<void*>(store_region->address());
@@ -223,7 +223,7 @@ Status DCPMMStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* s
 
   if (err) {
     stringstream ss;
-    ss << "Reallocate failed in DCPMM store after call memkind_posix_memalign method. The allocated size:"
+    ss << "Reallocate failed in DCPMM store after call memkind_posix_memalign method. The new allocated size:"
      << new_size << ". The available size: " << (capacity_ - used_size_);
     LOG(ERROR) << ss.str();
     return Status::OutOfMemory("Reallocate of size ", new_size, " failed in DCPMM store");
@@ -247,6 +247,8 @@ Status DCPMMStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* s
   uint8_t* new_address = reinterpret_cast<uint8_t*>(new_ptr);
   store_region->reset_address(new_address, new_size, occupied_size);
   used_size_ += (occupied_size - store_region->occupies_size());
+
+  LOG(INFO) << "Successfully reallocated in dcpmm store. And the reallocated size is " << new_size;
   return Status::OK();
 }
 

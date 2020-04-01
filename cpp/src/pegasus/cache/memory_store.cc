@@ -33,24 +33,36 @@ Status MemoryStore::Allocate(int64_t size, StoreRegion* store_region) {
   DCHECK(store_region != NULL);
   
   //check the free size. If no free size available, fail
-  int64_t available_size = capacity_ - used_size_;
-  if (size > available_size) {
-    return Status::Invalid("Request memory size" , size, "is large than available size.");
+  if (size > (capacity_ - used_size_)) {
+    stringstream ss;
+    ss << "Allocate failed in memory store when the available size < allocated size. The allocated size: "
+     << size << ". The available size: " << (capacity_ - used_size_);
+    LOG(ERROR) << ss.str();
+    return Status::Invalid("Request memory size" , size, "is larger than available size.");
   }
   
   uint8_t* out;
   const int result = posix_memalign(reinterpret_cast<void**>(&out), 64,
                                       static_cast<size_t>(size));
   if (result == ENOMEM) {
+    stringstream ss;
+    ss << "Allocate failed with OOM in memory store after call posix_memalign method. The allocated size:"
+     << size << ". The available size: " << (capacity_ - used_size_);
+    LOG(ERROR) << ss.str();
     return Status::OutOfMemory("malloc of size ", size, " failed");
    }
 
   if (result == EINVAL) {
+    stringstream ss;
+    ss << "Allocate failed with invalid alignment parameter in memory store after call posix_memalign method. The allocated size:"
+     << size << ". The available size: " << (capacity_ - used_size_);
+    LOG(ERROR) << ss.str();
     return Status::Invalid("invalid alignment parameter: ", 64);
   }
 
   store_region->reset_address(out, size, size);
   used_size_ += size;
+  LOG(INFO) << "Successfully allocated in memory store. And the allocated size is " << size;
   return Status::OK();
 }
 
@@ -59,18 +71,30 @@ Status MemoryStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* 
 
   //check the free size. If no free size available, fail
   int64_t available_size = capacity_ - used_size_;
-  if ((new_size - old_size) > available_size) {
-    return Status::Invalid("Request memory size" , (new_size - old_size), "is large than available size.");
+  if (new_size > (capacity_ - used_size_)) {
+    stringstream ss;
+    ss << "Reallocate failed in memory store when the available size < new allocated size. The new allocated size: "
+     << new_size << ". The available size: " << (capacity_ - used_size_);
+    LOG(ERROR) << ss.str();
+    return Status::Invalid("Request memory size" , (new_size - old_size), "is larger than available size.");
   }
 
   uint8_t* out;
   const int result = posix_memalign(reinterpret_cast<void**>(&out), 64,
                                       static_cast<size_t>(new_size));
   if (result == ENOMEM) {
+    stringstream ss;
+    ss << "Reallocate failed with OOM in memory store after call posix_memalign method. The new allocated size:"
+     << new_size << ". The available size: " << (capacity_ - used_size_);
+    LOG(ERROR) << ss.str();
     return Status::OutOfMemory("malloc of size ", new_size, " failed");
    }
 
   if (result == EINVAL) {
+    stringstream ss;
+    ss << "Reallocate failed with invalid alignment parameter in memory store after call posix_memalign method. The new allocated size:"
+     << new_size << ". The available size: " << (capacity_ - used_size_);
+    LOG(ERROR) << ss.str();
     return Status::Invalid("invalid alignment parameter: ", 64);
   }
 
@@ -80,6 +104,7 @@ Status MemoryStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* 
 
   store_region->reset_address(out, new_size, new_size);
   used_size_ += (new_size - old_size);
+  LOG(INFO) << "Successfully reallocated in dcpmm store. And the reallocated size is " << new_size;
   return Status::OK();
 }
 
