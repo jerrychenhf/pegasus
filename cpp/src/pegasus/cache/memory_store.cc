@@ -70,7 +70,6 @@ Status MemoryStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* 
   DCHECK(store_region != NULL);
 
   //check the free size. If no free size available, fail
-  int64_t available_size = capacity_ - used_size_;
   if (new_size > (capacity_ - used_size_)) {
     stringstream ss;
     ss << "Reallocate failed in memory store when the available size < new allocated size. The new allocated size: "
