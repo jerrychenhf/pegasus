@@ -27,7 +27,7 @@ fi
 . "${PEGASUS_HOME}/bin/pegasus-config.sh"
 
 # Start Planner
-"${PEGASUS_HOME}/bin"/start-planner.sh
+"${PEGASUS_HOME}/bin"/start-planner.sh $*
 
 # Start Workers
-"${PEGASUS_HOME}/bin"/start-workers.sh
+"${PEGASUS_HOME}/bin"/start-workers.sh $*

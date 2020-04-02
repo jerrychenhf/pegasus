@@ -56,6 +56,18 @@ PEGASUS_PLANNER_PORT   start the planner on a different port (default: 30001).
 PEGASUS_WORKER_PORT    start the worker on a different port (default: 30002).
 ```
 
+### Start PLanner and Worker with debug build
+```
+cd pegasus
+sh bin/start-planner.sh -build_type=debug
+sh bin/start-worker.sh -build_type=debug
+```
+or
+```
+cd pegasus
+sh bin/start-all.sh -build_type=debug
+```
+
 ### Spark Configurations for PEGASUS
 
 Step 1. Make the following configuration changes in Spark configuration file `$SPARK_HOME/conf/spark-defaults.conf`. 

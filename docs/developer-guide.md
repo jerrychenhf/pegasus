@@ -77,8 +77,8 @@ make
 ```
 git clone https://gitlab.devtools.intel.com/intel-bigdata/pegasus.git
 cd pegasus/cpp
-mkdir debug
-cd debug
+mkdir build
+cd build
 cmake -DPEGASUS_BUILD_TESTS=ON ..
 make
 ```
@@ -120,12 +120,12 @@ source arrow_env.conf
 ### Run unit tests
 To run all the tests:
 ```
-cd pegasus/cpp/debug/
+cd pegasus/cpp/build/
 ctest
 ```
 To run just one test:
 ```
-cd pegasus/cpp/debug/release/util/
+cd pegasus/cpp/build/release/util/
 ./pegasus-thread-pool-test
 ```
 

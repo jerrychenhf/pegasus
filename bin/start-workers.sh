@@ -41,6 +41,6 @@ if [ "$PEGASUS_PLANNER_HOST" = "" ]; then
 fi
 
 # Launch the workers
-"${PEGASUS_HOME}/bin/workers.sh" cd "${PEGASUS_HOME}" \;"${PEGASUS_HOME}/bin/start-worker.sh"  "--planner_hostname $PEGASUS_PLANNER_HOST --planner_port $PEGASUS_PLANNER_PORT"
+"${PEGASUS_HOME}/bin/workers.sh" cd "${PEGASUS_HOME}" \;"${PEGASUS_HOME}/bin/start-worker.sh"  "--planner_hostname $PEGASUS_PLANNER_HOST --planner_port $PEGASUS_PLANNER_PORT" $*
 
 
