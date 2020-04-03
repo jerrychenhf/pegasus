@@ -64,6 +64,7 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
   // create partitions with identities
 //  auto vectident = std::make_shared<std::vector<Identity>>();
   auto partitions = std::make_shared<std::vector<Partition>>();
+  int64_t total_bytes = 0;
 
   // setup the identity vector for ondisk dataset
   std::shared_ptr<Catalog> catalog;
@@ -80,7 +81,7 @@ LOG(INFO) << "Getting catalog ...";
 LOG(INFO) << "Getting storage plugin ...";
     RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(table_location, &storage_plugin));
     std::vector<std::string> file_list;
-    RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list));
+    RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list, &total_bytes));
 
 LOG(INFO) << "Filling partitions ...";
     for (auto filepath : file_list) {
@@ -103,6 +104,7 @@ LOG(INFO) << "Updating distLocations from distributor...";
  
   // build dataset
   DataSet::Data dd;
+  dd.total_bytes = total_bytes;
   dd.dataset_path = dataset_request->get_dataset_path();
   for (auto partt : *partitions)
     dd.partitions.push_back(partt);
@@ -126,7 +128,7 @@ Status DataSetBuilder::BuildDatasetPartitions(std::string table_location, std::s
   distributor->SetupDist();
 
   std::vector<std::string> file_list;
-  RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list));
+  RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list, nullptr));
 
 LOG(INFO) << "Filling partitions ...";
   for (auto filepath : file_list) {

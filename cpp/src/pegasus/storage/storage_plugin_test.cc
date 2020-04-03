@@ -50,7 +50,9 @@ TEST(StoragePluginTest, Unit) {
   auto partitions = std::make_shared<std::vector<Partition>>();
 
   std::vector<std::string> file_list;
-  ASSERT_OK(planner_storage_plugin->ListFiles(table_location, &file_list));
+  int64_t total_bytes;
+  ASSERT_OK(planner_storage_plugin->ListFiles(table_location, &file_list, &total_bytes));
+  ASSERT_NE(0, total_bytes);
   // ASSERT_EQ(1, file_list.size());
   for (auto filepath : file_list) {
     partitions->push_back(Partition(Identity(table_location, filepath)));

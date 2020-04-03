@@ -29,7 +29,8 @@ class StoragePlugin {
   virtual Status Init(std::string host, int32_t port) = 0;
   virtual Status Connect() = 0;
   virtual Status GetModifedTime(std::string dataset_path, uint64_t* modified_time) = 0;
-  virtual Status ListFiles(std::string dataset_path, std::vector<std::string>* file_list) = 0;
+  virtual Status ListFiles(std::string dataset_path, std::vector<std::string>* file_list,
+                           int64_t* total_bytes) = 0;
     
   enum StoragePluginType {
     UNKNOWN,

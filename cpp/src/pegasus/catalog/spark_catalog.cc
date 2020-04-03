@@ -59,7 +59,7 @@ Status SparkCatalog::GetSchema(DataSetRequest* dataset_request,
   std::shared_ptr<StoragePlugin> storage_plugin;
   RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(table_location, &storage_plugin));
   std::vector<std::string> file_list;
-  RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list));
+  RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list, nullptr));
 
   if (storage_plugin->GetPluginType() == StoragePlugin::HDFS) {
     std::shared_ptr<HdfsReadableFile> file;

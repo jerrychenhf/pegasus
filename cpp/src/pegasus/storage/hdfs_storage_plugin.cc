@@ -125,7 +125,8 @@ Status HDFSStoragePlugin::ListSubDirectoryModifiedTimes(std::string dataset_path
 }
 
 Status HDFSStoragePlugin::ListFiles(std::string dataset_path,
-                                    std::vector<std::string>* file_list) {
+                                    std::vector<std::string>* file_list,
+                                    int64_t* total_bytes) {
   
   std::vector<HdfsPathInfo> children;
   arrow::Status arrowStatus = client_->ListDirectory(dataset_path, &children);
@@ -138,10 +139,13 @@ Status HDFSStoragePlugin::ListFiles(std::string dataset_path,
     std::string child_path = uri.path();
 
     if(child_info.kind == ObjectType::DIRECTORY) {
-      ListFiles(child_path, file_list);
+      ListFiles(child_path, file_list, total_bytes);
     } else if (child_info.kind == ObjectType::FILE &&
         !boost::algorithm::ends_with(child_path, "_SUCCESS")) {
       file_list->push_back(child_info.name);
+      if (nullptr != total_bytes) {
+        *total_bytes = *total_bytes + child_info.size;
+      }
     }
   }
   return Status::OK();
