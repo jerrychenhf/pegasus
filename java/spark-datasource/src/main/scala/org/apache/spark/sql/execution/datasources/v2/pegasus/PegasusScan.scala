@@ -16,13 +16,15 @@
  */
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
+import java.util.OptionalLong
+
 import org.apache.commons.lang3.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.pegasus.rpc.{FlightDescriptor, FlightInfo, Location, Ticket}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.connector.read.{Batch, InputPartition, PartitionReaderFactory, Scan}
+import org.apache.spark.sql.connector.read.{Batch, InputPartition, PartitionReaderFactory, Scan, Statistics, SupportsReportStatistics}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
 import org.apache.spark.util.Utils
@@ -37,7 +39,29 @@ case class PegasusScan(
     dataSchema: StructType,
     readDataSchema: StructType,
     options: CaseInsensitiveStringMap)
-  extends Scan with Batch with Logging {
+  extends Scan with Batch with SupportsReportStatistics with Logging {
+
+  val fieldsString = readDataSchema.fields.map {
+    col => col.name
+  }.mkString(",")
+
+  val properties: Map[String, String] = Seq(
+    FlightDescriptor.COLUMN_NAMES -> fieldsString).toMap
+
+  logInfo("partition fields: " + fieldsString)
+
+  lazy val pegasusDataSetReader = new PegasusDataSetReader(sparkSession, paths,
+    options.asScala.toMap ++ properties)
+  lazy val flightInfo = {
+    try {
+      pegasusDataSetReader.getDataSet()
+    } catch {
+      case e: Exception =>
+        throw new RuntimeException(e)
+    } finally {
+      pegasusDataSetReader.close()
+    }
+  }
 
   /**
     * Returns whether a file with `path` could be split or not.
@@ -75,27 +99,6 @@ case class PegasusScan(
   }
 
   protected def partitions: Seq[PegasusPartition] = {
-    val fieldsString = readDataSchema.fields.map {
-      col => col.name
-    }.mkString(",")
-
-    val properties: Map[String, String] = Seq(
-      FlightDescriptor.COLUMN_NAMES -> fieldsString).toMap
-
-    logInfo("partition fields: " + fieldsString)
-
-    val pegasusDataSetReader = new PegasusDataSetReader(sparkSession, paths,
-      options.asScala.toMap ++ properties)
-    val flightInfo = {
-      try {
-        pegasusDataSetReader.getDataSet()
-      } catch {
-        case e: Exception =>
-          throw new RuntimeException(e)
-      } finally {
-        pegasusDataSetReader.close()
-      }
-    }
 
     val partitions = new ArrayBuffer[PegasusPartition]
     val endpoints = flightInfo.getEndpoints.asScala
@@ -116,6 +119,18 @@ case class PegasusScan(
 
   override def readSchema(): StructType = {
     StructType(readDataSchema.fields)
+  }
+
+  override def estimateStatistics(): Statistics = {
+    new Statistics {
+      override def sizeInBytes(): OptionalLong = {
+        val compressionFactor = sparkSession.sessionState.conf.fileCompressionFactor
+        val size = (compressionFactor * flightInfo.getBytes).toLong
+        OptionalLong.of(size)
+      }
+
+      override def numRows(): OptionalLong = OptionalLong.of(flightInfo.getRecords)
+    }
   }
 
 }
