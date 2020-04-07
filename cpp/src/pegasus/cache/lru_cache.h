@@ -186,7 +186,7 @@ class LRUCache {
 
   void Touch(const CacheKey* key);
 
-  void Erase(const CacheKey& key);
+  void Erase(const CacheKey* key);
 
   Status Init();
 

@@ -50,4 +50,9 @@ Status LruCacheEngine::TouchValue(LRUCache::CacheKey* key) {
   return Status::OK();
 }
 
+Status LruCacheEngine::EraseValue(LRUCache::CacheKey* key) {
+  lru_cache_->Erase(key);
+  return Status::OK();
+}
+
 } // namespace pegasus

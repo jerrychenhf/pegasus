@@ -165,8 +165,8 @@ void LRUCache::Touch(const CacheKey* key) {
   return;
 }
 
-void LRUCache::Erase(const CacheKey& key) {
-  Slice key_slice(reinterpret_cast<const uint8_t*>(&key), sizeof(key));
+void LRUCache::Erase(const CacheKey* key) {
+  Slice key_slice(reinterpret_cast<const uint8_t*>(key), sizeof(key));
   cache_->Erase(key_slice);
   return;
 }

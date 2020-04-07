@@ -180,11 +180,32 @@ Status DatasetCacheBlockManager::DeleteDataset(const std::string dataset_path) {
   return Status::OK();
 }
 
-Status CachedDataset::DeletePartition(const std::string partition_path){
+Status CachedDataset::DeletePartition(const std::string partition_path,
+ std::shared_ptr<CacheEngine> cache_engine){
   {
     boost::lock_guard<boost::mutex> l(cached_partitions_lock_); 
     LOG(WARNING) << "Delete the partition";
+
+    std::shared_ptr<CachedPartition> cached_partition;
+    GetCachedPartition(dataset_path_, &cached_partition);
+    cached_partition->DeleteEntry(cache_engine);
     cached_partitions_.erase(partition_path);
+  }
+  return Status::OK();
+}
+
+Status CachedPartition::DeleteEntry(std::shared_ptr<CacheEngine> cache_engine) {
+
+  {
+    boost::lock_guard<boost::mutex> l(cached_columns_lock_); 
+    for (auto iter = cached_columns_.begin(); iter != cached_columns_.end(); iter ++) {
+      std::shared_ptr<CachedColumn> column = iter->second;
+      int column_id = iter->first;
+      int64_t column_size = column->GetCacheRegion()->size();
+
+      LRUCache::CacheKey* key = new LRUCache::CacheKey(dataset_path_, partition_path_, column_id, column_size);
+      cache_engine->EraseValue(key);
+    }
   }
   return Status::OK();
 }
@@ -193,7 +214,10 @@ Status CachedPartition::DeleteColumn(int column_id) {
   {
     boost::lock_guard<boost::mutex> l(cached_columns_lock_);  
     LOG(WARNING) << "Delete the column"; 
-    cached_columns_.erase(column_id);
+    if (cached_columns_.find(column_id) != cached_columns_.end()) {
+      // If found the column id, then delete it.
+      cached_columns_.erase(column_id);
+    }
   } 
   return Status::OK();
 }

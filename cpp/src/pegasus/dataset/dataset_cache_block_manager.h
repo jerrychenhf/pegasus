@@ -83,6 +83,7 @@ class CachedPartition {
   bool InsertColumn(
    int column_id, std::shared_ptr<CachedColumn> new_column, std::shared_ptr<CachedColumn>* cached_column);
   Status DeleteColumn(int column_id);
+  Status DeleteEntry(std::shared_ptr<CacheEngine> cache_engine);
 
   const std::string GetDatasetPath() { return dataset_path_; }
   const std::string GetPartitionPath() {return partition_path_; }
@@ -105,7 +106,7 @@ class CachedDataset {
    std::shared_ptr<CachedPartition>* partition);
 
 
-  Status DeletePartition(const std::string partition_path);
+  Status DeletePartition(const std::string partition_path, std::shared_ptr<CacheEngine> cache_engine);
   
   const std::string& GetDatasetPath() { return dataset_path_; }
   std::unordered_map<string, std::shared_ptr<CachedPartition>> GetCachedPartitions() {
