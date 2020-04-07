@@ -221,7 +221,7 @@ Status DatasetCacheManager::DropCache(std::vector<rpc::PartsDropListofDataset> d
        // CacheEngine::CachePolicy cache_policy = GetCachePolicy(request_identity);
        CacheEngine::CachePolicy cache_policy = CacheEngine::CachePolicy::LRU; // TODO get the cache policy based on the data set type.
        RETURN_IF_ERROR(cache_engine_manager_->GetCacheEngine(cache_policy, &cache_engine));
-       cached_dataset->DeletePartition(partition_path);
+       cached_dataset->DeletePartition(partition_path, cache_engine);
      }
   }
   return Status::OK();
