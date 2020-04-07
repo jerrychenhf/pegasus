@@ -24,6 +24,7 @@
 #include "storage/storage_plugin_factory.h"
 #include "rpc/server.h"
 #include "dataset/request_identity.h"
+#include "rpc/types.h"
 
 using namespace std;
 using std::string;
@@ -43,6 +44,8 @@ class DatasetCacheManager {
   Status Init();
 
   Status GetDatasetStream(RequestIdentity* request_identity, std::unique_ptr<rpc::FlightDataStream>* data_stream);
+
+  Status DropCache(std::vector<rpc::PartsDropListofDataset> drop_lists);
 
  public:
   DatasetCacheEngineManager* cache_engine_manager_;

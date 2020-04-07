@@ -111,8 +111,7 @@ class LRUCache {
       std::shared_ptr<CachedPartition> partition;
       dataset->GetCachedPartition(partition_path, &partition);
 
-      Status status = partition->DeleteColumn(
-        partition, column_id);
+      Status status = partition->DeleteColumn(column_id);
       if (!status.ok()) {
         stringstream ss;
         ss << "Failed to delete the column when free the column";

@@ -180,22 +180,20 @@ Status DatasetCacheBlockManager::DeleteDataset(const std::string dataset_path) {
   return Status::OK();
 }
 
-Status CachedDataset::DeletePartition(
-  std::shared_ptr<CachedDataset> cached_dataset, const std::string partition_path){
+Status CachedDataset::DeletePartition(const std::string partition_path){
   {
     boost::lock_guard<boost::mutex> l(cached_partitions_lock_); 
     LOG(WARNING) << "Delete the partition";
-    cached_dataset->cached_partitions_.erase(partition_path);
+    cached_partitions_.erase(partition_path);
   }
   return Status::OK();
 }
 
-Status CachedPartition::DeleteColumn(
-  std::shared_ptr<CachedPartition> cached_partition, int column_id) {
+Status CachedPartition::DeleteColumn(int column_id) {
   {
     boost::lock_guard<boost::mutex> l(cached_columns_lock_);  
     LOG(WARNING) << "Delete the column"; 
-    cached_partition->cached_columns_.erase(column_id);
+    cached_columns_.erase(column_id);
   } 
   return Status::OK();
 }

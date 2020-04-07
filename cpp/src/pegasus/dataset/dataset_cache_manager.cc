@@ -206,6 +206,21 @@ std::vector<int> DatasetCacheManager::GetMissedColumnsIds(std::vector<int> col_i
     return missed_col_ids;
 }
 
+Status DatasetCacheManager::DropCache(std::vector<rpc::PartsDropListofDataset> drop_lists) {
+
+  for (auto iter = drop_lists.begin(); iter != drop_lists.end(); iter ++) {
+     std::string dataset_path = iter->get_dataset_path();
+     std::vector<std::string> partitions = iter->get_partitions();
+     std::shared_ptr<CachedDataset> cached_dataset;
+     cache_block_manager_->GetCachedDataSet(dataset_path, &cached_dataset);
+     for(auto partition = partitions.begin(); partition != partitions.end(); partition ++) {
+       std::string partition_path = *partition;
+       cached_dataset->DeletePartition(partition_path);
+     }
+  }
+  return Status::OK();
+}
+
 // Wrap the data to flight data stream.
 // According DatasetCacheBlockManager to chech whether sotred.
 // If yes, read it based on the address stored in DatasetCacheBlockManager and then return.

@@ -602,6 +602,9 @@ struct PEGASUS_RPC_EXPORT HeartbeatInfo {
 struct PEGASUS_RPC_EXPORT PartsDropListofDataset {
   std::string datasetpath;
   std::vector<std::string> partitions;
+
+  std::string get_dataset_path() const { return datasetpath; }
+  std::vector<std::string> get_partitions() const { return partitions; }
 };
 
 struct PEGASUS_RPC_EXPORT HeartbeatResultCmd {
