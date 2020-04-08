@@ -45,7 +45,7 @@ class DatasetCacheManager {
 
   Status GetDatasetStream(RequestIdentity* request_identity, std::unique_ptr<rpc::FlightDataStream>* data_stream);
 
-  Status DropCache(std::vector<rpc::PartsDropListofDataset> drop_lists);
+  Status DropCachedDataset(std::vector<rpc::PartsDropListofDataset> drop_lists);
 
  public:
   DatasetCacheEngineManager* cache_engine_manager_;
