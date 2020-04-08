@@ -174,7 +174,7 @@ bool CachedPartition::InsertColumn(
 Status DatasetCacheBlockManager::DeleteDataset(const std::string dataset_path) {
   {
     boost::lock_guard<boost::mutex> l(cached_datasets_lock_);
-    LOG(WARNING) << "Delete the dataset";
+    LOG(WARNING) << "Delete the dataset and the dataset path: " << dataset_path;
     cached_datasets_.erase(dataset_path);
   }
   return Status::OK();
@@ -184,12 +184,13 @@ Status CachedDataset::DeletePartition(const std::string partition_path,
  std::shared_ptr<CacheEngine> cache_engine){
   {
     boost::lock_guard<boost::mutex> l(cached_partitions_lock_); 
-    LOG(WARNING) << "Delete the partition";
 
     std::shared_ptr<CachedPartition> cached_partition;
     GetCachedPartition(dataset_path_, &cached_partition);
     cached_partition->DeleteEntry(cache_engine);
     cached_partitions_.erase(partition_path);
+    LOG(WARNING) << "Delete the partition and the dataset path: "
+     << dataset_path_ << " and the partition path: "<< partition_path;
   }
   return Status::OK();
 }
@@ -205,6 +206,8 @@ Status CachedPartition::DeleteEntry(std::shared_ptr<CacheEngine> cache_engine) {
 
       LRUCache::CacheKey* key = new LRUCache::CacheKey(dataset_path_, partition_path_, column_id, column_size);
       cache_engine->EraseValue(key);
+      LOG(WARNING) << "Delete the partition and the dataset path: "
+      << dataset_path_ << " and the partition path: "<< partition_path_ << " and the column id: " << column_id;
     }
   }
   return Status::OK();
@@ -213,10 +216,11 @@ Status CachedPartition::DeleteEntry(std::shared_ptr<CacheEngine> cache_engine) {
 Status CachedPartition::DeleteColumn(int column_id) {
   {
     boost::lock_guard<boost::mutex> l(cached_columns_lock_);  
-    LOG(WARNING) << "Delete the column"; 
     if (cached_columns_.find(column_id) != cached_columns_.end()) {
       // If found the column id, then delete it.
       cached_columns_.erase(column_id);
+      LOG(WARNING) << "Delete the column and the dataset path: "
+       << dataset_path_ <<" and the partition path: " << partition_path_ << " and the column id: " << column_id; 
     }
   } 
   return Status::OK();
