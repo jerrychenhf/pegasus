@@ -83,6 +83,11 @@ function start_planner() {
 
   PLANNER_ARGS="$PLANNER_ARGS --hostname $PEGASUS_PLANNER_HOST"
   PLANNER_ARGS="$PLANNER_ARGS --planner_port $PEGASUS_PLANNER_PORT"
+  if [ "$CHECK_DATASET_APPEND_ENABLED" = "true" ]; then
+    PLANNER_ARGS="$PLANNER_ARGS --check_dataset_append_enabled"
+  else
+    PLANNER_ARGS="$PLANNER_ARGS --check_dataset_append_enabled=false"
+  fi
   exec ${BINARY_BASE_DIR}/${BUILD_TYPE}/planner/plannerd ${PLANNER_ARGS} &
   newpid="$!"
   echo "$newpid" > "$pid"

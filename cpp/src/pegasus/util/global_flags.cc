@@ -71,3 +71,5 @@ DEFINE_string(storage_dcpmm_path, "",
 
 DEFINE_double(store_cache_ratio, 0.8,
     "The available cache ratio. It will begin evict when exceeded.");
+
+DEFINE_bool(check_dataset_append_enabled, true, "If true, check the dataset append");

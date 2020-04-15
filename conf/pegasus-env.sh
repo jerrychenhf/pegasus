@@ -41,3 +41,6 @@ export PEGASUS_WORKER_PORT=30002
 # - LRU_CACHE_CAPACITY_MB      lru cache capacity in MB.(Default: 512)
 # - LRU_CACHE_TYPE             Which type of lru cache to use for caching data.(Default: DRAM)
 # - CACHE_FORCE_SINGLE_SHARD   Override all cache implementations to use just one shard.(Default: ture)
+
+# - CHECK_DATASET_APPEND_ENABLED    If true, check the dataset append. (Default: true)
+export CHECK_DATASET_APPEND_ENABLED=false

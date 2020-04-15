@@ -28,6 +28,8 @@
 #include "dataset/flightinfo_builder.h"
 #include "consistent_hashing.h"
 
+DECLARE_bool(check_dataset_append_enabled);
+
 namespace pegasus
 {
 
@@ -175,23 +177,23 @@ Status DataSetService::GetDataSet(DataSetRequest *dataset_request, std::shared_p
     std::shared_ptr<StoragePlugin> storage_plugin;
     RETURN_IF_ERROR(catalog_manager_->GetCatalog(dataset_request, &catalog));
     LOG(INFO) << "Getting storage plugin ...";
-    if (catalog->GetCatalogType() == Catalog::SPARK)
-    {
+    if (catalog->GetCatalogType() == Catalog::SPARK) {
       RETURN_IF_ERROR(catalog->GetTableLocation(dataset_request, table_location));
       RETURN_IF_ERROR(PlannerExecEnv::GetInstance()->get_storage_plugin_factory()->GetStoragePlugin(table_location, &storage_plugin));
     }
     LOG(INFO) << "Got.";
 
-    storage_plugin->GetModifedTime(pds->dataset_path(), &timestamp);
-    LOG(INFO) << "timestamp: " << timestamp;
-    if (timestamp > pds->getTimestamp())
-    {
-      LOG(INFO) << "=== filesystem timestamp changed, set refresh flag";
-      pds->lockwrite();
-      pds->setRefreshFlag(DSRF_FILES_APPEND);
-      LOG(INFO) << "pds->getRefreshFlag(): " << pds->getRefreshFlag();
-      pds->setTimestamp(timestamp);
-      pds->unlockwrite();
+    if (FLAGS_check_dataset_append_enabled) {
+      storage_plugin->GetModifedTime(pds->dataset_path(), &timestamp);
+      LOG(INFO) << "timestamp: " << timestamp;
+      if (timestamp > pds->getTimestamp()) {
+        LOG(INFO) << "=== filesystem timestamp changed, set refresh flag";
+        pds->lockwrite();
+        pds->setRefreshFlag(DSRF_FILES_APPEND);
+        LOG(INFO) << "pds->getRefreshFlag(): " << pds->getRefreshFlag();
+        pds->setTimestamp(timestamp);
+        pds->unlockwrite();
+      }
     }
 
     // if need refresh
