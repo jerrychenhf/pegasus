@@ -77,12 +77,16 @@ Status ConsistentHashRing::SetupDist()
 			AddLocation(i);
 			LOG(INFO) << "Added location: #" << i;
 		}
-#if 1 // for debug, iterate the empty conhash
+#if 1 // for debug, iterate the created conhash
 		LOG(INFO) << "Iterate the conhash:";
+		ConHashMetrics chmetrics;
 		for (auto it = consistent_hash_.begin(); it != consistent_hash_.end(); ++it)
 		{
 			LOG(INFO) << "node: " << it->second << "\t" << std::right << std::setw(10) << it->first;
+			std::size_t pos = it->second.find_last_of("_");
+			chmetrics.Increment(it->second.substr(0, pos));
 		}
+		chmetrics.WriteAsJson();
 #endif
 		return Status::OK();
 	}
@@ -149,6 +153,7 @@ void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>>
 void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions)
 {
 	crc32_hasher h;
+	ConHashMetrics chm;
 	for (auto partt : (*partitions))
 	{
 		LOG(INFO) << "h(partt.GetIdentPath()): " << h(partt.GetIdentPath());
@@ -164,7 +169,9 @@ void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>
 		//std::cout << "lcn.ToString(): " << lcn.ToString() << std::endl;
 		//		partt.UpdateLocation(lcn);
 		partt.UpdateLocationURI(node);
+		chm.Increment(node);
 	}
+	chm.WriteToLog();
 }
 
 #if 0

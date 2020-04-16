@@ -25,10 +25,11 @@
 #include <boost/crc.hpp>
 //#include <boost/algorithm/string/trim.hpp>
 
-#include "pegasus/common/location.h"
-#include "pegasus/dataset/identity.h"
-#include "pegasus/dataset/dataset_distributor.h"
-#include "pegasus/util/consistent_hash_map.hpp"
+#include "common/location.h"
+#include "dataset/identity.h"
+#include "dataset/dataset_distributor.h"
+#include "util/consistent_hash_map.hpp"
+//#include "util/metrics.h"
 
 using namespace std;
 
@@ -67,6 +68,48 @@ typedef consistent_hash_map<std::string, crc32_hasher> consistent_hash_t;
 //	  static struct conhash_s *conhash;
     consistent_hash_t consistent_hash_;
   };
+
+struct ConHashMetrics {
+//  explicit ConHashMetrics(const scoped_refptr<MetricEntity>& entity);
+
+  // Add a batch of probe stats to the metrics.
+  //
+  // We use C-style array passing here since the call site allocates the
+  // ProbeStats from an arena.
+  //
+  // This allocates temporary scratch space from work_arena.
+//  void AddProbeStats(const ProbeStats* stats_array, int len, Arena* work_arena);
+
+  void Increment(std::string nodeaddr) {
+    std::unordered_map<std::string, uint64_t>::iterator it = conhashmetrics_.find(nodeaddr);
+    if (it == conhashmetrics_.end())
+      conhashmetrics_[nodeaddr] = 1;
+    else
+      conhashmetrics_[nodeaddr]++;
+  }
+
+  void WriteToLog() {
+    LOG(INFO) << "conhashmetrics distribution:";
+    uint64_t totalcount = 0;
+    for (auto& node : conhashmetrics_) {
+      totalcount += node.second;
+    }
+    for (auto& node : conhashmetrics_) {
+      LOG(INFO) << node.first << " : " << node.second << "/" << totalcount \
+                << " (" << node.second*100/totalcount << "%)";
+    }
+  }
+
+  void WriteAsJson() {
+    //TODO: implement
+
+  }
+
+  // Operation rates.
+//  std::unordered_map<std::string, Counter> conhashmetrics_;
+  std::unordered_map<std::string, uint64_t> conhashmetrics_;
+
+};
 
 } // namespace pegasus
 
