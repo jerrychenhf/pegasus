@@ -29,6 +29,8 @@
 #include <boost/thread/lock_guard.hpp>
 #include "runtime/worker_exec_env.h"
 #include "cache/store_manager.h"
+#include "dataset/dataset_cache_manager.h"
+
 
 using namespace boost;
 
@@ -285,18 +287,26 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
       LOG(INFO) << "Worker got command to execute:";
       switch (result->result_command.hbrc_action) {
         case rpc::HeartbeatResultCmd::DROPCACHE:
-          LOG(INFO) << "HeartbeatResultCmd: DROPCACHE";
-          // TODO: execute the command
-//          WorkerExecEnv::GetInstance()->GetDatasetCacheManager()->cache_block_manager_;
-//          fn(std::vector<PartsDropListofDataset> hbrc_parameters);
-          // for debug, print the parameters
-          LOG(INFO) << "result->result_command.hbrc_parameters.size(): " \
-                    << result->result_command.hbrc_parameters.size();
-          for (auto itds : result->result_command.hbrc_parameters) {
-            LOG(INFO) << "dataset: " << itds.datasetpath;
-            for (auto itpt : itds.partitions) {
-              LOG(INFO) << "\t" << itpt;
+          {
+            LOG(INFO) << "HeartbeatResultCmd: DROPCACHE";
+            // for debug, print the parameters
+            LOG(INFO) << "result->result_command.hbrc_parameters.size(): " \
+                      << result->result_command.hbrc_parameters.size();
+            for (auto itds : result->result_command.hbrc_parameters) {
+              LOG(INFO) << "dataset: " << itds.datasetpath;
+              for (auto itpt : itds.partitions) {
+                LOG(INFO) << "\t" << itpt;
+              }
             }
+            // do the drop cache action
+//          WorkerExecEnv* worker_exec_env = WorkerExecEnv::GetInstance();
+//          std::shared_ptr<StoreManager> store_manager = worker_exec_env->GetStoreManager();
+//          std::shared_ptr<DatasetCacheManager> dscm = worker_exec_env->GetDatasetCacheManager();
+//          dscm->DropCachedDataset(result->result_command.hbrc_parameters);
+          // disable the action temporarily due to crash
+          //Status status = WorkerExecEnv::GetInstance()->GetDatasetCacheManager()->
+          //                DropCachedDataset(result->result_command.hbrc_parameters);
+          //RETURN_IF_ERROR(status);
           }
           break;
         default:

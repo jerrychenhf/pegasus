@@ -64,18 +64,18 @@ class RuntimeProfile { // NOLINT: This struct is not packed, but there are not s
 
     virtual void Set(int value) { value_.Store(value); }
 
-    virtual void Set(double value) {
+/*    virtual void Set(double value) {
       DCHECK_EQ(sizeof(value), sizeof(int64_t));
       value_.Store(*reinterpret_cast<int64_t*>(&value));
     }
-
+*/
     virtual int64_t value() const { return value_.Load(); }
-
+/*
     virtual double double_value() const {
       int64_t v = value_.Load();
       return *reinterpret_cast<const double*>(&v);
     }
-
+*/
     ///  Return the name of the counter type
     virtual string CounterType() const {
       return "Counter";
