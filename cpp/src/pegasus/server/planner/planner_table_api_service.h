@@ -23,7 +23,7 @@
 #include "dataset/dataset_request.h"
 #include "dataset/dataset_service.h"
 #include "rpc/server.h"
-#include "storage/storage_plugin.h"
+#include "storage/storage.h"
 
 namespace pegasus {
 

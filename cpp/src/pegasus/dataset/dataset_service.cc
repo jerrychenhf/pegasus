@@ -91,7 +91,7 @@ Status DataSetService::NotifyDataCacheDrop(std::shared_ptr<DataSet> pds, std::sh
   return Status::OK();
 }
 
-Status DataSetService::RefreshDataSet(DataSetRequest *dataset_request, std::string table_location, std::shared_ptr<StoragePlugin> storage_plugin, std::shared_ptr<DataSet> pds, std::shared_ptr<DataSet> *dataset)
+Status DataSetService::RefreshDataSet(DataSetRequest *dataset_request, std::string table_location, std::shared_ptr<Storage> storage, std::shared_ptr<DataSet> pds, std::shared_ptr<DataSet> *dataset)
 {
   auto partitions = std::make_shared<std::vector<Partition>>();
 
@@ -100,7 +100,7 @@ Status DataSetService::RefreshDataSet(DataSetRequest *dataset_request, std::stri
   {
     LOG(INFO) << "=== DSRF_FILES_APPEND";
     auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
-    dsbuilder->BuildDatasetPartitions(table_location, storage_plugin, partitions, CONHASH);
+    dsbuilder->BuildDatasetPartitions(table_location, storage, partitions, CONHASH);
   }
   else if (pds->getRefreshFlag() & DSRF_WORKERSET_CHG)
   {
@@ -174,17 +174,17 @@ Status DataSetService::GetDataSet(DataSetRequest *dataset_request, std::shared_p
 
     std::shared_ptr<Catalog> catalog;
     std::string table_location;
-    std::shared_ptr<StoragePlugin> storage_plugin;
+    std::shared_ptr<Storage> storage;
     RETURN_IF_ERROR(catalog_manager_->GetCatalog(dataset_request, &catalog));
-    LOG(INFO) << "Getting storage plugin ...";
+    LOG(INFO) << "Getting storage ...";
     if (catalog->GetCatalogType() == Catalog::SPARK) {
       RETURN_IF_ERROR(catalog->GetTableLocation(dataset_request, table_location));
-      RETURN_IF_ERROR(PlannerExecEnv::GetInstance()->get_storage_plugin_factory()->GetStoragePlugin(table_location, &storage_plugin));
+      RETURN_IF_ERROR(PlannerExecEnv::GetInstance()->get_storage_factory()->GetStorage(table_location, &storage));
     }
     LOG(INFO) << "Got.";
 
     if (FLAGS_check_dataset_append_enabled) {
-      storage_plugin->GetModifedTime(pds->dataset_path(), &timestamp);
+      storage->GetModifedTime(pds->dataset_path(), &timestamp);
       LOG(INFO) << "timestamp: " << timestamp;
       if (timestamp > pds->getTimestamp()) {
         LOG(INFO) << "=== filesystem timestamp changed, set refresh flag";
@@ -200,7 +200,7 @@ Status DataSetService::GetDataSet(DataSetRequest *dataset_request, std::shared_p
     if (pds->needRefresh())
     {
       LOG(INFO) << "=== Need to refresh, refreshing ...";
-      RefreshDataSet(dataset_request, table_location, storage_plugin, pds, dataset);
+      RefreshDataSet(dataset_request, table_location, storage, pds, dataset);
     }    //if need refresh
     else // found and is uptodate
     {

@@ -25,7 +25,7 @@
 
 DECLARE_string(hostname);
 DECLARE_int32(worker_port);
-DECLARE_string(storage_plugin_type);
+DECLARE_string(storage_type);
 
 DECLARE_bool(store_dram_enabled);
 DECLARE_int32(store_dram_capacity_gb);

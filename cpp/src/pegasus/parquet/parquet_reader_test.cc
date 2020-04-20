@@ -24,8 +24,8 @@
 
 #include "parquet/parquet_reader.h"
 #include "test/gtest-util.h"
-#include "storage/storage_plugin.h"
-#include "storage/storage_plugin_factory.h"
+#include "storage/storage.h"
+#include "storage/storage_factory.h"
 
 namespace pegasus {
 
@@ -33,17 +33,17 @@ TEST(ParquetReaderTest, Unit) {
 
   std::string partition_path = 
       "hdfs://10.239.47.55:9000/genData1000/customer/part-00005-f6fb1ced-d4d4-4dac-a584-02e398d988b4-c000.snappy.parquet";
-  std::shared_ptr<StoragePluginFactory> worker_storage_plugin_factory(
-      new StoragePluginFactory());
+  std::shared_ptr<StorageFactory> worker_storage_factory(
+      new StorageFactory());
 
-  std::shared_ptr<StoragePlugin> worker_storage_plugin;
+  std::shared_ptr<Storage> worker_storage;
 
-  ASSERT_OK(worker_storage_plugin_factory->GetStoragePlugin(partition_path, &worker_storage_plugin));
-  ASSERT_NE(nullptr, worker_storage_plugin);
-  ASSERT_EQ(StoragePlugin::HDFS, worker_storage_plugin->GetPluginType());
+  ASSERT_OK(worker_storage_factory->GetStorage(partition_path, &worker_storage));
+  ASSERT_NE(nullptr, worker_storage);
+  ASSERT_EQ(Storage::HDFS, worker_storage->GetStorageType());
 
   std::shared_ptr<HdfsReadableFile> file;
-  ASSERT_OK(std::dynamic_pointer_cast<HDFSStoragePlugin>(worker_storage_plugin)
+  ASSERT_OK(std::dynamic_pointer_cast<HDFSStorage>(worker_storage)
       ->GetReadableFile(partition_path, &file));
 
   parquet::ArrowReaderProperties properties = parquet::default_arrow_reader_properties();

@@ -21,14 +21,14 @@
 #include "runtime/exec_env.h"
 #include "util/global_flags.h"
 
-DECLARE_string(storage_plugin_type);
+DECLARE_string(storage_type);
 
 namespace pegasus {
 
 ExecEnv* ExecEnv::exec_env_ = nullptr;
 
 ExecEnv::ExecEnv()
-  : storage_plugin_factory_(new StoragePluginFactory()) {
+  : storage_factory_(new StorageFactory()) {
 
   exec_env_ = this;
 }
@@ -37,8 +37,8 @@ Status ExecEnv::Init() {
   return Status::OK();
 }
 
-std::shared_ptr<StoragePluginFactory> ExecEnv::get_storage_plugin_factory() {
-  return storage_plugin_factory_; 
+std::shared_ptr<StorageFactory> ExecEnv::get_storage_factory() {
+  return storage_factory_; 
 }
 
 } // namespace pegasus

@@ -21,7 +21,7 @@
 #include "common/logging.h"
 #include "server/planner/worker_manager.h"
 #include "dataset/dataset_service.h"
-#include "storage/storage_plugin.h"
+#include "storage/storage.h"
 #include "server/planner/planner_table_api_service.h"
 
 using namespace std;

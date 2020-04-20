@@ -49,7 +49,7 @@ DatasetCacheManager::~DatasetCacheManager() {
 
 Status DatasetCacheManager::Init() {
   ExecEnv* env =  ExecEnv::GetInstance();
-  storage_plugin_factory_ = env->get_storage_plugin_factory();
+  storage_factory_ = env->get_storage_factory();
    
   cache_block_manager_ = new DatasetCacheBlockManager();
   cache_engine_manager_ = new DatasetCacheEngineManager();
@@ -146,11 +146,11 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
 
     std::unique_ptr<ParquetReader> parquet_reader;
     // Get the ReadableFile
-    std::shared_ptr<StoragePlugin> storage_plugin;
-    RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(partition_path, &storage_plugin));
-    if (storage_plugin->GetPluginType() == StoragePlugin::HDFS) {
+    std::shared_ptr<Storage> storage;
+    RETURN_IF_ERROR(storage_factory_->GetStorage(partition_path, &storage));
+    if (storage->GetStorageType() == Storage::HDFS) {
       std::shared_ptr<HdfsReadableFile> file;
-      RETURN_IF_ERROR(std::dynamic_pointer_cast<HDFSStoragePlugin>(storage_plugin)
+      RETURN_IF_ERROR(std::dynamic_pointer_cast<HDFSStorage>(storage)
           ->GetReadableFile(partition_path, &file));
       parquet::ArrowReaderProperties properties(parquet::default_arrow_reader_properties());
       parquet_reader = std::unique_ptr<ParquetReader>(

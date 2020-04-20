@@ -22,14 +22,14 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/storage")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/storage")
 
-add_library(StoragePlugin
-  hdfs_storage_plugin.cc
-  storage_plugin_factory.cc
+add_library(Storage
+  hdfs_storage.cc
+  storage_factory.cc
 )
-add_dependencies(StoragePlugin gen-deps)
+add_dependencies(Storage gen-deps)
 
 set(PEGASUS_STORAGE_TEST_LINK_LIBS
-    StoragePlugin
+    Storage
     Common
     Util
     Parquet)
@@ -64,7 +64,7 @@ endfunction()
 
 if(PEGASUS_BUILD_TESTS)
 
-  add_pegasus_storage_test(storage_plugin_test)
+  add_pegasus_storage_test(storage_test)
 
 endif()
 

@@ -15,38 +15,31 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_SPARK_CATALOG_H
-#define PEGASUS_SPARK_CATALOG_H
-
-#include "catalog/catalog.h"
-#include "storage/storage.h"
-#include "storage/storage_factory.h"
+#ifndef PEGASUS_FILE_STATUS_H
+#define PEGASUS_FILE_STATUS_H
 
 #include <string>
 
-using namespace std;
+namespace pegasus
+{
 
-namespace pegasus {
+class FileStatus
+{
+private: 
+  std::string file_path_;
+  int64_t size_in_bytes_;
 
-class SparkCatalog : public Catalog {
- public:
-  SparkCatalog();
-  ~SparkCatalog();
+public:
+  FileStatus(std::string file_path, int64_t size_in_bytes)
+             : file_path_(file_path), size_in_bytes_(size_in_bytes){};
 
-  Status GetTableLocation(DataSetRequest* dataset_request, std::string& table_location);
-  Status GetSchema(DataSetRequest* dataset_request,
-      std::shared_ptr<arrow::Schema>* schema);
-  FileFormat GetFileFormat(DataSetRequest* dataset_request);
-
-  CatalogType GetCatalogType();
-  
-  private:
-    std::shared_ptr<StorageFactory> storage_factory_;
-
-  public:
-    static const std::string FILE_FORMAT_ID_PARQUET;
+  void set_file_path(std::string file_path);
+  void set_size(int64_t size_in_bytes);
+  std::string get_file_path();
+  int64_t get_size();
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_SPARK_CATALOG_H
+
+#endif  // PEGASUS_FILE_STATUS_H

@@ -23,7 +23,7 @@
 
 DECLARE_string(hostname);
 DECLARE_int32(planner_port);
-DECLARE_string(storage_plugin_type);
+DECLARE_string(storage_type);
 
 namespace pegasus {
 

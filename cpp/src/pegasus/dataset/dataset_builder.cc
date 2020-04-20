@@ -27,7 +27,7 @@ namespace pegasus {
 DataSetBuilder::DataSetBuilder(std::shared_ptr<CatalogManager> catalog_manager)
     : catalog_manager_(catalog_manager) {
   PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
-  storage_plugin_factory_ = env->get_storage_plugin_factory();
+  storage_factory_ = env->get_storage_factory();
 }
 
 Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
@@ -77,11 +77,11 @@ LOG(INFO) << "Getting catalog ...";
   if (catalog->GetCatalogType() == Catalog::SPARK) {
     std::string table_location;
     RETURN_IF_ERROR(catalog->GetTableLocation(dataset_request, table_location));
-    std::shared_ptr<StoragePlugin> storage_plugin;
-LOG(INFO) << "Getting storage plugin ...";
-    RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(table_location, &storage_plugin));
+    std::shared_ptr<Storage> storage;
+LOG(INFO) << "Getting storage ...";
+    RETURN_IF_ERROR(storage_factory_->GetStorage(table_location, &storage));
     std::vector<std::string> file_list;
-    RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list, &total_bytes));
+    RETURN_IF_ERROR(storage->ListFiles(table_location, &file_list, &total_bytes));
 
 LOG(INFO) << "Filling partitions ...";
     for (auto filepath : file_list) {
@@ -92,7 +92,7 @@ LOG(INFO) << "\t" << filepath;
 
     RETURN_IF_ERROR(catalog->GetSchema(dataset_request, &schema));
 
-    RETURN_IF_ERROR(storage_plugin->GetModifedTime(table_location, &timestamp));
+    RETURN_IF_ERROR(storage->GetModifedTime(table_location, &timestamp));
   } else {
     return Status::Invalid("Invalid catalog type: ", catalog->GetCatalogType());
   }
@@ -118,7 +118,7 @@ LOG(INFO) << "BuildDataset() finished successfully.";
   return Status::OK();
 }
 
-Status DataSetBuilder::BuildDatasetPartitions(std::string table_location, std::shared_ptr<StoragePlugin> storage_plugin, 
+Status DataSetBuilder::BuildDatasetPartitions(std::string table_location, std::shared_ptr<Storage> storage, 
                                               std::shared_ptr<std::vector<Partition>> partitions,
                                               int distpolicy)
 {
@@ -128,7 +128,7 @@ Status DataSetBuilder::BuildDatasetPartitions(std::string table_location, std::s
   distributor->SetupDist();
 
   std::vector<std::string> file_list;
-  RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list, nullptr));
+  RETURN_IF_ERROR(storage->ListFiles(table_location, &file_list, nullptr));
 
 LOG(INFO) << "Filling partitions ...";
   for (auto filepath : file_list) {

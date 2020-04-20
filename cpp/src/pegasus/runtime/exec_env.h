@@ -18,7 +18,7 @@
 #ifndef PEGASUS_EXEC_ENV_H
 #define PEGASUS_EXEC_ENV_H
 
-#include "storage/storage_plugin_factory.h"
+#include "storage/storage_factory.h"
 
 using namespace std;
 
@@ -29,17 +29,17 @@ class ExecEnv {
  public:
   ExecEnv();
 
-  ExecEnv(const std::string& storage_plugin_type);
+  ExecEnv(const std::string& storage_type);
 
   static ExecEnv* GetInstance() { return exec_env_; }
 
   Status Init();
 
-  std::shared_ptr<StoragePluginFactory> get_storage_plugin_factory();
+  std::shared_ptr<StorageFactory> get_storage_factory();
 
  private:
   static ExecEnv* exec_env_;
-  std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
+  std::shared_ptr<StorageFactory> storage_factory_;
 };
 
 } // namespace pegasus

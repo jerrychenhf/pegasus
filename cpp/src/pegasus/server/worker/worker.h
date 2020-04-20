@@ -21,7 +21,7 @@
 #include "common/status.h"
 #include "dataset/dataset_cache_manager.h"
 #include "runtime/worker_exec_env.h"
-#include "storage/storage_plugin.h"
+#include "storage/storage.h"
 #include "server/worker/worker_table_api_service.h"
 
 using namespace std;

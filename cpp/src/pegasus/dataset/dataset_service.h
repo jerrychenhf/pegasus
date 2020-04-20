@@ -57,7 +57,7 @@ public:
   Status GetFlightListing(std::unique_ptr<rpc::FlightListing> *listings);
   Status GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> *datasets);
   Status NotifyDataCacheDrop(std::shared_ptr<DataSet> pds, std::shared_ptr<std::vector<Partition>> partitions);
-  Status RefreshDataSet(DataSetRequest *dataset_request, std::string table_location, std::shared_ptr<StoragePlugin> storage_plugin, std::shared_ptr<DataSet> pds, std::shared_ptr<DataSet> *dataset);
+  Status RefreshDataSet(DataSetRequest *dataset_request, std::string table_location, std::shared_ptr<Storage> storage, std::shared_ptr<DataSet> pds, std::shared_ptr<DataSet> *dataset);
   Status GetDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset);
   Status CacheDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset, int distpolicy);
   Status RemoveDataSet(DataSetRequest *dataset_request);

@@ -15,8 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_STORAGE_PLUGIN_H
-#define PEGASUS_STORAGE_PLUGIN_H
+#ifndef PEGASUS_STORAGE_H
+#define PEGASUS_STORAGE_H
 
 #include "arrow/io/hdfs.h"
 #include "common/status.h"
@@ -24,7 +24,7 @@
 
 namespace pegasus {
 
-class StoragePlugin {
+class Storage {
  public:
   virtual Status Init(std::string host, int32_t port) = 0;
   virtual Status Connect() = 0;
@@ -32,18 +32,18 @@ class StoragePlugin {
   virtual Status ListFiles(std::string dataset_path, std::vector<std::string>* file_list,
                            int64_t* total_bytes) = 0;
     
-  enum StoragePluginType {
+  enum StorageType {
     UNKNOWN,
     HDFS,
     S3
   };
 
-  virtual StoragePluginType GetPluginType() = 0;
+  virtual StorageType GetStorageType() = 0;
 
  private:
-  StoragePluginType storage_plugin_type_;
+  StorageType storage_type_;
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_STORAGE_PLUGIN_H
+#endif  // PEGASUS_STORAGE_H

@@ -15,12 +15,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_HDFS_STORAGE_PLUGIN_H
-#define PEGASUS_HDFS_STORAGE_PLUGIN_H
+#ifndef PEGASUS_HDFS_STORAGE_H
+#define PEGASUS_HDFS_STORAGE_H
 
 #include <arrow/io/hdfs.h>
 
-#include "storage/storage_plugin.h"
+#include "storage/storage.h"
 
 namespace pegasus {
 
@@ -29,18 +29,19 @@ using HdfsConnectionConfig = arrow::io::HdfsConnectionConfig;
 using HdfsReadableFile = arrow::io::HdfsReadableFile;
 using HdfsPathInfo = arrow::io::HdfsPathInfo;
 
-class HDFSStoragePlugin : public StoragePlugin {
+class HDFSStorage : public Storage {
  public:
-  HDFSStoragePlugin();
-  ~HDFSStoragePlugin();
+  HDFSStorage();
+  ~HDFSStorage();
   Status Init(std::string host, int32_t port) override;
   Status Connect() override;
   Status GetModifedTime(std::string dataset_path, uint64_t* modified_time) override;
   Status ListFiles(std::string dataset_path, std::vector<std::string>* file_list,
                    int64_t* total_bytes) override;
-  StoragePluginType GetPluginType() override;
+  StorageType GetStorageType() override;
 
   Status GetReadableFile(std::string file_path, std::shared_ptr<HdfsReadableFile>* file);
+ private:
   Status GetPathInfo(std::string dataset_path, HdfsPathInfo* file_info);
   Status ListModifiedTimes(std::string dataset_path, std::vector<int32_t>* modified_time_list) ;
   Status ListSubDirectoryModifiedTimes(std::string dataset_path,
@@ -53,4 +54,4 @@ class HDFSStoragePlugin : public StoragePlugin {
 
 } // namespace pegasus
 
-#endif  // PEGASUS_HDFS_STORAGE_PLUGIN_H
+#endif  // PEGASUS_HDFS_STORAGE_H

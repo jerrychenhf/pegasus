@@ -15,21 +15,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_STORAGE_PLUGIN_FACTORY_H
-#define PEGASUS_STORAGE_PLUGIN_FACTORY_H
+#ifndef PEGASUS_STORAGE_FACTORY_H
+#define PEGASUS_STORAGE_FACTORY_H
 
 #include <string>
-#include "storage/hdfs_storage_plugin.h"
+#include "storage/hdfs_storage.h"
 
 namespace pegasus {
-class StoragePluginFactory {
+class StorageFactory {
  public:
-  StoragePluginFactory();
-  ~StoragePluginFactory();
+  StorageFactory();
+  ~StorageFactory();
     
-  Status GetStoragePlugin(std::string url, std::shared_ptr<StoragePlugin>* storage_plugin);
+  Status GetStorage(std::string url, std::shared_ptr<Storage>* storage);
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_STORAGE_PLUGIN_FACTORY_H
+#endif  // PEGASUS_STORAGE_FACTORY_H

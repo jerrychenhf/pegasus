@@ -24,7 +24,7 @@
 #include "dataset/dataset_service.h"
 #include "util/global_flags.h"
 #include "server/planner/planner.h"
-#include "storage/storage_plugin.h"
+#include "storage/storage.h"
 #include "runtime/planner_exec_env.h"
 
 DECLARE_string(hostname);

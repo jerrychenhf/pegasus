@@ -108,7 +108,7 @@ set (PEGASUS_LIBS
   Runtime
   Planner
   Worker
-  StoragePlugin
+  Storage
   Util
   gutil
 )

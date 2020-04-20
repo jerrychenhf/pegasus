@@ -20,8 +20,8 @@
 
 #include "dataset/dataset_cache_block_manager.h"
 #include "dataset/dataset_cache_engine_manager.h"
-#include "storage/storage_plugin.h"
-#include "storage/storage_plugin_factory.h"
+#include "storage/storage.h"
+#include "storage/storage_factory.h"
 #include "rpc/server.h"
 #include "dataset/request_identity.h"
 #include "rpc/types.h"
@@ -52,7 +52,7 @@ class DatasetCacheManager {
   DatasetCacheBlockManager* cache_block_manager_;
  private: 
   
-  std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
+  std::shared_ptr<StorageFactory> storage_factory_;
   
   CacheEngine::CachePolicy GetCachePolicy(RequestIdentity* request_identity);
   

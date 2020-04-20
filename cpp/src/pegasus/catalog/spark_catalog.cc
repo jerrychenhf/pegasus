@@ -30,7 +30,7 @@ namespace pegasus {
 
 const std::string SparkCatalog::FILE_FORMAT_ID_PARQUET = "PARQUET";
 
-SparkCatalog::SparkCatalog() : storage_plugin_factory_(new StoragePluginFactory()) {
+SparkCatalog::SparkCatalog() : storage_factory_(new StorageFactory()) {
 
 }
 
@@ -56,14 +56,14 @@ Status SparkCatalog::GetSchema(DataSetRequest* dataset_request,
   
   std::string table_location;
   RETURN_IF_ERROR(GetTableLocation(dataset_request, table_location));
-  std::shared_ptr<StoragePlugin> storage_plugin;
-  RETURN_IF_ERROR(storage_plugin_factory_->GetStoragePlugin(table_location, &storage_plugin));
+  std::shared_ptr<Storage> storage;
+  RETURN_IF_ERROR(storage_factory_->GetStorage(table_location, &storage));
   std::vector<std::string> file_list;
-  RETURN_IF_ERROR(storage_plugin->ListFiles(table_location, &file_list, nullptr));
+  RETURN_IF_ERROR(storage->ListFiles(table_location, &file_list, nullptr));
 
-  if (storage_plugin->GetPluginType() == StoragePlugin::HDFS) {
+  if (storage->GetStorageType() == Storage::HDFS) {
     std::shared_ptr<HdfsReadableFile> file;
-    RETURN_IF_ERROR(std::dynamic_pointer_cast<HDFSStoragePlugin>(storage_plugin)
+    RETURN_IF_ERROR(std::dynamic_pointer_cast<HDFSStorage>(storage)
         ->GetReadableFile(file_list[0], &file));
 
     parquet::ArrowReaderProperties properties = parquet::default_arrow_reader_properties();

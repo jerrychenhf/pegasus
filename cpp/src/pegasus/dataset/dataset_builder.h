@@ -21,8 +21,8 @@
 #include "catalog/catalog_manager.h"
 #include "dataset/dataset.h"
 #include "dataset/dataset_request.h"
-#include "storage/storage_plugin.h"
-#include "storage/storage_plugin_factory.h"
+#include "storage/storage.h"
+#include "storage/storage_factory.h"
 
 namespace pegasus {
 
@@ -33,7 +33,7 @@ class DataSetBuilder {
   Status BuildDataset(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset,
                       int distpolicy);
 
-  Status BuildDatasetPartitions(std::string table_location, std::shared_ptr<StoragePlugin> storage_plugin, 
+  Status BuildDatasetPartitions(std::string table_location, std::shared_ptr<Storage> storage, 
                                 std::shared_ptr<std::vector<Partition>> partitions, int distpolicy);
 
   Status GetSchma(std::shared_ptr<std::string>* schema);
@@ -51,7 +51,7 @@ class DataSetBuilder {
 //  std::shared_ptr<std::vector<std::string>> file_list_;
 //  std::shared_ptr<std::vector<Location>> vectloc_;
   std::shared_ptr<CatalogManager> catalog_manager_;
-  std::shared_ptr<StoragePluginFactory> storage_plugin_factory_;
+  std::shared_ptr<StorageFactory> storage_factory_;
 };
 
 } // namespace pegasus

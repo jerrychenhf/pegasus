@@ -22,7 +22,7 @@
 #include "arrow/status.h"
 #include "arrow/util/uri.h"
 
-#include "storage/hdfs_storage_plugin.h"
+#include "storage/hdfs_storage.h"
 #include "dataset/consistent_hashing.h"
 
 #include <boost/algorithm/string.hpp>
@@ -40,15 +40,15 @@ using ObjectType = arrow::io::ObjectType;
 using FileStats = arrow::fs::FileStats;
 
 
-HDFSStoragePlugin::HDFSStoragePlugin() {
+HDFSStorage::HDFSStorage() {
 
 }
 
-HDFSStoragePlugin::~HDFSStoragePlugin() {
+HDFSStorage::~HDFSStorage() {
 
 }
 
-Status HDFSStoragePlugin::Init(std::string host, int32_t port) {
+Status HDFSStorage::Init(std::string host, int32_t port) {
   if (host.empty()) {
     conf_.host = FLAGS_namenode_hostname;
   } else {
@@ -67,7 +67,7 @@ Status HDFSStoragePlugin::Init(std::string host, int32_t port) {
   return Status::OK();
 }
 
-Status HDFSStoragePlugin::Connect() {
+Status HDFSStorage::Connect() {
 
   arrow::Status arrowStatus = HadoopFileSystem::Connect(&conf_, &client_);
   Status status = Status::fromArrowStatus(arrowStatus);
@@ -76,7 +76,7 @@ Status HDFSStoragePlugin::Connect() {
   return Status::OK();
 }
 
-Status HDFSStoragePlugin::GetModifedTime(std::string dataset_path, uint64_t* modified_time) {
+Status HDFSStorage::GetModifedTime(std::string dataset_path, uint64_t* modified_time) {
 
   std::vector<int32_t> modified_time_list;
   RETURN_IF_ERROR(ListModifiedTimes(dataset_path, &modified_time_list));
@@ -86,14 +86,14 @@ Status HDFSStoragePlugin::GetModifedTime(std::string dataset_path, uint64_t* mod
   return Status::OK();
 }
 
-Status HDFSStoragePlugin::GetPathInfo(std::string dataset_path, HdfsPathInfo* file_info) {
+Status HDFSStorage::GetPathInfo(std::string dataset_path, HdfsPathInfo* file_info) {
 
   arrow::Status arrowStatus = client_->GetPathInfo(dataset_path, file_info);
   RETURN_IF_ERROR(Status::fromArrowStatus(arrowStatus));;
   return Status::OK();
 }
 
-Status HDFSStoragePlugin::ListModifiedTimes(std::string dataset_path,
+Status HDFSStorage::ListModifiedTimes(std::string dataset_path,
     std::vector<int32_t>* modified_time_list) {
 
   arrow::io::HdfsPathInfo path_info;
@@ -104,7 +104,7 @@ Status HDFSStoragePlugin::ListModifiedTimes(std::string dataset_path,
   return Status::OK();
 }
 
-Status HDFSStoragePlugin::ListSubDirectoryModifiedTimes(std::string dataset_path,
+Status HDFSStorage::ListSubDirectoryModifiedTimes(std::string dataset_path,
     std::vector<int32_t>* modified_time_list) {
 
   std::vector<HdfsPathInfo> children;
@@ -124,7 +124,7 @@ Status HDFSStoragePlugin::ListSubDirectoryModifiedTimes(std::string dataset_path
   return Status::OK();
 }
 
-Status HDFSStoragePlugin::ListFiles(std::string dataset_path,
+Status HDFSStorage::ListFiles(std::string dataset_path,
                                     std::vector<std::string>* file_list,
                                     int64_t* total_bytes) {
   
@@ -151,15 +151,15 @@ Status HDFSStoragePlugin::ListFiles(std::string dataset_path,
   return Status::OK();
 }
 
-Status HDFSStoragePlugin::GetReadableFile(std::string file_path,
+Status HDFSStorage::GetReadableFile(std::string file_path,
                                           std::shared_ptr<HdfsReadableFile>* file) {
 
   arrow::Status arrowStatus = client_->OpenReadable(file_path, file);
   return Status::fromArrowStatus(arrowStatus);
 }
 
-StoragePlugin::StoragePluginType HDFSStoragePlugin::GetPluginType() {
-   return StoragePlugin::HDFS;
+Storage::StorageType HDFSStorage::GetStorageType() {
+   return Storage::HDFS;
 }
 
 } // namespace pegasus
