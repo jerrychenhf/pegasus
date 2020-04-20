@@ -61,6 +61,11 @@ Status HDFSStorage::Init(std::string host, int32_t port) {
   }
 
   arrow::Status arrowStatus = arrow::io::HaveLibHdfs();
+
+  if(arrowStatus.IsIOError()){
+    LOG(ERROR) << "ArrowStatus: IOError. Plesae check your environment variables HADOOP_HOME and CLASSPATH. CLASSPATH must contain the Hadoop jars. You can set these using: export CLASSPATH=`$HADOOP_HOME/bin/hadoop classpath --glob`";
+  }
+  
   Status status = Status::fromArrowStatus(arrowStatus);
   RETURN_IF_ERROR(status);
   

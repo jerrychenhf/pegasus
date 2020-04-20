@@ -25,14 +25,14 @@ export PEGASUS_HOME=`pwd`
 
 ```
 cd pegasus/bin
-sh start-planner.sh --hostname=localhost --planner_port=30001
+sh start-planner.sh --planner_hostname=localhost --planner_port=30001
 ```
 
 ## Start Worker
 
 ```
 cd pegasus/bin
-sh start-worker.sh --hostname=localhost --worker_port=30002 --planner_hostname=localhost --planner_port=30001
+sh start-worker.sh --worker_hostname=localhost --worker_port=30002 --planner_hostname=localhost --planner_port=30001
 ```
 
 ### Cluster Launch Scripts

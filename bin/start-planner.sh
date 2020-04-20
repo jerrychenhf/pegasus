@@ -29,23 +29,86 @@ BUILD_TYPE=release
 PLANNER_ARGS=""
 BINARY_BASE_DIR=${PEGASUS_HOME}/cpp/build
 
-# Everything except for -build_type should be passed as a plannerd argument
-for ARG in $*
+
+ARGS=`getopt -o awh:pp:wp:ph:bt: --long along,worker_hostname:,planner_port:,worker_port:,planner_hostname:,build_type: -- "$@"`
+if [ $? != 0 ]; then
+    echo "Terminating..."
+    exit 1
+fi
+
+#
+#将规范化后的命令行参数分配至位置参数（$1,$2,...)
+eval set -- "${ARGS}"
+
+while true
 do
-  case "$ARG" in
-    -build_type=debug)
-      BUILD_TYPE=debug
-      ;;
-    -build_type=release)
-      BUILD_TYPE=release
-      ;;
-    -build_type=*)
-      echo "Invalid build type. Valid values are: debug, release"
-      exit 1
-      ;;
-    *)
-      PLANNER_ARGS="${PLANNER_ARGS} ${ARG}"
-  esac
+    case "$1" in
+        -a|--along) 
+            echo "Option a";
+            shift
+            ;;
+        -wh|--worker_hostname)
+            PEGASUS_WORKER_HOST=$2
+            shift 2
+            ;;
+        -pp|--planner_port)
+            case "$2" in
+                "")
+                    echo "Option pp, no argument";
+                    shift 2  
+                    ;;
+                *)
+                    PEGASUS_PLANNER_PORT=$2
+                    shift 2;
+                    ;;
+            esac
+            ;;
+
+        -wp|--worker_port)
+            case "$2" in
+                "")
+                    echo "Option wp, no argument";
+                    shift 2  
+                    ;;
+                *)
+                    PEGASUS_WORKER_PORT=$2
+                    shift 2;
+                    ;;
+            esac
+            ;;
+        -ph|--planner_hostname)
+            case "$2" in
+                "")
+                    echo "Option ph, no argument";
+                    shift 2  
+                    ;;
+                *)
+                    PEGASUS_PLANNER_HOST=$2
+                    shift 2;
+                    ;;
+            esac
+            ;;
+        -bt|--build_type)
+            case "$2" in
+                "")
+                    echo "Option bt, no argument";
+                    shift 2  
+                    ;;
+                *)
+                    BUILD_TYPE=$2
+                    shift 2;
+                    ;;
+            esac
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Internal error!"
+            exit 1
+            ;;
+    esac
 done
 
 # Find the port number for the planner
