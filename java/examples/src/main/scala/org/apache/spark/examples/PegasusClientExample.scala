@@ -33,9 +33,9 @@ object PegasusClientExample {
         val plannerClient = plannerClientFactory.apply
         val path = "hdfs://10.239.47.55:9000/genData1000/catalog_sales"
         val properties = new HashMap[String, String]
-        properties.put("table.location", path)
-        properties.put("provider", "SPARK")
-        properties.put("format", "PARQUET")
+        properties.put(FlightDescriptor.TABLE_LOCATION , path)
+        properties.put(FlightDescriptor.CATALOG_PROVIDER , FlightDescriptor.CATALOG_PROVIDER_SPARK)
+        properties.put(FlightDescriptor.FILE_FORMAT, FlightDescriptor.FILE_FORMAT_PARQUET)
         val pathList = Seq(path)
         val descriptor = FlightDescriptor.path(pathList.asJava, properties)
 
