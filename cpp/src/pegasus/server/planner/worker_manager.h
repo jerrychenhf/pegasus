@@ -66,7 +66,7 @@ public:
       }
     }
     if (it == partstodrop_.end()) {
-      rpc::PartsDropListofDataset pdod;
+      rpc::PartitionDropList pdod;
       pdod.datasetpath = part.GetDataSetPath();
       pdod.partitions.push_back(part.GetIdentPath());
       partstodrop_.push_back(pdod);
@@ -75,10 +75,10 @@ public:
     return Status::OK();
   }
 
-  std::vector<rpc::PartsDropListofDataset>& GetPartstodrop() { return partstodrop_; }
+  std::vector<rpc::PartitionDropList>& GetPartstodrop() { return partstodrop_; }
 
 private:
-  std::vector<rpc::PartsDropListofDataset> partstodrop_;
+  std::vector<rpc::PartitionDropList> partstodrop_;
 };
 
 class WorkerRegistration {

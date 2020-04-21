@@ -97,7 +97,7 @@ arrow::Status FromProto(const pb::SchemaResult& pb_result, std::string* result);
 arrow::Status FromProto(const pb::BasicAuth& pb_basic_auth, BasicAuth* info);
 arrow::Status FromProto(const pb::NodeInfo& pb_info, NodeInfo* info);
 arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info);
-arrow::Status FromProto(const pb::PartsDropListofDataset& pb_partsdroplist, PartsDropListofDataset* partsdroplist);
+arrow::Status FromProto(const pb::PartitionDropList& pb_partsdroplist, PartitionDropList* partsdroplist);
 arrow::Status FromProto(const pb::HeartbeatResultCmd& pb_resultcmd, HeartbeatResultCmd* resultcmd);
 arrow::Status FromProto(const pb::HeartbeatResult& pb_result, HeartbeatResult* result);
 
@@ -111,7 +111,7 @@ void ToProto(const Ticket& ticket, pb::Ticket* pb_ticket);
 arrow::Status ToProto(const BasicAuth& basic_auth, pb::BasicAuth* pb_basic_auth);
 arrow::Status ToProto(const NodeInfo& info, pb::NodeInfo* pb_info);
 arrow::Status ToProto(const HeartbeatInfo& info, pb::HeartbeatInfo* pb_info);
-arrow::Status ToProto(const PartsDropListofDataset& partsdroplist, pb::PartsDropListofDataset* pb_partsdroplist);
+arrow::Status ToProto(const PartitionDropList& partsdroplist, pb::PartitionDropList* pb_partsdroplist);
 arrow::Status ToProto(const HeartbeatResultCmd& resultcmd, pb::HeartbeatResultCmd* pb_resultcmd);
 arrow::Status ToProto(const HeartbeatResult& result, pb::HeartbeatResult* pb_result);
 }  // namespace internal

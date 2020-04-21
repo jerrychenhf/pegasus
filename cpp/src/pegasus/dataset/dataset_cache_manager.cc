@@ -206,7 +206,7 @@ std::vector<int> DatasetCacheManager::GetMissedColumnsIds(std::vector<int> col_i
     return missed_col_ids;
 }
 
-Status DatasetCacheManager::DropCachedDataset(std::vector<rpc::PartsDropListofDataset> drop_lists) {
+Status DatasetCacheManager::DropCachedDataset(std::vector<rpc::PartitionDropList> drop_lists) {
   
   for (auto iter = drop_lists.begin(); iter != drop_lists.end(); iter ++) {
      std::string dataset_path = iter->get_dataset_path();

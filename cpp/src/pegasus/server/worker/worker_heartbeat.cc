@@ -159,6 +159,8 @@ Status WorkerHeartbeat::GetStoreInfo(int64_t *cache_capacity, int64_t *cache_fre
   std::shared_ptr<StoreManager> store_manager = worker_exec_env->GetStoreManager();
   std::unordered_map<std::string, std::shared_ptr<Store>>  stores = store_manager->GetStores();
 
+//  auto dscachemanager = worker_exec_env->GetDatasetCacheManager();
+
   for(auto iter = stores.begin(); iter != stores.end(); *iter ++) {
     *cache_capacity += iter->second->GetCapacity();
     *cache_free += iter->second->GetFreeSize();
