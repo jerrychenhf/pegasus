@@ -45,7 +45,7 @@ object PegasusClientExample {
         plannerClient.close()
         plannerClientFactory.close()
 
-        val plannerEnd = System.currentTimeMillis();
+        val plannerEnd = System.currentTimeMillis
         System.out.println("Planner Time: " + (plannerEnd - plannerBegin));
 
         val endpoints = info.getEndpoints.asScala
@@ -54,7 +54,7 @@ object PegasusClientExample {
         val locations = endpoint.getLocations.asScala
         val location = locations(0)
 
-        val workerBegin = System.currentTimeMillis();
+        val workerBegin = System.currentTimeMillis
 
         val workerClientFactory = new PegasusClientFactory(location, null, null)
         val workerClient = workerClientFactory.apply
@@ -74,7 +74,7 @@ object PegasusClientExample {
         workerClient.close()
         workerClientFactory.close()
 
-        val workerEnd = System.currentTimeMillis();
+        val workerEnd = System.currentTimeMillis
         System.out.println("Worker Time: " + (workerEnd - workerBegin));
     }
 }
