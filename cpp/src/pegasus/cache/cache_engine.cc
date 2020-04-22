@@ -38,9 +38,9 @@ Status LruCacheEngine::GetCacheStore(CacheStore** cache_store) {
   return cache_store_manager_->GetCacheStore(cache_store);
 }
   
-Status LruCacheEngine::PutValue(LRUCache::CacheKey* key) {
+Status LruCacheEngine::PutValue(LRUCache::CacheKey* key, int64_t column_size) {
  
-  lru_cache_->Insert(key);
+  lru_cache_->Insert(key, column_size);
   return Status::OK();
 }
 

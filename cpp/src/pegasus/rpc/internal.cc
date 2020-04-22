@@ -467,8 +467,8 @@ arrow::Status ToProto(const HeartbeatInfo& info, pb::HeartbeatInfo* pb_info) {
   return arrow::Status::OK();
 }
 
-// PartsDropListofDataset
-arrow::Status FromProto(const pb::PartsDropListofDataset& pb_partsdroplist, PartsDropListofDataset* partsdroplist) {
+// PartitionDropList
+arrow::Status FromProto(const pb::PartitionDropList& pb_partsdroplist, PartitionDropList* partsdroplist) {
   partsdroplist->datasetpath = pb_partsdroplist.datasetpath();
   for (int i=0; i<pb_partsdroplist.partitions_size(); i++) {
     partsdroplist->partitions.emplace_back(pb_partsdroplist.partitions(i));
@@ -476,7 +476,7 @@ arrow::Status FromProto(const pb::PartsDropListofDataset& pb_partsdroplist, Part
   return arrow::Status::OK();
 }
 
-arrow::Status ToProto(const PartsDropListofDataset& partsdroplist, pb::PartsDropListofDataset* pb_partsdroplist) {
+arrow::Status ToProto(const PartitionDropList& partsdroplist, pb::PartitionDropList* pb_partsdroplist) {
   pb_partsdroplist->set_datasetpath(partsdroplist.datasetpath);
   for (auto part : partsdroplist.partitions) {
     pb_partsdroplist->add_partitions(part);

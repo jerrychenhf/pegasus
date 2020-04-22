@@ -599,7 +599,7 @@ struct PEGASUS_RPC_EXPORT HeartbeatInfo {
   }
 };
 
-struct PEGASUS_RPC_EXPORT PartsDropListofDataset {
+struct PEGASUS_RPC_EXPORT PartitionDropList {
   std::string datasetpath;
   std::vector<std::string> partitions;
 
@@ -615,7 +615,7 @@ struct PEGASUS_RPC_EXPORT HeartbeatResultCmd {
   };
 
   HeartbeatResultCmdAction hbrc_action;
-  std::vector<PartsDropListofDataset> hbrc_parameters;
+  std::vector<PartitionDropList> hbrc_parameters;
 };
 
 /// \brief Worker heartbeat result

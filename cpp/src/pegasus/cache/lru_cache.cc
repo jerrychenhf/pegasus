@@ -139,17 +139,16 @@ LRUCache::LRUCache(size_t capacity)
 
 Status LRUCache::Init() {
   WorkerExecEnv* env = WorkerExecEnv::GetInstance();
-  env->GetDatasetCacheManager()->cache_block_manager_;
   eviction_callback_ = new LRUEvictionCallback(
-    env->GetDatasetCacheManager()->cache_block_manager_);
+    env->GetDatasetCacheManager()->GetBlockManager());
   return Status::OK();
 }
 
-void LRUCache::Insert(const CacheKey* key) {
+void LRUCache::Insert(const CacheKey* key, int64_t column_size) {
   
   Slice key_slice(reinterpret_cast<const uint8_t*>(key), sizeof(CacheKey));
 
-  auto handle(cache_->Allocate(key_slice, 0, key->occupied_size_));
+  auto handle(cache_->Allocate(key_slice, 0, column_size));
   CHECK(handle);
   
   auto h(cache_->Insert(std::move(handle),
@@ -158,10 +157,14 @@ void LRUCache::Insert(const CacheKey* key) {
 }
 
 void LRUCache::Touch(const CacheKey* key) {
-  LOG(INFO) << "Begin call the Touch method in lru cache";
-  cache_->Lookup(Slice(reinterpret_cast<const uint8_t*>(key),
-   sizeof(CacheKey)), Cache::CacheBehavior::EXPECT_IN_CACHE);
-  LOG(INFO) << "End call the Touch method in lru cache";
+  auto h(cache_->Lookup(Slice(reinterpret_cast<const uint8_t*>(key),
+   sizeof(CacheKey)), Cache::CacheBehavior::EXPECT_IN_CACHE));
+  
+  if (h) {
+    LOG(INFO) << "the cache key is in lru cache";
+  } else {
+    LOG(INFO) << "the cache key is not in lru cache";
+  }
   return;
 }
 

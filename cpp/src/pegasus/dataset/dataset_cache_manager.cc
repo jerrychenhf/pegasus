@@ -180,9 +180,9 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       std::shared_ptr<CachedColumn> cached_column;
       bool is_inserted = partition->InsertColumn(colId, column, &cached_column);
       if (is_inserted && cached_column == nullptr) {
-        LRUCache::CacheKey* key = new LRUCache::CacheKey(dataset_path, partition_path, colId, column_size);
+        LRUCache::CacheKey* key = new LRUCache::CacheKey(dataset_path, partition_path, colId);
         LOG(WARNING) << "Put the cached column into cache engine";
-        RETURN_IF_ERROR(cache_engine->PutValue(key));
+        RETURN_IF_ERROR(cache_engine->PutValue(key, column_size));
 
         retrieved_columns.insert(std::make_pair(colId, column));
       } else {
@@ -206,7 +206,7 @@ std::vector<int> DatasetCacheManager::GetMissedColumnsIds(std::vector<int> col_i
     return missed_col_ids;
 }
 
-Status DatasetCacheManager::DropCachedDataset(std::vector<rpc::PartsDropListofDataset> drop_lists) {
+Status DatasetCacheManager::DropCachedDataset(std::vector<rpc::PartitionDropList> drop_lists) {
   
   for (auto iter = drop_lists.begin(); iter != drop_lists.end(); iter ++) {
      std::string dataset_path = iter->get_dataset_path();

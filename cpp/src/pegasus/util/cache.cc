@@ -36,6 +36,8 @@
 
 #include "common/logging.h"
 
+#include "cache/lru_cache.h"
+
 // Useful in tests that require accurate cache capacity accounting.
 DEFINE_bool(cache_force_single_shard, true,
             "Override all cache implementations to use just one shard");
@@ -569,8 +571,15 @@ class ShardedCache : public Cache {
 
  private:
   static inline uint32_t HashSlice(Slice s) {
-    return util_hash::CityHash64(
-      reinterpret_cast<const char *>(s.data()), s.size());
+    auto* entry_ptr = reinterpret_cast<LRUCache::CacheKey*>(s.mutable_data());
+  
+    std::string dataset_path = entry_ptr->dataset_path_;
+    std::string partition_path = entry_ptr->partition_path_;
+    int column_id = entry_ptr->column_id_;
+
+    std::string key = dataset_path.append(partition_path).append(to_string(column_id));
+
+   return util_hash::CityHash64(key.data(), key.size());
   }
 
   uint32_t Shard(uint32_t hash) {

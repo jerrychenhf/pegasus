@@ -381,7 +381,7 @@ message HeartbeatInfo {
   NodeInfo node_info = 4;
 }
 
-message PartsDropListofDataset {
+message PartitionDropList {
   /*
    * one dataset path (string) with multiple partition ids (strings)
    */
@@ -408,7 +408,7 @@ message HeartbeatResultCmd {
 
   HeartbeatResultCmdAction hbrc_action = 1;
 
-  repeated PartsDropListofDataset hbrc_parameters = 2;
+  repeated PartitionDropList hbrc_parameters = 2;
 };
 
 message HeartbeatResult {
