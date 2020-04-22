@@ -271,57 +271,48 @@ Status DataSetService::GetFlightInfo(DataSetRequest *dataset_request,
   }
 
   // map the column names to column indices
-  LOG(INFO) << "Mapping the column names to column indices";
-  std::vector<std::string> column_names = dataset_request->get_column_names();
-  std::vector<int32_t> column_indices;
   std::shared_ptr<arrow::Schema> schema = rdataset->get_schema();
-
-  if (column_names.empty())
-  {
-    column_names = schema->field_names();
-  }
-
-  arrow::SchemaBuilder builder;
-  for (std::string column_name : column_names)
-  {
-    int32_t index = schema->GetFieldIndex(column_name);
-    if (index != -1)
-    {
-      column_indices.push_back(index);
-      std::shared_ptr<arrow::Field> field = schema->GetFieldByName(column_name);
-      if (nullptr != field)
-      {
-        builder.AddField(field);
-      }
-      else
-      {
-        Status::Invalid("column name: ", column_name, "can't find in table.");
-      }
-    }
-    else
-    {
-      Status::Invalid("column name: ", column_name, "can't find in table.");
-    }
-  }
-
+  std::shared_ptr<std::vector<int32_t>> column_indices;
   std::shared_ptr<arrow::Schema> new_schema;
-  arrow::Result<std::shared_ptr<arrow::Schema>> result = builder.Finish();
-  if (result.ok())
-  {
-    new_schema = result.ValueOrDie();
-  }
-  else
-  {
-    Status::Invalid("Failed to get new schema.");
-  }
-
-  // std::shared_ptr<arrow::Schema> new_schema = std::make_shared<arrow::Schema>(fields);
-
-  dataset_request->set_column_indices(column_indices);
+  RETURN_IF_ERROR(GetColumnIndices(dataset_request, schema, &column_indices, &new_schema));
+  dataset_request->set_column_indices(*column_indices);
 
   LOG(INFO) << "Building flightinfo";
   flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdataset));
-  RETURN_IF_ERROR(flightinfo_builder_->BuildFlightInfo(flight_info, new_schema, column_indices, (rpc::FlightDescriptor &)fldtr));
+  RETURN_IF_ERROR(flightinfo_builder_->BuildFlightInfo(flight_info, new_schema, *column_indices, (rpc::FlightDescriptor &)fldtr));
+  return Status::OK();
+}
+
+Status DataSetService::GetColumnIndices(DataSetRequest* dataset_request,
+                                        std::shared_ptr<arrow::Schema> schema,
+                                        std::shared_ptr<std::vector<int32_t>>* column_indices,
+                                        std::shared_ptr<arrow::Schema>* new_schema) {
+  LOG(INFO) << "Mapping the column names to column indices";
+  std::vector<std::string> column_names = dataset_request->get_column_names();
+  if (column_names.empty()) {
+    column_names = schema->field_names();
+  }
+  arrow::SchemaBuilder builder;
+  std::vector<int32_t> indices;
+  for (std::string column_name : column_names) {
+    int32_t index = schema->GetFieldIndex(column_name);
+    if (index == -1) {
+      return Status::Invalid("column name: ", column_name, "can't find in table.");
+    }
+    indices.push_back(index);
+    std::shared_ptr<arrow::Field> field = schema->GetFieldByName(column_name);
+    if (nullptr == field) {
+      return Status::Invalid("column name: ", column_name, "can't find in table.");
+    }
+    builder.AddField(field);
+  }
+  *column_indices = std::make_shared<std::vector<int32_t>>(indices);
+  arrow::Result<std::shared_ptr<arrow::Schema>> result = builder.Finish();
+  if (result.ok()) {
+    *new_schema = result.ValueOrDie();
+  } else {
+    return Status::Invalid("Failed to get new schema.");
+  }
   return Status::OK();
 }
 

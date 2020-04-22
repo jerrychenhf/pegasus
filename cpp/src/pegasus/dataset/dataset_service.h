@@ -65,6 +65,12 @@ public:
   void WkMngObsUpdate(int wmevent);
 
 private:
+  Status GetColumnIndices(DataSetRequest *dataset_request,
+                          std::shared_ptr<arrow::Schema> schema,
+                          std::shared_ptr<std::vector<int32_t>>* column_indices,
+                          std::shared_ptr<arrow::Schema>* new_schema);
+
+private:
   //  std::shared_ptr<WorkerManager> worker_manager_;
   std::shared_ptr<FlightInfoBuilder> flightinfo_builder_;
   std::shared_ptr<DataSetStore> dataset_store_;
