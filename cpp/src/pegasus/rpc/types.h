@@ -537,6 +537,10 @@ struct PEGASUS_RPC_EXPORT NodeInfo {
   
   int64_t cache_capacity;
   int64_t cache_free;
+  uint64_t total_cacherd_cnt;
+  uint64_t ds_cacherd_cnt;
+  uint64_t pt_cacherd_cnt;
+  uint64_t col_cacherd_cnt;
   
   int64_t get_cache_capacity() const { return cache_capacity; }
   int64_t get_cache_free() const { return cache_free; }

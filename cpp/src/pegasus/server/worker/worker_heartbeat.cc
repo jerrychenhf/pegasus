@@ -98,8 +98,8 @@ bool WorkerHeartbeat::UpdateNodeInfo(const rpc::NodeInfo& node_info) {
   int64_t ts = UnixMillis();
   {
     lock_guard<mutex> l(node_info_lock_);
-    
-    if (node_info == node_info_) {
+
+    if ((node_info==node_info_) && (node_info_.total_cacherd_cnt==node_info.total_cacherd_cnt)){
       // no change
       return false;
     }
@@ -107,6 +107,10 @@ bool WorkerHeartbeat::UpdateNodeInfo(const rpc::NodeInfo& node_info) {
     node_info_ = node_info;
     node_info_update_timestamp_ = ts;
     node_info_changed_ = 1;
+    LOG(INFO) << "updated node_info_: " << node_info_.total_cacherd_cnt << " "\
+                                        << node_info_.ds_cacherd_cnt << " "\
+                                        << node_info_.pt_cacherd_cnt << " "\
+                                        << node_info_.col_cacherd_cnt << " ";
   }
   
   return true;
@@ -159,8 +163,6 @@ Status WorkerHeartbeat::GetStoreInfo(int64_t *cache_capacity, int64_t *cache_fre
   std::shared_ptr<StoreManager> store_manager = worker_exec_env->GetStoreManager();
   std::unordered_map<std::string, std::shared_ptr<Store>>  stores = store_manager->GetStores();
 
-//  auto dscachemanager = worker_exec_env->GetDatasetCacheManager();
-
   for(auto iter = stores.begin(); iter != stores.end(); *iter ++) {
     *cache_capacity += iter->second->GetCapacity();
     *cache_free += iter->second->GetFreeSize();
@@ -175,11 +177,17 @@ void WorkerHeartbeat::DoHeartbeat(int thread_id,
   int64_t cache_free = 0;
   GetStoreInfo(&cache_capacity, &cache_free);
 
+  auto dscachemanager = WorkerExecEnv::GetInstance()->GetDatasetCacheManager();
   rpc::NodeInfo new_node_info = rpc::NodeInfo();
   new_node_info.set_cache_capacity(cache_capacity);
   new_node_info.set_cache_free(cache_free);
-  UpdateNodeInfo(new_node_info);
-  
+  new_node_info.total_cacherd_cnt = dscachemanager->cache_metrics_.total_cacherd_cnt;
+  new_node_info.ds_cacherd_cnt = dscachemanager->cache_metrics_.ds_cacherd_cnt;
+  new_node_info.pt_cacherd_cnt = dscachemanager->cache_metrics_.pt_cacherd_cnt;
+  new_node_info.col_cacherd_cnt = dscachemanager->cache_metrics_.col_cacherd_cnt;
+  if (UpdateNodeInfo(new_node_info))
+    LOG(INFO) << "NodeInfo updated.";
+
   int64_t heartbeat_deadline = heartbeat.deadline;
   if (heartbeat_deadline != 0) {
     // Wait until deadline.

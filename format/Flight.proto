@@ -338,6 +338,10 @@ message NodeInfo {
   // Set these to -1 if unknown.
   int64 cache_capacity = 1;
   int64 cache_free = 2;
+  uint64 total_cacherd_cnt = 3;
+  uint64 ds_cacherd_cnt = 4;
+  uint64 pt_cacherd_cnt = 5;
+  uint64 col_cacherd_cnt = 6;
 }
 
 /*

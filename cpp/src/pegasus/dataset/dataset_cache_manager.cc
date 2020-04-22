@@ -53,6 +53,8 @@ Status DatasetCacheManager::Init() {
    
   cache_block_manager_ = new DatasetCacheBlockManager();
   cache_engine_manager_ = new DatasetCacheEngineManager();
+
+  cache_metrics_.ResetCacheMetrics();
    
   RETURN_IF_ERROR(cache_block_manager_->Init());
   RETURN_IF_ERROR(cache_engine_manager_->Init());
@@ -241,8 +243,8 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
   CacheEngine::CachePolicy cache_policy = GetCachePolicy(request_identity);
   RETURN_IF_ERROR(cache_engine_manager_->GetCacheEngine(cache_policy, &cache_engine));
 
+  cache_metrics_.total_cacherd_cnt++;
   // Check whether the dataset is cached.
-  
   std::vector<int> col_ids = request_identity->column_indices();
   unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns;
   
@@ -257,6 +259,7 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
      col_ids, cached_columns, cache_engine, data_stream);
   } else {
     // dataset is cached
+    cache_metrics_.ds_cacherd_cnt++;
     std::shared_ptr<CachedPartition> partition;
     dataset->GetCachedPartition(
      request_identity->partition_path(), &partition);
@@ -268,11 +271,13 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
        cached_columns, cache_engine, data_stream);
     } else {
       // partition is cached.
+      cache_metrics_.pt_cacherd_cnt++;
       // Check which column is cached.
       partition->GetCachedColumns(request_identity->column_indices(),
        cache_engine, &cached_columns);
       if (col_ids.size() == cached_columns.size()) {
         LOG(WARNING) << "All the columns are cached. And we will wrap the columns into Flight data stream";
+        cache_metrics_.col_cacherd_cnt++;
         return WrapDatasetStream(request_identity, cached_columns, data_stream);
       } else {
         // Not all columns cached.

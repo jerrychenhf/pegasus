@@ -36,6 +36,20 @@ namespace arrow {
 
 namespace pegasus {
 
+struct CacheMetrics {
+  uint64_t total_cacherd_cnt;
+  uint64_t ds_cacherd_cnt;
+  uint64_t pt_cacherd_cnt;
+  uint64_t col_cacherd_cnt;
+
+  void ResetCacheMetrics() {
+    total_cacherd_cnt = 0;
+    ds_cacherd_cnt = 0;
+    pt_cacherd_cnt = 0;
+    col_cacherd_cnt = 0;
+  }
+};
+
 class DatasetCacheManager {
  public:
   DatasetCacheManager();
@@ -50,6 +64,8 @@ class DatasetCacheManager {
   DatasetCacheBlockManager* GetBlockManager() {
     return cache_block_manager_;
   }
+
+  struct CacheMetrics cache_metrics_;
 
  private: 
   DatasetCacheEngineManager* cache_engine_manager_;

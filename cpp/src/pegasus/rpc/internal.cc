@@ -406,12 +406,20 @@ arrow::Status ToProto(const SchemaResult& result, pb::SchemaResult* pb_result) {
 arrow::Status FromProto(const pb::NodeInfo& pb_info, NodeInfo* info) {
   info->cache_capacity = pb_info.cache_capacity();
   info->cache_free = pb_info.cache_free();
+  info->total_cacherd_cnt = pb_info.total_cacherd_cnt();
+  info->ds_cacherd_cnt = pb_info.ds_cacherd_cnt();
+  info->pt_cacherd_cnt = pb_info.pt_cacherd_cnt();
+  info->col_cacherd_cnt = pb_info.col_cacherd_cnt();
   return arrow::Status::OK();
 }
 
 arrow::Status ToProto(const NodeInfo& info, pb::NodeInfo* pb_info) {
   pb_info->set_cache_capacity(info.cache_capacity);
   pb_info->set_cache_free(info.cache_free);
+  pb_info->set_total_cacherd_cnt(info.total_cacherd_cnt);
+  pb_info->set_ds_cacherd_cnt(info.ds_cacherd_cnt);
+  pb_info->set_pt_cacherd_cnt(info.pt_cacherd_cnt);
+  pb_info->set_col_cacherd_cnt(info.col_cacherd_cnt);
   return arrow::Status::OK();
 }
 
