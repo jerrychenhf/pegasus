@@ -59,13 +59,13 @@ PEGASUS_WORKER_PORT    start the worker on a different port (default: 30002).
 ### Start PLanner and Worker with debug build
 ```
 cd pegasus
-sh bin/start-planner.sh -build_type=debug
-sh bin/start-worker.sh -build_type=debug
+sh bin/start-planner.sh --build_type=debug
+sh bin/start-worker.sh --build_type=debug
 ```
 or
 ```
 cd pegasus
-sh bin/start-all.sh -build_type=debug
+sh bin/start-all.sh --build_type=debug
 ```
 
 ### Spark Configurations for PEGASUS

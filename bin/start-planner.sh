@@ -30,14 +30,14 @@ PLANNER_ARGS=""
 BINARY_BASE_DIR=${PEGASUS_HOME}/cpp/build
 
 
-ARGS=`getopt -o awh:pp:wp:ph:bt: --long along,worker_hostname:,planner_port:,worker_port:,planner_hostname:,build_type: -- "$@"`
+ARGS=`getopt -o awh:pp:wp:ph:bt: --long along,worker_hostname:,planner_port:,worker_port:,planner_hostname:,build_type: -- $@`
 if [ $? != 0 ]; then
-    echo "Terminating..."
+    echo "Planner terminating..."
     exit 1
 fi
 
-#
-#将规范化后的命令行参数分配至位置参数（$1,$2,...)
+
+#Normalize command line parameters
 eval set -- "${ARGS}"
 
 while true
