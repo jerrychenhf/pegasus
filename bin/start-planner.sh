@@ -44,7 +44,6 @@ while true
 do
     case "$1" in
         -a|--along) 
-            echo "Option a";
             shift
             ;;
         -wh|--worker_hostname)
@@ -54,7 +53,6 @@ do
         -pp|--planner_port)
             case "$2" in
                 "")
-                    echo "Option pp, no argument";
                     shift 2  
                     ;;
                 *)
@@ -67,7 +65,6 @@ do
         -wp|--worker_port)
             case "$2" in
                 "")
-                    echo "Option wp, no argument";
                     shift 2  
                     ;;
                 *)
@@ -79,7 +76,6 @@ do
         -ph|--planner_hostname)
             case "$2" in
                 "")
-                    echo "Option ph, no argument";
                     shift 2  
                     ;;
                 *)
@@ -91,7 +87,6 @@ do
         -bt|--build_type)
             case "$2" in
                 "")
-                    echo "Option bt, no argument";
                     shift 2  
                     ;;
                 *)

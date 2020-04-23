@@ -42,22 +42,18 @@ while true
 do
     case "$1" in
         -a|--along) 
-            echo "Option a";
             shift
             ;;
         -wh|--worker_hostname)
-            echo "Option worker_hostname, argument $2";
             PEGASUS_WORKER_HOST=$2
             shift 2
             ;;
         -pp|--planner_port)
             case "$2" in
                 "")
-                    echo "Option pp, no argument";
                     shift 2  
                     ;;
                 *)
-                    echo "Option planner_port, argument $2";
                     PEGASUS_PLANNER_PORT=$2
                     shift 2;
                     ;;
@@ -67,11 +63,9 @@ do
         -wp|--worker_port)
             case "$2" in
                 "")
-                    echo "Option wp, no argument";
                     shift 2  
                     ;;
                 *)
-                    echo "Option worker_port, argument $2";
                     PEGASUS_WORKER_PORT=$2
                     shift 2;
                     ;;
@@ -80,11 +74,9 @@ do
         -ph|--planner_hostname)
             case "$2" in
                 "")
-                    echo "Option ph, no argument";
                     shift 2  
                     ;;
                 *)
-                    echo "Option planner_hostname, argument $2";
                     PEGASUS_PLANNER_HOST=$2
                     shift 2;
                     ;;
@@ -93,11 +85,9 @@ do
         -bt|--build_type)
             case "$2" in
                 "")
-                    echo "Option bt, no argument";
                     shift 2  
                     ;;
                 *)
-                    echo "Option build_type, argument $2";
                     BUILD_TYPE=$2
                     shift 2;
                     ;;
