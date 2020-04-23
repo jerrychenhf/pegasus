@@ -158,14 +158,23 @@ class HandleTable {
   uint32_t length_;
   uint32_t elems_;
   RLHandle** list_;
-
+  
+  std::string GetKeyValue(Slice key) {
+    auto* entry_ptr = reinterpret_cast<LRUCache::CacheKey*>(key.mutable_data());
+    std::string dataset_path = entry_ptr->dataset_path_;
+    std::string partition_path = entry_ptr->partition_path_;
+    int column_id = entry_ptr->column_id_;
+    std::string value = dataset_path.append(partition_path).append(to_string(column_id));
+    return value;
+  }
   // Return a pointer to slot that points to a cache entry that
   // matches key/hash.  If there is no such cache entry, return a
   // pointer to the trailing slot in the corresponding linked list.
   RLHandle** FindPointer(const Slice& key, uint32_t hash) {
     RLHandle** ptr = &list_[hash & (length_ - 1)];
     while (*ptr != nullptr &&
-           ((*ptr)->hash != hash || key != (*ptr)->key())) {
+           ((*ptr)->hash != hash ||
+            GetKeyValue(key) != GetKeyValue((*ptr)->key()))) {
       ptr = &(*ptr)->next_hash;
     }
     return ptr;
