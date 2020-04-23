@@ -48,8 +48,7 @@ enum {
     std::string GetHash(std::string key);
     virtual void GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<std::vector<Location>> vectloc) = 0;
     virtual void GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions) = 0;
-//  private:
-//	  int distpolicy_;
+
     std::shared_ptr<std::vector<Location>> validlocations_;
     std::shared_ptr<std::vector<int64_t>> nodecacheMB_;
   };

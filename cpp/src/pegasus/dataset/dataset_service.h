@@ -45,7 +45,7 @@ class FlightListing;
 
 } // namespace rpc
 
-class DataSetService : IWMObserver
+class DataSetService : IWMObserver  //TODO: WorkerManagerObserver
 {
 public:
   DataSetService();
@@ -56,23 +56,21 @@ public:
   Status GetFlightInfo(DataSetRequest *dataset_request, std::unique_ptr<rpc::FlightInfo> *flight_info, const rpc::FlightDescriptor &fldtr);
   Status GetFlightListing(std::unique_ptr<rpc::FlightListing> *listings);
   Status GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> *datasets);
+  Status GetDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset);
+
+private:
   Status NotifyDataCacheDrop(std::shared_ptr<DataSet> pds, std::shared_ptr<std::vector<Partition>> partitions);
   Status RefreshDataSet(DataSetRequest *dataset_request, std::string table_location, std::shared_ptr<Storage> storage, std::shared_ptr<DataSet> pds, std::shared_ptr<DataSet> *dataset);
-  Status GetDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset);
   Status CacheDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset, int distpolicy);
   Status RemoveDataSet(DataSetRequest *dataset_request);
   Status FilterDataSet(const std::vector<Filter> &parttftr, std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet> *resultdataset);
-  void WkMngObsUpdate(int wmevent);
-
-private:
+  void WkMngObsUpdate(int wmevent); //TODO: update function name
   Status GetColumnIndices(DataSetRequest *dataset_request,
                           std::shared_ptr<arrow::Schema> schema,
                           std::shared_ptr<std::vector<int32_t>>* column_indices,
                           std::shared_ptr<arrow::Schema>* new_schema);
 
 private:
-  //  std::shared_ptr<WorkerManager> worker_manager_;
-  std::shared_ptr<FlightInfoBuilder> flightinfo_builder_;
   std::shared_ptr<DataSetStore> dataset_store_;
   std::shared_ptr<CatalogManager> catalog_manager_;
 };

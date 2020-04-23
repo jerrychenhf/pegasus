@@ -34,9 +34,11 @@ ConsistentHashRing::~ConsistentHashRing()
 {
 }
 
+//TODO: GetValidLocations(), then assign them.
 void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations,
 											   std::shared_ptr<std::vector<int64_t>> nodecacheMB)
 {
+	//TODO: return early, reduce nested code
 	if (nullptr != locations)
 	{
 		validlocations_ = locations;
@@ -45,10 +47,8 @@ void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Locat
 	else // If the locations are not provided, get the worker locations from worker_manager
 	{
 		std::shared_ptr<WorkerManager> worker_manager = PlannerExecEnv::GetInstance()->get_worker_manager();
-		//Status WorkerManager::GetWorkerRegistrations(std::vector<std::shared_ptr<WorkerRegistration>>& registrations)
 		std::vector<std::shared_ptr<WorkerRegistration>> wregs;
 		worker_manager->GetWorkerRegistrations(wregs);
-		//std::cout << "node count from workerregistration vector: " << wregs.size() << std::endl;
 		LOG(INFO) << "node count from workerregistration vector: " << wregs.size();
 		if (wregs.size() > 0)
 		{
@@ -60,14 +60,12 @@ void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Locat
 				LOG(INFO) << "- insert location: " << it->address().ToString();
 				nodecacheMB_->push_back(it->node_info()->get_cache_capacity() / (1024 * 1024));
 				LOG(INFO) << "- nodecachesize(MB): " << it->node_info()->get_cache_capacity() / (1024 * 1024);
-				//				nodecacheMB_->push_back(1024);
-				//LOG(INFO) << "== nodecachesize(MB): fake 1024";
 			}
 		}
 	}
 }
 
-Status ConsistentHashRing::SetupDist()
+Status ConsistentHashRing::SetupDist()	//SetupDistribution()
 {
 	LOG(INFO) << "SetupDist()...";
 	if (validlocations_)
@@ -77,7 +75,6 @@ Status ConsistentHashRing::SetupDist()
 			AddLocation(i);
 			LOG(INFO) << "Added location: #" << i;
 		}
-#if 1 // for debug, iterate the created conhash
 		LOG(INFO) << "Iterate the conhash:";
 		ConHashMetrics chmetrics;
 		for (auto it = consistent_hash_.begin(); it != consistent_hash_.end(); ++it)
@@ -87,7 +84,6 @@ Status ConsistentHashRing::SetupDist()
 			chmetrics.Increment(it->second.substr(0, pos));
 		}
 		chmetrics.WriteAsJson();
-#endif
 		return Status::OK();
 	}
 	else

@@ -19,7 +19,5 @@
 
 namespace pegasus {
 
-//DSDistributor::DSDistributor() {;}
-//DSDistributor::~DSDistributor() {;}
 
 } // namespace pegasus

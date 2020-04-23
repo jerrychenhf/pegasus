@@ -17,60 +17,60 @@
 
 #include "pegasus/dataset/dataset_store.h"
 
-namespace pegasus {
+namespace pegasus
+{
 
-DataSetStore::DataSetStore() {
+DataSetStore::DataSetStore()
+{
 }
 
-DataSetStore::~DataSetStore() {
-
+DataSetStore::~DataSetStore()
+{
 }
 
-Status DataSetStore::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets) {
+Status DataSetStore::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> *datasets)
+{
 
-//  boost::shared_lock<boost::shared_mutex> rdlock(l_);
-//  boost::lock_guard<boost::detail::spinlock> l(l_);
   boost::lock_guard<SpinLock> l(l_);
   datasets->get()->reserve(planner_metadata_.size());
-  for(auto entry : planner_metadata_) {
+  for (auto entry : planner_metadata_)
+  {
     //TODO: lockread for each dataset
     datasets->get()->push_back(entry.second);
   }
   return Status::OK();
 }
 
-Status DataSetStore::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset) {
+Status DataSetStore::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet> *dataset)
+{
 
-	LOG(INFO) << "GetDataSet()...";
-//  boost::shared_lock<boost::shared_mutex> rdlock(l_);
-//  boost::lock_guard<boost::detail::spinlock> l(l_);
+  LOG(INFO) << "GetDataSet()...";
   boost::lock_guard<SpinLock> l(l_);
   auto entry = planner_metadata_.find(dataset_path);
-  if (entry == planner_metadata_.end()) {
+  if (entry == planner_metadata_.end())
+  {
     return Status::KeyError("Could not find dataset.", dataset_path);
   }
   else
   {
     *dataset = entry->second;
-//  auto find_dataset = entry->second;
-//  *dataset = std::shared_ptr<DataSet>(new DataSet(*find_dataset));
   }
 
-	LOG(INFO) << "...GetDataSet()";
+  LOG(INFO) << "...GetDataSet()";
   return Status::OK();
 }
 
-Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset) {
+Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset)
+{
 
   std::string key = dataset->dataset_path();
-//  boost::unique_lock<boost::shared_mutex> wrlock(l_);
-//  boost::lock_guard<boost::detail::spinlock> l(l_);
   boost::lock_guard<SpinLock> l(l_);
   planner_metadata_[key] = std::move(dataset);
   return Status::OK();
 }
 
-Status DataSetStore::InvalidateAll() {
+Status DataSetStore::InvalidateAll()
+{
 
   boost::lock_guard<SpinLock> l(l_);
   for (auto i : planner_metadata_)
@@ -79,53 +79,19 @@ Status DataSetStore::InvalidateAll() {
   }
   return Status::OK();
 }
-#if 0
-Status DataSetStore::ReplacePartitions(std::string& datasetpath, std::shared_ptr<std::vector<Partition>> partits) {
 
-  boost::lock_guard<SpinLock> l(l_);
-  (planner_metadata_[datasetpath])->replacePartitions(*partits);
-  return Status::OK();
-}
-#endif
-Status DataSetStore::UpdateDataSet(std::shared_ptr<DataSet> dataset) {
-#if 0
-  std::string key = dataset->dataset_path();
-//  boost::unique_lock<boost::shared_mutex> wrlock(l_);
-//  boost::lock_guard<boost::detail::spinlock> l(l_);
-  boost::lock_guard<SpinLock> l(l_);
-  //TODO: replace the pointer
-  planner_metadata_[key] = std::move(dataset);
-#endif
+Status DataSetStore::UpdateDataSet(std::shared_ptr<DataSet> dataset)
+{
   return Status::OK();
 }
 
-Status DataSetStore::RemoveDataSet(std::shared_ptr<DataSet> dataset) {
+Status DataSetStore::RemoveDataSet(std::shared_ptr<DataSet> dataset)
+{
 
   std::string key = dataset->dataset_path();
-//  boost::unique_lock<boost::shared_mutex> wrlock(l_);
-//  boost::lock_guard<boost::detail::spinlock> l(l_);
   boost::lock_guard<SpinLock> l(l_);
   planner_metadata_.erase(key);
   return Status::OK();
 }
 
-//TODO: delete it as this interface is no longer needed.
-#if 0
-//if it is needed in future, its logic should be updated for concurrence
-Status DataSetStore::InsertEndPoint(std::string dataset_path, std::shared_ptr<Partition> new_partition) {
-  std::shared_ptr<DataSet>* dataset;
-  GetDataSet(dataset_path, dataset);
-  std::vector<Partition> partitions = (*dataset)->partitions();
-
-  DataSet::Data data = DataSet::Data();
-  data.dataset_path = dataset_path;
-  partitions.push_back(*new_partition);
-  data.partitions = partitions;
-  data.total_records = (*dataset)->total_records();
-  data.total_bytes = (*dataset)->total_bytes();
-  DataSet value(data);
-
-  planner_metadata_[dataset_path] = std::unique_ptr<DataSet>(new DataSet(value));
-}
-#endif
 } // namespace pegasus

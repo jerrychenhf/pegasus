@@ -22,7 +22,6 @@
 #include <atomic>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/shared_mutex.hpp>
-//#include <boost/smart_ptr/detail/spinlock.hpp>
 #include <util/spinlock.h>
 #include "common/status.h"
 #include "dataset/dataset.h"
@@ -40,13 +39,10 @@ class DataSetStore {
   Status ReplacePartitions(std::string& datasetpath, std::shared_ptr<std::vector<Partition>> partits);
   Status UpdateDataSet(std::shared_ptr<DataSet> dataset);
   Status RemoveDataSet(std::shared_ptr<DataSet> dataset);
-//  Status InsertEndPoint(std::string dataset_path, std::shared_ptr<Partition> new_partition);
 
  private:
-//  boost::shared_mutex l_;   //mutex is 3X slower than spinlock
-//  boost::detail::spinlock l_;   //deadlock with boost spinlock, reason unclear
-  SpinLock l_;
-  std::unordered_map<std::string, std::shared_ptr<DataSet>> planner_metadata_;
+  SpinLock l_;  //TODO: rename it
+  std::unordered_map<std::string, std::shared_ptr<DataSet>> planner_metadata_;  //TODO: rename it
 };
 
 } // namespace pegasus

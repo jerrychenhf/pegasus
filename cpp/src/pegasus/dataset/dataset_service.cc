@@ -15,10 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//TODO use the concurrent_hash_map
-//#include "tbb/concurrent_hash_map.h"
-//using namespace tbb;
-
 #include <memory>
 #include <unordered_map>
 
@@ -43,9 +39,7 @@ DataSetService::~DataSetService()
 
 Status DataSetService::Init()
 {
-  //  PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
   dataset_store_ = std::unique_ptr<DataSetStore>(new DataSetStore);
-  //  worker_manager_ = env->GetInstance()->get_worker_manager();
   catalog_manager_ = std::make_shared<CatalogManager>();
   PlannerExecEnv::GetInstance()->get_worker_manager()->RegisterObserver(this);
 
@@ -124,7 +118,6 @@ Status DataSetService::RefreshDataSet(DataSetRequest *dataset_request, std::stri
 
   // keep the existing dataset pointer in dataset_store, only update data
   pds->lockwrite();
-  //replacePartitions(std::vector<Partition> partits)
   pds->replacePartitions(*partitions);
   pds->resetRefreshFlag();
   *dataset = pds;
@@ -133,23 +126,23 @@ Status DataSetService::RefreshDataSet(DataSetRequest *dataset_request, std::stri
   return Status::OK();
 }
 
+//TODO: lockread/write move into function
 Status DataSetService::GetDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset)
 {
 
   std::shared_ptr<DataSet> pds = NULL;
   std::string dataset_path = dataset_request->get_dataset_path();
-  dataset_store_->GetDataSet(dataset_path, &pds);
+  dataset_store_->GetDataSet(dataset_path, &pds); //TODO: check return value
 
-  if (pds == NULL)
+  if (pds == NULL) //TODO: check return value
   {
     LOG(INFO) << "=== Not found, creating new dataset ...";
-    // === CacheDataSet(dataset_path, dataset, CONHASH);
     // build the dataset and insert it to dataset store.
     auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
     // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
     dsbuilder->BuildDataset(dataset_request, dataset, CONHASH);
     // Begin Write
-    (*dataset)->lockwrite();
+    (*dataset)->lockwrite();  //TODO: needed?
 #if 0
     // read again to avoid duplicated write
     dataset_store_->GetDataSet(dataset_path, &pds);
@@ -172,6 +165,7 @@ Status DataSetService::GetDataSet(DataSetRequest *dataset_request, std::shared_p
     // check timestamp and update refresh flag
     uint64_t timestamp = 0;
 
+    //TODO: move into a function
     std::shared_ptr<Catalog> catalog;
     std::string table_location;
     std::shared_ptr<Storage> storage;
@@ -206,8 +200,7 @@ Status DataSetService::GetDataSet(DataSetRequest *dataset_request, std::shared_p
     {
       LOG(INFO) << "=== Up-to-date";
       pds->lockread();
-      //    *dataset = std::shared_ptr<DataSet>(new DataSet(*pds));
-      *dataset = std::make_shared<DataSet>(pds->GetData());
+      *dataset = std::make_shared<DataSet>(pds->GetData()); //TODO: prefer not deep-copy
       (*dataset)->set_schema(pds->get_schema());
       pds->unlockread();
     }
@@ -223,7 +216,7 @@ Status DataSetService::CacheDataSet(DataSetRequest *dataset_request, std::shared
 
   // build the dataset and insert it to dataset store.
   auto dsbuilder = std::make_shared<DataSetBuilder>(catalog_manager_);
-  // Status BuildDataset(std::shared_ptr<DataSet>* dataset);
+  
   RETURN_IF_ERROR(dsbuilder->BuildDataset(dataset_request, dataset, distpolicy));
   // Begin Write
   (*dataset)->lockwrite();
@@ -240,7 +233,7 @@ Status DataSetService::RemoveDataSet(DataSetRequest *dataset_request)
   std::shared_ptr<DataSet> pds = NULL;
   std::string dataset_path = dataset_request->get_dataset_path();
   dataset_store_->GetDataSet(dataset_path, &pds);
-  //Status DataSetStore::RemoveDataSet(std::shared_ptr<DataSet> dataset)
+  
   pds->lockwrite();
   dataset_store_->RemoveDataSet(pds);
   pds->unlockwrite();
@@ -261,7 +254,7 @@ Status DataSetService::GetFlightInfo(DataSetRequest *dataset_request,
   LOG(INFO) << "Filtering the dataSet";
   std::shared_ptr<ResultDataSet> rdataset;
   // Filter dataset
-  dataset->lockread();
+  dataset->lockread();  //TODO: needed?
   Status st = FilterDataSet(dataset_request->get_filters(), dataset, &rdataset);
   dataset->unlockread();
   // Note: we can also release the dataset readlock here, the benefit is it avoids dataset mem copy.
@@ -278,8 +271,8 @@ Status DataSetService::GetFlightInfo(DataSetRequest *dataset_request,
   dataset_request->set_column_indices(*column_indices);
 
   LOG(INFO) << "Building flightinfo";
-  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdataset));
-  RETURN_IF_ERROR(flightinfo_builder_->BuildFlightInfo(flight_info, new_schema, *column_indices, (rpc::FlightDescriptor &)fldtr));
+  auto flightinfo_builder = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdataset));
+  RETURN_IF_ERROR(flightinfo_builder->BuildFlightInfo(flight_info, new_schema, *column_indices, (rpc::FlightDescriptor &)fldtr));
   return Status::OK();
 }
 
@@ -343,18 +336,9 @@ Status DataSetService::GetFlightListing(std::unique_ptr<rpc::FlightListing> *lis
 
   auto rdatasets = std::make_shared<std::vector<std::shared_ptr<ResultDataSet>>>();
   //TODO: fill the resultdataset
-  /*  for (auto ds:(*datasets))
-  {
-    ResultDataSet::Data dd;
-    dd.dataset_path = ds->dataset_path();
-    dd.partitions = ds->partitions();
-    dd.total_bytes = ds->total_bytes();
-    dd.total_records = ds->total_records();
-    rdatasets->push_back(&ResultDataSet(dd));
-  }
-*/
-  flightinfo_builder_ = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdatasets));
-  flightinfo_builder_->BuildFlightListing(listings);
+
+  auto flightinfo_builder = std::shared_ptr<FlightInfoBuilder>(new FlightInfoBuilder(rdatasets));
+  flightinfo_builder->BuildFlightListing(listings);
   return Status::OK();
 }
 

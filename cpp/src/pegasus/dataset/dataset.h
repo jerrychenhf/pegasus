@@ -20,11 +20,8 @@
 
 #include <string>
 #include <vector>
-
 #include <arrow/type.h>
-
 #include <boost/thread/shared_mutex.hpp>
-
 #include "dataset/partition.h"
 #include "util/visibility.h"
 
@@ -49,7 +46,6 @@ public:
         ++readCount;
         assert(readCount > 0);
         assert(writeCount == 0);
-//        std::cout << "readCount = " << readCount << "\n";
         internal.unlock();
     }
     
@@ -59,7 +55,6 @@ public:
         ++writeCount;
         assert(writeCount == 1);
         assert(readCount == 0);
-//        std::cout << "writeCount = " << writeCount << "\n";
     }
 
     void unlockread()
@@ -68,7 +63,6 @@ public:
         --readCount;
         assert(readCount >= 0);
         assert(writeCount == 0);
-//        std::cout << "readCount = " << readCount << "\n";
         if (readCount == 0)
         {   
             content.unlock();
@@ -81,7 +75,6 @@ public:
         --writeCount;
         assert(writeCount == 0);
         assert(readCount == 0);
-//        std::cout << "writeCount = " << writeCount << "\n";
         content.unlock();
     }
 
@@ -155,14 +148,12 @@ class PEGASUS_EXPORT DataSet {
   rwlock dslock;
   Data data_;
   std::shared_ptr<arrow::Schema> schema_;
-//  bool needRefresh_;
   uint64_t refreshFlag_;  //DSRF_FILES_APPEND, DSRF_WORKERSET_CHG, ...
 };
 
 class PEGASUS_EXPORT ResultDataSet {
  public:
   struct Data {
-    // arrow::Schema schema;
     /// Path identifying a particular dataset. 
     std::string dataset_path;
     std::vector<Partition> partitions;

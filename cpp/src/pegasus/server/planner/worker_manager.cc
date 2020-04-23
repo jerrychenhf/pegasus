@@ -154,14 +154,9 @@ Status WorkerManager::HeartbeatWorker(const rpc::HeartbeatInfo& info) {
       LOG(INFO) << "column cache hit rate: " \
                 << info.node_info->col_cacherd_cnt*100/info.node_info->total_cacherd_cnt\
                 << "% (" << info.node_info->col_cacherd_cnt << "/" << info.node_info->total_cacherd_cnt << ")";
-/*      LOG(INFO) << "\ttotal_cacherd_cnt: " << current_registration->node_info_->total_cacherd_cnt;
-      LOG(INFO) << "\tds_cacherd_cnt: " << current_registration->node_info_->ds_cacherd_cnt;
-      LOG(INFO) << "\tpt_cacherd_cnt: " << current_registration->node_info_->pt_cacherd_cnt;
-      LOG(INFO) << "\tcol_cacherd_cnt: " << current_registration->node_info_->col_cacherd_cnt;
-*/    }
-    
+    }
+
     worker_failure_detector_->UpdateHeartbeat(id);
-    
   }
   
   return Status::OK();

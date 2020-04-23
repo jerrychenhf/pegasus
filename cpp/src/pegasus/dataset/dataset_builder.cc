@@ -16,53 +16,31 @@
 // under the License.
 
 #include "dataset/dataset_builder.h"
-
 #include "dataset/consistent_hashing.h"
 #include "dataset/dataset_request.h"
 #include "dataset/partition.h"
 #include "runtime/planner_exec_env.h"
 
-namespace pegasus {
+namespace pegasus
+{
 
 DataSetBuilder::DataSetBuilder(std::shared_ptr<CatalogManager> catalog_manager)
-    : catalog_manager_(catalog_manager) {
-  PlannerExecEnv* env =  PlannerExecEnv::GetInstance();
+    : catalog_manager_(catalog_manager)
+{
+  PlannerExecEnv *env = PlannerExecEnv::GetInstance();
   storage_factory_ = env->get_storage_factory();
 }
 
-Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
-                                   std::shared_ptr<DataSet>* dataset, int distpolicy) {
+Status DataSetBuilder::BuildDataset(DataSetRequest *dataset_request,
+                                    std::shared_ptr<DataSet> *dataset, int distpolicy)
+{
 
-#if 0 //TODO: need redesign
-  std::shared_ptr<DSDistributor> distributor;
-  switch (distpolicy)
-  {
-    case CONHASH:
-//      distributor = std::make_shared<DSDistributor>(new ConsistentHashRing());
-      distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<ConsistentHashRing>());
-      break;
-    case LOCALONLY:
-      distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<DistLocalOnly>());
-      break;
-    case LOCALPREFER:
-      distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<DistLocalPrefer>());
-      break;
-    default:
-      return Status::NotImplemented("Distributor Type");
-  }
-#endif
-  //TODO: only consider ConsistentHashRing for now
-//  std::shared_ptr<DSDistributor> distributor = std::make_shared<ConsistentHashRing>();  //error: conversion from ‘...’ to non-scalar type 
-//  std::shared_ptr<DSDistributor> distributor;
-//  distributor = std::static_pointer_cast<DSDistributor>(std::make_shared<ConsistentHashRing>()); //error: is an inaccessible base of
-//  DSDistributor* distributor(new ConsistentHashRing); //error: is an inaccessible base of
-  auto distributor = std::make_shared<ConsistentHashRing>(); 
+  auto distributor = std::make_shared<ConsistentHashRing>();
   // TODO: get locations here to decouple distributor from workermanager
   distributor->PrepareValidLocations(nullptr, nullptr);
   distributor->SetupDist();
 
   // create partitions with identities
-//  auto vectident = std::make_shared<std::vector<Identity>>();
   auto partitions = std::make_shared<std::vector<Partition>>();
   int64_t total_bytes = 0;
 
@@ -73,19 +51,21 @@ Status DataSetBuilder::BuildDataset(DataSetRequest* dataset_request,
   std::shared_ptr<arrow::Schema> schema;
   uint64_t timestamp = 0;
 
-LOG(INFO) << "Getting catalog ...";
-  if (catalog->GetCatalogType() == Catalog::SPARK) {
+  LOG(INFO) << "Getting catalog ...";
+  if (catalog->GetCatalogType() == Catalog::SPARK)
+  {
     std::string table_location;
     RETURN_IF_ERROR(catalog->GetTableLocation(dataset_request, table_location));
     std::shared_ptr<Storage> storage;
-LOG(INFO) << "Getting storage ...";
+    LOG(INFO) << "Getting storage ...";
     RETURN_IF_ERROR(storage_factory_->GetStorage(table_location, &storage));
     std::vector<std::string> file_list;
     RETURN_IF_ERROR(storage->ListFiles(table_location, &file_list, &total_bytes));
 
-LOG(INFO) << "Filling partitions ...";
-    for (auto filepath : file_list) {
-LOG(INFO) << "\t" << filepath;
+    LOG(INFO) << "Filling partitions ...";
+    for (auto filepath : file_list)
+    {
+      LOG(INFO) << "\t" << filepath;
       Partition partition = Partition(Identity(table_location, filepath));
       partitions->push_back(partition);
     }
@@ -93,15 +73,16 @@ LOG(INFO) << "\t" << filepath;
     RETURN_IF_ERROR(catalog->GetSchema(dataset_request, &schema));
 
     RETURN_IF_ERROR(storage->GetModifedTime(table_location, &timestamp));
-  } else {
+  }
+  else
+  {
     return Status::Invalid("Invalid catalog type: ", catalog->GetCatalogType());
   }
 
-LOG(INFO) << "Updating distLocations from distributor...";
+  LOG(INFO) << "Updating distLocations from distributor...";
   // allocate location for each partition
-//  auto vectloc = std::make_shared<std::vector<Location>>();
   distributor->GetDistLocations(partitions);
- 
+
   // build dataset
   DataSet::Data dd;
   dd.total_bytes = total_bytes;
@@ -113,16 +94,16 @@ LOG(INFO) << "Updating distLocations from distributor...";
   (*dataset)->set_schema(schema);
   (*dataset)->setTimestamp(timestamp);
 
-LOG(INFO) << "BuildDataset() finished successfully.";
+  LOG(INFO) << "BuildDataset() finished successfully.";
 
   return Status::OK();
 }
 
-Status DataSetBuilder::BuildDatasetPartitions(std::string table_location, std::shared_ptr<Storage> storage, 
+Status DataSetBuilder::BuildDatasetPartitions(std::string table_location, std::shared_ptr<Storage> storage,
                                               std::shared_ptr<std::vector<Partition>> partitions,
                                               int distpolicy)
 {
-  auto distributor = std::make_shared<ConsistentHashRing>(); 
+  auto distributor = std::make_shared<ConsistentHashRing>();
   // TODO: get locations here to decouple distributor from workermanager
   distributor->PrepareValidLocations(nullptr, nullptr);
   distributor->SetupDist();
@@ -130,24 +111,25 @@ Status DataSetBuilder::BuildDatasetPartitions(std::string table_location, std::s
   std::vector<std::string> file_list;
   RETURN_IF_ERROR(storage->ListFiles(table_location, &file_list, nullptr));
 
-LOG(INFO) << "Filling partitions ...";
-  for (auto filepath : file_list) {
-LOG(INFO) << "\t" << filepath;
+  LOG(INFO) << "Filling partitions ...";
+  for (auto filepath : file_list)
+  {
+    LOG(INFO) << "\t" << filepath;
     Partition partition = Partition(Identity(table_location, filepath));
     partitions->push_back(partition);
   }
 
-LOG(INFO) << "Updating distLocations from distributor...";
+  LOG(INFO) << "Updating distLocations from distributor...";
 
   distributor->GetDistLocations(partitions);
 
-LOG(INFO) << "BuildDataset() finished successfully.";
+  LOG(INFO) << "BuildDataset() finished successfully.";
   return Status::OK();
 }
 
-
-Status DataSetBuilder::GetTotalRecords(int64_t* total_records) {
-//  *total_records = file_list_->size();  //TODO: need to confirm
+Status DataSetBuilder::GetTotalRecords(int64_t *total_records)
+{
+  //  *total_records = file_list_->size();  //TODO: need to confirm
   return Status::OK();
 }
 
