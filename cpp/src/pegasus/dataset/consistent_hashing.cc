@@ -93,15 +93,15 @@ Status ConsistentHashRing::SetupDist()	//SetupDistribution()
 	}
 }
 
-void ConsistentHashRing::AddLocation(unsigned int locidx)
+void ConsistentHashRing::AddLocation(unsigned int locationid)
 {
-	int num_vn = nodecacheMB_->at(locidx) / 100;
-	num_vn = std::max(MIN_VIRT_NODE_NUM, num_vn);
-	num_vn = std::min(MAX_VIRT_NODE_NUM, num_vn);
+	int vnodecount = nodecacheMB_->at(locationid) / VIRT_NODE_DIVISOR;
+	vnodecount = std::max(MIN_VIRT_NODE_NUM, vnodecount);
+	vnodecount = std::min(MAX_VIRT_NODE_NUM, vnodecount);
 
-	for (int i = 0; i < num_vn; i++)
+	for (int i = 0; i < vnodecount; i++)
 	{
-		std::string node = validlocations_->at(locidx).ToString() + "_" + std::to_string(i);
+		std::string node = validlocations_->at(locationid).ToString() + "_" + std::to_string(i);
 		//LOG(INFO) << "consistent_hash_.insert(" << node << ");";
 		consistent_hash_.insert(node);
 	}
@@ -110,10 +110,10 @@ void ConsistentHashRing::AddLocation(unsigned int locidx)
 void ConsistentHashRing::AddLocation(Location location)
 {
 #if 0
-	int num_vn = nodecacheMB_ / 1000;
-	num_vn = std::max(MIN_VIRT_NODE_NUM, num_vn);
-	num_vn = std::min(MAX_VIRT_NODE_NUM, num_vn);
-	AddLocation(location, num_vn);
+	int vnodecount = nodecacheMB_ / 1000;
+	vnodecount = std::max(MIN_VIRT_NODE_NUM, vnodecount);
+	vnodecount = std::min(MAX_VIRT_NODE_NUM, vnodecount);
+	AddLocation(location, vnodecount);
 #endif
 }
 void ConsistentHashRing::AddLocation(Location location, int num_virtual_nodes)

@@ -31,7 +31,8 @@
 using namespace std;
 
 namespace pegasus {
-#define MAX_VIRT_NODE_NUM 100
+#define VIRT_NODE_DIVISOR 100 // place one virtual node for every 100MB cache
+#define MAX_VIRT_NODE_NUM 400 // the distribution is smoother with bigger value
 #define MIN_VIRT_NODE_NUM 1
 
 struct crc32_hasher {
