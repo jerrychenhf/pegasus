@@ -373,16 +373,18 @@ message HeartbeatInfo {
    * The worker hostname as identifer reported in the heartbeat
    */
   string hostname = 2;
+
+  int64 port = 3;
    
   /*
    * The worker address reported in the registration
    */
-  Location address = 3;
+  Location address = 4;
   
   /*
    * Other worker node information reported in the heartbeat
    */
-  NodeInfo node_info = 4;
+  NodeInfo node_info = 5;
 }
 
 message PartitionDropList {
