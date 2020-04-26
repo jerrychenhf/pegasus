@@ -426,6 +426,7 @@ arrow::Status ToProto(const NodeInfo& info, pb::NodeInfo* pb_info) {
 // HeartbeatInfo
 arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info) {
   info->hostname = pb_info.hostname();
+  info->port = pb_info.port();
   if (pb_info.type() == pb::HeartbeatInfo::REGISTRATION) {
     info->type = HeartbeatInfo::REGISTRATION;
     
@@ -451,6 +452,7 @@ arrow::Status FromProto(const pb::HeartbeatInfo& pb_info, HeartbeatInfo* info) {
 
 arrow::Status ToProto(const HeartbeatInfo& info, pb::HeartbeatInfo* pb_info) {
   pb_info->set_hostname(info.hostname);
+  pb_info->set_port(info.port);
   if (info.type == HeartbeatInfo::REGISTRATION) {
     pb_info->set_type(pb::HeartbeatInfo::REGISTRATION);
     

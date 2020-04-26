@@ -344,6 +344,10 @@ bool HeartbeatInfo::Equals(const HeartbeatInfo& other) const {
   if (hostname != other.hostname) {
     return false;
   }
+
+  if (port != other.port) {
+    return false;
+  }
   
   switch (type) {
     case REGISTRATION: {

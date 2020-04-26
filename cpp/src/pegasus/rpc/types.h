@@ -571,6 +571,7 @@ struct PEGASUS_RPC_EXPORT HeartbeatInfo {
 
   /// The identifier
   std::string hostname;
+  std::int64_t port;
   
   /// The address to contact the worker for RPC. 
   /// Valid for registration

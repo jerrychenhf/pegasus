@@ -256,6 +256,7 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
   
   // identifier
   info.hostname = FLAGS_hostname;
+  info.port = FLAGS_worker_port;
   
   if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION) {
     info.type = rpc::HeartbeatInfo::REGISTRATION;
