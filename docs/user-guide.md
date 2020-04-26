@@ -109,3 +109,61 @@ Step 5. Run queries on table. For example,
 ```
 > SELECT * FROM pegasusitem;
 ```
+
+
+## Start PLanner and Worker with Yarn Service
+
+
+### Start Planner
+
+```
+cd pegasus/bin
+sh start-planner.sh --planner_hostname=localhost --planner_port=30001
+```
+
+### Start Worker
+
+```
+cd pegasus/dev
+sh make_distribution.sh
+hadoop fs -mkdir -p intel_pegasus
+hadoop fs -put pegasus.tar.gz /intel_pegasus/
+```
+
+Deploy a pegasus service in Yarn. Modify these parameters ($yarn_host,$worker_num and $planner_hostname) according to your running environment.
+```
+curl --location --request POST '$yarn_host:8088/app/v1/services' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "name": "pegasusworker",
+    "version": "1.0.0",
+    "components": [
+        {
+            "name": "worker",
+            "number_of_containers": $worker_num,
+            "artifact": {
+                "id": "/intel_pegasus/pegasus.tar.gz",
+                "type": "TARBALL"
+            },
+            "launch_command": "export LD_LIBRARY_PATH=`pwd`/lib/:$LD_LIBRARY_PATH&&cd lib&& ./workerd --hostname=localhost --worker_port=30002 --planner_hostname=$planner_hostname --planner_port=30001",
+            "resource": {
+                "cpus": 1,
+                "memory": "2048"
+            },
+            "placement_policy": {
+                "constraints": [
+                    {
+                        "type": "ANTI_AFFINITY",
+                        "scope": "NODE",
+                        "target_tags": [
+                            "worker"
+                        ]
+                       
+                    }
+                ]
+            }
+        }
+    ]
+}
+'
+```
