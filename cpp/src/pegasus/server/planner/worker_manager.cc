@@ -101,7 +101,7 @@ Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info,
 
 Status WorkerManager::RegisterWorker(const rpc::HeartbeatInfo& info) {
     
-  WorkerId id = info.hostname + std::to_string(info.port);
+  WorkerId id = info.hostname + ":" + std::to_string(info.port);
   std::string address_str;
   
   LOG(INFO) << "Registering worker: " << id;
@@ -141,7 +141,7 @@ Status WorkerManager::RegisterWorker(const rpc::HeartbeatInfo& info) {
 }
 
 Status WorkerManager::HeartbeatWorker(const rpc::HeartbeatInfo& info) {
-  WorkerId id = info.hostname + std::to_string(info.port);
+  WorkerId id = info.hostname + ":" + std::to_string(info.port);
   
   VLOG(3) << "Heartbeat worker: " << id;
   {
