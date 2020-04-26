@@ -10,8 +10,8 @@ cd $START_PATH
 cd ../cpp
 mkdir -p build
 cd build
-# cmake -DPEGASUS_USE_GLOG=ON ..
-# make
+cmake -DPEGASUS_USE_GLOG=ON ..
+make
 
 mkdir -p $START_PATH/target/pegasus
 echo $(pwd)

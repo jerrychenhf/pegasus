@@ -130,7 +130,7 @@ hadoop fs -mkdir -p intel_pegasus
 hadoop fs -put pegasus.tar.gz /intel_pegasus/
 ```
 
-Deploy a pegasus service in Yarn. Modify these parameters ($yarn_host,$worker_num and $planner_hostname) according to your running environment.
+Deploy a pegasus service on Yarn. Modify these parameters ($yarn_host,$worker_num and $planner_hostname) according to your running environment.
 ```
 curl --location --request POST '$yarn_host:8088/app/v1/services' \
 --header 'Content-Type: application/json' \
