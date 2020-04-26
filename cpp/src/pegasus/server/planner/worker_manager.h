@@ -110,6 +110,11 @@ public:
   std::shared_ptr<rpc::NodeInfo> node_info_;
 };
 
+struct WorkerSetInfo {
+  std::shared_ptr<std::vector<rpc::Location>> locations;
+  std::shared_ptr<std::vector<int64_t>> nodecacheMB;
+};
+
 // Get the worker locations
 class WorkerManager {
  public:
@@ -118,6 +123,7 @@ class WorkerManager {
   Status Init();
   
   Status GetWorkerRegistrations(std::vector<std::shared_ptr<WorkerRegistration>>& registrations);
+  Status GetWorkerSetInfo(std::shared_ptr<struct WorkerSetInfo>& workersetinfo);
 
   Status Heartbeat(const rpc::HeartbeatInfo& info, std::unique_ptr<rpc::HeartbeatResult>* result);
   

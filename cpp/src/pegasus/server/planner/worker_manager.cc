@@ -46,6 +46,20 @@ Status WorkerManager::GetWorkerRegistrations(
   return Status::OK();
 }
 
+Status WorkerManager::GetWorkerSetInfo(std::shared_ptr<struct WorkerSetInfo>& workersetinfo) {
+  {
+    lock_guard<mutex> l(workers_lock_);
+    for(WorkerRegistrationMap::iterator it = workers_.begin();
+      it != workers_.end(); ++it) {
+				workersetinfo->locations->push_back(it->second->address());
+				LOG(INFO) << "- insert location: " << it->second->address().ToString();
+				workersetinfo->nodecacheMB->push_back(it->second->node_info()->get_cache_capacity() / (1024 * 1024));
+				LOG(INFO) << "- nodecachesize(MB): " << it->second->node_info()->get_cache_capacity() / (1024 * 1024);
+    }
+  }
+  return Status::OK();
+}
+
 Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info,
                                 std::unique_ptr<rpc::HeartbeatResult>* result) {
   Status status = Status::OK();
