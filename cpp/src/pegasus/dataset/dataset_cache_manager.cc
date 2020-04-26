@@ -174,7 +174,8 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
         chunked_array, column_size);
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, colId, cache_region));
-
+        
+      cache_metrics_.cached_size += column_size;
       // Insert the column if already inserted, 
       // we do not put the column into the LRU cache.
       // And because this column is shared ptr, so out this for clause , 
@@ -184,6 +185,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       if (is_inserted && cached_column == nullptr) {
         LRUCache::CacheKey* key = new LRUCache::CacheKey(dataset_path, partition_path, colId);
         LOG(WARNING) << "Put the cached column into cache engine";
+        
         RETURN_IF_ERROR(cache_engine->PutValue(key, column_size));
 
         retrieved_columns.insert(std::make_pair(colId, column));
@@ -191,6 +193,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
         retrieved_columns.insert(std::make_pair(colId, cached_column));
       }
     }
+    LOG(INFO) << "the cached size is " << cache_metrics_.cached_size;
     
     return Status::OK();
 }
