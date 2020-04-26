@@ -32,7 +32,8 @@ using namespace std;
 
 namespace pegasus {
 #define VIRT_NODE_DIVISOR 100 // place one virtual node for every 100MB cache
-#define MAX_VIRT_NODE_NUM 400 // the distribution is smoother with bigger value
+//#define MAX_VIRT_NODE_NUM 400 // the distribution is smoother with bigger value,
+                                // replaced with FLAGS_max_virtual_node_num
 #define MIN_VIRT_NODE_NUM 1
 
 struct crc32_hasher {
@@ -55,8 +56,8 @@ typedef consistent_hash_map<std::string, crc32_hasher> consistent_hash_t;
     void PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations, std::shared_ptr<std::vector<int64_t>> nodecacheMB);
     Status SetupDistribution();
     void AddLocation(unsigned int locidx);
-    void AddLocation(Location location);
-    void AddLocation(Location location, int num_virtual_nodes);
+//    void AddLocation(Location location);
+//    void AddLocation(Location location, int num_virtual_nodes);
     void RemoveLocation(Location location);
     Location GetLocation(Identity identity);
     std::string GetHash(std::string key);

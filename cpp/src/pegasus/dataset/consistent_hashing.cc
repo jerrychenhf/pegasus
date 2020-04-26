@@ -21,6 +21,8 @@
 #include "runtime/planner_exec_env.h"
 #include "server/planner/worker_manager.h"
 
+DECLARE_int32(max_virtual_node_num);
+
 namespace pegasus
 {
 
@@ -97,7 +99,7 @@ void ConsistentHashRing::AddLocation(unsigned int locationid)
 {
 	int vnodecount = nodecacheMB_->at(locationid) / VIRT_NODE_DIVISOR;
 	vnodecount = std::max(MIN_VIRT_NODE_NUM, vnodecount);
-	vnodecount = std::min(MAX_VIRT_NODE_NUM, vnodecount);
+	vnodecount = std::min(FLAGS_max_virtual_node_num, vnodecount);
 
 	for (int i = 0; i < vnodecount; i++)
 	{
@@ -106,15 +108,14 @@ void ConsistentHashRing::AddLocation(unsigned int locationid)
 		consistent_hash_.insert(node);
 	}
 }
-
+#if 0
 void ConsistentHashRing::AddLocation(Location location)
 {
-#if 0
+
 	int vnodecount = nodecacheMB_ / 1000;
 	vnodecount = std::max(MIN_VIRT_NODE_NUM, vnodecount);
 	vnodecount = std::min(MAX_VIRT_NODE_NUM, vnodecount);
 	AddLocation(location, vnodecount);
-#endif
 }
 void ConsistentHashRing::AddLocation(Location location, int num_virtual_nodes)
 {
@@ -123,7 +124,7 @@ void ConsistentHashRing::AddLocation(Location location, int num_virtual_nodes)
 	consistent_hash_.insert(node);
 #endif
 }
-
+#endif
 Location ConsistentHashRing::GetLocation(Identity identity)
 {
 	crc32_hasher h;
