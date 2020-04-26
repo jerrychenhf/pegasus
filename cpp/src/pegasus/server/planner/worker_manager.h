@@ -44,9 +44,9 @@ class WorkerFailureDetector;
 /// provided by the subscriber at registration time.
 typedef std::string WorkerId;
 
-class IWMObserver {
+class IWorkerManagerObserver {
  public:
-  virtual void WkMngObsUpdate(int wmevent) = 0;
+  virtual void ObserverUpdate(int wmevent) = 0;
 };  //WMObserver
 
 // <datasetpath_string, partitionidstring_vector>
@@ -124,13 +124,13 @@ class WorkerManager {
   // Notified by failure detector that the worker failed
   Status OnWorkerFailed(const WorkerId& id);
 
-  void RegisterObserver(IWMObserver *obs) { vobservers_.push_back(obs); }
-  void UnregisterObserver(IWMObserver *obs) {
+  void RegisterObserver(IWorkerManagerObserver *obs) { vobservers_.push_back(obs); }
+  void UnregisterObserver(IWorkerManagerObserver *obs) {
     vobservers_.erase(std::remove(vobservers_.begin(), vobservers_.end(), obs), vobservers_.end());
   }
   void NotifyObservers(int wmevent) {
     for (auto ob : vobservers_)
-      ob->WkMngObsUpdate(wmevent);
+      ob->ObserverUpdate(wmevent);
   }
 
   Status UpdateCacheDropLists(std::shared_ptr<std::vector<Partition>> partits);
@@ -154,7 +154,7 @@ class WorkerManager {
 
   boost::scoped_ptr<WorkerFailureDetector> worker_failure_detector_;
 
-  std::vector<IWMObserver *> vobservers_;
+  std::vector<IWorkerManagerObserver *> vobservers_;
 
   typedef boost::unordered_map<WorkerId, std::shared_ptr<WorkerCacheDropList>>
                  WorkerCacheDropListMap;

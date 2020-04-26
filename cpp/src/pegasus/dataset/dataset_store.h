@@ -41,8 +41,8 @@ class DataSetStore {
   Status RemoveDataSet(std::shared_ptr<DataSet> dataset);
 
  private:
-  SpinLock l_;  //TODO: rename it
-  std::unordered_map<std::string, std::shared_ptr<DataSet>> planner_metadata_;  //TODO: rename it
+  SpinLock wholestore_lock_;
+  std::unordered_map<std::string, std::shared_ptr<DataSet>> dataset_map_;
 };
 
 } // namespace pegasus

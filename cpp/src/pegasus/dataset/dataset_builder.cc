@@ -38,7 +38,7 @@ Status DataSetBuilder::BuildDataset(DataSetRequest *dataset_request,
   auto distributor = std::make_shared<ConsistentHashRing>();
   // TODO: get locations here to decouple distributor from workermanager
   distributor->PrepareValidLocations(nullptr, nullptr);
-  distributor->SetupDist();
+  distributor->SetupDistribution();
 
   // create partitions with identities
   auto partitions = std::make_shared<std::vector<Partition>>();
@@ -106,7 +106,7 @@ Status DataSetBuilder::BuildDatasetPartitions(std::string table_location, std::s
   auto distributor = std::make_shared<ConsistentHashRing>();
   // TODO: get locations here to decouple distributor from workermanager
   distributor->PrepareValidLocations(nullptr, nullptr);
-  distributor->SetupDist();
+  distributor->SetupDistribution();
 
   std::vector<std::string> file_list;
   RETURN_IF_ERROR(storage->ListFiles(table_location, &file_list, nullptr));

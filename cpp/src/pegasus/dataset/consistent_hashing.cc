@@ -65,9 +65,9 @@ void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Locat
 	}
 }
 
-Status ConsistentHashRing::SetupDist()	//SetupDistribution()
+Status ConsistentHashRing::SetupDistribution()
 {
-	LOG(INFO) << "SetupDist()...";
+	LOG(INFO) << "SetupDistribution()...";
 	if (validlocations_)
 	{
 		for (unsigned int i = 0; i < validlocations_->size(); i++)

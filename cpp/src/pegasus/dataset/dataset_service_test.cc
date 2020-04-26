@@ -41,7 +41,7 @@ TEST(DatasetServiceTest, ConHashInit)
 {
   auto distributor = std::make_shared<ConsistentHashRing>();
   // setup the distribution engine
-  Status res = distributor->SetupDist();
+  Status res = distributor->SetupDistribution();
   EXPECT_ERROR(Status::Invalid(""), res.code());
 }
 #endif
@@ -68,7 +68,7 @@ TEST(DatasetServiceTest, ConHashBasic)
   distributor->PrepareValidLocations(validlocs, nodecacheMBs);
 
   // setup the distribution engine
-  ASSERT_OK(distributor->SetupDist());
+  ASSERT_OK(distributor->SetupDistribution());
 
   std::string test_dataset_path = "hostnameplusfolderpath";
 

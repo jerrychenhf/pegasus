@@ -31,9 +31,9 @@ DataSetStore::~DataSetStore()
 Status DataSetStore::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> *datasets)
 {
 
-  boost::lock_guard<SpinLock> l(l_);
-  datasets->get()->reserve(planner_metadata_.size());
-  for (auto entry : planner_metadata_)
+  boost::lock_guard<SpinLock> l(wholestore_lock_);
+  datasets->get()->reserve(dataset_map_.size());
+  for (auto entry : dataset_map_)
   {
     //TODO: lockread for each dataset
     datasets->get()->push_back(entry.second);
@@ -45,9 +45,9 @@ Status DataSetStore::GetDataSet(std::string dataset_path, std::shared_ptr<DataSe
 {
 
   LOG(INFO) << "GetDataSet()...";
-  boost::lock_guard<SpinLock> l(l_);
-  auto entry = planner_metadata_.find(dataset_path);
-  if (entry == planner_metadata_.end())
+  boost::lock_guard<SpinLock> l(wholestore_lock_);
+  auto entry = dataset_map_.find(dataset_path);
+  if (entry == dataset_map_.end())
   {
     return Status::KeyError("Could not find dataset.", dataset_path);
   }
@@ -64,16 +64,16 @@ Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset)
 {
 
   std::string key = dataset->dataset_path();
-  boost::lock_guard<SpinLock> l(l_);
-  planner_metadata_[key] = std::move(dataset);
+  boost::lock_guard<SpinLock> l(wholestore_lock_);
+  dataset_map_[key] = std::move(dataset);
   return Status::OK();
 }
 
 Status DataSetStore::InvalidateAll()
 {
 
-  boost::lock_guard<SpinLock> l(l_);
-  for (auto i : planner_metadata_)
+  boost::lock_guard<SpinLock> l(wholestore_lock_);
+  for (auto i : dataset_map_)
   {
     i.second->setRefreshFlag(DSRF_WORKERSET_CHG);
   }
@@ -89,8 +89,8 @@ Status DataSetStore::RemoveDataSet(std::shared_ptr<DataSet> dataset)
 {
 
   std::string key = dataset->dataset_path();
-  boost::lock_guard<SpinLock> l(l_);
-  planner_metadata_.erase(key);
+  boost::lock_guard<SpinLock> l(wholestore_lock_);
+  dataset_map_.erase(key);
   return Status::OK();
 }
 

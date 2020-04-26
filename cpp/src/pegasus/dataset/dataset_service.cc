@@ -46,7 +46,7 @@ Status DataSetService::Init()
   return Status::OK();
 }
 
-void DataSetService::WkMngObsUpdate(int wmevent)
+void DataSetService::ObserverUpdate(int wmevent)
 {
   if ((WMEVENT_WORKERNODE_ADDED == wmevent) || (WMEVENT_WORKERNODE_REMOVED == wmevent))
     dataset_store_->InvalidateAll();
@@ -101,7 +101,7 @@ Status DataSetService::RefreshDataSet(DataSetRequest *dataset_request, std::stri
     LOG(INFO) << "=== DSRF_WORKERSET_CHG";
     auto distributor = std::make_shared<ConsistentHashRing>();
     distributor->PrepareValidLocations(nullptr, nullptr);
-    distributor->SetupDist();
+    distributor->SetupDistribution();
     for (auto ptt : pds->partitions())
     {
       Partition partition = Partition(Identity(pds->dataset_path(), ptt.GetIdentPath()));
@@ -132,9 +132,9 @@ Status DataSetService::GetDataSet(DataSetRequest *dataset_request, std::shared_p
 
   std::shared_ptr<DataSet> pds = NULL;
   std::string dataset_path = dataset_request->get_dataset_path();
-  dataset_store_->GetDataSet(dataset_path, &pds); //TODO: check return value
+  Status st = dataset_store_->GetDataSet(dataset_path, &pds);
 
-  if (pds == NULL) //TODO: check return value
+  if (Status::OK() != st)
   {
     LOG(INFO) << "=== Not found, creating new dataset ...";
     // build the dataset and insert it to dataset store.
