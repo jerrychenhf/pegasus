@@ -74,4 +74,6 @@ DEFINE_double(store_cache_ratio, 0.8,
 
 DEFINE_bool(check_dataset_append_enabled, true, "If true, check the dataset append");
 
-DEFINE_int32(max_virtual_node_num, 400, "The maximum virtual node number.");
+DEFINE_int32(max_virtual_node_num, 400,
+    "The maximum virtual node number to construct the consistent hash ring. \
+    The virtual node number formula is vnodenum = min(totalcachesizeinMB/100, max_virtual_node_num).");
