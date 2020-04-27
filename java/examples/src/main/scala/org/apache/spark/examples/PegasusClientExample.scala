@@ -56,10 +56,10 @@ object PegasusClientExample {
             args(0).toInt
           else 1
         }
-        val random = {
+        val start = {
           if (args.length > 1)
-            args(1).toBoolean
-          else false
+            args(1).toInt
+          else 0
         }
         val executorPool = Executors.newFixedThreadPool(threadNum)
         val begin = System.currentTimeMillis
@@ -69,12 +69,9 @@ object PegasusClientExample {
                 override def run(): Unit = {
 
                     val workerBegin = System.currentTimeMillis
-                    var endpoint = endpoints.asJava.get(threadId)
-                    if (random) {
-                      val index = scala.util.Random.nextInt(endpoints.size -1)
-                      System.out.println("endpoint index: " + index)
-                      endpoint = endpoints.asJava.get(index)
-                    }
+                    val index = threadId + start
+                    System.out.println("endpoint index: " + index)
+                    var endpoint = endpoints.asJava.get(index)
                     val ticket = endpoint.getTicket
                     val locations = endpoint.getLocations.asScala
                     val location = locations(0)
