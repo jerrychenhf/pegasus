@@ -132,6 +132,7 @@ add_subdirectory(runtime)
 add_subdirectory(server/planner)
 add_subdirectory(server/worker)
 add_subdirectory(plasma)
+add_subdirectory(benchmark)
 
 if(NOT APPLE AND NOT MSVC)
   # Localize thirdparty symbols using a linker version script. This hides them
