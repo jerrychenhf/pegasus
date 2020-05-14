@@ -551,6 +551,8 @@ class FlightClient::FlightClientImpl {
     args.SetInt(GRPC_ARG_INITIAL_RECONNECT_BACKOFF_MS, 100);
     // Receive messages of any size
     args.SetMaxReceiveMessageSize(-1);
+    grpc::ResourceQuota quota;
+    args.SetResourceQuota(quota);
 
     if (options.override_hostname != "") {
       args.SetSslTargetNameOverride(options.override_hostname);
