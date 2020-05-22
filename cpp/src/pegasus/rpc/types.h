@@ -30,6 +30,7 @@
 #include "rpc/visibility.h"
 #include "arrow/ipc/writer.h"
 #include "arrow/buffer.h"
+#include "rpc/file_batch.h"
 
 namespace arrow {
 class Buffer;
@@ -501,6 +502,36 @@ class PEGASUS_RPC_EXPORT MetadataRecordBatchReader {
   virtual arrow::Status ReadAll(std::vector<std::shared_ptr<arrow::RecordBatch>>* batches);
   /// \brief Consume entire stream as a Table
   virtual arrow::Status ReadAll(std::shared_ptr<arrow::Table>* table);
+};
+
+/// \brief A holder for a Batch data with associated Flight metadata.
+class PEGASUS_RPC_EXPORT FlightStreamData {
+ public:
+  std::shared_ptr<arrow::Buffer> app_metadata;
+};
+
+class PEGASUS_RPC_EXPORT FlightStreamRecordBatch: public FlightStreamData {
+ public:
+  std::shared_ptr<arrow::RecordBatch> data;
+};
+
+class PEGASUS_RPC_EXPORT FlightStreamFileBatch: public FlightStreamData {
+ public:
+  //TO DO: FileBatch should be a list of buffers for each columns
+  std::shared_ptr<FileBatch> data;
+};
+
+/// \brief An interface to read Flight data with metadata.
+class PEGASUS_RPC_EXPORT FlightStreamDataReader {
+ public:
+  virtual ~FlightStreamDataReader() = default;
+
+  /// \brief Get the schema for this stream.
+  virtual std::shared_ptr<arrow::Schema> schema() const = 0;
+  /// \brief Get the next message from Flight. If the stream is
+  /// finished, then the members of \a FlightStreamData will be
+  /// nullptr.
+  virtual arrow::Status Next(FlightStreamData* next) = 0;
 };
 
 /// \brief A FlightListing implementation based on a vector of

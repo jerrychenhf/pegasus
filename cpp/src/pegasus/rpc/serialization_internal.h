@@ -24,8 +24,10 @@
 
 #include "rpc/internal.h"
 #include "rpc/types.h"
+#include "rpc/file_batch_reader.h"
 #include "arrow/ipc/message.h"
 #include "arrow/status.h"
+#include "arrow/ipc/options.h"
 
 namespace pegasus {
 
@@ -63,6 +65,17 @@ bool WritePayload(const FlightPayload& payload,
 bool ReadPayload(grpc::ClientReader<pb::FlightData>* reader, FlightData* data);
 bool ReadPayload(grpc::ServerReaderWriter<pb::PutResult, pb::FlightData>* reader,
                  FlightData* data);
+                 
+/// \brief Compute IpcPayload for the given file batch
+/// \param[in] batch the FileBatch that is being serialized
+/// \param[in] options options for serialization
+/// \param[out] out the returned IpcPayload
+/// \return Status
+arrow::Status GetFileBatchPayload(const FileBatch& batch,
+                           const arrow::ipc::IpcOptions& options,
+                           arrow::ipc::internal::IpcPayload* out);
+                             
+
 
 }  // namespace internal
 }  // namespace rpc

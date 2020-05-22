@@ -42,7 +42,7 @@ class Status;
 class CachedColumn;
 
 namespace rpc {
-
+class FileBatchReader;
 class ServerMiddleware;
 class ServerMiddlewareFactory;
 
@@ -95,6 +95,26 @@ class PEGASUS_RPC_EXPORT TableRecordBatchStream : public RecordBatchStream {
   std::shared_ptr<arrow::Table> table_;
 };
 
+
+/// \brief A basic implementation of FlightDataStream that will provide
+/// a sequence of FlightData messages to be written to a gRPC stream
+class PEGASUS_RPC_EXPORT FileBatchStream : public FlightDataStream {
+ public:
+  /// \param[in] reader produces a sequence of record batches
+  /// \param[in,out] pool a MemoryPool to use for allocations
+  explicit FileBatchStream(const std::shared_ptr<FileBatchReader>& reader,
+                            std::vector<std::shared_ptr<CachedColumn>> columns,
+                            arrow::MemoryPool* pool = arrow::default_memory_pool());
+  ~FileBatchStream() override;
+
+  std::shared_ptr<arrow::Schema> schema() override;
+  arrow::Status GetSchemaPayload(FlightPayload* payload) override;
+  arrow::Status Next(FlightPayload* payload) override;
+
+ private:
+  class FileBatchStreamImpl;
+  std::unique_ptr<FileBatchStreamImpl> impl_;
+};
 /// \brief A reader for IPC payloads uploaded by a client. Also allows
 /// reading application-defined metadata via the Flight protocol.
 class PEGASUS_RPC_EXPORT FlightMessageReader : public MetadataRecordBatchReader {

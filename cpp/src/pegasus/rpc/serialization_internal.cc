@@ -378,6 +378,15 @@ bool ReadPayload(grpc::ServerReaderWriter<pb::PutResult, pb::FlightData>* reader
   return reader->Read(reinterpret_cast<pb::FlightData*>(data));
 }
 
+arrow::Status GetFileBatchPayload(const FileBatch& batch,
+                           const arrow::ipc::IpcOptions& options,
+                           arrow::ipc::internal::IpcPayload* out) {
+  //TO DO: write the file patch as the IpcPayload
+  // IpcPayload is intermediate data structure with metadata header, and zero or more buffers
+  // for the message body.
+  return arrow::Status::OK();
+}
+
 #ifndef _WIN32
 #pragma GCC diagnostic pop
 #endif

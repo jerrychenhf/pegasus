@@ -24,9 +24,12 @@
 #include "cache/cache_memory_pool.h"
 #include "common/logging.h"
 #include "cache/lru_cache.h"
+#include "rpc/file_batch_reader.h"
 #include <boost/thread/mutex.hpp>
 
 DEFINE_int64(chunk_size, 2048, "The maximum chunk size of record batches");
+
+DECLARE_bool(cache_format_arrow);
 
 namespace pegasus {
 
@@ -101,17 +104,26 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
     }
   }
 
-  std::shared_ptr<arrow::Schema> schema;
-  request_identity->get_schema(&schema);
-
-  std::shared_ptr<arrow::Table> table = arrow::Table::Make(schema, chunked_arrays);
-
-  std::shared_ptr<arrow::TableBatchReader> reader = std::make_shared<arrow::TableBatchReader>(*table);
-  reader->set_chunksize(FLAGS_chunk_size);
-  *data_stream = std::unique_ptr<rpc::FlightDataStream>(
-  new rpc::TableRecordBatchStream(reader, columns, table));
-
-  return Status::OK();
+  if (FLAGS_cache_format_arrow) {
+    // arrow data format
+    std::shared_ptr<arrow::Schema> schema;
+    request_identity->get_schema(&schema);
+  
+    std::shared_ptr<arrow::Table> table = arrow::Table::Make(schema, chunked_arrays);
+  
+    std::shared_ptr<arrow::TableBatchReader> reader = std::make_shared<arrow::TableBatchReader>(*table);
+    reader->set_chunksize(FLAGS_chunk_size);
+    *data_stream = std::unique_ptr<rpc::FlightDataStream>(
+      new rpc::TableRecordBatchStream(reader, columns, table));
+ } else {
+   // file data format
+   //TO DO: passed the cached column data to the reader
+   std::shared_ptr<rpc::CachedFileBatchReader> reader = std::make_shared<rpc::CachedFileBatchReader>();
+   *data_stream = std::unique_ptr<rpc::FlightDataStream>(
+      new rpc::FileBatchStream(reader, columns));
+ }
+ 
+ return Status::OK();
 }
 
 Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(RequestIdentity* request_identity,

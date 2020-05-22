@@ -255,20 +255,24 @@ class GrpcClientAuthReader : public ClientAuthReader {
 
 class GrpcIpcMessageReader;
 class GrpcStreamReader : public FlightStreamReader {
+ protected:
+  friend class GrpcIpcMessageReader;
+  std::shared_ptr<arrow::Buffer> last_app_metadata_;
+};
+
+class GrpcRecordBatchStreamReader : public GrpcStreamReader {
  public:
-  GrpcStreamReader();
+  GrpcRecordBatchStreamReader();
 
   static Status Open(std::unique_ptr<ClientRpc> rpc,
                      std::unique_ptr<grpc::ClientReader<pb::FlightData>> stream,
-                     std::unique_ptr<GrpcStreamReader>* out);
+                     std::unique_ptr<GrpcRecordBatchStreamReader>* out);
   std::shared_ptr<arrow::Schema> schema() const override;
-  Status Next(FlightStreamChunk* out) override;
+  Status Next(FlightStreamData* out) override;
   void Cancel() override;
 
  private:
-  friend class GrpcIpcMessageReader;
   std::unique_ptr<arrow::RecordBatchReader> batch_reader_;
-  std::shared_ptr<arrow::Buffer> last_app_metadata_;
   std::shared_ptr<ClientRpc> rpc_;
 };
 
@@ -320,12 +324,12 @@ class GrpcIpcMessageReader : public arrow::ipc::MessageReader {
   bool stream_finished_;
 };
 
-GrpcStreamReader::GrpcStreamReader() {}
+GrpcRecordBatchStreamReader::GrpcRecordBatchStreamReader() {}
 
-Status GrpcStreamReader::Open(std::unique_ptr<ClientRpc> rpc,
+Status GrpcRecordBatchStreamReader::Open(std::unique_ptr<ClientRpc> rpc,
                               std::unique_ptr<grpc::ClientReader<pb::FlightData>> stream,
-                              std::unique_ptr<GrpcStreamReader>* out) {
-  *out = std::unique_ptr<GrpcStreamReader>(new GrpcStreamReader);
+                              std::unique_ptr<GrpcRecordBatchStreamReader>* out) {
+  *out = std::unique_ptr<GrpcRecordBatchStreamReader>(new GrpcRecordBatchStreamReader);
   out->get()->rpc_ = std::move(rpc);
   std::unique_ptr<GrpcIpcMessageReader> message_reader(
       new GrpcIpcMessageReader(out->get(), out->get()->rpc_, std::move(stream)));
@@ -333,18 +337,65 @@ Status GrpcStreamReader::Open(std::unique_ptr<ClientRpc> rpc,
                                             &(*out)->batch_reader_);
 }
 
-std::shared_ptr<arrow::Schema> GrpcStreamReader::schema() const {
+std::shared_ptr<arrow::Schema> GrpcRecordBatchStreamReader::schema() const {
   return batch_reader_->schema();
 }
 
-Status GrpcStreamReader::Next(FlightStreamChunk* out) {
-  out->app_metadata = nullptr;
-  RETURN_NOT_OK(batch_reader_->ReadNext(&out->data));
-  out->app_metadata = std::move(last_app_metadata_);
+Status GrpcRecordBatchStreamReader::Next(FlightStreamData* out) {
+  // convert to FlightStreamRecordBatch
+  FlightStreamRecordBatch* out_batch = reinterpret_cast<FlightStreamRecordBatch*>(out);
+  out_batch->app_metadata = nullptr;
+  RETURN_NOT_OK(batch_reader_->ReadNext(&out_batch->data));
+  out_batch->app_metadata = std::move(last_app_metadata_);
   return Status::OK();
 }
 
-void GrpcStreamReader::Cancel() { rpc_->context.TryCancel(); }
+void GrpcRecordBatchStreamReader::Cancel() { rpc_->context.TryCancel(); }
+  
+class GrpcFileBatchStreamReader : public GrpcStreamReader {
+ public:
+  GrpcFileBatchStreamReader();
+
+  static Status Open(std::unique_ptr<ClientRpc> rpc,
+                     std::unique_ptr<grpc::ClientReader<pb::FlightData>> stream,
+                     std::unique_ptr<GrpcFileBatchStreamReader>* out);
+  std::shared_ptr<arrow::Schema> schema() const override;
+  Status Next(FlightStreamData* out) override;
+  void Cancel() override;
+
+ private:
+  std::unique_ptr<FileBatchReader> batch_reader_;
+  std::shared_ptr<ClientRpc> rpc_;
+};
+
+GrpcFileBatchStreamReader::GrpcFileBatchStreamReader() {}
+
+Status GrpcFileBatchStreamReader::Open(std::unique_ptr<ClientRpc> rpc,
+                              std::unique_ptr<grpc::ClientReader<pb::FlightData>> stream,
+                              std::unique_ptr<GrpcFileBatchStreamReader>* out) {
+  *out = std::unique_ptr<GrpcFileBatchStreamReader>(new GrpcFileBatchStreamReader);
+  out->get()->rpc_ = std::move(rpc);
+  std::unique_ptr<GrpcIpcMessageReader> message_reader(
+      new GrpcIpcMessageReader(out->get(), out->get()->rpc_, std::move(stream)));
+  return FileBatchStreamReader::Open(std::move(message_reader),
+                                            &(*out)->batch_reader_);
+}
+
+std::shared_ptr<arrow::Schema> GrpcFileBatchStreamReader::schema() const {
+  return batch_reader_->schema();
+}
+
+Status GrpcFileBatchStreamReader::Next(FlightStreamData* out) {
+  // convert to FlightStreamFileBatch
+  FlightStreamFileBatch* out_batch = reinterpret_cast<FlightStreamFileBatch*>(out);
+  out_batch->app_metadata = nullptr;
+  RETURN_NOT_OK(batch_reader_->ReadNext(&out_batch->data));
+  out_batch->app_metadata = std::move(last_app_metadata_);
+  return Status::OK();
+}
+
+void GrpcFileBatchStreamReader::Cancel() { rpc_->context.TryCancel(); }
+
 
 // Similarly, the next two classes are intertwined. In order to get
 // application-specific metadata to the IpcPayloadWriter,
@@ -567,6 +618,7 @@ class FlightClient::FlightClientImpl {
         grpc::experimental::CreateCustomChannelWithInterceptors(
             grpc_uri.str(), creds, args, std::move(interceptors)));
 
+    cache_format_arrow = options.cache_format_arrow;
     return Status::OK();
   }
 
@@ -701,9 +753,15 @@ class FlightClient::FlightClientImpl {
     std::unique_ptr<grpc::ClientReader<pb::FlightData>> stream(
         stub_->DoGet(&rpc->context, pb_ticket));
 
-    std::unique_ptr<GrpcStreamReader> reader;
-    RETURN_NOT_OK(GrpcStreamReader::Open(std::move(rpc), std::move(stream), &reader));
-    *out = std::move(reader);
+    if (cache_format_arrow) {
+      std::unique_ptr<GrpcRecordBatchStreamReader> reader;
+      RETURN_NOT_OK(GrpcRecordBatchStreamReader::Open(std::move(rpc), std::move(stream), &reader));
+      *out = std::move(reader);
+    } else {
+      std::unique_ptr<GrpcFileBatchStreamReader> reader;
+      RETURN_NOT_OK(GrpcFileBatchStreamReader::Open(std::move(rpc), std::move(stream), &reader));
+      *out = std::move(reader);
+    }
     return Status::OK();
   }
 
@@ -747,6 +805,7 @@ class FlightClient::FlightClientImpl {
  private:
   std::unique_ptr<pb::FlightService::Stub> stub_;
   std::shared_ptr<ClientAuthHandler> auth_handler_;
+  bool cache_format_arrow;
 };
 
 FlightClient::FlightClient() { impl_.reset(new FlightClientImpl); }

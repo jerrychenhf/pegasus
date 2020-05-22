@@ -74,11 +74,13 @@ class PEGASUS_RPC_EXPORT FlightClientOptions {
   std::string override_hostname;
   /// \brief A list of client middleware to apply.
   std::vector<std::shared_ptr<ClientMiddlewareFactory>> middleware;
+  /// \the cache format to use
+  bool cache_format_arrow;
 };
 
 /// \brief A RecordBatchReader exposing Flight metadata and cancel
 /// operations.
-class PEGASUS_RPC_EXPORT FlightStreamReader : public MetadataRecordBatchReader {
+class PEGASUS_RPC_EXPORT FlightStreamReader : public FlightStreamDataReader {
  public:
   /// \brief Try to cancel the call.
   virtual void Cancel() = 0;

@@ -78,7 +78,8 @@ set(PEGASUS_RPC_SRCS
     serialization_internal.cc
     server.cc
     server_auth.cc
-    types.cc)
+    types.cc
+    file_batch_reader.cc)
 
 add_pegasus_lib(pegasus_rpc
               CMAKE_PACKAGE_NAME
