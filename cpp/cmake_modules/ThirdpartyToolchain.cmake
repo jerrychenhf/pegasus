@@ -1329,7 +1329,8 @@ macro(build_gtest)
   add_dependencies(GTest::GMock googletest_ep)
 endmacro()
 
-if(PEGASUS_BUILD_TESTS)
+if(PEGASUS_BUILD_TESTS
+   OR PEGASUS_BUILD_BENCHMARKS)
   resolve_dependency(GTest)
 
   if(NOT GTEST_VENDORED)
