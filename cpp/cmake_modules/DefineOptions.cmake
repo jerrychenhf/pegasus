@@ -79,7 +79,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 
   define_option(PEGASUS_BUILD_TESTS "Build the Pegasus googletest unit tests" OFF)
 
-  define_option(PEGASUS_BUILD_BENCHMARKS "Build the Pegasus benchmarks" ON)
+  define_option(PEGASUS_BUILD_BENCHMARKS "Build the Pegasus benchmarks" OFF)
 
   define_option_string(PEGASUS_TEST_LINKAGE
                        "Linkage of Pegasus libraries with unit tests executables."

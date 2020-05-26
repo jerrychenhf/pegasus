@@ -440,6 +440,11 @@ if(PEGASUS_BUILD_TESTS)
   add_dependencies(pegasus_test_dependencies ${PEGASUS_TEST_LINK_TOOLCHAIN})
 endif()
 
+if(PEGASUS_BUILD_BENCHMARKS)
+  # Some benchmarks use gtest
+  add_dependencies(pegasus_benchmark_dependencies pegasus_test_dependencies
+                   toolchain-benchmarks)
+endif()
 
 set(PEGASUS_TEST_STATIC_LINK_LIBS  
     pegasus_static 
