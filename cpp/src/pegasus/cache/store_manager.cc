@@ -25,6 +25,7 @@ namespace pegasus {
 const std::string StoreManager::STORE_ID_DRAM = "DRAM";
 const std::string StoreManager::STORE_ID_DCPMM = "DCPMM";
 const std::string StoreManager::STORE_PROPERTY_PATH = "path";
+const std::string StoreManager::STORE_ID_FILE = "FILE";
 
 StoreManager::~StoreManager(){
 }

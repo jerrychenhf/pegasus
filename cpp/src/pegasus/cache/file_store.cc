@@ -17,6 +17,9 @@
 
 #include "cache/file_store.h"
 #include "ipc/allocator.h"
+#include "cache/store_manager.h"
+
+DECLARE_int32(store_file_capacity_gb);
 
 namespace pegasus {
 constexpr int64_t kBlockSize = 64;
@@ -28,6 +31,22 @@ FileStore::FileStore(int64_t capacity)
 
 Status FileStore::Init(const std::unordered_map<string, string>* properties) {
   LOG(INFO) << "Init the binary store";
+  // Get the file store path from properties
+  auto entry  = properties->find(StoreManager::STORE_PROPERTY_PATH);
+  
+  std::string file_store_path = "";
+
+  if (entry == properties->end()) {
+    file_store_path = "/dev/shm";
+  } else {
+    file_store_path = entry->second;
+  }
+  LOG(INFO) << "The file store path is " << file_store_path;
+
+  int64_t capacity = ((int64_t) FLAGS_store_file_capacity_gb) * StoreManager::GIGABYTE;
+
+  Allocator::SetFootprintLimit(static_cast<size_t>(capacity));
+  
   void* pointer = Allocator::Memalign(
         kBlockSize, Allocator::GetFootprintLimit() - 256 * sizeof(size_t));
   DCHECK(pointer != nullptr);
@@ -37,11 +56,6 @@ Status FileStore::Init(const std::unordered_map<string, string>* properties) {
 }
 
 Status FileStore::Allocate(int64_t size, StoreRegion* store_region) {
-
-  return Status::OK();
-}
-
-Status FileStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* store_region) {
 
   return Status::OK();
 }
