@@ -372,7 +372,7 @@ class TestFlightClient : public ::testing::Test {
     std::unique_ptr<FlightStreamReader> stream;
     ASSERT_OK(client_->DoGet(ticket, &stream));
 
-    FlightStreamChunk chunk;
+    FlightStreamRecordBatch chunk;
     for (int i = 0; i < num_batches; ++i) {
       ASSERT_OK(stream->Next(&chunk));
       ASSERT_NE(nullptr, chunk.data);
