@@ -19,6 +19,7 @@
 #define PEGASUS_CACHE_REGION_H
 
 #include "cache/cache_store.h"
+#include "dataset/object_id.h"
 
 #include <string>
 
@@ -51,23 +52,22 @@ class CacheRegion {
   CacheRegion();
   CacheRegion(const std::shared_ptr<CacheMemoryPool>& memory_pool,
     const std::shared_ptr<arrow::ChunkedArray>& chunked_array, int64_t size,
-     const unordered_map<int, std::shared_ptr<ObjectEntry>> object_entrys = {});
+     const unordered_map<int, std::shared_ptr<ObjectID>> object_ids = {});
   
   ~CacheRegion();
   
   int64_t size() const;
   std::shared_ptr<arrow::ChunkedArray> chunked_array() const;
   std::shared_ptr<CacheMemoryPool> memory_pool() const;
-  unordered_map<int, std::shared_ptr<ObjectEntry>> object_entrys() const;
+  unordered_map<int, std::shared_ptr<ObjectID>> object_ids() const;
  private:
   // the pool object associated to the chunked array
   // use shared ptr to managed the life time
   std::shared_ptr<CacheMemoryPool> memory_pool_;
   std::shared_ptr<arrow::ChunkedArray> chunked_array_;
   int64_t size_;
-  // the key is the rowgroup_ids and the value is the buffers
-  // TODO: Combine the chunked_array_ and chunked_arrays_
-  unordered_map<int, std::shared_ptr<ObjectEntry>> object_entrys_;
+  // the key is the rowgroup_ids and the value is the objectid
+  unordered_map<int, std::shared_ptr<ObjectID>> object_ids_;
 };
 
 } // namespace pegasus
