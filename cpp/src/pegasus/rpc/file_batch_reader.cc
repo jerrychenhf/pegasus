@@ -22,7 +22,6 @@
 #include "arrow/result.h"
 #include "arrow/ipc/dictionary.h"
 #include "dataset/dataset_cache_block_manager.h"
-#include "dataset/object_id.h"
 
 namespace pegasus {
 
@@ -40,7 +39,7 @@ namespace rpc {
 
     std::shared_ptr<CachedColumn> column = columns_[0]; 
     CacheRegion* cache_region = column->GetCacheRegion();
-    rowgroup_nums_ = cache_region->object_ids().size();
+    rowgroup_nums_ = cache_region->object_entrys().size();
     absolute_rowgroup_position_ = 0;
   }
   
@@ -63,18 +62,18 @@ namespace rpc {
       return arrow::Status::OK();
     }
     
-    std::vector<std::shared_ptr<ObjectID>> batch_data(columns_.size());
+    std::vector<std::shared_ptr<ObjectEntry>> batch_data(columns_.size());
 
     // Traverse the columns and create the FileBatch for each rowgroup
     for (int i = 0; i < columns_.size(); ++i) {
       std::shared_ptr<CachedColumn> column = columns_[i];
       CacheRegion* cache_region = column->GetCacheRegion();
-      unordered_map<int, std::shared_ptr<ObjectID>> object_ids =
-       cache_region->object_ids();
+      unordered_map<int, std::shared_ptr<ObjectEntry>> object_entrys =
+       cache_region->object_entrys();
 
-      auto iter  = object_ids.find(absolute_rowgroup_position_);
-      std::shared_ptr<ObjectID> object_id = iter->second;
-      batch_data[i] = object_id;
+      auto iter  = object_entrys.find(absolute_rowgroup_position_);
+      std::shared_ptr<ObjectEntry> object_entry = iter->second;
+      batch_data[i] = object_entry;
     }
   
     *out = std::make_shared<FileBatch>(absolute_rowgroup_position_, batch_data);
