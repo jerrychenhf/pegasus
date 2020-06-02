@@ -19,6 +19,7 @@
 #define PEGASUS_FILE_BATCH_H
 
 #include "common/status.h"
+#include "cache/cache_region.h"
 
 using namespace std;
 
@@ -26,11 +27,14 @@ namespace pegasus {
 
 class FileBatch {
  public:
- 	FileBatch() {
-  }
+ 	FileBatch(int rowgroup_id, std::vector<std::shared_ptr<ObjectEntry>> object_entrys):
+	 rowgroup_id_(rowgroup_id), object_entrys_(object_entrys) {}
  	
- 	//TO DO
-	// implement the file batch
+ 	int rowgroup_id() {return rowgroup_id_;}
+	std::vector<std::shared_ptr<ObjectEntry>> object_entrys() {return object_entrys_;}
+ private:
+  int rowgroup_id_;
+  std::vector<std::shared_ptr<ObjectEntry>> object_entrys_;
 };
 
 } // namespace pegasus

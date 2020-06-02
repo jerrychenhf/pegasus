@@ -21,13 +21,26 @@
 #include "rpc/file_batch_reader.h"
 #include "arrow/result.h"
 #include "arrow/ipc/dictionary.h"
+#include "dataset/dataset_cache_block_manager.h"
 
 namespace pegasus {
 
 namespace rpc {
   
-  CachedFileBatchReader::CachedFileBatchReader(){
-    //TO DO
+  CachedFileBatchReader::CachedFileBatchReader() {
+
+  }
+
+  CachedFileBatchReader::CachedFileBatchReader(
+    std::vector<std::shared_ptr<CachedColumn>> columns): columns_(columns){
+     if (columns_.size() < 0) {
+      // return arrow::Status::Invalid("The cached columns size is 0 !!!");
+    } 
+
+    std::shared_ptr<CachedColumn> column = columns_[0]; 
+    CacheRegion* cache_region = column->GetCacheRegion();
+    rowgroup_nums_ = cache_region->object_entrys().size();
+    absolute_rowgroup_position_ = 0;
   }
   
   std::shared_ptr<arrow::Schema> CachedFileBatchReader::schema() const {
@@ -36,7 +49,35 @@ namespace rpc {
   }
   
   arrow::Status CachedFileBatchReader::ReadNext(std::shared_ptr<FileBatch>* out) {
-    //TO DO
+    // column1 -> (rowgroup1-> buffer, rowgroup2 -> buffer)
+    // columns2 -> (rowgroup1 -> buffer, rowgroup2 -> buffer)
+    // FileBatch1
+    //          column1 -> (rowgroup1-> buffer)
+    //          column2 -> (rowgroup1 -> buffer)
+    // FileBatch2
+    //          column1 -> (rowgroup2-> buffer)
+    //          column2 -> (rowgroup2 -> buffer) 
+    if (columns_.size() < 0) {
+      *out = nullptr;
+      return arrow::Status::OK();
+    }
+    
+    std::vector<std::shared_ptr<ObjectEntry>> batch_data(columns_.size());
+
+    // Traverse the columns and create the FileBatch for each rowgroup
+    for (int i = 0; i < columns_.size(); ++i) {
+      std::shared_ptr<CachedColumn> column = columns_[i];
+      CacheRegion* cache_region = column->GetCacheRegion();
+      unordered_map<int, std::shared_ptr<ObjectEntry>> object_entrys =
+       cache_region->object_entrys();
+
+      auto iter  = object_entrys.find(absolute_rowgroup_position_);
+      std::shared_ptr<ObjectEntry> object_entry = iter->second;
+      batch_data[i] = object_entry;
+    }
+  
+    *out = std::make_shared<FileBatch>(absolute_rowgroup_position_, batch_data);
+    absolute_rowgroup_position_ += 1;
     return arrow::Status::OK();
   }
   

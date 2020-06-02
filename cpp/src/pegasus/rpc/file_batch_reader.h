@@ -26,6 +26,8 @@ using namespace std;
 
 namespace pegasus {
 
+class CachedColumn;
+
 namespace rpc {
 
 class FileBatchReader {
@@ -51,15 +53,18 @@ class FileBatchReader {
 /// The conversion is zero-copy: each file batch is a view of row group columns.
 class  CachedFileBatchReader : public FileBatchReader {
  public:
-  /// \brief Construct a TableBatchReader for the given table
-  explicit CachedFileBatchReader();
+  /// \brief Construct a CachedFileBatchReader for the given CachedColumns
+  explicit CachedFileBatchReader(std::vector<std::shared_ptr<CachedColumn>> columns);
+  CachedFileBatchReader();
 
   std::shared_ptr<arrow::Schema> schema() const override;
 
   arrow::Status ReadNext(std::shared_ptr<FileBatch>* out) override;
 
  private:
-  
+  std::vector<std::shared_ptr<CachedColumn>> columns_;
+  int rowgroup_nums_;
+  int absolute_rowgroup_position_;
 };
 
 class  FileBatchStreamReader : public FileBatchReader {
