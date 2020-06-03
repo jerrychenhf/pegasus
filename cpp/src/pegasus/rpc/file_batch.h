@@ -19,22 +19,24 @@
 #define PEGASUS_FILE_BATCH_H
 
 #include "common/status.h"
-#include "cache/cache_region.h"
 
 using namespace std;
+namespace arrow {
+  class Buffer;
+}
 
 namespace pegasus {
 
 class FileBatch {
  public:
- 	FileBatch(int rowgroup_id, std::vector<std::shared_ptr<ObjectEntry>> object_entrys):
-	 rowgroup_id_(rowgroup_id), object_entrys_(object_entrys) {}
+ 	FileBatch(int rowgroup_id, std::vector<std::shared_ptr<arrow::Buffer>> object_buffers):
+	 rowgroup_id_(rowgroup_id), object_buffers_(object_buffers) {}
  	
  	int rowgroup_id() {return rowgroup_id_;}
-	std::vector<std::shared_ptr<ObjectEntry>> object_entrys() {return object_entrys_;}
+	std::vector<std::shared_ptr<arrow::Buffer>> object_buffers() {return object_buffers_;}
  private:
   int rowgroup_id_;
-  std::vector<std::shared_ptr<ObjectEntry>> object_entrys_;
+  std::vector<std::shared_ptr<arrow::Buffer>> object_buffers_;
 };
 
 } // namespace pegasus

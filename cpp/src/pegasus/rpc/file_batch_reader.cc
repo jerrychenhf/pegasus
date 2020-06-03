@@ -39,7 +39,7 @@ namespace rpc {
 
     std::shared_ptr<CachedColumn> column = columns_[0]; 
     CacheRegion* cache_region = column->GetCacheRegion();
-    rowgroup_nums_ = cache_region->object_entrys().size();
+    rowgroup_nums_ = cache_region->object_buffers().size();
     absolute_rowgroup_position_ = 0;
   }
   
@@ -62,17 +62,17 @@ namespace rpc {
       return arrow::Status::OK();
     }
     
-    std::vector<std::shared_ptr<ObjectEntry>> batch_data(columns_.size());
+    std::vector<std::shared_ptr<arrow::Buffer>> batch_data(columns_.size());
 
     // Traverse the columns and create the FileBatch for each rowgroup
     for (int i = 0; i < columns_.size(); ++i) {
       std::shared_ptr<CachedColumn> column = columns_[i];
       CacheRegion* cache_region = column->GetCacheRegion();
-      unordered_map<int, std::shared_ptr<ObjectEntry>> object_entrys =
-       cache_region->object_entrys();
+      unordered_map<int, std::shared_ptr<arrow::Buffer>> object_buffers =
+       cache_region->object_buffers();
 
-      auto iter  = object_entrys.find(absolute_rowgroup_position_);
-      std::shared_ptr<ObjectEntry> object_entry = iter->second;
+      auto iter  = object_buffers.find(absolute_rowgroup_position_);
+      std::shared_ptr<arrow::Buffer> object_entry = iter->second;
       batch_data[i] = object_entry;
     }
   
