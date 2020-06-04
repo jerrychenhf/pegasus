@@ -17,7 +17,11 @@
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -ldl") 
 
-add_custom_target(gen-deps ALL DEPENDS boost_ep glog_ep arrow_ep)
+if(NOT ARROW_FOUND)
+  add_custom_target(gen-deps ALL DEPENDS boost_ep glog_ep arrow_ep)
+else()
+  add_custom_target(gen-deps ALL DEPENDS boost_ep glog_ep)
+endif()
 #add_custom_target(gen-deps ALL DEPENDS boost_ep gflags_ep)
 add_custom_target(pegasus)
 add_custom_target(pegasus-tests)

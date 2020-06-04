@@ -44,6 +44,7 @@ public:
   static const std::string STORE_ID_DRAM;
   static const std::string STORE_ID_DCPMM;
   static const std::string STORE_PROPERTY_PATH;
+  static const std::string STORE_ID_FILE;
   
   static const int64_t KILOBYTE = 1024;
   static const int64_t MEGABYTE = KILOBYTE * 1024;

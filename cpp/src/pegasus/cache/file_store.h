@@ -15,30 +15,39 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_FILE_BATCH_H
-#define PEGASUS_FILE_BATCH_H
+#ifndef PEGASUS_BINARY_STORE_H
+#define PEGASUS_BINARY_STORE_H
 
+#include <unordered_map>
+#include <atomic>
+
+#include "cache/store.h"
 #include "common/status.h"
-
-using namespace std;
-namespace arrow {
-  class Buffer;
-}
+#include "cache/store_region.h"
 
 namespace pegasus {
 
-class FileBatch {
+class FileStore : public Store {
  public:
- 	FileBatch(int rowgroup_id, std::vector<std::shared_ptr<arrow::Buffer>> object_buffers):
-	 rowgroup_id_(rowgroup_id), object_buffers_(object_buffers) {}
- 	
- 	int rowgroup_id() {return rowgroup_id_;}
-	std::vector<std::shared_ptr<arrow::Buffer>> object_buffers() {return object_buffers_;}
+  FileStore(int64_t capacity);
+  
+  virtual Status Init(const std::unordered_map<string, string>* properties);
+  
+  virtual Status Allocate(int64_t size, StoreRegion* store_region) override;
+  virtual Status Reallocate(int64_t old_size, int64_t new_size, StoreRegion* store_region) override;
+  virtual Status Free(StoreRegion* store_region) override;
+  
+  virtual int64_t GetCapacity()override { return capacity_; } 
+  virtual int64_t GetFreeSize() override;
+  virtual int64_t GetUsedSize() override;
+  
+  virtual std::string GetStoreName() override;
+
  private:
-  int rowgroup_id_;
-  std::vector<std::shared_ptr<arrow::Buffer>> object_buffers_;
+  int64_t capacity_;
+  std::atomic<int64_t> used_size_;
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_FILE_BATCH_H
+#endif  // PEGASUS_BINARY_STORE_H
