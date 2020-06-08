@@ -24,6 +24,7 @@ set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/parquet")
 
 add_library(Parquet
   parquet_reader.cc
+  parquet_raw_data_reader.cc
 )
 add_dependencies(Parquet gen-deps)
 
@@ -65,6 +66,7 @@ endfunction()
 if(PEGASUS_BUILD_TESTS)
 
   add_pegasus_parquet_test(parquet_reader_test)
+  add_pegasus_parquet_test(parquet_raw_data_reader_test)
 
 endif()
 
