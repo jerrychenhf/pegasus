@@ -41,7 +41,8 @@ Status WorkerTableAPIService::Init() {
   int32_t port = env_->GetWorkerGrpcPort();
 
   pegasus::rpc::Location location;
-  pegasus::rpc::Location::ForGrpcTcp(hostname, port, &location);
+  // pegasus::rpc::Location::ForGrpcTcp(hostname, port, &location);
+  Location::ForGrpcUnix("/tmp/worker", &location);
   pegasus::rpc::FlightServerOptions options(location);
   arrow::Status st = rpc::FlightServerBase::Init(options);
   if (!st.ok()) {

@@ -63,8 +63,9 @@ WorkerHeartbeat::WorkerHeartbeat()
         bind<void>(mem_fn(&WorkerHeartbeat::DoHeartbeat), this,
           _1, _2)));
 
-  planner_address_ = FLAGS_planner_hostname + ":" 
-    + std::to_string(FLAGS_planner_port);
+  // planner_address_ = FLAGS_planner_hostname + ":" 
+  //   + std::to_string(FLAGS_planner_port);
+  planner_address_ = "/tmp/planner";
   LOG(INFO) << "Planner address to heartbeat: " << planner_address_;
 }
 
@@ -248,10 +249,10 @@ void WorkerHeartbeat::DoHeartbeat(int thread_id,
 
 Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
   Status status;
+
   FlightClientConnection client(heartbeat_client_cache_.get(),
       planner_address_, &status);
   RETURN_IF_ERROR(status);
-
   rpc::HeartbeatInfo info;
   
   // identifier
@@ -260,8 +261,8 @@ Status WorkerHeartbeat::SendHeartbeat(const ScheduledHeartbeat& heartbeat) {
   
   if(heartbeat.heartbeatType == HeartbeatType::REGISTRATION) {
     info.type = rpc::HeartbeatInfo::REGISTRATION;
-    rpc::Location::ForGrpcTcp(FLAGS_hostname, FLAGS_worker_port, info.mutable_address());
-    
+    // rpc::Location::ForGrpcTcp(FLAGS_hostname, FLAGS_worker_port, info.mutable_address());
+    Location::ForGrpcUnix("/tmp/worker", info.mutable_address());
     LOG(INFO) << "Registering worker with hostname: " << FLAGS_hostname
                 << " and address: " << FLAGS_hostname << ":" << FLAGS_worker_port;
   } else {

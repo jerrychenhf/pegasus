@@ -29,8 +29,10 @@ object PegasusClientExample {
 
     def main(args: Array[String]): Unit = {
 
+//        val plannerClientFactory = new PegasusClientFactory(
+//              Location.forGrpcInsecure("bdpe611n3", 30001), null, null)
         val plannerClientFactory = new PegasusClientFactory(
-              Location.forGrpcInsecure("bdpe611n3", 30001), null, null)
+            Location.forGrpcDomainSocket("/tmp/planner"), null, null);
         val plannerClient = plannerClientFactory.apply
         val path = "hdfs://10.239.47.55:9000/genData1000/store_sales"
         val properties = new HashMap[String, String]

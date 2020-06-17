@@ -34,7 +34,8 @@ class PegasusDataSetReader(
   private val plannerPort = sparkSession.conf.get(
     PegasusConf.PLANNER_PORT.key, PegasusConf.PLANNER_PORT.defaultValue.get)
 
-  private val location = Location.forGrpcInsecure(plannerHost, plannerPort.toInt)
+//  private val location = Location.forGrpcInsecure(plannerHost, plannerPort.toInt)
+  private val location = Location.forGrpcDomainSocket("/tmp/planner")
 
   private val userName = sparkSession.conf.get(
     PegasusConf.USERNAME.key, PegasusConf.USERNAME.defaultValue.get)

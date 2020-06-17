@@ -54,12 +54,12 @@ case class PegasusPartitionReaderFactory(
     if (!locations.isEmpty) {
       location = endpoint.getLocations.get(0)
       if (location.getUri != null) {
-        if (location.getUri.getHost == null) {
-          throw new NoSuchElementException("No host name found in location.")
-        }
-        if (location.getUri.getPort == null) {
-          throw new NoSuchElementException("No host port found in location.")
-        }
+//        if (location.getUri.getHost == null) {
+//          throw new NoSuchElementException("No host name found in location.")
+//        }
+//        if (location.getUri.getPort == null) {
+//          throw new NoSuchElementException("No host port found in location.")
+//        }
       } else {
         throw new NoSuchElementException("No Location found in FlightEndpoint.")
       }

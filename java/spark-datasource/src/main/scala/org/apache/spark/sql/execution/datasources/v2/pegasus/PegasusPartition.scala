@@ -36,7 +36,8 @@ case class PegasusPartition(index: Int, endpoint: FlightEndpoint)
     logInfo("preferred partition locations " + locations)
 
     locations.map { location =>
-      location.getUri.getHost
+//      location.getUri.getHost
+      "localhost"
     }.toArray
   }
 

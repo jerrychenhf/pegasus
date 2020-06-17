@@ -31,6 +31,9 @@ DEFINE_string(planner_hostname, "", "Hostname of the planner to register with");
 DEFINE_int32(planner_port, 30001, "port on which planner is exported");
 DEFINE_int32(worker_port, 30002, "port on which worker is exported");
 
+DEFINE_string(planner_unix_path, "/tmp/planner", "GRPC UNIX path of planner");
+DEFINE_string(worker_unix_path, "/tmp/worker", "GRPC UNIX path of worker");
+
 DEFINE_string(storage_type, "HDFS", "StorageType");
 DEFINE_string(store_types, "MEMORY", "StoreType");
 

@@ -34,13 +34,14 @@ namespace pegasus {
     std::string host;
     int32_t port = 0;
     
-    if (!pegasus::ParseAddress(address_, &host, &port))
-      return Status::Invalid(strings::Substitute(
-          "Address: $0 is invalid.",
-          address_));
+    // if (!pegasus::ParseAddress(address_, &host, &port))
+    //   return Status::Invalid(strings::Substitute(
+    //       "Address: $0 is invalid.",
+    //       address_));
     
     rpc::Location location;
-    rpc::Status status = rpc::Location::ForGrpcTcp(host, port, &location);
+    // rpc::Status status = rpc::Location::ForGrpcTcp(host, port, &location);
+    rpc::Status status = rpc::Location::ForGrpcUnix("/tmp/planner", &location);
     if(!status.ok())
       return pegasus::Status::fromArrowStatus(status);
     
