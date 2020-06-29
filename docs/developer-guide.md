@@ -142,7 +142,7 @@ cd pegasus/java
 mvn clean package
 
 ```
-To run examples
+To run Spark DataFrame Example
 ```
 cd pegasus/java
 ./bin/run-example org.apache.spark.examples.DataFrameExample
