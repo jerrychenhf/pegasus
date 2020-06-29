@@ -5,7 +5,7 @@
 ```
 iperf -s
 ```
-#### Run
+#### Run iperf Client
 -P15 is the 15 threads
 ```
 iperf -c localhost -p 5001 -P15
@@ -23,11 +23,10 @@ cmake -DARROW_FLIGHT=ON -DARROW_PARQUET=ON -DARROW_HDFS=ON -DARROW_WITH_SNAPPY=O
 make
 ```
 #### Run Benchmark
+10 is the thread number.
 ```
 cd release
-```
-```
-./arrow-flight-benchmark --server_host localhost --num_streams 1 --num_threads 1
+./arrow-flight-benchmark --server_host localhost --num_streams 1 --num_threads 10
 ```
 
 ### Run Arrow Flight Benchmark Client with Pegasus Server
@@ -49,10 +48,11 @@ sh start-planner.sh --planner_hostname=localhost --planner_port=30001
 cd pegasus/bin
 sh start-worker.sh --worker_hostname=localhost --worker_port=30002 --planner_hostname=localhost --planner_port=30001
 ```
-#### Run Benchmark
+#### Run Benchmark Client
+10 is the thread number.
 ```
 cd release/benchmark/
-./benchmark --server_host=localhost
+./benchmark --server_host=localhost --num_threads 10
 ```
 
 ### Run Java client Driver with Pegasus Server
