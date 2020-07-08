@@ -566,6 +566,50 @@ arrow::Status ToProto(const HeartbeatResult& result, pb::HeartbeatResult* pb_res
   return arrow::Status::OK();
 }
 
+arrow::Status FromProto(const pb::LocalColumnInfo& pb_info, LocalColumnInfo* info) {
+  info->column_index = pb_info.column_index();
+  info->data_offset = pb_info.data_offset();
+  info->data_size = pb_info.data_size();
+  info->mmap_fd = pb_info.mmap_fd();
+  info->mmap_size = pb_info.mmap_size();
+  return arrow::Status::OK();
+}
+
+arrow::Status FromProto(const pb::LocalPartitionInfo& pb_info, LocalPartitionInfo* info) {
+  info->columns.resize(pb_info.columninfo_size());
+  for (int i = 0; i < pb_info.columninfo_size(); ++i) {
+    RETURN_NOT_OK(FromProto(pb_info.columninfo(i), &info->columns[i]));
+  }
+  return arrow::Status::OK();
+}
+
+arrow::Status FromProto(const pb::LocalReleaseResult& pb_result, LocalReleaseResult* result) {
+  result->result_code = pb_result.result_code();
+  return arrow::Status::OK();
+}
+
+arrow::Status ToProto(const LocalColumnInfo& info, pb::LocalColumnInfo* pb_info) {
+  pb_info->set_column_index(info.column_index);
+  pb_info->set_data_offset(info.data_offset);
+  pb_info->set_data_size(info.data_size);
+  pb_info->set_mmap_fd(info.mmap_fd);
+  pb_info->set_mmap_size(info.mmap_size);
+  return arrow::Status::OK();
+}
+
+arrow::Status ToProto(const LocalPartitionInfo& info, pb::LocalPartitionInfo* pb_info) {
+  pb_info->clear_columninfo();
+  for (const LocalColumnInfo& column : info.columns) {
+    ToProto(column, pb_info->add_columninfo());
+  }
+  return arrow::Status::OK();
+}
+
+arrow::Status ToProto(const LocalReleaseResult& result, pb::LocalReleaseResult* pb_result) {
+  pb_result->set_result_code(result.result_code);
+  return arrow::Status::OK();
+}
+
 }  // namespace internal
 }  // namespace rpc
 }  // namespace pegasus

@@ -91,6 +91,22 @@ arrow::Status WorkerTableAPIService::DoPut(const rpc::ServerCallContext& context
   return arrow::Status::OK();
 }
 
+
+arrow::Status WorkerTableAPIService::GetLocalData(const rpc::ServerCallContext& context,
+                               const rpc::Ticket& request,
+                               std::unique_ptr<rpc::LocalPartitionInfo>* response) {
+  //TO DO
+  return arrow::Status::OK();
+}
+                                
+
+arrow::Status WorkerTableAPIService::ReleaseLocalData(const rpc::ServerCallContext& context,
+                               const rpc::Ticket& request,
+                               std::unique_ptr<rpc::LocalReleaseResult>* response) {
+  //TO DO
+  return arrow::Status::OK();
+}
+
 arrow::Status WorkerTableAPIService::CreateDataRequest(const rpc::Ticket& request,
   RequestIdentity* request_identity) {
 

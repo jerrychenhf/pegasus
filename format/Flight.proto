@@ -108,6 +108,16 @@ service FlightService {
    * Heartbeat between workder and server. 
    */
   rpc Heartbeat(HeartbeatInfo) returns (HeartbeatResult) {}
+  
+  /*
+   * Request data columns for a partition from a local worker in shared memory mapping way.
+   */
+  rpc GetLocalData(Ticket) returns (LocalPartitionInfo) {}
+  
+  /*
+   * Relesae the data columns in a local worker after the client finishing its use.
+   */
+  rpc ReleaseLocalData(Ticket) returns (LocalReleaseResult) {}
 }
 
 /*
@@ -442,4 +452,52 @@ message HeartbeatResult {
   bool result_hascmd = 2;
   HeartbeatResultCmd result_command = 3;
 
+}
+
+/*
+ * The access informaiton for reading data for one column from local memory mapping
+ */
+message LocalColumnInfo {
+  /*
+   * The column index
+   */
+  int32 column_index = 1;
+  
+  /*
+   * The data offset in the mapping
+   */
+  int32 data_offset = 2;
+  
+  /*
+   * The data size
+   */
+  int64 data_size = 3;
+  
+  /*
+   * The file descriptor for memory mapping the column data
+   */
+  int32 mmap_fd = 4;
+  
+  /*
+   * The mmap size for the file descriptor
+   */
+  int64 mmap_size = 5;
+}
+
+/*
+ * The access informaiton for reading data for the partition columns from local memory mapping
+ */
+message LocalPartitionInfo {
+  /*
+   * A list of column memory information
+   */
+  repeated LocalColumnInfo columnInfo = 1;
+}
+
+message LocalReleaseResult {
+  
+  /*
+   * The result code of the release action
+   */
+  int32 result_code = 1;
 }

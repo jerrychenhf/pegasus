@@ -293,6 +293,24 @@ class PEGASUS_RPC_EXPORT FlightServerBase {
   virtual arrow::Status Heartbeat(const ServerCallContext& context,
                                const HeartbeatInfo& request,
                                std::unique_ptr<HeartbeatResult>* response);
+                                
+  /// \brief Retrieve the shared memory mapping data from local worker
+  /// \param[in] context The call context.
+  /// \param[in] request may be null
+  /// \param[out] Local partition information for reading from shared memory
+  /// \return Status
+  virtual arrow::Status GetLocalData(const ServerCallContext& context,
+                               const Ticket& request,
+                               std::unique_ptr<LocalPartitionInfo>* response);
+                                
+  /// \brief Release the shared memory mapping data after having used it
+  /// \param[in] context The call context.
+  /// \param[in] request may be null
+  /// \param[out] the release result
+  /// \return Status
+  virtual arrow::Status ReleaseLocalData(const ServerCallContext& context,
+                               const Ticket& request,
+                               std::unique_ptr<LocalReleaseResult>* response);
  private:
   struct Impl;
   std::unique_ptr<Impl> impl_;

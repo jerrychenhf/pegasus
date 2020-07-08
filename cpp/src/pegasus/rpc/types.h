@@ -678,5 +678,75 @@ struct PEGASUS_RPC_EXPORT HeartbeatResult {
   }
 };
 
+/// \brief Column data information for local memory mapping
+struct PEGASUS_RPC_EXPORT LocalColumnInfo {
+  /*
+   * The column index
+   */
+  int32_t column_index;
+  
+  /*
+   * The data offset in the mapping
+   */
+  int32_t data_offset;
+  
+  /*
+   * The data size
+   */
+  int64_t data_size;
+  
+  /*
+   * The file descriptor for memory mapping the column data
+   */
+  int32_t mmap_fd;
+  
+  /*
+   * The mmap size for the file descriptor
+   */
+  int64_t mmap_size;
+
+  bool Equals(const LocalColumnInfo& other) const;
+
+  friend bool operator==(const LocalColumnInfo& left, const LocalColumnInfo& right) {
+    return left.Equals(right);
+  }
+  friend bool operator!=(const LocalColumnInfo& left, const LocalColumnInfo& right) {
+    return !(left == right);
+  }
+};
+
+/// \brief Partion data information for memory mapping which include a list of column data
+/// redeemed
+struct PEGASUS_RPC_EXPORT LocalPartitionInfo {
+   /// List of local column info for memory mapping each column
+  std::vector<LocalColumnInfo> columns;
+
+  bool Equals(const LocalPartitionInfo& other) const;
+
+  friend bool operator==(const LocalPartitionInfo left, const LocalPartitionInfo& right) {
+    return left.Equals(right);
+  }
+  friend bool operator!=(const LocalPartitionInfo& left, const LocalPartitionInfo& right) {
+    return !(left == right);
+  }
+};
+
+/// \brief Column data information for local memory mapping
+struct PEGASUS_RPC_EXPORT LocalReleaseResult {
+  /*
+   * The result code of release using of local data
+   */
+  int32_t result_code;
+
+  bool Equals(const LocalReleaseResult& other) const;
+
+  friend bool operator==(const LocalReleaseResult& left, const LocalReleaseResult& right) {
+    return left.Equals(right);
+  }
+  friend bool operator!=(const LocalReleaseResult& left, const LocalReleaseResult& right) {
+    return !(left == right);
+  }
+};
+
 }  // namespace rpc
 }  // namespace pegasus

@@ -597,6 +597,44 @@ class FlightServiceImpl : public FlightService::Service {
     SERVICE_RETURN_NOT_OK(flight_context, internal::ToProto(*result, response));
     RETURN_WITH_MIDDLEWARE(flight_context, grpc::Status::OK);
   }
+  
+  grpc::Status GetLocalData(ServerContext* context, const pb::Ticket* request,
+                             pb::LocalPartitionInfo* response) {
+    GrpcServerCallContext flight_context;
+    GRPC_RETURN_NOT_GRPC_OK(
+        CheckAuth(FlightMethod::GetLocalData, context, flight_context));
+
+    CHECK_ARG_NOT_NULL(flight_context, request, "Ticket cannot be null");
+
+    Ticket ticket;
+    SERVICE_RETURN_NOT_OK(flight_context, internal::FromProto(*request, &ticket));
+
+    std::unique_ptr<LocalPartitionInfo> result;
+    SERVICE_RETURN_NOT_OK(flight_context,
+                          server_->GetLocalData(flight_context, ticket, &result));
+
+    SERVICE_RETURN_NOT_OK(flight_context, internal::ToProto(*result, response));
+    RETURN_WITH_MIDDLEWARE(flight_context, grpc::Status::OK);
+  }
+  
+  grpc::Status ReleaseLocalData(ServerContext* context, const pb::Ticket* request,
+                             pb::LocalReleaseResult* response) {
+    GrpcServerCallContext flight_context;
+    GRPC_RETURN_NOT_GRPC_OK(
+        CheckAuth(FlightMethod::GetLocalData, context, flight_context));
+
+    CHECK_ARG_NOT_NULL(flight_context, request, "Ticket cannot be null");
+
+    Ticket ticket;
+    SERVICE_RETURN_NOT_OK(flight_context, internal::FromProto(*request, &ticket));
+
+    std::unique_ptr<LocalReleaseResult> result;
+    SERVICE_RETURN_NOT_OK(flight_context,
+                          server_->ReleaseLocalData(flight_context, ticket, &result));
+
+    SERVICE_RETURN_NOT_OK(flight_context, internal::ToProto(*result, response));
+    RETURN_WITH_MIDDLEWARE(flight_context, grpc::Status::OK);
+  }
 
  private:
   std::shared_ptr<ServerAuthHandler> auth_handler_;
@@ -813,6 +851,18 @@ arrow::Status FlightServerBase::GetSchema(const ServerCallContext& context,
 arrow::Status FlightServerBase::Heartbeat(const ServerCallContext& context,
                                        const HeartbeatInfo& request,
                                        std::unique_ptr<HeartbeatResult>* response) {
+  return arrow::Status::NotImplemented("NYI");
+}
+
+arrow::Status FlightServerBase::GetLocalData(const ServerCallContext& context,
+                                       const Ticket& request,
+                                       std::unique_ptr<LocalPartitionInfo>* response) {
+  return arrow::Status::NotImplemented("NYI");
+}
+
+arrow::Status FlightServerBase::ReleaseLocalData(const ServerCallContext& context,
+                                       const Ticket& request,
+                                       std::unique_ptr<LocalReleaseResult>* response) {
   return arrow::Status::NotImplemented("NYI");
 }
 
