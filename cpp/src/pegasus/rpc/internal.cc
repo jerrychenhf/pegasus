@@ -245,13 +245,15 @@ arrow::Status FromProto(const pb::Ticket& pb_ticket, Ticket* ticket) {
   return arrow::Status::OK();
 }
 
-void ToProto(const Ticket& ticket, pb::Ticket* pb_ticket) {
+arrow::Status ToProto(const Ticket& ticket, pb::Ticket* pb_ticket) {
   pb_ticket->set_dataset_path(ticket.dataset_path);
   pb_ticket->set_partition_identity(ticket.partition_identity);
   pb_ticket->set_schema(ticket.serialized_schema());
   for (int32_t column_indice : ticket.column_indices) {
     pb_ticket->add_column_indice(column_indice);
   }
+  
+  return arrow::Status::OK();
 }
 
 // FlightData

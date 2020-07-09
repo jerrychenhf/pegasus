@@ -181,6 +181,10 @@ class GrpcClientInterceptorAdapterFactory
       flight_method = FlightMethod::ListActions;
      } else if (method.ends_with("/Heartbeat")) {
       flight_method = FlightMethod::Heartbeat;
+    } else if (method.ends_with("/GetLocalData")) {
+      flight_method = FlightMethod::GetLocalData;
+    } else if (method.ends_with("/ReleaseLocalData")) {
+      flight_method = FlightMethod::ReleaseLocalData;
     } else {
       DCHECK(false) << "Unknown Flight method: " << info->method();
     }
@@ -801,6 +805,46 @@ class FlightClient::FlightClientImpl {
     result->reset(new HeartbeatResult(std::move(r)));
     return Status::OK();
   }
+  
+  Status GetLocalData(const FlightCallOptions& options,
+                       const Ticket& ticket,
+                       std::unique_ptr<LocalPartitionInfo>* result) {
+    pb::Ticket pb_ticket;
+    pb::LocalPartitionInfo pb_response;
+
+    RETURN_NOT_OK(internal::ToProto(ticket, &pb_ticket));
+
+    ClientRpc rpc(options);
+    RETURN_NOT_OK(rpc.SetToken(auth_handler_.get()));
+    Status s = internal::FromGrpcStatus(
+        stub_->GetLocalData(&rpc.context, pb_ticket, &pb_response));
+    RETURN_NOT_OK(s);
+
+    LocalPartitionInfo r;
+    RETURN_NOT_OK(internal::FromProto(pb_response, &r));
+    result->reset(new LocalPartitionInfo(std::move(r)));
+    return Status::OK();
+  }
+  
+  Status ReleaseLocalData(const FlightCallOptions& options,
+                       const Ticket& ticket,
+                       std::unique_ptr<LocalReleaseResult>* result) {
+    pb::Ticket pb_ticket;
+    pb::LocalReleaseResult pb_response;
+
+    RETURN_NOT_OK(internal::ToProto(ticket, &pb_ticket));
+
+    ClientRpc rpc(options);
+    RETURN_NOT_OK(rpc.SetToken(auth_handler_.get()));
+    Status s = internal::FromGrpcStatus(
+        stub_->ReleaseLocalData(&rpc.context, pb_ticket, &pb_response));
+    RETURN_NOT_OK(s);
+
+    LocalReleaseResult r;
+    RETURN_NOT_OK(internal::FromProto(pb_response, &r));
+    result->reset(new LocalReleaseResult(std::move(r)));
+    return Status::OK();
+  }
 
  private:
   std::unique_ptr<pb::FlightService::Stub> stub_;
@@ -877,6 +921,18 @@ Status FlightClient::Heartbeat(const FlightCallOptions& options,
                        const HeartbeatInfo& info,
                        std::unique_ptr<HeartbeatResult>* result) {
   return impl_->Heartbeat(options, info, result);
+}
+
+Status FlightClient::GetLocalData(const FlightCallOptions& options,
+                       const Ticket& ticket,
+                       std::unique_ptr<LocalPartitionInfo>* result) {
+  return impl_->GetLocalData(options, ticket, result);
+}
+
+Status FlightClient::ReleaseLocalData(const FlightCallOptions& options,
+                       const Ticket& ticket,
+                       std::unique_ptr<LocalReleaseResult>* result) {
+  return impl_->ReleaseLocalData(options, ticket, result);
 }
 
 }  // namespace rpc
