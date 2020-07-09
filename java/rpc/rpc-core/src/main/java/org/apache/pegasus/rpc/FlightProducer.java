@@ -97,6 +97,24 @@ public interface FlightProducer {
   void listActions(CallContext context, StreamListener<ActionType> listener);
 
   /**
+   * Request data columns for a partition from a local worker in shared memory mapping way.
+   *
+   * @param context Per-call context.
+   * @param ticket the ticket for the partition and columns to get
+   * @return the result contains information to read the data through shared memory
+   */
+  LocalPartitionInfo getLocalData(CallContext context, Ticket ticket);
+
+  /**
+   * Release data columns for a partition from a local worker in shared memory mapping way.
+   *
+   * @param context Per-call context.
+   * @param ticket the ticket for the partition and columns to release
+   * @return the release result
+   */
+  LocalReleaseResult releaseLocalData(CallContext context, Ticket ticket);
+
+  /**
    * An interface for sending Arrow data back to a client.
    */
   interface ServerStreamListener {

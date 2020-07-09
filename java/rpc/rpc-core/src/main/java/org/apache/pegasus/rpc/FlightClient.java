@@ -258,6 +258,40 @@ public class FlightClient implements AutoCloseable {
   }
 
   /**
+   * Request data columns for a partition from a local worker in shared memory mapping way.
+   * @param ticket The ticket of the partition and colums to read
+   * @param options RPC-layer hints for this call.
+   */
+  public LocalPartitionInfo getLocalData(Ticket ticket, CallOption... options) {
+    try {
+      return new LocalPartitionInfo(CallOptions.wrapStub(blockingStub, options).getLocalData(ticket.toProtocol()));
+    } catch (URISyntaxException e) {
+      // We don't expect this will happen for conforming Flight implementations. For instance, a Java server
+      // itself wouldn't be able to construct an invalid Location.
+      throw new RuntimeException(e);
+    } catch (StatusRuntimeException sre) {
+      throw StatusUtils.fromGrpcRuntimeException(sre);
+    }
+  }
+
+ /**
+   * Release data columns for a partition from a local worker in shared memory mapping way.
+   * @param ticket The ticket of the partition and colums to release
+   * @param options RPC-layer hints for this call.
+   */
+  public LocalReleaseResult releaseLocalData(Ticket ticket, CallOption... options) {
+    try {
+      return new LocalReleaseResult(CallOptions.wrapStub(blockingStub, options).releaseLocalData(ticket.toProtocol()));
+    } catch (URISyntaxException e) {
+      // We don't expect this will happen for conforming Flight implementations. For instance, a Java server
+      // itself wouldn't be able to construct an invalid Location.
+      throw new RuntimeException(e);
+    } catch (StatusRuntimeException sre) {
+      throw StatusUtils.fromGrpcRuntimeException(sre);
+    }
+  }
+
+  /**
    * Retrieve a stream from the server.
    * @param ticket The ticket granting access to the data stream.
    * @param options RPC-layer hints for this call.

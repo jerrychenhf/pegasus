@@ -158,6 +158,16 @@ public class TestLargeMessage {
     }
 
     @Override
+    public LocalPartitionInfo getLocalData(CallContext context, Ticket ticket) {
+      return null;
+    }
+
+    @Override
+    public LocalReleaseResult releaseLocalData(CallContext context, Ticket ticket) {
+      return null;
+    }
+
+    @Override
     public void close() throws Exception {
       allocator.close();
     }

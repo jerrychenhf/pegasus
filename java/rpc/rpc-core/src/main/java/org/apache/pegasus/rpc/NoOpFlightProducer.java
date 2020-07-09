@@ -58,4 +58,14 @@ public class NoOpFlightProducer implements FlightProducer {
     listener.onError(CallStatus.UNIMPLEMENTED.withDescription("Not implemented.").toRuntimeException());
   }
 
+  @Override
+  public LocalPartitionInfo getLocalData(CallContext context, Ticket ticket) {
+    throw CallStatus.UNIMPLEMENTED.withDescription("Not implemented.").toRuntimeException();
+  }
+
+  @Override
+  public LocalReleaseResult releaseLocalData(CallContext context, Ticket ticket) {
+    throw CallStatus.UNIMPLEMENTED.withDescription("Not implemented.").toRuntimeException();
+  }
+
 }
