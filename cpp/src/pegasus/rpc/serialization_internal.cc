@@ -384,6 +384,45 @@ arrow::Status GetFileBatchPayload(const FileBatch& batch,
   //TO DO: write the file patch as the IpcPayload
   // IpcPayload is intermediate data structure with metadata header, and zero or more buffers
   // for the message body.
+
+  out->type = arrow::ipc::Message::RECORD_BATCH;
+  std::vector<std::shared_ptr<arrow::Buffer>> buffers = batch.object_buffers();
+  // construct the body buffers of IPCPayload
+  for (unsigned  i =0; i < buffers.size(); i++) {
+    out->body_buffers.emplace_back(buffers[i]);
+  }
+
+  // The position for the start of a buffer relative to the passed frame of
+  // reference. May be 0 or some other position in an address space
+  int64_t offset = 0;
+  
+  int64_t value_length = out->body_buffers.size();
+
+  int64_t meta_array[value_length * 2];
+  // Construct the buffer metadata for the file batch header
+  for (unsigned i = 0; i < value_length; ++i) {
+    const arrow::Buffer* buffer = out->body_buffers[i].get();
+    int64_t size = 0;
+    int64_t padding = 0;
+
+    // The buffer might be null if we are handling zero row lengths.
+    if (buffer) {
+      size = buffer->size();
+      padding = arrow::BitUtil::RoundUpToMultipleOf8(size) - size;
+    }
+    // store the offset and size of every buffer
+    meta_array[i * 2] = offset;
+    meta_array[i * 2 + 1] = size;
+  
+    offset += size + padding;
+  }
+
+  out->body_length = offset;
+
+  uint8_t* buffer_data = out->metadata->mutable_data();
+  memcpy(buffer_data, meta_array, value_length * 2);
+
+  DCHECK(arrow::BitUtil::IsMultipleOf8(out->body_length));
   return arrow::Status::OK();
 }
 
