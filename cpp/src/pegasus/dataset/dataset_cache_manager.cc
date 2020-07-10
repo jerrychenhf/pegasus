@@ -118,7 +118,7 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
  } else {
    // file data format
    //TO DO: passed the cached column data to the reader
-   std::shared_ptr<rpc::CachedFileBatchReader> reader = std::make_shared<rpc::CachedFileBatchReader>();
+   std::shared_ptr<rpc::CachedFileBatchReader> reader = std::make_shared<rpc::CachedFileBatchReader>(columns);
    *data_stream = std::unique_ptr<rpc::FlightDataStream>(
       new rpc::FileBatchStream(reader, columns));
  }
