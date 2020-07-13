@@ -68,12 +68,12 @@ function prepare_arrow(){
       make
       make install
       cp -r $(pwd)/src/arrow/filesystem /usr/local/include/arrow/
-      cd ../java
-      mvn -DskipTests clean instal
+      cd ../../java
+      mvn -DskipTests clean install
       cd $START_PATH
-      echo "export ARROW_HOME=/usr/local" >env.sh
+      echo "export ARROW_HOME=/usr/local" >> ~/.bashrc
+      source ~/.bashrc
    fi
 }
 
 
-echo "Please source env.sh ,then run make_distribution.sh"

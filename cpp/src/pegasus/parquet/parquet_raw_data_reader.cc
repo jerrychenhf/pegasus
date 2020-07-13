@@ -33,8 +33,7 @@ Status ParquetRawDataReader::GetColumnBuffer(int row_group_index, int column_ind
                                              std::shared_ptr<arrow::Buffer>* buffer) {
   std::shared_ptr<parquet::RowGroupReader> row_group_reader = file_reader_->RowGroup(row_group_index);
   
-  //TO DO
-  //*buffer = row_group_reader->GetColumnBuffer(column_index);
+  *buffer = row_group_reader->GetColumnBuffer(column_index);
   return Status::OK();
 }
 
