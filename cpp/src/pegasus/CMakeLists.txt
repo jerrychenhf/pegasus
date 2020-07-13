@@ -200,6 +200,41 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/pegasus-config.cmake
         DESTINATION "${PEGASUS_CMAKE_INSTALL_DIR}")
 
 
+if(PEGASUS_RPC_JAVA_CLIENT_JNI)
+  # rpc java client jni support
+  find_package(JNI REQUIRED)
+  # add jni support
+  include_directories(${JAVA_INCLUDE_PATH})
+  include_directories(${JAVA_INCLUDE_PATH2})
+  if(JNI_FOUND)
+    message(STATUS "JNI_INCLUDE_DIRS = ${JNI_INCLUDE_DIRS}")
+    message(STATUS "JNI_LIBRARIES = ${JNI_LIBRARIES}")
+  else()
+    message(WARNING "Could not find JNI")
+  endif()
 
+  add_compile_options("-I$ENV{JAVA_HOME}/include/")
+  if(WIN32)
+    add_compile_options("-I$ENV{JAVA_HOME}/include/win32")
+  elseif(APPLE)
+    add_compile_options("-I$ENV{JAVA_HOME}/include/darwin")
+  else() # linux
+    add_compile_options("-I$ENV{JAVA_HOME}/include/linux")
+  endif()
+
+  include_directories("${CMAKE_CURRENT_LIST_DIR}/java")
+
+  file(GLOB PEGASUS_RPC_JAVA_CLIENT_JNI_SRC java/*.cc)
+  add_library(pegasus_java SHARED ${PEGASUS_RPC_JAVA_CLIENT_JNI_SRC})
+
+  if(APPLE)
+    target_link_libraries(pegasus_java
+                          "-undefined dynamic_lookup"
+                          ${PTHREAD_LIBRARY})
+  else(APPLE)
+    target_link_libraries(pegasus_java
+                          ${PTHREAD_LIBRARY})
+  endif(APPLE)
+endif()
 
 

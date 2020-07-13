@@ -141,6 +141,8 @@ Always OFF if building binaries" OFF)
 
   option(PEGASUS_BUILD_CONFIG_SUMMARY_JSON "Summarize build configuration in a JSON file"
          ON)
+
+  define_option(PEGASUS_RPC_JAVA_CLIENT_JNI "Build with Pegasus Java Client JNI for local memory mapping" ON)
 endif()
 
 macro(config_summary_message)
