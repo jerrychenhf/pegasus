@@ -174,6 +174,9 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
           new ParquetReader(file, memory_pool.get(), properties));
       } else {
         parquet::ReaderProperties properties(memory_pool.get());
+        
+        // only when the flag of buffered_stream_enabled_ is enabled, the buffer can be allocated from the memory pool.
+        properties.enable_buffered_stream();
         parquet_raw_reader = std::unique_ptr<ParquetRawDataReader>(
           new ParquetRawDataReader(file, properties));
       }
