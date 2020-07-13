@@ -159,6 +159,8 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
     RETURN_IF_ERROR(memory_pool->Create());
 
     std::unique_ptr<ParquetReader> parquet_reader;
+    std::unique_ptr<ParquetRawDataReader> parquet_raw_reader;
+
     // Get the ReadableFile
     std::shared_ptr<Storage> storage;
     RETURN_IF_ERROR(storage_factory_->GetStorage(partition_path, &storage));
@@ -166,9 +168,15 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       std::shared_ptr<HdfsReadableFile> file;
       RETURN_IF_ERROR(std::dynamic_pointer_cast<HDFSStorage>(storage)
           ->GetReadableFile(partition_path, &file));
-      parquet::ArrowReaderProperties properties(parquet::default_arrow_reader_properties());
-      parquet_reader = std::unique_ptr<ParquetReader>(
-        new ParquetReader(file, memory_pool.get(), properties));
+      if (FLAGS_cache_format_arrow) {
+        parquet::ArrowReaderProperties properties(parquet::default_arrow_reader_properties());
+        parquet_reader = std::unique_ptr<ParquetReader>(
+          new ParquetReader(file, memory_pool.get(), properties));
+      } else {
+        parquet::ReaderProperties properties(memory_pool.get());
+        parquet_raw_reader = std::unique_ptr<ParquetRawDataReader>(
+          new ParquetRawDataReader(file, properties));
+      }
     }
 
     std::shared_ptr<CachedPartition> partition;
@@ -177,13 +185,29 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
     int64_t occupied_size = 0;
     for(auto iter = col_ids.begin(); iter != col_ids.end(); iter ++) {
       int colId = *iter;
+      int row_group_counts = parquet_raw_reader->RowGroupsNum();
+      unordered_map<int, std::shared_ptr<arrow::Buffer>> object_buffers;
       std::shared_ptr<arrow::ChunkedArray> chunked_array;
-      LOG(INFO) << "Begin read the column chunk with col ID " << colId << " partition path " << partition_path;
-      RETURN_IF_ERROR(parquet_reader->ReadColumnChunk(*iter, &chunked_array));
+
+      if (FLAGS_cache_format_arrow) {
+      
+        LOG(INFO) << "Begin read the column chunk with col ID " << colId << " partition path " << partition_path;
+        RETURN_IF_ERROR(parquet_reader->ReadColumnChunk(*iter, &chunked_array));
+      } else {
+        
+        for(int i = 0; i < row_group_counts; i ++) {
+          std::shared_ptr<arrow::Buffer> buffer;
+          LOG(INFO) << "Begin read the raw column chunk with row group ID" << i << " col ID " << colId << " partition path " << partition_path;
+          RETURN_IF_ERROR(parquet_raw_reader->GetColumnBuffer(*iter, i, &buffer));
+          object_buffers[i] = std::move(buffer);
+        }
+      }
+
       int64_t column_size = memory_pool->bytes_allocated() - occupied_size;
       occupied_size += column_size;
+
       CacheRegion* cache_region = new CacheRegion(memory_pool,
-        chunked_array, column_size);
+        chunked_array, column_size, object_buffers);
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, colId, cache_region));
         

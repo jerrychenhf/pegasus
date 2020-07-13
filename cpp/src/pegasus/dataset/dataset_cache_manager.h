@@ -25,6 +25,7 @@
 #include "rpc/server.h"
 #include "dataset/request_identity.h"
 #include "rpc/types.h"
+#include "parquet/parquet_raw_data_reader.h"
 
 using namespace std;
 using std::string;
