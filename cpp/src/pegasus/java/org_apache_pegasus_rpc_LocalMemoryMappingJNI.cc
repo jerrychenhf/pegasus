@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-#include "LocalMemoryMapping.cc"
+#include "LocalMemoryMapping.h"
 
 using namespace pegasus;
 

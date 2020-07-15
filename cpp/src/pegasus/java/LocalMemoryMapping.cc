@@ -20,6 +20,8 @@
 #include <mutex>
 #include <unordered_map>
 #include <sys/mman.h>
+#include <unistd.h>
+#include <memory>
 #include <cassert>
 
 // From Google gutil
