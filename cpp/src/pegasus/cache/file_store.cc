@@ -18,6 +18,7 @@
 #include "cache/file_store.h"
 #include "ipc/allocator.h"
 #include "cache/store_manager.h"
+#include "ipc/malloc.h"
 
 DECLARE_int32(store_file_capacity_gb);
 
@@ -56,11 +57,46 @@ Status FileStore::Init(const std::unordered_map<string, string>* properties) {
 }
 
 Status FileStore::Allocate(int64_t size, StoreRegion* store_region) {
+  DCHECK(store_region != NULL);
+  
+  //check the free size. If no free size available, fail
+  if (size > (capacity_ - used_size_)) {
+    stringstream ss;
+    ss << "Allocate failed in file memory store when the available size < allocated size. The allocated size: "
+     << size << ". The available size: " << (capacity_ - used_size_);
+    LOG(ERROR) << ss.str();
+    return Status::Invalid("Request memory size" , size, "is larger than available size.");
+  }
 
+  uint8_t* pointer = nullptr;
+
+  pointer = reinterpret_cast<uint8_t*>(Allocator::Memalign(kBlockSize, size));
+
+  if (pointer == nullptr) {
+    stringstream ss;
+    ss << "Allocate failed with OOM in file store. The allocated size:"
+     << size << ". The available size: " << (capacity_ - used_size_);
+    LOG(ERROR) << ss.str();
+    return Status::OutOfMemory("malloc of size ", size, " failed");
+  }
+
+  // get the fd, map size offset info by the address.
+  // GetMallocMapinfo(pointer, &fd, &map_size, &offset);
+
+  store_region->reset_address(pointer, size, size);
+
+  used_size_ += size;
+  LOG(INFO) << "Successfully allocated in memory store. And the allocated size is " << size;
   return Status::OK();
 }
 
 Status FileStore::Free(StoreRegion* store_region) {
+  
+  DCHECK(store_region != NULL);
+
+  used_size_ -= store_region->occupies_size();
+ 
+  Allocator::Free(store_region->address(), static_cast<size_t>(store_region->occupies_size()));
 
   return Status::OK();
 }
