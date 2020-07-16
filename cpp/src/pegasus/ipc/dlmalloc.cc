@@ -45,6 +45,7 @@ int fake_munmap(void*, int64_t);
 #define HAVE_MORECORE 0
 #define DEFAULT_MMAP_THRESHOLD MAX_SIZE_T
 #define DEFAULT_GRANULARITY ((size_t)128U * 1024U)
+#define USE_LOCKS 1
 
 #include "pegasus/ipc/thirdparty/dlmalloc.c"  // NOLINT
 
@@ -129,9 +130,7 @@ void* fake_mmap(size_t size) {
   // Increase dlmalloc's allocation granularity directly.
   mparams.granularity *= GRANULARITY_MULTIPLIER;
 
-  MmapRecord& record = mmap_records[pointer];
-  record.fd = fd;
-  record.size = size;
+  AddMmapRecord(pointer, fd, size);
 
   // We lie to dlmalloc about where mapped memory actually lives.
   pointer = pointer_advance(pointer, kMmapRegionsGap);
@@ -147,9 +146,8 @@ int fake_munmap(void* addr, int64_t size) {
   addr = pointer_retreat(addr, kMmapRegionsGap);
   size += kMmapRegionsGap;
 
-  auto entry = mmap_records.find(addr);
-
-  if (entry == mmap_records.end() || entry->second.size != size) {
+  int fd = GetMappedFd(addr, size);
+  if (fd < 0) {
     // Reject requests to munmap that don't directly match previous
     // calls to mmap, to prevent dlmalloc from trimming.
     return -1;
@@ -157,10 +155,10 @@ int fake_munmap(void* addr, int64_t size) {
 
   int r = munmap(addr, size);
   if (r == 0) {
-    close(entry->second.fd);
+    close(fd);
   }
-
-  mmap_records.erase(entry);
+  
+  RemoveMmapRecord(addr);
   return r;
 }
 

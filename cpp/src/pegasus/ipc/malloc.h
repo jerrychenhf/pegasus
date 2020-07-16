@@ -39,6 +39,21 @@ void GetMallocMapinfo(void* addr, int* fd, int64_t* map_length, ptrdiff_t* offse
 /// @return The size of the corresponding memory-mapped file.
 int64_t GetMmapSize(int fd);
 
+/// Add the mmap record providing the pointer, file descrptor and mapped size.
+/// @param pointer The mapped pointer
+/// @param fd The file descriptor to look up.
+/// @param The size of the corresponding memory-mapped file.
+void AddMmapRecord(void* pointer, int fd, int64_t size);
+
+/// Check the providing the pointer is mapped with the specific size and return the file descriptor
+/// @param pointer The mapped pointer
+/// @param The size of the corresponding memory-mapped file.
+int GetMappedFd(void* pointer, int64_t size) ;
+
+/// Remove the mmap record
+/// @param pointer The mapped pointer
+void RemoveMmapRecord(void* pointer );
+
 struct MmapRecord {
   int fd;
   int64_t size;

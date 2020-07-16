@@ -85,13 +85,13 @@ class MmapTableEntry {
 std::unordered_map<int, std::unique_ptr<MmapTableEntry>> mmap_table_;
   
 // A mutex which protects this class.
- std::recursive_mutex mutex_;
+ std::mutex mutex_;
 
 // If the file descriptor fd has been mmapped in this process before,
 // return the pointer that was returned by mmap, otherwise mmap it and store the
 // pointer in a hash table.
 uint8_t* LookupOrMmap(int fd, int64_t map_size) {
-  std::lock_guard<std::recursive_mutex> guard(mutex_);
+  std::lock_guard<std::mutex> guard(mutex_);
   auto entry = mmap_table_.find(fd);
   if (entry != mmap_table_.end()) {
     return entry->second->pointer();
@@ -105,7 +105,7 @@ uint8_t* LookupOrMmap(int fd, int64_t map_size) {
 // Get a pointer to a file that we know has been memory mapped in this client
 // process before.
 uint8_t* LookupMmappedFile(int fd) {
-  std::lock_guard<std::recursive_mutex> guard(mutex_);
+  std::lock_guard<std::mutex> guard(mutex_);
   auto entry = mmap_table_.find(fd);
   assert(entry != mmap_table_.end());
   return entry->second->pointer();
@@ -113,7 +113,7 @@ uint8_t* LookupMmappedFile(int fd) {
 
 //To cleanup all the mmap entries, make sure no shared memory pointers are in using
 void CleanupMmap() {
-   std::lock_guard<std::recursive_mutex> guard(mutex_);
+   std::lock_guard<std::mutex> guard(mutex_);
    mmap_table_.clear();
 }
 

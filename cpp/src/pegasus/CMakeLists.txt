@@ -224,7 +224,7 @@ if(PEGASUS_RPC_JAVA_CLIENT_JNI)
 
   include_directories("${CMAKE_CURRENT_LIST_DIR}/java")
 
-  file(GLOB PEGASUS_RPC_JAVA_CLIENT_JNI_SRC java/*.cc)
+  file(GLOB_RECURSE PEGASUS_RPC_JAVA_CLIENT_JNI_SRC java/*.cc)
   add_library(pegasus_java SHARED ${PEGASUS_RPC_JAVA_CLIENT_JNI_SRC})
 
   if(APPLE)

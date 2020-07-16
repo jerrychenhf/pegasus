@@ -24,16 +24,18 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
-
 #include <cerrno>
 #include <string>
 #include <vector>
+#include <mutex>
 
 #include "pegasus/common/logging.h"
 
 namespace pegasus {
 
 std::unordered_map<void*, MmapRecord> mmap_records;
+// A mutex which protects this mmap_records.
+std::mutex mmap_records_mutex_;
 
 static void* pointer_advance(void* p, ptrdiff_t n) { return (unsigned char*)p + n; }
 
@@ -43,6 +45,7 @@ static ptrdiff_t pointer_distance(void const* pfrom, void const* pto) {
 
 void GetMallocMapinfo(void* addr, int* fd, int64_t* map_size, ptrdiff_t* offset) {
   // TODO(rshin): Implement a more efficient search through mmap_records.
+  std::lock_guard<std::mutex> guard(mmap_records_mutex_);
   for (const auto& entry : mmap_records) {
     if (addr >= entry.first && addr < pointer_advance(entry.first, entry.second.size)) {
       *fd = entry.second.fd;
@@ -57,14 +60,47 @@ void GetMallocMapinfo(void* addr, int* fd, int64_t* map_size, ptrdiff_t* offset)
 }
 
 int64_t GetMmapSize(int fd) {
+  mmap_records_mutex_.lock();
   for (const auto& entry : mmap_records) {
     if (entry.second.fd == fd) {
+      mmap_records_mutex_.unlock();
       return entry.second.size;
     }
   }
   
+  mmap_records_mutex_.unlock();
   LOG(FATAL) << "failed to find entry in mmap_records for fd " << fd;
   return -1;  // This code is never reached.
+}
+
+void AddMmapRecord(void* pointer, int fd, int64_t size) {
+  mmap_records_mutex_.lock();
+  MmapRecord& record = mmap_records[pointer];
+  record.fd = fd;
+  record.size = size;
+  mmap_records_mutex_.unlock();
+}
+
+int GetMappedFd(void* pointer, int64_t size) {
+  mmap_records_mutex_.lock();
+  auto entry = mmap_records.find(pointer);
+  if (entry == mmap_records.end() || entry->second.size != size) {
+    mmap_records_mutex_.unlock();
+    return -1;
+  }
+  
+  int fd = entry->second.fd;
+  mmap_records_mutex_.unlock();
+  return fd;
+}
+
+void RemoveMmapRecord(void* pointer ) {
+  mmap_records_mutex_.lock();
+  auto entry = mmap_records.find(pointer);
+  if (entry != mmap_records.end()) {
+    mmap_records.erase(entry);
+  }
+  mmap_records_mutex_.unlock();
 }
 
 }  // namespace pegasus
