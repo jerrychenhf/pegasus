@@ -25,6 +25,7 @@
 #include "common/logging.h"
 #include "cache/lru_cache.h"
 #include "rpc/file_batch_reader.h"
+#include "ipc/malloc.h"
 #include <boost/thread/mutex.hpp>
 
 DEFINE_int64(chunk_size, 2048, "The maximum chunk size of record batches");
@@ -191,6 +192,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       int row_group_counts = parquet_raw_reader->RowGroupsNum();
       unordered_map<int, std::shared_ptr<arrow::Buffer>> object_buffers;
       std::shared_ptr<arrow::ChunkedArray> chunked_array;
+      unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries;
 
       if (FLAGS_cache_format_arrow) {
       
@@ -203,6 +205,14 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
           LOG(INFO) << "Begin read the raw column chunk with row group ID" << i << " col ID " << colId << " partition path " << partition_path;
           RETURN_IF_ERROR(parquet_raw_reader->GetColumnBuffer(*iter, i, &buffer));
           object_buffers[i] = std::move(buffer);
+          // std::shared_ptr<CachedPartition> new_partition = std::shared_ptr<CachedPartition>(new CachedPartition(dataset_path_, partition_path));
+          int fd = -1;
+          int64_t map_size = 0;
+          ptrdiff_t offset = 0;
+          uint8_t* pointer = const_cast< uint8_t*>(buffer->data());
+          
+          GetMallocMapinfo(pointer, &fd, &map_size, &offset);
+          std::shared_ptr<ObjectEntry> entry = std::shared_ptr<ObjectEntry>(new ObjectEntry());
         }
       }
 
@@ -210,7 +220,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       occupied_size += column_size;
 
       CacheRegion* cache_region = new CacheRegion(memory_pool,
-        chunked_array, column_size, object_buffers);
+        chunked_array, column_size, object_buffers, object_entries);
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, colId, cache_region));
         

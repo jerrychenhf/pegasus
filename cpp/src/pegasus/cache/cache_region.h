@@ -35,16 +35,16 @@ namespace pegasus {
 class CacheMemoryPool;
 
 struct ObjectEntry {
-  ObjectEntry();
+  ObjectEntry() {};
 
-  ~ObjectEntry();
+  ~ObjectEntry() {};
 
   /// Memory mapped file containing the object.
   int fd;
   /// Offset from the base of the mmap.
   ptrdiff_t offset;
-  /// Size of the object in bytes.
-  int64_t data_size;
+  /// Size of the underlying map.
+  int64_t map_size;
 };
 
 class CacheRegion {
@@ -52,7 +52,8 @@ class CacheRegion {
   CacheRegion();
   CacheRegion(const std::shared_ptr<CacheMemoryPool>& memory_pool,
     const std::shared_ptr<arrow::ChunkedArray>& chunked_array, int64_t size,
-     const unordered_map<int, std::shared_ptr<arrow::Buffer>> object_buffers = {});
+     const unordered_map<int, std::shared_ptr<arrow::Buffer>> object_buffers = {},
+    unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries = {} );
   
   ~CacheRegion();
   
@@ -69,6 +70,10 @@ class CacheRegion {
   // the key is the rowgroup_ids and the value is the buffers
   // TODO: Combine the chunked_array_ and chunked_arrays_
   unordered_map<int, std::shared_ptr<arrow::Buffer>> object_buffers_;
+  
+  // store all the object entries for the column. the key is the row group ID.
+  unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries_;
+  
 };
 
 } // namespace pegasus
