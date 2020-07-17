@@ -95,7 +95,15 @@ arrow::Status WorkerTableAPIService::DoPut(const rpc::ServerCallContext& context
 arrow::Status WorkerTableAPIService::GetLocalData(const rpc::ServerCallContext& context,
                                const rpc::Ticket& request,
                                std::unique_ptr<rpc::LocalPartitionInfo>* response) {
-  //TO DO
+
+  RequestIdentity request_identity;
+  arrow::Status st = CreateDataRequest(request, &request_identity);
+
+  if(!st.ok())
+    return st;
+
+  Status status = dataset_cache_manager_->GetLocalData(&request_identity, response);
+
   return arrow::Status::OK();
 }
                                 
@@ -103,7 +111,15 @@ arrow::Status WorkerTableAPIService::GetLocalData(const rpc::ServerCallContext& 
 arrow::Status WorkerTableAPIService::ReleaseLocalData(const rpc::ServerCallContext& context,
                                const rpc::Ticket& request,
                                std::unique_ptr<rpc::LocalReleaseResult>* response) {
-  //TO DO
+
+  RequestIdentity request_identity;
+  arrow::Status st = CreateDataRequest(request, &request_identity);
+
+  if(!st.ok())
+    return st;
+
+  Status status = dataset_cache_manager_->ReleaseLocalData(&request_identity, response);
+  
   return arrow::Status::OK();
 }
 

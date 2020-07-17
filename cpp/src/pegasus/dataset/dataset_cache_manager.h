@@ -26,6 +26,7 @@
 #include "dataset/request_identity.h"
 #include "rpc/types.h"
 #include "parquet/parquet_raw_data_reader.h"
+#include <boost/thread/mutex.hpp>
 
 using namespace std;
 using std::string;
@@ -62,6 +63,10 @@ class DatasetCacheManager {
 
   Status GetDatasetStream(RequestIdentity* request_identity, std::unique_ptr<rpc::FlightDataStream>* data_stream);
 
+  Status GetLocalData(RequestIdentity* request_identity, std::unique_ptr<rpc::LocalPartitionInfo>* result);
+
+  Status ReleaseLocalData(RequestIdentity* request_identity, std::unique_ptr<rpc::LocalReleaseResult>* result);
+
   Status DropCachedDataset(std::vector<rpc::PartitionDropList> drop_lists);
 
   DatasetCacheBlockManager* GetBlockManager() {
@@ -75,6 +80,9 @@ class DatasetCacheManager {
   DatasetCacheBlockManager* cache_block_manager_;
   
   std::shared_ptr<StorageFactory> storage_factory_;
+
+  boost::mutex in_used_columns_lock_;
+  std::unordered_map<string, std::vector<std::shared_ptr<CachedColumn>>> in_used_columns_;
   
   CacheEngine::CachePolicy GetCachePolicy(RequestIdentity* request_identity);
   

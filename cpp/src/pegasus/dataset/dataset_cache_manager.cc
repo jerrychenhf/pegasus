@@ -141,8 +141,12 @@ Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(RequestIdentity* r
       std::shared_ptr<CachedColumn> cached_column = iter->second;
       retrieved_columns.insert(std::make_pair(col_id, cached_column));
     }
-    
-    return WrapDatasetStream(request_identity, retrieved_columns, data_stream);
+
+    if (data_stream == nullptr) {
+      return Status::OK();
+    } else {
+      return WrapDatasetStream(request_identity, retrieved_columns, data_stream);
+    }
 }
 
 Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
@@ -205,14 +209,15 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
           LOG(INFO) << "Begin read the raw column chunk with row group ID" << i << " col ID " << colId << " partition path " << partition_path;
           RETURN_IF_ERROR(parquet_raw_reader->GetColumnBuffer(*iter, i, &buffer));
           object_buffers[i] = std::move(buffer);
-          // std::shared_ptr<CachedPartition> new_partition = std::shared_ptr<CachedPartition>(new CachedPartition(dataset_path_, partition_path));
+         
           int fd = -1;
           int64_t map_size = 0;
           ptrdiff_t offset = 0;
           uint8_t* pointer = const_cast< uint8_t*>(buffer->data());
           
           GetMallocMapinfo(pointer, &fd, &map_size, &offset);
-          std::shared_ptr<ObjectEntry> entry = std::shared_ptr<ObjectEntry>(new ObjectEntry());
+          std::shared_ptr<ObjectEntry> entry = std::shared_ptr<ObjectEntry>(new ObjectEntry(fd, offset, map_size));
+          object_entries[i] = std::move(entry);
         }
       }
 
@@ -328,9 +333,16 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
       partition->GetCachedColumns(request_identity->column_indices(),
        cache_engine, &cached_columns);
       if (col_ids.size() == cached_columns.size()) {
-        LOG(WARNING) << "All the columns are cached. And we will wrap the columns into Flight data stream";
+        
         cache_metrics_.col_cacherd_cnt++;
-        return WrapDatasetStream(request_identity, cached_columns, data_stream);
+
+        if (data_stream == nullptr) {
+          return Status::OK();
+        } else {
+          LOG(WARNING) << "All the columns are cached. And we will wrap the columns into Flight data stream";
+          return WrapDatasetStream(request_identity, cached_columns, data_stream);
+        }
+
       } else {
         // Not all columns cached.
         // Get the not cached col_ids.
@@ -341,6 +353,104 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
       }
    }
   }
+}
+
+Status DatasetCacheManager::GetLocalData(RequestIdentity* request_identity, std::unique_ptr<rpc::LocalPartitionInfo>* result) {
+  // get the missed columns from hdfs and put the columns into cache and block manager.
+  //  Then all the request columns are cached.
+  GetDatasetStream(request_identity, nullptr);
+
+  // get the columns and put the columns into in_used_columns_.
+  std::shared_ptr<CachedDataset> dataset;
+  cache_block_manager_->GetCachedDataSet(request_identity->dataset_path(), &dataset);
+
+  std::shared_ptr<CachedPartition> partition;
+  dataset->GetCachedPartition(
+     request_identity->partition_path(), &partition);
+
+  std::vector<int> col_ids = request_identity->column_indices();
+  unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns;
+  // here no need to touch the value, because it already done when 
+  // call GetDatasetStream method. So we set the cache_engine to nullptr to skip.
+  partition->GetCachedColumns(request_identity->column_indices(),
+       nullptr, &cached_columns);
+  
+  std::string dataset_path = request_identity->dataset_path();
+  std::string partition_path = request_identity->partition_path();
+
+  for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++) {
+    int column_id = *iter;
+    std::string key = dataset_path.append(partition_path).append(to_string(column_id));
+
+    auto entry = cached_columns.find(column_id);
+    assert(entry != cached_columns.end());
+
+    std::shared_ptr<CachedColumn> column = entry->second;
+    {
+      boost::lock_guard<boost::mutex> l(in_used_columns_lock_);
+      auto in_use_entry = in_used_columns_.find(key);
+
+      if (in_use_entry == in_used_columns_.end()) {
+        // store the key firstly
+        std::vector<std::shared_ptr<CachedColumn>> columns;
+        columns.push_back(column);
+        in_used_columns_[key] = columns;
+      } else {
+        // directly put the value into the in_used_columns_.
+        in_use_entry->second.push_back(column);
+      }
+   }
+  }
+
+  // TODO: wrap the column info of fd, offset and map_size into the result
+  return Status::OK();
+}
+
+Status DatasetCacheManager::ReleaseLocalData(RequestIdentity* request_identity, std::unique_ptr<rpc::LocalReleaseResult>* result) {
+
+   // get the columns and release the columns in in_used_columns_.
+  std::shared_ptr<CachedDataset> dataset;
+  cache_block_manager_->GetCachedDataSet(request_identity->dataset_path(), &dataset);
+
+  std::shared_ptr<CachedPartition> partition;
+  dataset->GetCachedPartition(
+     request_identity->partition_path(), &partition);
+
+  std::vector<int> col_ids = request_identity->column_indices();
+  unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns;
+  // here no need to touch the value, because it already done when 
+  // call GetDatasetStream method. So we set the cache_engine to nullptr to skip.
+  partition->GetCachedColumns(request_identity->column_indices(),
+       nullptr, &cached_columns);
+  
+  std::string dataset_path = request_identity->dataset_path();
+  std::string partition_path = request_identity->partition_path();
+
+  for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++) {
+    int column_id = *iter;
+    std::string key = dataset_path.append(partition_path).append(to_string(column_id));
+
+    auto entry = cached_columns.find(column_id);
+    assert(entry != cached_columns.end());
+
+    std::shared_ptr<CachedColumn> column = entry->second;
+    {
+      boost::lock_guard<boost::mutex> l(in_used_columns_lock_);
+      auto in_use_entry = in_used_columns_.find(key);
+
+      if (in_use_entry == in_used_columns_.end()) {
+        LOG(WARNING) << "The released key is not in the global map of in_used_columns_. Please check the key";
+
+        return Status::KeyError("the key of ", key, "is not valid");
+      } else {
+        // directly delete the last value in in_used_columns_.
+        in_use_entry->second.pop_back();
+      }
+   }
+  }
+
+  // TODO: wrap the LocalReleaseResult
+  return Status::OK();
 }
 
 } // namespace pegasus

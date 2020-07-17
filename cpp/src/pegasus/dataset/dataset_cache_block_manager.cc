@@ -137,10 +137,12 @@ Status CachedDataset::GetCachedPartition(
       if (entry != cached_columns_.end()) {
         int colId = *iter;
         auto find_column = entry->second;
-
-        LRUCache::CacheKey* key = new LRUCache::CacheKey(dataset_path, partition_path, colId);
-        // Touch value in lru cache when access the cached column.
-        cache_engine->TouchValue(key);
+        
+        if (cache_engine != nullptr) {
+          LRUCache::CacheKey* key = new LRUCache::CacheKey(dataset_path, partition_path, colId);
+          // Touch value in lru cache when access the cached column.
+          cache_engine->TouchValue(key);
+        }
 
         columns->insert(pair<int, std::shared_ptr<CachedColumn>>(colId, find_column));
        }

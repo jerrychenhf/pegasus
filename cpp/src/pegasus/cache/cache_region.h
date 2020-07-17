@@ -35,16 +35,17 @@ namespace pegasus {
 class CacheMemoryPool;
 
 struct ObjectEntry {
-  ObjectEntry() {};
+  ObjectEntry(int fd, ptrdiff_t offset, int64_t map_size):
+  fd_(fd), offset_(offset), map_size_(map_size) {};
 
   ~ObjectEntry() {};
 
   /// Memory mapped file containing the object.
-  int fd;
+  int fd_;
   /// Offset from the base of the mmap.
-  ptrdiff_t offset;
+  ptrdiff_t offset_;
   /// Size of the underlying map.
-  int64_t map_size;
+  int64_t map_size_;
 };
 
 class CacheRegion {
