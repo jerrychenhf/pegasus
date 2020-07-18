@@ -25,9 +25,16 @@ class PegasusClientFactory(location: Location,
                            password: String) extends AutoCloseable {
 
   private val allocator = new RootAllocator(Long.MaxValue)
+  //TODO make useFileBatch configurable
+  private var useFileBatch = false
 
   def apply: FlightClient = {
-    val client = FlightClient.builder(allocator, location).build
+    var client: FlightClient = null
+    if(useFileBatch) {
+      client = FlightClient.builder(allocator, location).useFileBatch().build
+    } else {
+      client = FlightClient.builder(allocator, location).build
+    }
 //    client.authenticateBasic(username, password)
     client
   }

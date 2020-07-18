@@ -16,13 +16,18 @@
  */
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
+import org.apache.hadoop.fs.Path
+import org.apache.parquet.format.converter.ParquetMetadataConverter.NO_FILTER
+import org.apache.parquet.hadoop.ParquetFileReader
 import org.apache.pegasus.rpc.{Location, Ticket}
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.connector.read.{InputPartition, PartitionReader, PartitionReaderFactory}
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.types.{AtomicType, StructType}
 import org.apache.spark.sql.vectorized.ColumnarBatch
+import org.apache.spark.util.SerializableConfiguration
 
 /**
   * A factory used to create Pegasus Partition readers.
@@ -35,6 +40,7 @@ import org.apache.spark.sql.vectorized.ColumnarBatch
 case class PegasusPartitionReaderFactory(
     paths: Seq[String],
     sqlConf: SQLConf,
+    broadcastedConf: Broadcast[SerializableConfiguration],
     readDataSchema: StructType) extends PartitionReaderFactory with Logging {
 
   override def supportColumnarReads(partition: InputPartition): Boolean = {
@@ -69,7 +75,9 @@ case class PegasusPartitionReaderFactory(
 
     val ticket: Ticket = endpoint.getTicket
 
-    val pegasusReader = new PegasusPartitionReader(ticket, location, null, null)
+    val conf = broadcastedConf.value.value
+    val pegasusReader = new PegasusPartitionReader(conf, ticket, location, null, null, readDataSchema)
+
 
     new PartitionReader[ColumnarBatch] {
       override def next(): Boolean = {

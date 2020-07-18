@@ -27,7 +27,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.connector.read.{Batch, InputPartition, PartitionReaderFactory, Scan, Statistics, SupportsReportStatistics}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.util.CaseInsensitiveStringMap
-import org.apache.spark.util.Utils
+import org.apache.spark.util.{SerializableConfiguration, Utils}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
@@ -70,7 +70,10 @@ case class PegasusScan(
 
   override def createReaderFactory(): PartitionReaderFactory = {
 
-    PegasusPartitionReaderFactory(paths, sparkSession.sessionState.conf, readDataSchema)
+    val broadcastedConf = sparkSession.sparkContext.broadcast(
+      new SerializableConfiguration(hadoopConf))
+
+    PegasusPartitionReaderFactory(paths, sparkSession.sessionState.conf, broadcastedConf, readDataSchema)
   }
 
   override def equals(obj: Any): Boolean = obj match {

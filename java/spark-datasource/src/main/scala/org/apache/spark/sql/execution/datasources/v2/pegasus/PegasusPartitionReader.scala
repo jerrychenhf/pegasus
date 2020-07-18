@@ -16,25 +16,51 @@
  */
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
+import java.io.IOException
+
 import scala.collection.JavaConverters._
 import org.apache.pegasus.rpc.FlightClient
 import org.apache.pegasus.rpc.Location
 import org.apache.pegasus.rpc.Ticket
 import org.apache.arrow.memory.RootAllocator
 import org.apache.arrow.util.AutoCloseables
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.Path
+import org.apache.parquet.format.converter.ParquetMetadataConverter.NO_FILTER
+import org.apache.parquet.hadoop.{ParquetFileReader, PegasusParquetChunkReader}
 import org.apache.spark.internal.Logging
+import org.apache.spark.sql.execution.datasources.parquet.{ParquetReadSupport, PegasusVectorizedColumnReader}
+import org.apache.spark.sql.execution.vectorized.{OnHeapColumnVector, WritableColumnVector}
+import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.vectorized.{ArrowColumnVector, ColumnVector, ColumnarBatch}
 
-class PegasusPartitionReader(ticket: Ticket,
+class PegasusPartitionReader(configuration: Configuration,
+                             ticket: Ticket,
                              location: Location,
                              username: String,
-                             password: String) extends Logging {
+                             password: String,
+                             readDataSchema: StructType) extends Logging {
 
   private val clientFactory = new PegasusClientFactory(
     location, null, null)
 
   val client = clientFactory.apply
   private val stream = client.getStream(ticket)
+  //TODO make useFileBatch configurable
+  private var useFileBatch = false
+
+
+
+  lazy val footer =  ParquetFileReader.readFooter(configuration, new Path(ticket.getPartitionIdentity.toString), NO_FILTER)
+  val parquetFileSchema = footer.getFileMetaData.getSchema
+  val parquetRequestedSchema = ParquetReadSupport.clipParquetSchema(parquetFileSchema,
+    readDataSchema, false)
+
+  val blocks = footer.getBlocks
+  private var currentBlock = 0
+
+  val reader = new PegasusParquetChunkReader(configuration, footer, parquetRequestedSchema.getColumns)
+  reader.setRequestedSchema(parquetRequestedSchema)
 
   def next: Boolean = {
     logInfo("partition schema: " + stream.getRoot.getSchema)
@@ -48,13 +74,30 @@ class PegasusPartitionReader(ticket: Ticket,
 
   def get: ColumnarBatch = {
     try {
-      val columns = stream.getRoot().getFieldVectors().asScala.map { vector =>
-        new ArrowColumnVector(vector).asInstanceOf[ColumnVector]
-      }.toArray
-
-      val batch = new ColumnarBatch(columns)
-      batch.setNumRows(stream.getRoot().getRowCount())
-      batch
+      if(useFileBatch) {
+        val num = stream.getRoot().getRowCount()
+        val columnVectors = OnHeapColumnVector.allocateColumns(num, readDataSchema)
+        val pages = reader.getRowGroup(stream.getRoot().getFieldVectors())
+        if (pages == null) throw new IOException("expecting more rows but reached last block")
+        val columnDescriptors = parquetRequestedSchema.getColumns
+        val types = parquetRequestedSchema.asGroupType.getFields
+        for (i <- 0 until columnDescriptors.size()) {
+          // TODO consider null column
+          val columnReader = new PegasusVectorizedColumnReader(columnDescriptors.get(i), types.get(i).getOriginalType(),
+            pages.getPageReader(columnDescriptors.get(i)), null);
+          columnReader.readBatch(num, columnVectors(i));
+        }
+        new ColumnarBatch(columnVectors.map { vector =>
+          vector.asInstanceOf[WritableColumnVector]
+        })
+      } else {
+        val columns: Array[ColumnVector] = stream.getRoot().getFieldVectors().asScala.map { vector =>
+          new ArrowColumnVector(vector).asInstanceOf[ColumnVector]
+        }.toArray
+        val batch = new ColumnarBatch(columns)
+        batch.setNumRows(stream.getRoot().getRowCount())
+        batch
+      }
     } catch {
       case e: Exception =>
         throw new RuntimeException(e)
