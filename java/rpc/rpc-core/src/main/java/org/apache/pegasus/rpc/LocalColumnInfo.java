@@ -34,10 +34,7 @@ import org.apache.pegasus.rpc.impl.Flight;
  */
 public class LocalColumnInfo {
   private final int columnIndex;
-  private final int dataOffset;
-  private final long dataSize;
-  private final int mmapFd;
-  private final long mmapSize;
+  private List<LocalColumnChunkInfo> chunks;
 
   /**
    * Constructs a new instance.
@@ -48,14 +45,11 @@ public class LocalColumnInfo {
    * @param mmapFd The mmap file descriptor
    * @param mmapSize The number of bytes for the mmap.
    */
-  public LocalColumnInfo(int columnIndex, int dataOffset, long dataSize,
-      int mmapFd, long mmapSize) {
+  public LocalColumnInfo(int columnIndex, List<LocalColumnChunkInfo> chunks) {
     super();
     this.columnIndex = columnIndex;
-    this.dataOffset = dataOffset;
-    this.dataSize = dataSize;
-    this.mmapFd = mmapFd;
-    this.mmapSize = mmapSize;
+    Objects.requireNonNull(chunks);
+    this.chunks = chunks;
   }
 
   /**
@@ -63,30 +57,18 @@ public class LocalColumnInfo {
    */
   LocalColumnInfo(Flight.LocalColumnInfo pbLocalColumnInfo) throws URISyntaxException {
     columnIndex = pbLocalColumnInfo.getColumnIndex();
-    dataOffset = pbLocalColumnInfo.getDataOffset();
-    dataSize = pbLocalColumnInfo.getDataSize();
-    mmapFd = pbLocalColumnInfo.getMmapFd();
-    mmapSize = pbLocalColumnInfo.getMmapSize();
+    chunks = new ArrayList<>();
+    for (final Flight.LocalColumnChunkInfo columnChunkInfo : pbLocalColumnInfo.getColumnChunkInfoList()) {
+      chunks.add(new LocalColumnChunkInfo(columnChunkInfo));
+    }
   }
 
   public int getColumnIndex() {
     return columnIndex;
   }
 
-  public int getDataOffset() {
-    return dataOffset;
-  }
-  
-  public long getDataSize() {
-    return dataSize;
-  }
-  
-  public int getMmapFd() {
-    return mmapFd;
-  }
-
-  public long getMmapSize() {
-    return mmapSize;
+  public List<LocalColumnChunkInfo> getColumnChunkInfos() {
+    return chunks;
   }
 
   /**
@@ -95,10 +77,7 @@ public class LocalColumnInfo {
   Flight.LocalColumnInfo toProtocol() {
     return Flight.LocalColumnInfo.newBuilder()
         .setColumnIndex(LocalColumnInfo.this.columnIndex)
-        .setDataOffset(LocalColumnInfo.this.dataOffset)
-        .setDataSize(LocalColumnInfo.this.dataSize)
-        .setMmapFd(LocalColumnInfo.this.mmapFd)
-        .setMmapSize(LocalColumnInfo.this.mmapSize)
+        .addAllColumnChunkInfo(chunks.stream().map(t -> t.toProtocol()).collect(Collectors.toList()))
         .build();
   }
 
@@ -135,25 +114,19 @@ public class LocalColumnInfo {
     }
     LocalColumnInfo that = (LocalColumnInfo) o;
     return columnIndex == that.columnIndex &&
-        dataOffset == that.dataOffset &&
-        dataSize == that.dataSize &&
-        mmapFd == that.mmapFd &&
-        mmapSize == that.mmapSize;
+        chunks.equals(that.chunks);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(columnIndex, dataOffset, dataSize, mmapFd, mmapSize);
+    return Objects.hash(columnIndex, chunks);
   }
 
   @Override
   public String toString() {
     return "LocalColumnInfo{" +
         "columnIndex=" + columnIndex +
-        ", dataOffset=" + dataOffset +
-        ", dataSize=" + dataSize +
-        ", mmapFd=" + mmapFd +
-        ", mmapSize=" + mmapSize +
+        "columns=" + chunks +
         '}';
   }
 }

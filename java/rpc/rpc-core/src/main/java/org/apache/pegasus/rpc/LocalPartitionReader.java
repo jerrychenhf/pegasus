@@ -28,6 +28,8 @@ import java.util.List;
  */
 public class LocalPartitionReader {
   private LocalPartitionInfo localPartitionInfo;
+  private int chunkCount = 0;
+  private int currentChunk = 0;
 
   /**
    * Constructs a new instance.
@@ -36,29 +38,40 @@ public class LocalPartitionReader {
    */
   public LocalPartitionReader(LocalPartitionInfo localPartitionInfo) {
     this.localPartitionInfo = localPartitionInfo;
+    if (localPartitionInfo != null && localPartitionInfo.getColumnInfos().size() != 0) {
+      LocalColumnInfo column = localPartitionInfo.getColumnInfos().get(0);
+      chunkCount = column.getColumnChunkInfos().size();
+    }
   }
 
   /**
    * Do the mapping and retunr the the list of the mapped byte buffers
    */
-  public List<ByteBuffer> read() throws IOException {
-    if (localPartitionInfo == null || localPartitionInfo.getColumnInfos().size() == 0)
-      throw new IOException("Invalid local partition information.");
-    
+  public List<ByteBuffer> next() throws IOException {
+    if(currentChunk >= chunkCount) 
+      return null;
+      
     // map the shared memory of each column
     List<LocalColumnInfo> columnInfos = localPartitionInfo.getColumnInfos();
     List<ByteBuffer> columnBuffers = new ArrayList<ByteBuffer>(columnInfos.size());
     for( LocalColumnInfo columnInfo : columnInfos) {
-      ByteBuffer columnBuffer = readColumn(columnInfo);
+      ByteBuffer columnBuffer = readColumn(columnInfo, currentChunk);
       columnBuffers.add(columnBuffer);
     }
     
+    currentChunk++;
     return columnBuffers;
   }
 
-  private ByteBuffer readColumn(LocalColumnInfo columnInfo) throws IOException {
-    return LocalMemoryMappingJNI.getMappedBuffer(columnInfo.getMmapFd(), columnInfo.getMmapSize(),
-      columnInfo.getDataOffset(), columnInfo.getDataSize());
+  private ByteBuffer readColumn(LocalColumnInfo columnInfo, int chunkIndex) throws IOException {
+    List<LocalColumnChunkInfo> chunks = columnInfo.getColumnChunkInfos();
+    LocalColumnChunkInfo chunk = chunks.get(chunkIndex);
+    return readColumnChunk(chunk);
+  }
+  
+  private ByteBuffer readColumnChunk(LocalColumnChunkInfo chunk) throws IOException {
+    return LocalMemoryMappingJNI.getMappedBuffer(chunk.getMmapFd(), chunk.getMmapSize(),
+      chunk.getDataOffset(), chunk.getDataSize());
   }
 
 }

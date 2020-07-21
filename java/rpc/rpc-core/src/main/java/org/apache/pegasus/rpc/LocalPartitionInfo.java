@@ -33,31 +33,31 @@ import org.apache.pegasus.rpc.impl.Flight;
  * A POJO representation of a LocalPartitionInfo, metadata associated with a set of data columns of a partition for shared memroy based local read.
  */
 public class LocalPartitionInfo {
-  private List<LocalColumnInfo> columnInfos;
+  private List<LocalColumnInfo> columns;
 
   /**
    * Constructs a new instance.
    *
-   * @param columnInfos A list of columnInfos for the partition information.
+   * @param columns A list of LocalColumnInfo for the partition information.
    */
-  public LocalPartitionInfo(List<LocalColumnInfo> columnInfos) {
+  public LocalPartitionInfo(List<LocalColumnInfo> columns) {
     super();
-    Objects.requireNonNull(columnInfos);
-    this.columnInfos = columnInfos;
+    Objects.requireNonNull(columns);
+    this.columns = columns;
   }
 
   /**
    * Constructs from the protocol buffer representation.
    */
   LocalPartitionInfo(Flight.LocalPartitionInfo pbLocalPartitionInfo) throws URISyntaxException {
-    columnInfos = new ArrayList<>();
+    columns = new ArrayList<>();
     for (final Flight.LocalColumnInfo columnInfo : pbLocalPartitionInfo.getColumnInfoList()) {
-      columnInfos.add(new LocalColumnInfo(columnInfo));
+      columns.add(new LocalColumnInfo(columnInfo));
     }
   }
 
   public List<LocalColumnInfo> getColumnInfos() {
-    return columnInfos;
+    return columns;
   }
 
   /**
@@ -65,7 +65,7 @@ public class LocalPartitionInfo {
    */
   Flight.LocalPartitionInfo toProtocol() {
     return Flight.LocalPartitionInfo.newBuilder()
-        .addAllColumnInfo(columnInfos.stream().map(t -> t.toProtocol()).collect(Collectors.toList()))
+        .addAllColumnInfo(columns.stream().map(t -> t.toProtocol()).collect(Collectors.toList()))
         .build();
   }
 
@@ -101,18 +101,18 @@ public class LocalPartitionInfo {
       return false;
     }
     LocalPartitionInfo that = (LocalPartitionInfo) o;
-    return columnInfos.equals(that.columnInfos);
+    return columns.equals(that.columns);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(columnInfos);
+    return Objects.hash(columns);
   }
 
   @Override
   public String toString() {
     return "LocalPartitionInfo{" +
-        "columnInfos=" + columnInfos +
+        "columns=" + columns +
         '}';
   }
 }
