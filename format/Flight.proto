@@ -455,14 +455,14 @@ message HeartbeatResult {
 }
 
 /*
- * The access informaiton for reading data for one column from local memory mapping
+ * The access informaiton for reading data for one column chunk from local memory mapping
  */
-message LocalColumnInfo {
-  /*
-   * The column index
+message LocalColumnChunkInfo {
+/*
+   * The chunk index
    */
-  int32 column_index = 1;
-  
+  int32 chunk_index = 1;
+
   /*
    * The data offset in the mapping
    */
@@ -482,6 +482,21 @@ message LocalColumnInfo {
    * The mmap size for the file descriptor
    */
   int64 mmap_size = 5;
+}
+
+/*
+ * The access informaiton for reading data for one column from local memory mapping
+ */
+message LocalColumnInfo {
+  /*
+   * The column index
+   */
+  int32 column_index = 1;
+  
+  /*
+   * A list of column chunk memory information
+   */
+  repeated LocalColumnChunkInfo columnChunkInfo = 2;
 }
 
 /*

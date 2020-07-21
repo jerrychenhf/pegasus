@@ -115,9 +115,11 @@ arrow::Status ToProto(const PartitionDropList& partsdroplist, pb::PartitionDropL
 arrow::Status ToProto(const HeartbeatResultCmd& resultcmd, pb::HeartbeatResultCmd* pb_resultcmd);
 arrow::Status ToProto(const HeartbeatResult& result, pb::HeartbeatResult* pb_result);
 
+arrow::Status FromProto(const pb::LocalColumnChunkInfo& pb_info, LocalColumnChunkInfo* info);
 arrow::Status FromProto(const pb::LocalColumnInfo& pb_info, LocalColumnInfo* info);
 arrow::Status FromProto(const pb::LocalPartitionInfo& pb_info, LocalPartitionInfo* info);
 arrow::Status FromProto(const pb::LocalReleaseResult& pb_result, LocalReleaseResult* result);
+arrow::Status ToProto(const LocalColumnChunkInfo& info, pb::LocalColumnChunkInfo* pb_info);
 arrow::Status ToProto(const LocalColumnInfo& info, pb::LocalColumnInfo* pb_info);
 arrow::Status ToProto(const LocalPartitionInfo& info, pb::LocalPartitionInfo* pb_info);
 arrow::Status ToProto(const LocalReleaseResult& result, pb::LocalReleaseResult* pb_result);

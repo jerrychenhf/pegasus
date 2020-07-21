@@ -380,13 +380,21 @@ bool HeartbeatResult::Equals(const HeartbeatResult& other) const {
   return true;
 }
 
-
-bool LocalColumnInfo::Equals(const LocalColumnInfo& other) const {
-  if (column_index != other.column_index ||
+bool LocalColumnChunkInfo::Equals(const LocalColumnChunkInfo& other) const {
+  if (chunk_index != other.chunk_index ||
     data_offset != other.data_offset ||
     data_size != other.data_size ||
     mmap_fd != other.mmap_fd ||
     mmap_size != other.mmap_size) {
+    return false;
+  }
+  
+  return true;
+}
+
+bool LocalColumnInfo::Equals(const LocalColumnInfo& other) const {
+  if (column_index != other.column_index ||
+    chunks != other.chunks) {
     return false;
   }
   

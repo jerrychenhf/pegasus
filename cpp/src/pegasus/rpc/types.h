@@ -678,12 +678,12 @@ struct PEGASUS_RPC_EXPORT HeartbeatResult {
   }
 };
 
-/// \brief Column data information for local memory mapping
-struct PEGASUS_RPC_EXPORT LocalColumnInfo {
+/// \brief Column chunk data information for local memory mapping
+struct PEGASUS_RPC_EXPORT LocalColumnChunkInfo {
   /*
-   * The column index
+   * The chunk index (row group index)
    */
-  int32_t column_index;
+  int32_t chunk_index;
   
   /*
    * The data offset in the mapping
@@ -705,6 +705,26 @@ struct PEGASUS_RPC_EXPORT LocalColumnInfo {
    */
   int64_t mmap_size;
 
+  bool Equals(const LocalColumnChunkInfo& other) const;
+
+  friend bool operator==(const LocalColumnChunkInfo& left, const LocalColumnChunkInfo& right) {
+    return left.Equals(right);
+  }
+  friend bool operator!=(const LocalColumnChunkInfo& left, const LocalColumnChunkInfo& right) {
+    return !(left == right);
+  }
+};
+
+/// \brief Column data information for local memory mapping
+struct PEGASUS_RPC_EXPORT LocalColumnInfo {
+  /*
+   * The column index
+   */
+  int32_t column_index;
+  
+  /// List of local column chunk info for memory mapping each column
+  std::vector<LocalColumnChunkInfo> chunks;
+    
   bool Equals(const LocalColumnInfo& other) const;
 
   friend bool operator==(const LocalColumnInfo& left, const LocalColumnInfo& right) {

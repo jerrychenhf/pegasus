@@ -568,12 +568,22 @@ arrow::Status ToProto(const HeartbeatResult& result, pb::HeartbeatResult* pb_res
   return arrow::Status::OK();
 }
 
-arrow::Status FromProto(const pb::LocalColumnInfo& pb_info, LocalColumnInfo* info) {
-  info->column_index = pb_info.column_index();
+arrow::Status FromProto(const pb::LocalColumnChunkInfo& pb_info, LocalColumnChunkInfo* info) {
+  info->chunk_index = pb_info.chunk_index();
   info->data_offset = pb_info.data_offset();
   info->data_size = pb_info.data_size();
   info->mmap_fd = pb_info.mmap_fd();
   info->mmap_size = pb_info.mmap_size();
+  return arrow::Status::OK();
+}
+
+arrow::Status FromProto(const pb::LocalColumnInfo& pb_info, LocalColumnInfo* info) {
+  info->column_index = pb_info.column_index();
+
+  info->chunks.resize(pb_info.columnchunkinfo_size());
+  for (int i = 0; i < pb_info.columnchunkinfo_size(); ++i) {
+    RETURN_NOT_OK(FromProto(pb_info.columnchunkinfo(i), &info->chunks[i]));
+  }
   return arrow::Status::OK();
 }
 
@@ -590,12 +600,22 @@ arrow::Status FromProto(const pb::LocalReleaseResult& pb_result, LocalReleaseRes
   return arrow::Status::OK();
 }
 
-arrow::Status ToProto(const LocalColumnInfo& info, pb::LocalColumnInfo* pb_info) {
-  pb_info->set_column_index(info.column_index);
+arrow::Status ToProto(const LocalColumnChunkInfo& info, pb::LocalColumnChunkInfo* pb_info) {
+  pb_info->set_chunk_index(info.chunk_index);
   pb_info->set_data_offset(info.data_offset);
   pb_info->set_data_size(info.data_size);
   pb_info->set_mmap_fd(info.mmap_fd);
   pb_info->set_mmap_size(info.mmap_size);
+  return arrow::Status::OK();
+}
+
+arrow::Status ToProto(const LocalColumnInfo& info, pb::LocalColumnInfo* pb_info) {
+  pb_info->set_column_index(info.column_index);
+
+  pb_info->clear_columnchunkinfo();
+  for (const LocalColumnChunkInfo& chunk : info.chunks) {
+    ToProto(chunk, pb_info->add_columnchunkinfo());
+  }
   return arrow::Status::OK();
 }
 
