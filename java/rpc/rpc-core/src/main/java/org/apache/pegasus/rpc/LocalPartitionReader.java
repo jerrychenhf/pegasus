@@ -20,7 +20,9 @@ package org.apache.pegasus.rpc;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
 
 
 /**
@@ -28,8 +30,14 @@ import java.util.List;
  */
 public class LocalPartitionReader {
   private LocalPartitionInfo localPartitionInfo;
+
+  private int columns = 0;
   private int chunkCount = 0;
   private int currentChunk = 0;
+  private int[] mmapFds;
+  private long[] mmapSizes;
+  private long[] dataOffsets;
+  private long[] dataSizes;
 
   /**
    * Constructs a new instance.
@@ -39,8 +47,13 @@ public class LocalPartitionReader {
   public LocalPartitionReader(LocalPartitionInfo localPartitionInfo) {
     this.localPartitionInfo = localPartitionInfo;
     if (localPartitionInfo != null && localPartitionInfo.getColumnInfos().size() != 0) {
+      this.columns = localPartitionInfo.getColumnInfos().size();
       LocalColumnInfo column = localPartitionInfo.getColumnInfos().get(0);
-      chunkCount = column.getColumnChunkInfos().size();
+      this.chunkCount = column.getColumnChunkInfos().size();
+      this.mmapFds = new int[columns];
+      this.mmapSizes = new long[columns];
+      this.dataOffsets = new long[columns];
+      this.dataSizes = new long[columns];
     }
   }
 
@@ -50,16 +63,41 @@ public class LocalPartitionReader {
   public List<ByteBuffer> next() throws IOException {
     if(currentChunk >= chunkCount) 
       return null;
-      
+
+    // map the shared memory of each column in batch
+    List<ByteBuffer> columnBuffers = mapColumnsBatch(currentChunk);
+    currentChunk++;
+    return columnBuffers;
+  }
+  
+  private List<ByteBuffer> mapColumns(int chunkIndex) throws IOException   {
     // map the shared memory of each column
     List<LocalColumnInfo> columnInfos = localPartitionInfo.getColumnInfos();
     List<ByteBuffer> columnBuffers = new ArrayList<ByteBuffer>(columnInfos.size());
     for( LocalColumnInfo columnInfo : columnInfos) {
-      ByteBuffer columnBuffer = readColumn(columnInfo, currentChunk);
+      ByteBuffer columnBuffer = readColumn(columnInfo, chunkIndex);
       columnBuffers.add(columnBuffer);
     }
-    
-    currentChunk++;
+    return columnBuffers;
+  }
+
+  private List<ByteBuffer> mapColumnsBatch(int chunkIndex) throws IOException   {
+    // map the shared memory of each column
+    List<LocalColumnInfo> columnInfos = localPartitionInfo.getColumnInfos();
+    int column = 0;
+    for( LocalColumnInfo columnInfo : columnInfos) {
+      List<LocalColumnChunkInfo> chunks = columnInfo.getColumnChunkInfos();
+      LocalColumnChunkInfo chunk = chunks.get(chunkIndex);
+      mmapFds[column] = chunk.getMmapFd();
+      mmapSizes[column] = chunk.getMmapSize();
+      dataOffsets[column] = chunk.getDataOffset();
+      dataSizes[column] = chunk.getDataSize();
+      column++;
+    }
+
+    ByteBuffer[]  buffers =  LocalMemoryMappingJNI.getMappedBuffers(
+      mmapFds, mmapSizes, dataOffsets, dataSizes);
+    List<ByteBuffer> columnBuffers = Arrays.asList(buffers);  
     return columnBuffers;
   }
 
