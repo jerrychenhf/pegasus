@@ -62,11 +62,11 @@ import io.netty.buffer.Unpooled;
  * The in-memory representation of FlightData used to manage a stream of Arrow messages.
  */
 class FileBatchMessage extends ArrowMessage {
-  private FileBatchMessageMetadata messageMetadata;
+  private MessageMetadataResult messageMetadata;
   
-  protected FileBatchMessage(FlightDescriptor descriptor, FileBatchMessageMetadata messageMetadata, ArrowBuf appMetadata,
+  protected FileBatchMessage(FlightDescriptor descriptor, MessageMetadataResult messageMetadata, ArrowBuf appMetadata,
                        ArrowBuf buf) {
-    super(descriptor, null, appMetadata, buf);
+    super(descriptor, messageMetadata, appMetadata, buf);
     this.messageMetadata = messageMetadata;
   }
   
@@ -101,21 +101,21 @@ class FileBatchMessage extends ArrowMessage {
     throw new RuntimeException("RecordBatch is not supported.");
   }
   
-  public FileBatch asFileBatch() {
+  public FileBatch asFileBatch() throws IOException {
     Preconditions.checkArgument(bufs.size() == 1, "A batch can only be consumed if it contains a single ArrowBuf.");
     Preconditions.checkArgument(getMessageType() == HeaderType.RECORD_BATCH);
 
     ArrowBuf underlying = bufs.get(0);
 
     underlying.getReferenceManager().retain();
-    return FileBatch.deserializeFileBatch(messageMetadata, underlying);
+    return FileBatch.deserializeFileBatch(message, underlying);
   }
 
   private static ArrowMessage frame(BufferAllocator allocator, final InputStream stream) {
 
     try {
       FlightDescriptor descriptor = null;
-      FileBatchMessageMetadata messageMetadata = null;
+      MessageMetadataResult messageMetadata = null;
       ArrowBuf body = null;
       ArrowBuf appMetadata = null;
       while (stream.available() > 0) {
@@ -133,7 +133,7 @@ class FileBatchMessage extends ArrowMessage {
             int size = readRawVarint32(stream);
             byte[] bytes = new byte[size];
             ByteStreams.readFully(stream, bytes);
-            messageMetadata = FileBatchMessageMetadata.create(ByteBuffer.wrap(bytes), size);
+            messageMetadata = MessageMetadataResult.create(ByteBuffer.wrap(bytes), size);
             break;
           }
           case APP_METADATA_TAG: {

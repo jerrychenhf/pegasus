@@ -17,10 +17,17 @@
 
 package org.apache.pegasus.rpc;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.netty.buffer.ArrowBuf;
+import org.apache.arrow.flatbuf.Buffer;
+import org.apache.arrow.flatbuf.FieldNode;
+import org.apache.arrow.flatbuf.Message;
+import org.apache.arrow.flatbuf.RecordBatch;
+import org.apache.arrow.vector.ipc.message.ArrowFieldNode;
+import org.apache.arrow.vector.ipc.message.MessageMetadataResult;
 
 /**
  * The File Batch which contains chunks of data for columns
@@ -34,22 +41,31 @@ public class FileBatch implements AutoCloseable {
     this.buffers = buffers;
   }
   
-  public static FileBatch deserializeFileBatch(FileBatchMessageMetadata messageMetaData,
-                                               ArrowBuf body) {
-    //TO DO
-    //get the buffers and create the FileBatch
+  public static FileBatch deserializeFileBatch(MessageMetadataResult serializedMessage,
+                                               ArrowBuf body) throws IOException {
+    Message recordBatchMessage = serializedMessage.getMessage();
+    RecordBatch recordBatchFB = (RecordBatch) recordBatchMessage.header(new RecordBatch());
+    // Now read the body
+    int nodesLength = recordBatchFB.nodesLength();
+    List<ArrowFieldNode> nodes = new ArrayList<>();
+    for (int i = 0; i < nodesLength; ++i) {
+      FieldNode node = recordBatchFB.nodes(i);
+      if ((int) node.length() != node.length() ||
+              (int) node.nullCount() != node.nullCount()) {
+        throw new IOException("Cannot currently deserialize record batches with " +
+                "node length larger than INT_MAX records.");
+      }
+      nodes.add(new ArrowFieldNode(node.length(), node.nullCount()));
+    }
     List<ArrowBuf> buffers = new ArrayList<>();
-    
-    //TO DO: get columns
-    int columns = 0;
-    for (int i = 0; i < columns; ++i) {
-      // TO DO: get the offset and length of each buffer
-      int offset = 0;
-      int len = 0;
-      ArrowBuf vectorBuffer = body.slice(offset, len);
+    for (int i = 0; i < recordBatchFB.buffersLength(); ++i) {
+      Buffer bufferFB = recordBatchFB.buffers(i);
+      ArrowBuf vectorBuffer = body.slice(bufferFB.offset(), bufferFB.length());
       buffers.add(vectorBuffer);
     }
-    
+    if ((int) recordBatchFB.length() != recordBatchFB.length()) {
+      throw new IOException("Cannot currently deserialize record batches with more than INT_MAX records.");
+    }
     body.getReferenceManager().release();
     return new FileBatch(buffers);    
   }

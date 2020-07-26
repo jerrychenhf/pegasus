@@ -50,7 +50,7 @@ class PegasusPartitionReader(configuration: Configuration,
   private var useFileBatch = false
 
 
-
+  //TODO consider metadata reading performance
   lazy val footer =  ParquetFileReader.readFooter(configuration, new Path(ticket.getPartitionIdentity.toString), NO_FILTER)
   val parquetFileSchema = footer.getFileMetaData.getSchema
   val parquetRequestedSchema = ParquetReadSupport.clipParquetSchema(parquetFileSchema,
