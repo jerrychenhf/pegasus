@@ -49,6 +49,10 @@ unordered_map<int, std::shared_ptr<arrow::Buffer>> CacheRegion::object_buffers()
   return object_buffers_;
 }
 
+unordered_map<int, std::shared_ptr<ObjectEntry>> CacheRegion::object_entries() const {
+  return object_entries_;
+}
+
 std::shared_ptr<CacheMemoryPool> CacheRegion::memory_pool() const {
  return memory_pool_;
 }

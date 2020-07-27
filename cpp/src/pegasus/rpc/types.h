@@ -741,6 +741,12 @@ struct PEGASUS_RPC_EXPORT LocalPartitionInfo {
    /// List of local column info for memory mapping each column
   std::vector<LocalColumnInfo> columns;
 
+  explicit LocalPartitionInfo() {}
+
+
+  explicit LocalPartitionInfo(std::vector<LocalColumnInfo> columns) :
+    columns(columns) {}
+
   bool Equals(const LocalPartitionInfo& other) const;
 
   friend bool operator==(const LocalPartitionInfo left, const LocalPartitionInfo& right) {

@@ -27,6 +27,7 @@
 #include "rpc/file_batch_reader.h"
 #include "ipc/malloc.h"
 #include <boost/thread/mutex.hpp>
+#include "rpc/types.h"
 
 DEFINE_int64(chunk_size, 2048, "The maximum chunk size of record batches");
 
@@ -377,7 +378,8 @@ Status DatasetCacheManager::GetLocalData(RequestIdentity* request_identity, std:
   
   std::string dataset_path = request_identity->dataset_path();
   std::string partition_path = request_identity->partition_path();
-
+  
+  // store the requested columns into in_used_columns_. 
   for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++) {
     int column_id = *iter;
     std::string key = dataset_path.append(partition_path).append(to_string(column_id));
@@ -402,7 +404,38 @@ Status DatasetCacheManager::GetLocalData(RequestIdentity* request_identity, std:
    }
   }
 
-  // TODO: wrap the column info of fd, offset and map_size into the result
+  // wrap LocalPartitionInfo
+  std::vector<rpc::LocalColumnInfo> columns;
+  for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++) {
+    int column_id = *iter;
+    auto entry = cached_columns.find(column_id);
+    assert(entry != cached_columns.end());
+
+    std::shared_ptr<CachedColumn> column = entry->second;
+    CacheRegion* region = column->GetCacheRegion();
+    unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries = region->object_entries();
+
+    int row_group_counts = object_entries.size();
+    std::vector<rpc::LocalColumnChunkInfo> chunks;
+
+    for (int i =0; i < row_group_counts; i++) {
+      auto entry = object_entries.find(i);
+      assert(entry != cached_columns.end());
+      std::shared_ptr<ObjectEntry> object_entry = entry->second;
+
+      int fd = object_entry.get()->fd_;
+      ptrdiff_t offset = object_entry.get()->offset_;
+      int64_t map_size = object_entry.get()->map_size_;
+      rpc::LocalColumnChunkInfo chunk{fd, offset, map_size};
+
+      chunks.push_back(chunk);
+    }
+
+    rpc::LocalColumnInfo column_entry {column_id, chunks};
+    columns.push_back(column_entry);
+  }
+
+  *result = std::unique_ptr<rpc::LocalPartitionInfo>(new rpc::LocalPartitionInfo(columns));
   return Status::OK();
 }
 
