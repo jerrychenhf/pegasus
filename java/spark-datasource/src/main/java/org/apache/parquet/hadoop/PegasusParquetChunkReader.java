@@ -20,6 +20,7 @@
 package org.apache.parquet.hadoop;
 
 import com.google.common.collect.Maps;
+import io.netty.buffer.ArrowBuf;
 import org.apache.arrow.vector.FieldVector;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.parquet.column.ColumnDescriptor;
@@ -52,9 +53,9 @@ public class PegasusParquetChunkReader extends ParquetFileReader {
 
   }
 
-  public PageReadStore getRowGroup(List<FieldVector> fieldVectorList) throws IOException {
+  public PageReadStore getRowGroup(List<ArrowBuf> arrowBufs) throws IOException {
 
-    ColumnChunkPageReadStore currentRowGroup = new ColumnChunkPageReadStore(fieldVectorList.size());
+    ColumnChunkPageReadStore currentRowGroup = new ColumnChunkPageReadStore(arrowBufs.size());
 
     BlockMetaData block = blocks.get(currentBlock);
 
@@ -67,13 +68,13 @@ public class PegasusParquetChunkReader extends ParquetFileReader {
       }
     }
 
-    if (fieldVectorList.size() != columnDescriptors.size()) {
+    if (arrowBufs.size() != columnDescriptors.size()) {
       throw new ParquetDecodingException("fieldVectorList.size() != columnDescriptors.size()");
     }
 
-    for (int i = 0; i < fieldVectorList.size(); ++i) {
-      byte[] data = new byte[(int)fieldVectorList.get(i).getDataBuffer().capacity()];
-      fieldVectorList.get(i).getDataBuffer().getBytes(0, data);
+    for (int i = 0; i < arrowBufs.size(); ++i) {
+      byte[] data = new byte[(int)arrowBufs.get(i).capacity()];
+      arrowBufs.get(i).getBytes(0, data);
 
       // TODO , use WorkaroundChunk
       final Chunk chunk = new Chunk(new ChunkDescriptor(columnDescriptors.get(i), columnChunkMetaDataList.get(i),0,0), Collections.singletonList(ByteBuffer.wrap(data)));

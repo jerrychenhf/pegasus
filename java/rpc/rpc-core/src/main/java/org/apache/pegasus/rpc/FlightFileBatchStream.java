@@ -127,6 +127,17 @@ public class FlightFileBatchStream extends FlightStream {
       throw new RuntimeException(e);
     }
   }
+
+  public FileBatchRoot getFileBatchRoot() {
+    try {
+      return fileBatchRoot.get();
+    } catch (InterruptedException e) {
+      throw CallStatus.INTERNAL.withCause(e).toRuntimeException();
+    } catch (ExecutionException e) {
+      throw StatusUtils.fromThrowable(e.getCause());
+    }
+  }
+
   private class Observer implements StreamObserver<ArrowMessage> {
 
     Observer() {

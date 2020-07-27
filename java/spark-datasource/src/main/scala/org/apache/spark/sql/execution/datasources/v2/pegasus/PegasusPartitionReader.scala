@@ -19,9 +19,7 @@ package org.apache.spark.sql.execution.datasources.v2.pegasus
 import java.io.IOException
 
 import scala.collection.JavaConverters._
-import org.apache.pegasus.rpc.FlightClient
-import org.apache.pegasus.rpc.Location
-import org.apache.pegasus.rpc.Ticket
+import org.apache.pegasus.rpc.{FlightClient, FlightFileBatchStream, Location, Ticket}
 import org.apache.arrow.memory.RootAllocator
 import org.apache.arrow.util.AutoCloseables
 import org.apache.hadoop.conf.Configuration
@@ -77,7 +75,7 @@ class PegasusPartitionReader(configuration: Configuration,
       if(useFileBatch) {
         val num = stream.getRoot().getRowCount()
         val columnVectors = OnHeapColumnVector.allocateColumns(num, readDataSchema)
-        val pages = reader.getRowGroup(stream.getRoot().getFieldVectors())
+        val pages = reader.getRowGroup(stream.asInstanceOf[FlightFileBatchStream].getFileBatchRoot().getArrowBufs())
         if (pages == null) throw new IOException("expecting more rows but reached last block")
         val columnDescriptors = parquetRequestedSchema.getColumns
         val types = parquetRequestedSchema.asGroupType.getFields

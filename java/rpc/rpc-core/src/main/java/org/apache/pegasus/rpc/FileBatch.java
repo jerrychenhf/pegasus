@@ -20,6 +20,7 @@ package org.apache.pegasus.rpc;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import io.netty.buffer.ArrowBuf;
 import org.apache.arrow.flatbuf.Buffer;
@@ -69,7 +70,11 @@ public class FileBatch implements AutoCloseable {
     body.getReferenceManager().release();
     return new FileBatch(buffers);    
   }
-  
+
+  public List<ArrowBuf> getArrowBufs() {
+    return buffers;
+  }
+
   /**
    * Releases the buffers.
    */

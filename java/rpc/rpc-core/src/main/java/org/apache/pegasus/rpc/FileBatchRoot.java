@@ -17,7 +17,12 @@
 
 package org.apache.pegasus.rpc;
 
+import io.netty.buffer.ArrowBuf;
 import org.apache.arrow.memory.BufferAllocator;
+import org.apache.arrow.vector.FieldVector;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The File Batch which contains chunks of data for columns
@@ -41,5 +46,9 @@ public class FileBatchRoot {
   public void clear() {
     fileBatch = null;
   }
-    
+
+  public List<ArrowBuf> getArrowBufs() {
+    return fileBatch.getArrowBufs();
+  }
+
 }
