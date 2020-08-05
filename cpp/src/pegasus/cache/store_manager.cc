@@ -19,7 +19,7 @@
 #include "runtime/worker_exec_env.h"
 #include "cache/memory_store.h"
 #include "cache/dcpmm_store.h"
-
+#include "cache/file_store.h"
 namespace pegasus {
 
 const std::string StoreManager::STORE_ID_DRAM = "DRAM";
@@ -46,10 +46,11 @@ Status StoreManager::Init() {
       store = std::shared_ptr<MemoryStore>(new MemoryStore(store_info->capacity()));
     } else if (store_info->type() == Store::StoreType::DCPMM) {
       store = std::shared_ptr<DCPMMStore>(new DCPMMStore(store_info->capacity()));
+    } else if (store_info->type() == Store::StoreType::FILE) {
+      store = std::shared_ptr<FileStore>(new FileStore(store_info->capacity()));
     } else {
       return Status::Invalid("Invalid store type specified.");
-    }
-    
+    } 
     RETURN_IF_ERROR(store->Init(store_info->properties().get()));
     stores_.insert(std::make_pair(it->first, store));
   }

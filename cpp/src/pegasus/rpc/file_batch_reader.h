@@ -54,7 +54,7 @@ class FileBatchReader {
 class  CachedFileBatchReader : public FileBatchReader {
  public:
   /// \brief Construct a CachedFileBatchReader for the given CachedColumns
-  explicit CachedFileBatchReader(std::vector<std::shared_ptr<CachedColumn>> columns);
+  explicit CachedFileBatchReader(std::vector<std::shared_ptr<CachedColumn>> columns, std::shared_ptr<arrow::Schema> schema);
   CachedFileBatchReader();
 
   std::shared_ptr<arrow::Schema> schema() const override;
@@ -65,6 +65,7 @@ class  CachedFileBatchReader : public FileBatchReader {
   std::vector<std::shared_ptr<CachedColumn>> columns_;
   int rowgroup_nums_;
   int absolute_rowgroup_position_;
+  std::shared_ptr<arrow::Schema> schema_;
 };
 
 class  FileBatchStreamReader : public FileBatchReader {

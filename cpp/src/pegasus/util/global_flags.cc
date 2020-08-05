@@ -81,6 +81,9 @@ DEFINE_int32(max_virtual_node_num, 400,
 DEFINE_bool(cache_format_arrow, true,
     "enable arrow data cache or file data cache");
 
+DEFINE_bool(zero_copy_enable, false,
+    "enable binary data cache");
+
 DEFINE_int32(store_file_capacity_gb, 10,
     "The DCPMM store initial capacity in GB.");
 

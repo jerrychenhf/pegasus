@@ -56,6 +56,10 @@ Status FileStore::Init(const std::unordered_map<string, string>* properties) {
   return Status::OK();
 }
 
+Status FileStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* store_region) {
+  return Status::OK();
+}
+
 Status FileStore::Allocate(int64_t size, StoreRegion* store_region) {
   DCHECK(store_region != NULL);
   

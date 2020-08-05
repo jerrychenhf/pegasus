@@ -28,6 +28,8 @@
 #include "ipc/malloc.h"
 #include <boost/thread/mutex.hpp>
 #include "rpc/types.h"
+#include "arrow/buffer.h"
+#include <boost/shared_ptr.hpp>
 
 DEFINE_int64(chunk_size, 2048, "The maximum chunk size of record batches");
 
@@ -106,11 +108,11 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
     }
   }
 
+  std::shared_ptr<arrow::Schema> schema;
+  request_identity->get_schema(&schema);
+
   if (FLAGS_cache_format_arrow) {
     // arrow data format
-    std::shared_ptr<arrow::Schema> schema;
-    request_identity->get_schema(&schema);
-  
     std::shared_ptr<arrow::Table> table = arrow::Table::Make(schema, chunked_arrays);
   
     std::shared_ptr<arrow::TableBatchReader> reader = std::make_shared<arrow::TableBatchReader>(*table);
@@ -120,11 +122,11 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
  } else {
    // file data format
    //TO DO: passed the cached column data to the reader
-   std::shared_ptr<rpc::CachedFileBatchReader> reader = std::make_shared<rpc::CachedFileBatchReader>(columns);
+   std::shared_ptr<rpc::CachedFileBatchReader> reader = std::make_shared<rpc::CachedFileBatchReader>(columns, schema);
    *data_stream = std::unique_ptr<rpc::FlightDataStream>(
       new rpc::FileBatchStream(reader, columns));
  }
- 
+ LOG(WARNING) << "Successfully wrap the dataset into flight data stream"; 
  return Status::OK();
 }
 
@@ -195,7 +197,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
     for(auto iter = col_ids.begin(); iter != col_ids.end(); iter ++) {
       int colId = *iter;
       int row_group_counts = parquet_raw_reader->RowGroupsNum();
-      unordered_map<int, std::shared_ptr<arrow::Buffer>> object_buffers;
+      unordered_map<int, std::shared_ptr<Buffer>> object_buffers;
       std::shared_ptr<arrow::ChunkedArray> chunked_array;
       unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries;
 
@@ -206,16 +208,16 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       } else {
         
         for(int i = 0; i < row_group_counts; i ++) {
-          std::shared_ptr<arrow::Buffer> buffer;
+          std::shared_ptr<Buffer> buffer;
           LOG(INFO) << "Begin read the raw column chunk with row group ID" << i << " col ID " << colId << " partition path " << partition_path;
           RETURN_IF_ERROR(parquet_raw_reader->GetColumnBuffer(*iter, i, &buffer));
           object_buffers[i] = std::move(buffer);
-         
+          
           int fd = -1;
           int64_t map_size = 0;
           ptrdiff_t offset = 0;
-          uint8_t* pointer = const_cast< uint8_t*>(buffer->data());
-          
+          uint8_t* pointer = const_cast< uint8_t*>(object_buffers[i] ->data());
+
           GetMallocMapinfo(pointer, &fd, &map_size, &offset);
           std::shared_ptr<ObjectEntry> entry = std::shared_ptr<ObjectEntry>(new ObjectEntry(fd, offset, map_size));
           object_entries[i] = std::move(entry);
@@ -385,7 +387,7 @@ Status DatasetCacheManager::GetLocalData(RequestIdentity* request_identity, std:
     std::string key = dataset_path.append(partition_path).append(to_string(column_id));
 
     auto entry = cached_columns.find(column_id);
-    assert(entry != cached_columns.end());
+    // assert(entry != cached_columns.end());
 
     std::shared_ptr<CachedColumn> column = entry->second;
     {
@@ -409,7 +411,7 @@ Status DatasetCacheManager::GetLocalData(RequestIdentity* request_identity, std:
   for (auto iter = col_ids.begin(); iter != col_ids.end(); iter++) {
     int column_id = *iter;
     auto entry = cached_columns.find(column_id);
-    assert(entry != cached_columns.end());
+    // assert(entry != cached_columns.end());
 
     std::shared_ptr<CachedColumn> column = entry->second;
     CacheRegion* region = column->GetCacheRegion();
@@ -420,7 +422,7 @@ Status DatasetCacheManager::GetLocalData(RequestIdentity* request_identity, std:
 
     for (int i =0; i < row_group_counts; i++) {
       auto entry = object_entries.find(i);
-      assert(entry != cached_columns.end());
+     // assert(entry != cached_columns.end());
       std::shared_ptr<ObjectEntry> object_entry = entry->second;
 
       int fd = object_entry.get()->fd_;

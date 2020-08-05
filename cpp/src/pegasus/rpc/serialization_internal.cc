@@ -418,6 +418,7 @@ arrow::Status GetFileBatchPayload(const FileBatch& batch,
   }
 
   out->body_length = offset;
+  RETURN_NOT_OK(AllocateBuffer(arrow::default_memory_pool(), value_length * 2, &out->metadata));
 
   uint8_t* buffer_data = out->metadata->mutable_data();
   memcpy(buffer_data, meta_array, value_length * 2);

@@ -38,6 +38,7 @@ DECLARE_string(storage_dcpmm_path);
 DECLARE_bool(cache_format_arrow);
 DECLARE_int32(store_file_capacity_gb);
 DECLARE_string(store_file_path);
+DECLARE_bool(zero_copy_enable);
 
 namespace pegasus {
 
@@ -99,7 +100,7 @@ Status WorkerExecEnv::InitStoreInfo() {
   }
   
   // if file store configured
-  if(!FLAGS_cache_format_arrow) {
+  if(FLAGS_zero_copy_enable) {
     // read capacity
     int64_t capacity = ((int64_t) FLAGS_store_file_capacity_gb) * StoreManager::GIGABYTE;
 

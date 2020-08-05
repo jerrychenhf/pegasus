@@ -32,20 +32,20 @@ namespace rpc {
   }
 
   CachedFileBatchReader::CachedFileBatchReader(
-    std::vector<std::shared_ptr<CachedColumn>> columns): columns_(columns){
-     if (columns_.size() < 0) {
+    std::vector<std::shared_ptr<CachedColumn>> columns, std::shared_ptr<arrow::Schema> schema):
+     columns_(columns), schema_(schema){
+     if (columns.size() < 0) {
       // return arrow::Status::Invalid("The cached columns size is 0 !!!");
     } 
 
-    std::shared_ptr<CachedColumn> column = columns_[0]; 
+    std::shared_ptr<CachedColumn> column = columns[0]; 
     CacheRegion* cache_region = column->GetCacheRegion();
     rowgroup_nums_ = cache_region->object_buffers().size();
     absolute_rowgroup_position_ = 0;
   }
   
   std::shared_ptr<arrow::Schema> CachedFileBatchReader::schema() const {
-    //TO DO
-    return nullptr;
+     return schema_;
   }
   
   arrow::Status CachedFileBatchReader::ReadNext(std::shared_ptr<FileBatch>* out) {
