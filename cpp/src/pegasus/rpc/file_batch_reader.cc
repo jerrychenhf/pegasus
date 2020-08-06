@@ -22,6 +22,7 @@
 #include "arrow/result.h"
 #include "arrow/ipc/dictionary.h"
 #include "dataset/dataset_cache_block_manager.h"
+#include "common/logging.h"
 
 namespace pegasus {
 
@@ -57,7 +58,7 @@ namespace rpc {
     // FileBatch2
     //          column1 -> (rowgroup2-> buffer)
     //          column2 -> (rowgroup2 -> buffer) 
-    if (columns_.size() < 0) {
+    if (columns_.size() < 0 || absolute_rowgroup_position_ == rowgroup_nums_) {
       *out = nullptr;
       return arrow::Status::OK();
     }
@@ -70,7 +71,6 @@ namespace rpc {
       CacheRegion* cache_region = column->GetCacheRegion();
       unordered_map<int, std::shared_ptr<arrow::Buffer>> object_buffers =
        cache_region->object_buffers();
-
       auto iter  = object_buffers.find(absolute_rowgroup_position_);
       std::shared_ptr<arrow::Buffer> object_entry = iter->second;
       batch_data[i] = object_entry;
