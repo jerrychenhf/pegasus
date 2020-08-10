@@ -45,11 +45,11 @@ std::shared_ptr<arrow::ChunkedArray>  CacheRegion::chunked_array() const {
     return chunked_array_;
 }
 
-unordered_map<int, std::shared_ptr<arrow::Buffer>> CacheRegion::object_buffers() const {
+unordered_map<int, std::shared_ptr<arrow::Buffer>>& CacheRegion::object_buffers() {
   return object_buffers_;
 }
 
-unordered_map<int, std::shared_ptr<ObjectEntry>> CacheRegion::object_entries() const {
+unordered_map<int, std::shared_ptr<ObjectEntry>>& CacheRegion::object_entries() {
   return object_entries_;
 }
 

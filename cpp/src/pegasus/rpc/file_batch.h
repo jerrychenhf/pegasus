@@ -33,7 +33,7 @@ class FileBatch {
 	 rowgroup_id_(rowgroup_id), object_buffers_(object_buffers) {}
  	
  	int rowgroup_id() const { return rowgroup_id_; }
-	std::vector<std::shared_ptr<arrow::Buffer>> object_buffers() const { return object_buffers_; }
+	const std::vector<std::shared_ptr<arrow::Buffer>>& object_buffers() const { return object_buffers_; }
  private:
   int rowgroup_id_;
   std::vector<std::shared_ptr<arrow::Buffer>> object_buffers_;
