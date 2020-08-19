@@ -200,17 +200,25 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       unordered_map<int, std::shared_ptr<Buffer>> object_buffers;
       std::shared_ptr<arrow::ChunkedArray> chunked_array;
       unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries;
-
+      int64_t row_counts_per_rowgroup = 0;
       if (FLAGS_cache_format_arrow) {
       
         LOG(INFO) << "Begin read the column chunk with col ID " << colId << " partition path " << partition_path;
         RETURN_IF_ERROR(parquet_reader->ReadColumnChunk(*iter, &chunked_array));
       } else {
-        
+        bool flag = false;
+        std::shared_ptr<parquet::RowGroupReader> row_group_reader;
         for(int i = 0; i < row_group_counts; i ++) {
           std::shared_ptr<Buffer> buffer;
           LOG(INFO) << "Begin read the raw column chunk with row group ID" << i << " col ID " << colId << " partition path " << partition_path;
           RETURN_IF_ERROR(parquet_raw_reader->GetColumnBuffer(*iter, i, &buffer));
+
+          if (!flag) {
+            RETURN_IF_ERROR(parquet_raw_reader->GetRowGroupReader(i, &row_group_reader));
+            row_counts_per_rowgroup = row_group_reader->metadata()->num_rows();
+          }
+          
+
           object_buffers[i] = std::move(buffer);
           
           int fd = -1;
@@ -228,7 +236,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       occupied_size += column_size;
 
       CacheRegion* cache_region = new CacheRegion(memory_pool,
-        chunked_array, column_size, object_buffers, object_entries);
+        chunked_array, column_size, object_buffers, object_entries, row_counts_per_rowgroup);
       std::shared_ptr<CachedColumn> column = std::shared_ptr<CachedColumn>(
         new CachedColumn(partition_path, colId, cache_region));
         

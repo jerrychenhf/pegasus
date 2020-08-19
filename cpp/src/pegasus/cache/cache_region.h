@@ -54,7 +54,7 @@ class CacheRegion {
   CacheRegion(const std::shared_ptr<CacheMemoryPool>& memory_pool,
     const std::shared_ptr<arrow::ChunkedArray>& chunked_array, int64_t size,
      const unordered_map<int, std::shared_ptr<arrow::Buffer>> object_buffers = {},
-    unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries = {} );
+    unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries = {}, int64_t row_counts_per_rowgroup = 0 );
   
   ~CacheRegion();
   
@@ -63,6 +63,7 @@ class CacheRegion {
   std::shared_ptr<CacheMemoryPool> memory_pool() const;
   unordered_map<int, std::shared_ptr<arrow::Buffer>>& object_buffers();
   unordered_map<int, std::shared_ptr<ObjectEntry>>& object_entries();
+  int64_t row_counts_per_rowgroup() const;
  private:
   // the pool object associated to the chunked array
   // use shared ptr to managed the life time
@@ -75,6 +76,8 @@ class CacheRegion {
   
   // store all the object entries for the column. the key is the row group ID.
   unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries_;
+
+  int64_t row_counts_per_rowgroup_;
   
 };
 

@@ -29,14 +29,16 @@ namespace pegasus {
 
 class FileBatch {
  public:
- 	FileBatch(int rowgroup_id, std::vector<std::shared_ptr<arrow::Buffer>> object_buffers):
-	 rowgroup_id_(rowgroup_id), object_buffers_(object_buffers) {}
+ 	FileBatch(int rowgroup_id, std::vector<std::shared_ptr<arrow::Buffer>> object_buffers, int64_t row_counts):
+	 rowgroup_id_(rowgroup_id), object_buffers_(object_buffers), row_counts_(row_counts) {}
  	
  	int rowgroup_id() const { return rowgroup_id_; }
 	const std::vector<std::shared_ptr<arrow::Buffer>>& object_buffers() const { return object_buffers_; }
+	int64_t row_counts() const {return row_counts_;}
  private:
   int rowgroup_id_;
   std::vector<std::shared_ptr<arrow::Buffer>> object_buffers_;
+  int64_t row_counts_;
 };
 
 } // namespace pegasus

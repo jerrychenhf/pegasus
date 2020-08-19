@@ -64,6 +64,7 @@ namespace rpc {
     }
     
     std::vector<std::shared_ptr<arrow::Buffer>> batch_data(columns_.size());
+    int64_t row_counts = 0;
 
     // Traverse the columns and create the FileBatch for each rowgroup
     for (int i = 0; i < columns_.size(); ++i) {
@@ -74,9 +75,10 @@ namespace rpc {
       auto iter  = object_buffers.find(absolute_rowgroup_position_);
       std::shared_ptr<arrow::Buffer> object_entry = iter->second;
       batch_data[i] = object_entry;
+      row_counts = cache_region->row_counts_per_rowgroup();
     }
   
-    *out = std::make_shared<FileBatch>(absolute_rowgroup_position_, batch_data);
+    *out = std::make_shared<FileBatch>(absolute_rowgroup_position_, batch_data, row_counts);
     absolute_rowgroup_position_ += 1;
     return arrow::Status::OK();
   }

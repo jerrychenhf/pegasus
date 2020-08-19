@@ -144,6 +144,7 @@ static const uint8_t kPaddingBytes[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 grpc::Status FlightDataSerialize(const FlightPayload& msg, ByteBuffer* out,
                                  bool* own_buffer) {
+
   size_t body_size = 0;
   size_t header_size = 0;
 
@@ -216,13 +217,24 @@ grpc::Status FlightDataSerialize(const FlightPayload& msg, ByteBuffer* out,
     header_stream.WriteRawMaybeAliased(msg.descriptor->data(),
                                        static_cast<int>(msg.descriptor->size()));
   }
+  
+  // TODO: consider the file batch feature enable or not.
+  if (has_body) {
 
-  // Write header
-  WireFormatLite::WriteTag(pb::FlightData::kDataHeaderFieldNumber,
-                           WireFormatLite::WIRETYPE_LENGTH_DELIMITED, &header_stream);
-  header_stream.WriteVarint32(metadata_size);
-  header_stream.WriteRawMaybeAliased(ipc_msg.metadata->data(),
+    WireFormatLite::WriteTag(4,
+                           WireFormatLite::WIRETYPE_LENGTH_DELIMITED, &header_stream);              
+    header_stream.WriteVarint32(metadata_size);
+    header_stream.WriteRawMaybeAliased(ipc_msg.metadata->data(),
                                      static_cast<int>(ipc_msg.metadata->size()));
+
+  } else {
+    WireFormatLite::WriteTag(pb::FlightData::kDataHeaderFieldNumber,
+                           WireFormatLite::WIRETYPE_LENGTH_DELIMITED, &header_stream);                      
+    header_stream.WriteVarint32(metadata_size);
+    header_stream.WriteRawMaybeAliased(ipc_msg.metadata->data(),
+                                     static_cast<int>(ipc_msg.metadata->size()));
+
+  }
 
   // Write app metadata
   if (app_metadata_size > 0) {
@@ -384,7 +396,7 @@ arrow::Status GetFileBatchPayload(const FileBatch& batch,
   //TO DO: write the file patch as the IpcPayload
   // IpcPayload is intermediate data structure with metadata header, and zero or more buffers
   // for the message body.
-
+  
   out->type = arrow::ipc::Message::RECORD_BATCH;
   std::vector<std::shared_ptr<arrow::Buffer>> buffers = batch.object_buffers();
   // construct the body buffers of IPCPayload
@@ -398,7 +410,11 @@ arrow::Status GetFileBatchPayload(const FileBatch& batch,
   
   int64_t value_length = out->body_buffers.size();
 
-  int64_t meta_array[value_length * 2];
+  int64_t meta_array[value_length * 2 + 1];
+  // store the row count of current row group
+  meta_array[0] = batch.row_counts();
+
+  int64_t count = 1;
   // Construct the buffer metadata for the file batch header
   for (unsigned i = 0; i < value_length; ++i) {
     const arrow::Buffer* buffer = out->body_buffers[i].get();
@@ -411,17 +427,31 @@ arrow::Status GetFileBatchPayload(const FileBatch& batch,
       padding = arrow::BitUtil::RoundUpToMultipleOf8(size) - size;
     }
     // store the offset and size of every buffer
-    meta_array[i * 2] = offset;
-    meta_array[i * 2 + 1] = size;
-  
+    meta_array[count] = offset;
+    meta_array[count + 1] = size + padding;
+
+    count += 2;
     offset += size + padding;
   }
 
   out->body_length = offset;
-  RETURN_NOT_OK(AllocateBuffer(arrow::default_memory_pool(), value_length * 2, &out->metadata));
+
+  int64_t buffer_size = (value_length * 2 +1) * sizeof(int64_t);
+  int64_t new_buffer_size = 0;
+
+  // Ensure the buffer size >= 24, otherwise the grpc transformation will be wrong.
+  if (buffer_size < 24) {
+    new_buffer_size = 24;
+  } else {
+    new_buffer_size = buffer_size;
+  }
+
+  RETURN_NOT_OK(AllocateBuffer(arrow::default_memory_pool(), new_buffer_size, &out->metadata));
 
   uint8_t* buffer_data = out->metadata->mutable_data();
-  memcpy(buffer_data, meta_array, value_length * 2);
+  memcpy(buffer_data, meta_array, buffer_size);
+  
+  memset(buffer_data + buffer_size, 0, new_buffer_size);
 
   DCHECK(arrow::BitUtil::IsMultipleOf8(out->body_length));
   return arrow::Status::OK();
