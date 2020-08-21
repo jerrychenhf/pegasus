@@ -210,8 +210,8 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
         std::shared_ptr<parquet::RowGroupReader> row_group_reader;
         for(int i = 0; i < row_group_counts; i ++) {
           std::shared_ptr<Buffer> buffer;
-          LOG(INFO) << "Begin read the raw column chunk with row group ID" << i << " col ID " << colId << " partition path " << partition_path;
-          RETURN_IF_ERROR(parquet_raw_reader->GetColumnBuffer(*iter, i, &buffer));
+          LOG(INFO) << "Begin read the raw column chunk with row group ID " << i << " col ID " << colId << " partition path " << partition_path;
+          RETURN_IF_ERROR(parquet_raw_reader->GetColumnBuffer(i, colId, &buffer));
 
           if (!flag) {
             RETURN_IF_ERROR(parquet_raw_reader->GetRowGroupReader(i, &row_group_reader));
