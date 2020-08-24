@@ -19,6 +19,7 @@
 #include "ipc/allocator.h"
 #include "cache/store_manager.h"
 #include "ipc/malloc.h"
+#include "ipc/store_config.h"
 
 DECLARE_int32(store_file_capacity_gb);
 
@@ -43,15 +44,27 @@ Status FileStore::Init(const std::unordered_map<string, string>* properties) {
     file_store_path = entry->second;
   }
   LOG(INFO) << "The file store path is " << file_store_path;
+  
+  // Init the store config.
+  StoreConfig* file_store_config = new StoreConfig();
+  file_store_config->hugepages_enabled= false;
+  file_store_config->directory = file_store_path;
+  store_config = file_store_config;
 
   int64_t capacity = ((int64_t) FLAGS_store_file_capacity_gb) * StoreManager::GIGABYTE;
 
   Allocator::SetFootprintLimit(static_cast<size_t>(capacity));
   
+  // We are using a single memory-mapped file by mallocing and freeing a single
+  // large amount of space up front. According to the documentation,
+  // dlmalloc might need up to 128*sizeof(size_t) bytes for internal
+  // bookkeeping.
   void* pointer = Allocator::Memalign(
         kBlockSize, Allocator::GetFootprintLimit() - 256 * sizeof(size_t));
   DCHECK(pointer != nullptr);
-    
+
+  // This will unmap the file, but the next one created will be as large
+  // as this one (this is an implementation detail of dlmalloc). 
   Allocator::Free(pointer, Allocator::GetFootprintLimit() - 256 * sizeof(size_t));
   return Status::OK();
 }
