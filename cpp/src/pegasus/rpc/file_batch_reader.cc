@@ -70,12 +70,12 @@ namespace rpc {
     for (int i = 0; i < columns_.size(); ++i) {
       std::shared_ptr<CachedColumn> column = columns_[i];
       CacheRegion* cache_region = column->GetCacheRegion();
-      unordered_map<int, std::shared_ptr<arrow::Buffer>> object_buffers =
+      unordered_map<int, std::shared_ptr<BufferEntry>> object_buffers =
        cache_region->object_buffers();
       auto iter  = object_buffers.find(absolute_rowgroup_position_);
-      std::shared_ptr<arrow::Buffer> object_entry = iter->second;
-      batch_data[i] = object_entry;
-      row_counts = cache_region->row_counts_per_rowgroup();
+      std::shared_ptr<BufferEntry> object_entry = iter->second;
+      batch_data[i] = object_entry->file_buffer_;
+      row_counts = object_entry->row_counts_;
     }
   
     *out = std::make_shared<FileBatch>(absolute_rowgroup_position_, batch_data, row_counts);

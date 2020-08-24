@@ -705,6 +705,11 @@ struct PEGASUS_RPC_EXPORT LocalColumnChunkInfo {
    */
   int64_t mmap_size;
 
+  /*
+   * The row counts number
+   */
+  int64_t row_counts;
+
   bool Equals(const LocalColumnChunkInfo& other) const;
 
   friend bool operator==(const LocalColumnChunkInfo& left, const LocalColumnChunkInfo& right) {

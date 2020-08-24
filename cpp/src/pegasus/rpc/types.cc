@@ -385,7 +385,8 @@ bool LocalColumnChunkInfo::Equals(const LocalColumnChunkInfo& other) const {
     data_offset != other.data_offset ||
     data_size != other.data_size ||
     mmap_fd != other.mmap_fd ||
-    mmap_size != other.mmap_size) {
+    mmap_size != other.mmap_size ||
+    row_counts != other.row_counts) {
     return false;
   }
   

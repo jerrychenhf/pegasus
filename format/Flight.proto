@@ -482,6 +482,8 @@ message LocalColumnChunkInfo {
    * The mmap size for the file descriptor
    */
   int64 mmap_size = 5;
+
+  int64 row_counts = 6;
 }
 
 /*

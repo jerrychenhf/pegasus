@@ -197,7 +197,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
     for(auto iter = col_ids.begin(); iter != col_ids.end(); iter ++) {
       int colId = *iter;
       int row_group_counts = parquet_raw_reader->RowGroupsNum();
-      unordered_map<int, std::shared_ptr<Buffer>> object_buffers;
+      unordered_map<int, std::shared_ptr<BufferEntry>> object_buffers;
       std::shared_ptr<arrow::ChunkedArray> chunked_array;
       unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries;
       int64_t row_counts_per_rowgroup = 0;
@@ -206,28 +206,27 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
         LOG(INFO) << "Begin read the column chunk with col ID " << colId << " partition path " << partition_path;
         RETURN_IF_ERROR(parquet_reader->ReadColumnChunk(*iter, &chunked_array));
       } else {
-        bool flag = false;
+       
         std::shared_ptr<parquet::RowGroupReader> row_group_reader;
         for(int i = 0; i < row_group_counts; i ++) {
           std::shared_ptr<Buffer> buffer;
           LOG(INFO) << "Begin read the raw column chunk with row group ID " << i << " col ID " << colId << " partition path " << partition_path;
           RETURN_IF_ERROR(parquet_raw_reader->GetColumnBuffer(i, colId, &buffer));
 
-          if (!flag) {
-            RETURN_IF_ERROR(parquet_raw_reader->GetRowGroupReader(i, &row_group_reader));
-            row_counts_per_rowgroup = row_group_reader->metadata()->num_rows();
-          }
-          
+          RETURN_IF_ERROR(parquet_raw_reader->GetRowGroupReader(i, &row_group_reader));
+          row_counts_per_rowgroup = row_group_reader->metadata()->num_rows();
 
-          object_buffers[i] = std::move(buffer);
+          std::shared_ptr<BufferEntry> buffer_entry = std::shared_ptr<BufferEntry>(new BufferEntry(buffer, row_counts_per_rowgroup));
+          object_buffers[i] = std::move(buffer_entry);
           
           int fd = -1;
           int64_t map_size = 0;
           ptrdiff_t offset = 0;
-          uint8_t* pointer = const_cast< uint8_t*>(object_buffers[i] ->data());
+          uint8_t* pointer = const_cast< uint8_t*>(buffer->data());
 
           GetMallocMapinfo(pointer, &fd, &map_size, &offset);
-          std::shared_ptr<ObjectEntry> entry = std::shared_ptr<ObjectEntry>(new ObjectEntry(fd, offset, map_size));
+          std::shared_ptr<ObjectEntry> entry = std::shared_ptr<ObjectEntry>(new ObjectEntry(fd,
+           offset, map_size, row_counts_per_rowgroup));
           object_entries[i] = std::move(entry);
         }
       }
@@ -436,7 +435,8 @@ Status DatasetCacheManager::GetLocalData(RequestIdentity* request_identity, std:
       int fd = object_entry.get()->fd_;
       ptrdiff_t offset = object_entry.get()->offset_;
       int64_t map_size = object_entry.get()->map_size_;
-      rpc::LocalColumnChunkInfo chunk{fd, offset, map_size};
+      int64_t row_counts = object_entry.get()->row_counts_;
+      rpc::LocalColumnChunkInfo chunk{fd, offset, map_size, row_counts};
 
       chunks.push_back(chunk);
     }

@@ -574,6 +574,7 @@ arrow::Status FromProto(const pb::LocalColumnChunkInfo& pb_info, LocalColumnChun
   info->data_size = pb_info.data_size();
   info->mmap_fd = pb_info.mmap_fd();
   info->mmap_size = pb_info.mmap_size();
+  info->row_counts = pb_info.row_counts();
   return arrow::Status::OK();
 }
 
@@ -606,6 +607,7 @@ arrow::Status ToProto(const LocalColumnChunkInfo& info, pb::LocalColumnChunkInfo
   pb_info->set_data_size(info.data_size);
   pb_info->set_mmap_fd(info.mmap_fd);
   pb_info->set_mmap_size(info.mmap_size);
+  pb_info->set_row_counts(info.row_counts);
   return arrow::Status::OK();
 }
 
