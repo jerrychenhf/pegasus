@@ -26,7 +26,7 @@ class PegasusClientFactory(location: Location,
 
   private val allocator = new RootAllocator(Long.MaxValue)
   //TODO make useFileBatch configurable
-  private var useFileBatch = false
+  private var useFileBatch = true
 
   def apply: FlightClient = {
     var client: FlightClient = null

@@ -57,10 +57,16 @@ public class LocalPartitionReader {
     }
   }
 
+  public boolean next() {
+    if(currentChunk >= chunkCount)
+      return false;
+    return true;
+  }
+
   /**
    * Do the mapping and retunr the the list of the mapped byte buffers
    */
-  public List<ByteBuffer> next() throws IOException {
+  public List<ByteBuffer> get() throws IOException {
     if(currentChunk >= chunkCount) 
       return null;
 

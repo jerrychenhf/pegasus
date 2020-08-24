@@ -62,14 +62,14 @@ import io.netty.buffer.Unpooled;
  * The in-memory representation of FlightData used to manage a stream of Arrow messages.
  */
 class FileBatchMessage extends ArrowMessage {
-  private MessageMetadataResult messageMetadata;
-  
-  protected FileBatchMessage(FlightDescriptor descriptor, MessageMetadataResult messageMetadata, ArrowBuf appMetadata,
-                       ArrowBuf buf) {
-    super(descriptor, messageMetadata, appMetadata, buf);
+  private FileBatchMessageMetadata messageMetadata;
+
+  protected FileBatchMessage(FlightDescriptor descriptor, FileBatchMessageMetadata messageMetadata, ArrowBuf appMetadata,
+                             ArrowBuf buf) {
+    super(descriptor, null, appMetadata, buf);
     this.messageMetadata = messageMetadata;
   }
-  
+
   /** Get the application-specific metadata in this message. The ArrowMessage retains ownership of the buffer. */
   @Override
   public ArrowBuf getApplicationMetadata() {
@@ -80,27 +80,28 @@ class FileBatchMessage extends ArrowMessage {
   public MessageMetadataResult asSchemaMessage() {
     throw new RuntimeException("Schema is not supported.");
   }
-  
+
   @Override
   public FlightDescriptor getDescriptor() {
     return descriptor;
   }
-  
+
   @Override
   public HeaderType getMessageType() {
-    return HeaderType.getHeader(messageMetadata.headerType());
+//    return HeaderType.getHeader(messageMetadata.headerType());
+    return ArrowMessage.HeaderType.RECORD_BATCH;
   }
 
   @Override
   public Schema asSchema() {
     throw new RuntimeException("Schema is not supported.");
   }
-  
+
   @Override
   public ArrowRecordBatch asRecordBatch() throws IOException {
     throw new RuntimeException("RecordBatch is not supported.");
   }
-  
+
   public FileBatch asFileBatch() throws IOException {
     Preconditions.checkArgument(bufs.size() == 1, "A batch can only be consumed if it contains a single ArrowBuf.");
     Preconditions.checkArgument(getMessageType() == HeaderType.RECORD_BATCH);
@@ -108,14 +109,17 @@ class FileBatchMessage extends ArrowMessage {
     ArrowBuf underlying = bufs.get(0);
 
     underlying.getReferenceManager().retain();
-    return FileBatch.deserializeFileBatch(message, underlying);
+    FileBatch filebatch =  FileBatch.deserializeFileBatch(messageMetadata, underlying);
+//    filebatch.getArrowBufs();
+    return filebatch;
   }
 
   private static ArrowMessage frame(BufferAllocator allocator, final InputStream stream) {
 
     try {
       FlightDescriptor descriptor = null;
-      MessageMetadataResult messageMetadata = null;
+      FileBatchMessageMetadata messageMetadata = null;
+      MessageMetadataResult header = null;
       ArrowBuf body = null;
       ArrowBuf appMetadata = null;
       while (stream.available() > 0) {
@@ -133,7 +137,15 @@ class FileBatchMessage extends ArrowMessage {
             int size = readRawVarint32(stream);
             byte[] bytes = new byte[size];
             ByteStreams.readFully(stream, bytes);
-            messageMetadata = MessageMetadataResult.create(ByteBuffer.wrap(bytes), size);
+            header = MessageMetadataResult.create(ByteBuffer.wrap(bytes), size);
+            break;
+          }
+          case FILEBATCH_HEADER_TAG: {
+            int size = readRawVarint32(stream);
+            byte[] bytes = new byte[size];
+
+            ByteStreams.readFully(stream, bytes);
+            messageMetadata = FileBatchMessageMetadata.create(ByteBuffer.wrap(bytes), size);
             break;
           }
           case APP_METADATA_TAG: {
@@ -157,7 +169,8 @@ class FileBatchMessage extends ArrowMessage {
             // ignore unknown fields.
         }
       }
-
+      if (header != null)
+        return new ArrowMessage(descriptor, header, appMetadata, body);
       return new FileBatchMessage(descriptor, messageMetadata, appMetadata, body);
     } catch (Exception ioe) {
       throw new RuntimeException(ioe);

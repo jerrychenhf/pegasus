@@ -42,7 +42,7 @@ public class FileBatchMessageMetadata {
   }
 
   /**
-   * Creates a new {@link MessageMetadataResult} by parsing it from the beginning of the buffer.
+   * Creates a new {@link FileBatchMessageMetadata} by parsing it from the beginning of the buffer.
    *
    * @param messageLength The length of the serialized flatbuffer message in bytes (might not be equal to the buffer
    *     size).
@@ -72,20 +72,20 @@ public class FileBatchMessageMetadata {
   public byte headerType() {
     return metadata.headerType();
   }
-  
+
   public static class MessageMetadata {
-      public static  MessageMetadata create(ByteBuffer buffer) {
-        //TO DO
-        return new MessageMetadata();
-      }
-      
-      public MessageMetadata(){
-      }
-      
-      public byte headerType() {
-        //TO DO
-        return 0;
-      }
+    public static  MessageMetadata create(ByteBuffer buffer) {
+      //TO DO
+      return new MessageMetadata();
+    }
+
+    public MessageMetadata(){
+    }
+
+    public byte headerType() {
+      //TO DO
+      return 0;
+    }
   }
 
   private final int messageLength;

@@ -15,45 +15,41 @@
  * limitations under the License.
  */
 
-package org.apache.pegasus.rpc;
+package org.apache.spark.sql.execution.datasources.v2.pegasus;
 
-import io.netty.buffer.ArrowBuf;
-import org.apache.arrow.memory.BufferAllocator;
-import org.apache.arrow.vector.FieldVector;
+import org.apache.spark.annotation.Evolving;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * The File Batch which contains chunks of data for columns
+ * A logical representation of parquet chunk buffer reader.
+ *
+ * @since 3.0.0
  */
-public class FileBatchRoot {
-  private BufferAllocator allocator;
-  private FileBatch fileBatch;
-  
-  public FileBatchRoot(BufferAllocator allocator) {
-    this.allocator = allocator;
-  }
+@Evolving
+public interface DataReader {
 
-  public static FileBatchRoot create(BufferAllocator allocator) {
-    return new FileBatchRoot(allocator);
-  }
-  
-  public void load(FileBatch fileBatch) {
-    this.fileBatch = fileBatch;
-  }
-  
-  public void clear() {
-    fileBatch = null;
-  }
+  /**
+   * Proceed to next columnarBatch, returns false if there is no more records.
+   *
+   * @throws IOException if failure happens during disk/network IO like reading files.
+   */
+  boolean next() throws IOException;
 
-  public List<ByteBuffer> getbyteBuffers() {
-    return fileBatch.getbyteBuffers();
-  }
+  /**
+   * Return the current columnarBatch. This method should return same value until `next` is called.
+   */
+  List<ByteBuffer> get();
 
-  public int getRowCount() {
-    return fileBatch.getRowCount();
-  }
+  /**
+   * Return the current columnarBatch count. This method should return same value until `next` is called.
+   */
+  int getBatchCount();
 
+  /**
+   * Release resource or references
+   */
+  void close();
 }
