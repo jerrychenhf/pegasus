@@ -35,8 +35,8 @@ namespace pegasus {
 class CacheMemoryPool;
 
 struct ObjectEntry {
-  ObjectEntry(int fd, ptrdiff_t offset, int64_t map_size, int row_counts):
-  fd_(fd), offset_(offset), map_size_(map_size), row_counts_(row_counts) {};
+  ObjectEntry(int fd, ptrdiff_t offset, int64_t map_size, int64_t row_counts, int64_t data_size):
+  fd_(fd), offset_(offset), map_size_(map_size), row_counts_(row_counts), data_size_(data_size) {};
 
   ~ObjectEntry() {};
 
@@ -48,6 +48,8 @@ struct ObjectEntry {
   int64_t map_size_;
 
   int64_t row_counts_;
+
+  int64_t data_size_;
 };
 
 struct BufferEntry{

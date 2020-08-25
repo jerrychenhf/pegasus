@@ -223,10 +223,11 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
           int64_t map_size = 0;
           ptrdiff_t offset = 0;
           uint8_t* pointer = const_cast< uint8_t*>(buffer->data());
-
+       
           GetMallocMapinfo(pointer, &fd, &map_size, &offset);
+
           std::shared_ptr<ObjectEntry> entry = std::shared_ptr<ObjectEntry>(new ObjectEntry(fd,
-           offset, map_size, row_counts_per_rowgroup));
+           offset, map_size, row_counts_per_rowgroup, buffer->size()));
           object_entries[i] = std::move(entry);
         }
       }
@@ -430,18 +431,23 @@ Status DatasetCacheManager::GetLocalData(RequestIdentity* request_identity, std:
     for (int i =0; i < row_group_counts; i++) {
       auto entry = object_entries.find(i);
      // assert(entry != cached_columns.end());
-      std::shared_ptr<ObjectEntry> object_entry = entry->second;
+      std::shared_ptr<ObjectEntry> object_entry = entry->second;  
 
-      int fd = object_entry.get()->fd_;
-      ptrdiff_t offset = object_entry.get()->offset_;
-      int64_t map_size = object_entry.get()->map_size_;
-      int64_t row_counts = object_entry.get()->row_counts_;
-      rpc::LocalColumnChunkInfo chunk{fd, offset, map_size, row_counts};
+      rpc::LocalColumnChunkInfo chunk;
+      chunk.chunk_index = i;
+      chunk.data_offset = object_entry.get()->offset_;
+      chunk.data_size = object_entry.get()->data_size_;
+      chunk.mmap_fd = object_entry.get()->fd_;
+      chunk.mmap_size = object_entry.get()->map_size_;
+      chunk.row_counts = object_entry.get()->row_counts_;
 
       chunks.push_back(chunk);
     }
 
-    rpc::LocalColumnInfo column_entry {column_id, chunks};
+    rpc::LocalColumnInfo column_entry;
+    column_entry.column_index = column_id;
+    column_entry.chunks = chunks;
+
     columns.push_back(column_entry);
   }
 
