@@ -752,6 +752,7 @@
     <module>rpc/rpc-core</module>
     <module>rpc/rpc-grpc</module>
     <module>spark-datasource</module>
+    <module>spark-shuffle</module>
     <module>examples</module>
   </modules>
 
