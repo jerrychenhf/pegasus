@@ -27,6 +27,11 @@ add_library(pegasus_ipc
   malloc.cc
   dlmalloc.cc
   allocator.cc
+  fling.cc
+  events.cc
+  io.cc
+  ipc_server.cc
+  thirdparty/ae/ae.c
 )
 add_dependencies(pegasus_ipc gen-deps)
 
