@@ -30,6 +30,7 @@ import java.util.List;
  */
 public class LocalPartitionReader {
   private LocalPartitionInfo localPartitionInfo;
+  private String ipcSocketName;
 
   private int columns = 0;
   private int chunkCount = 0;
@@ -39,13 +40,16 @@ public class LocalPartitionReader {
   private long[] dataOffsets;
   private long[] dataSizes;
 
+  private long conn = 0;
+
   /**
    * Constructs a new instance.
    *
    * @param localPartitionInfo The LocalPartitionInfo from which to construct the shared memory buffers for the columns
    */
-  public LocalPartitionReader(LocalPartitionInfo localPartitionInfo) {
+  public LocalPartitionReader(LocalPartitionInfo localPartitionInfo, String ipcSocketName) {
     this.localPartitionInfo = localPartitionInfo;
+    this.ipcSocketName = ipcSocketName;
     if (localPartitionInfo != null && localPartitionInfo.getColumnInfos().size() != 0) {
       this.columns = localPartitionInfo.getColumnInfos().size();
       LocalColumnInfo column = localPartitionInfo.getColumnInfos().get(0);
@@ -54,6 +58,16 @@ public class LocalPartitionReader {
       this.mmapSizes = new long[columns];
       this.dataOffsets = new long[columns];
       this.dataSizes = new long[columns];
+    }
+  }
+  
+  public void open(String ipcSocketName) throws IOException {
+    this.conn = LocalMemoryMappingJNI.open(ipcSocketName, mmapFds);
+  }
+  
+  public void close() throws IOException {
+    if(this.conn != 0) {
+      LocalMemoryMappingJNI.close(this.conn);
     }
   }
 
@@ -95,7 +109,7 @@ public class LocalPartitionReader {
       column++;
     }
 
-    ByteBuffer[]  buffers =  LocalMemoryMappingJNI.getMappedBuffers(
+    ByteBuffer[]  buffers =  LocalMemoryMappingJNI.getMappedBuffers(this.conn,
       mmapFds, mmapSizes, dataOffsets, dataSizes);
     List<ByteBuffer> columnBuffers = Arrays.asList(buffers);  
     return columnBuffers;
@@ -108,8 +122,8 @@ public class LocalPartitionReader {
   }
   
   private ByteBuffer readColumnChunk(LocalColumnChunkInfo chunk) throws IOException {
-    return LocalMemoryMappingJNI.getMappedBuffer(chunk.getMmapFd(), chunk.getMmapSize(),
-      chunk.getDataOffset(), chunk.getDataSize());
+    return LocalMemoryMappingJNI.getMappedBuffer(this.conn,
+      chunk.getMmapFd(), chunk.getMmapSize(), chunk.getDataOffset(), chunk.getDataSize());
   }
 
 }

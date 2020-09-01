@@ -24,6 +24,9 @@ import java.nio.ByteBuffer;
  * A JNI class to call into native for getting the memory mapping buffers
  */
 public class LocalMemoryMappingJNI {
-  public static native ByteBuffer getMappedBuffer(int mmapFd, long mmapSize, long dataOffset, long dataSize);
-  public static native ByteBuffer[] getMappedBuffers(int[] mmapFds, long[] mmapSizes, long[] dataOffsets, long[] dataSizes);
+  public static native long open(String storeSocketName, int[] mmapFds);
+  public static native void close(long conn);
+
+  public static native ByteBuffer getMappedBuffer(long conn, int mmapFd, long mmapSize, long dataOffset, long dataSize);
+  public static native ByteBuffer[] getMappedBuffers(long conn, int[] mmapFds, long[] mmapSizes, long[] dataOffsets, long[] dataSizes);
 }
