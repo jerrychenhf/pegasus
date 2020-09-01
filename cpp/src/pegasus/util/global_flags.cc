@@ -89,3 +89,5 @@ DEFINE_int32(store_file_capacity_gb, 10,
 
 DEFINE_string(store_file_path, "",
     "The DCPMM device path.");
+
+DEFINE_string(ipc_socket_name, "/tmp/pegasus_ipc", "The domain socket name for IPC data exchange.");

@@ -15,38 +15,41 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_WORKER_H
-#define PEGASUS_WORKER_H
+#ifndef PEGASUS_IPC_SERVER_THREAD_H
+#define PEGASUS_IPC_SERVER_THREAD_H
 
 #include "common/status.h"
-#include "dataset/dataset_cache_manager.h"
-#include "runtime/worker_exec_env.h"
-#include "storage/storage.h"
-#include "server/worker/worker_table_api_service.h"
-#include "server/worker/ipc_server_thread.h"
+#include "util/thread.h"
+#include "ipc/ipc_server.h"
 
 using namespace std;
 
 namespace pegasus {
 
-class WorkerExecEnv;
-class WorkerHeartbeat;
+template <typename T>
+class ThreadPool;
 
-class Worker {
+class IpcServerThread {
  public:
-  Worker(WorkerExecEnv* exec_env);
-  ~Worker();
+  IpcServerThread();
+  ~IpcServerThread();
   
   Status Init();
-  Status Start();
 
+  Status Start();
+  Status Stop();
+  
  private:
-  WorkerExecEnv* exec_env_;
-  std::shared_ptr<WorkerTableAPIService> worker_table_api_service_;
-  std::shared_ptr<WorkerHeartbeat> worker_heartbeat_;
-  std::shared_ptr<IpcServerThread> ipc_server_thread_;
+  std::unique_ptr<Thread> thread_;
+  std::unique_ptr<IpcServer> ipc_server_;
+
+  void IpcMainThread();
+
+  Status StartServer(const char* socket_name) ;
+  Status StopServer();
+
 };
 
 } // namespace pegasus
 
-#endif  // PEGASUS_WORKER_H
+#endif  // PEGASUS_IPC_SERVER_THREAD_H

@@ -19,7 +19,6 @@
 
 #include <utility>
 #include <errno.h>
-#include <signal.h>
 #include "pegasus/common/logging.h"
 #include "pegasus/ipc/io.h"
 #include "pegasus/ipc/fling.h"
@@ -59,11 +58,13 @@ int WarnIfSigpipe(int status, int client_sock) {
   return -1;  // This is never reached.
 }
 
+Client::Client(int fd) : fd(fd) {}
+  
 IpcServer::IpcServer() {
 }
 
 
-Status IpcServer::Start(char* socket_name) {
+Status IpcServer::Start(const char* socket_name) {
   // Create the event loop.
   loop_.reset(new EventLoop);
   
@@ -154,11 +155,26 @@ Status IpcServer::ProcessMessage(Client* client) {
 
 Status IpcServer::SendFileDescriptor(Client* client, uint8_t* message, size_t message_size ) {
   // send back all the fds requested by the client
-  std::vector<int> request_fds;
-  //TO DO
+  if(message_size < sizeof(int)) {
+    LOG(FATAL) << "Invalid message size: " << message_size;
+    return Status::Invalid("Invalid message size");
+  }
+  int* data = reinterpret_cast<int*>(message);
+  int count = *data;
+  message_size -= sizeof(int);
+  
+  if(message_size < sizeof(int) * count) {
+    LOG(FATAL) << "Invalid message size: " << message_size;
+    return Status::Invalid("Invalid message size");
+  }
+
+  int* request_fds = data + 1;
   
   // Send all of the file descriptors for the present objects.
-  for (int request_fd : request_fds) {
+  for (int i = 0; i  < count; i++) {
+    int request_fd = *request_fds;
+    request_fd++;
+
     // Only send the file descriptor if it hasn't been sent (see analogous
     // logic in GetStoreFd in client).
     if (client->used_fds.find(request_fd) == client->used_fds.end()) {
@@ -172,31 +188,5 @@ Status IpcServer::SendFileDescriptor(Client* client, uint8_t* message, size_t me
   
   return Status::OK();
 }
-
-std::unique_ptr<IpcServer> IpcServer::ipc_server = nullptr;
-  
-void IpcServer::StartServer(char* socket_name) {
-  // Ignore SIGPIPE signals. If we don't do this, then when we attempt to write
-  // to a client that has already died, the store could die.
-  signal(SIGPIPE, SIG_IGN);
-
-  IpcServer::ipc_server.reset(new IpcServer());
-  
-  // start will run the event loop until Stop called
-  IpcServer::ipc_server->Start(socket_name);
-  
-  // when it comes here, the stop is called and the even loop exit
-  IpcServer::ipc_server->Shutdown();
-  IpcServer::ipc_server = nullptr;
-}
-
-void IpcServer::StopServer() {
-  // TO BE CHECKED
-  // whether this can be called in the main thread?
-  if (IpcServer::ipc_server != nullptr) {
-      IpcServer::ipc_server->Stop();
-  }
-}
-  
 
 }  // namespace pegasus

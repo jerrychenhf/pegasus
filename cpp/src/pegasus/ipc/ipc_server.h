@@ -45,15 +45,12 @@ struct Client {
 
 class IpcServer {
  public:
-    static void StartServer(char* socket_name) ;
-    static void StopServer();
- public:
   IpcServer();
 
   ~IpcServer();
 
   /// \brief Run the server
-  Status Start(char* socket_name);
+  Status Start(const char* socket_name);
 
   /// \brief Stop the server
   Status Stop();
@@ -81,9 +78,6 @@ class IpcServer {
   std::vector<uint8_t> input_buffer_;
     
   std::unordered_map<int, std::unique_ptr<Client>> connected_clients_;
-    
-private:
-  static std::unique_ptr<IpcServer> ipc_server;
 };
   
 }  // namespace pegasus

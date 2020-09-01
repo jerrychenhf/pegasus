@@ -25,6 +25,7 @@ add_library(Worker
   worker_table_api_service.cc
   worker.cc
   worker_heartbeat.cc
+  ipc_server_thread.cc
 )
 add_dependencies(Worker gen-deps)
 
