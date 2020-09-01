@@ -47,6 +47,10 @@ public class LocalPartitionReader {
    *
    * @param localPartitionInfo The LocalPartitionInfo from which to construct the shared memory buffers for the columns
    */
+  public LocalPartitionReader(LocalPartitionInfo localPartitionInfo) {
+    this(localPartitionInfo, "/tmp/pegasus_ipc");
+  }
+  
   public LocalPartitionReader(LocalPartitionInfo localPartitionInfo, String ipcSocketName) {
     this.localPartitionInfo = localPartitionInfo;
     this.ipcSocketName = ipcSocketName;
@@ -61,7 +65,7 @@ public class LocalPartitionReader {
     }
   }
   
-  public void open(String ipcSocketName) throws IOException {
+  public void open() throws IOException {
     this.conn = LocalMemoryMappingJNI.open(ipcSocketName, mmapFds);
   }
   
