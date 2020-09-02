@@ -24,6 +24,12 @@ import java.nio.ByteBuffer;
  * A JNI class to call into native for getting the memory mapping buffers
  */
 public class LocalMemoryMappingJNI {
+  private static final String LIBNAME = "pegasus_java";
+
+  static {
+    NativeLibraryLoader.load(LIBNAME);
+  }
+
   public static native long open(String storeSocketName, int[] mmapFds);
   public static native void close(long conn);
 

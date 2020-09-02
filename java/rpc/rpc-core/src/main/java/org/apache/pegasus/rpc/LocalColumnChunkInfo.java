@@ -38,6 +38,7 @@ public class LocalColumnChunkInfo {
   private final long dataSize;
   private final int mmapFd;
   private final long mmapSize;
+  private final int rowCounts;
 
   /**
    * Constructs a new instance.
@@ -49,13 +50,14 @@ public class LocalColumnChunkInfo {
    * @param mmapSize The number of bytes for the mmap.
    */
   public LocalColumnChunkInfo(int chunkIndex, int dataOffset, long dataSize,
-      int mmapFd, long mmapSize) {
+      int mmapFd, long mmapSize, int rowCounts) {
     super();
     this.chunkIndex = chunkIndex;
     this.dataOffset = dataOffset;
     this.dataSize = dataSize;
     this.mmapFd = mmapFd;
     this.mmapSize = mmapSize;
+    this.rowCounts = rowCounts;
   }
 
   /**
@@ -67,6 +69,7 @@ public class LocalColumnChunkInfo {
     dataSize = pbLocalColumnChunkInfo.getDataSize();
     mmapFd = pbLocalColumnChunkInfo.getMmapFd();
     mmapSize = pbLocalColumnChunkInfo.getMmapSize();
+    rowCounts = (int)pbLocalColumnChunkInfo.getRowCounts();
   }
 
   public int getChunkIndex() {
@@ -89,6 +92,10 @@ public class LocalColumnChunkInfo {
     return mmapSize;
   }
 
+  public int getRowCounts() {
+        return rowCounts;
+    }
+
   /**
    * Converts to the protocol buffer representation.
    */
@@ -99,6 +106,7 @@ public class LocalColumnChunkInfo {
         .setDataSize(LocalColumnChunkInfo.this.dataSize)
         .setMmapFd(LocalColumnChunkInfo.this.mmapFd)
         .setMmapSize(LocalColumnChunkInfo.this.mmapSize)
+        .setRowCounts(LocalColumnChunkInfo.this.rowCounts)
         .build();
   }
 
@@ -138,12 +146,13 @@ public class LocalColumnChunkInfo {
         dataOffset == that.dataOffset &&
         dataSize == that.dataSize &&
         mmapFd == that.mmapFd &&
-        mmapSize == that.mmapSize;
+        mmapSize == that.mmapSize &&
+        rowCounts ==  that.rowCounts;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(chunkIndex, dataOffset, dataSize, mmapFd, mmapSize);
+    return Objects.hash(chunkIndex, dataOffset, dataSize, mmapFd, mmapSize, rowCounts);
   }
 
   @Override
@@ -154,6 +163,7 @@ public class LocalColumnChunkInfo {
         ", dataSize=" + dataSize +
         ", mmapFd=" + mmapFd +
         ", mmapSize=" + mmapSize +
+        ", rowCounts=" + rowCounts +
         '}';
   }
 }

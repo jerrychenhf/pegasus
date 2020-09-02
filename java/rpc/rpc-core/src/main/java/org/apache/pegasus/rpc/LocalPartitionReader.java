@@ -76,9 +76,18 @@ public class LocalPartitionReader {
   }
 
   /**
+   * Whether or not more data
+   */
+  public boolean next() {
+    if(currentChunk >= chunkCount)
+      return false;
+    return true;
+  }
+
+  /**
    * Do the mapping and retunr the the list of the mapped byte buffers
    */
-  public List<ByteBuffer> next() throws IOException {
+  public List<ByteBuffer> get() throws IOException {
     if(currentChunk >= chunkCount) 
       return null;
 
@@ -87,7 +96,14 @@ public class LocalPartitionReader {
     currentChunk++;
     return columnBuffers;
   }
-  
+
+  /**
+   * get the rowcount of the current chunk
+   */
+  public int getRowCount() {
+    return localPartitionInfo.getColumnInfos().get(0).getColumnChunkInfos().get(currentChunk).getRowCounts();
+  }
+
   private List<ByteBuffer> mapColumns(int chunkIndex) throws IOException   {
     // map the shared memory of each column
     List<LocalColumnInfo> columnInfos = localPartitionInfo.getColumnInfos();

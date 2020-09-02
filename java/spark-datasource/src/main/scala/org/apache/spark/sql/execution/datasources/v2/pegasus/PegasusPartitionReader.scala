@@ -17,6 +17,8 @@
 package org.apache.spark.sql.execution.datasources.v2.pegasus
 
 import java.io.IOException
+import java.net.NetworkInterface
+import java.util
 
 import scala.collection.JavaConverters._
 import org.apache.pegasus.rpc.{FlightClient, FlightFileBatchStream, Location, Ticket}
@@ -42,14 +44,23 @@ class PegasusPartitionReader(configuration: Configuration,
   private val clientFactory = new PegasusClientFactory(
     location, null, null)
 
+  val localIPList:util.ArrayList[String] = getLocalList
+
   val client = clientFactory.apply
-  private val stream = client.getStream(ticket)
   //TODO make useFileBatch configurable
-  private var useFileBatch = false
+  private var useFileBatch = true
+  var dataReader: DataReader = null
+  if(isLocal(location)) {
+    dataReader = new LocalDataReader(client, ticket)
+  } else {
+    dataReader = new GrpcDataReader(client, ticket)
+  }
 
 
   //TODO consider metadata reading performance
-  lazy val footer =  ParquetFileReader.readFooter(configuration, new Path(ticket.getPartitionIdentity.toString), NO_FILTER)
+
+  logInfo("ticket.getPartitionIdentity.toString " + new String(ticket.getPartitionIdentity))
+  lazy val footer =  ParquetFileReader.readFooter(configuration, new Path(new String(ticket.getPartitionIdentity)), NO_FILTER)
   val parquetFileSchema = footer.getFileMetaData.getSchema
   val parquetRequestedSchema = ParquetReadSupport.clipParquetSchema(parquetFileSchema,
     readDataSchema, false)
@@ -57,13 +68,13 @@ class PegasusPartitionReader(configuration: Configuration,
   val blocks = footer.getBlocks
   private var currentBlock = 0
 
-  val reader = new PegasusParquetChunkReader(configuration, footer, parquetRequestedSchema.getColumns)
+  val reader = new PegasusParquetChunkReader(configuration, new Path(new String(ticket.getPartitionIdentity)), footer, parquetRequestedSchema.getColumns)
   reader.setRequestedSchema(parquetRequestedSchema)
 
   def next: Boolean = {
-    logInfo("partition schema: " + stream.getRoot.getSchema)
+//    logInfo("partition schema: " + stream.getRoot.getSchema)
     try {
-      stream.next()
+      dataReader.next()
     } catch {
       case e: Exception =>
         throw new RuntimeException(e)
@@ -73,28 +84,9 @@ class PegasusPartitionReader(configuration: Configuration,
   def get: ColumnarBatch = {
     try {
       if(useFileBatch) {
-        val num = stream.getRoot().getRowCount()
-        val columnVectors = OnHeapColumnVector.allocateColumns(num, readDataSchema)
-        val pages = reader.getRowGroup(stream.asInstanceOf[FlightFileBatchStream].getFileBatchRoot().getArrowBufs())
-        if (pages == null) throw new IOException("expecting more rows but reached last block")
-        val columnDescriptors = parquetRequestedSchema.getColumns
-        val types = parquetRequestedSchema.asGroupType.getFields
-        for (i <- 0 until columnDescriptors.size()) {
-          // TODO consider null column
-          val columnReader = new PegasusVectorizedColumnReader(columnDescriptors.get(i), types.get(i).getOriginalType(),
-            pages.getPageReader(columnDescriptors.get(i)), null);
-          columnReader.readBatch(num, columnVectors(i));
-        }
-        new ColumnarBatch(columnVectors.map { vector =>
-          vector.asInstanceOf[WritableColumnVector]
-        })
+        getBatchFromFileBatch
       } else {
-        val columns: Array[ColumnVector] = stream.getRoot().getFieldVectors().asScala.map { vector =>
-          new ArrowColumnVector(vector).asInstanceOf[ColumnVector]
-        }.toArray
-        val batch = new ColumnarBatch(columns)
-        batch.setNumRows(stream.getRoot().getRowCount())
-        batch
+        getBatchFromArrowVector
       }
     } catch {
       case e: Exception =>
@@ -103,8 +95,8 @@ class PegasusPartitionReader(configuration: Configuration,
   }
 
   def close = {
-    if (stream != null) {
-      stream.close()
+    if (dataReader != null) {
+      dataReader.close()
     }
     if (clientFactory != null) {
       clientFactory.close()
@@ -113,4 +105,61 @@ class PegasusPartitionReader(configuration: Configuration,
       client.close()
     }
   }
+
+  def isLocal(location: Location): Boolean = {
+    val host = location.getUri.getHost
+    return localIPList.contains(host)
+  }
+
+  def getBatchFromFileBatch: ColumnarBatch = {
+    val num = dataReader.getBatchCount
+    val columnVectors = OnHeapColumnVector.allocateColumns(num, readDataSchema)
+    val pages = reader.getRowGroup(dataReader.get)
+    if (pages == null) throw new IOException("expecting more rows but reached last block")
+    val columnDescriptors = parquetRequestedSchema.getColumns
+    val types = parquetRequestedSchema.asGroupType.getFields
+    for (i <- 0 until columnDescriptors.size()) {
+      // TODO consider null column
+      val page = pages.getPageReader(columnDescriptors.get(i))
+      val columnReader = new PegasusVectorizedColumnReader(columnDescriptors.get(i), types.get(i).getOriginalType(),
+        page, null);
+      columnReader.readBatch(num, columnVectors(i));
+    }
+    val batch = new ColumnarBatch(columnVectors.map { vector =>
+      vector.asInstanceOf[WritableColumnVector]
+    })
+    batch.setNumRows(num)
+    batch
+  }
+
+  def getBatchFromArrowVector: ColumnarBatch = {
+    val columns: Array[ColumnVector] = dataReader.asInstanceOf[GrpcDataReader].getColumns
+    val batch = new ColumnarBatch(columns)
+    batch.setNumRows(dataReader.getBatchCount)
+    batch
+  }
+
+  def getLocalList: util.ArrayList[String] = {
+
+    val localIPList = new util.ArrayList[String]
+    try {
+      var netInterfaces = NetworkInterface.getNetworkInterfaces
+      var ip = null
+      while (netInterfaces.hasMoreElements) {
+        val ni = netInterfaces.nextElement
+        val addresses = ni.getInetAddresses
+        while (addresses.hasMoreElements) {
+          val ip = addresses.nextElement
+          if (ip.getHostAddress.indexOf(':') == -1) {
+            System.out.println("local IP: " + ni.getName + "," + ip.getHostAddress)
+            localIPList.add(ip.getHostAddress)
+          }
+        }
+      }
+    } catch {
+      case e: Exception => throw(e)
+    }
+    localIPList
+  }
+
 }

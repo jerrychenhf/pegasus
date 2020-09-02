@@ -56,7 +56,30 @@ public class FlightFileBatchStream extends FlightStream {
   public FlightFileBatchStream(BufferAllocator allocator, int pendingTarget, Cancellable cancellable, Requestor requestor) {
     super(allocator, pendingTarget, cancellable, requestor);
   }
-  
+
+  /**
+   * Closes the stream (freeing any existing resources).
+   *
+   * <p>If the stream is isn't complete and is cancellable this method will cancel the stream first.</p>
+   */
+  public void close() throws Exception {
+    final List<AutoCloseable> closeables = new ArrayList<>();
+    // cancellation can throw, but we still want to clean up resources, so make it an AutoCloseable too
+    closeables.add(() -> {
+      if (!completed && cancellable != null) {
+        cancel("Stream closed before end.", /* no exception to report */ null);
+      }
+    });
+//    closeables.add(root.get());
+    closeables.add(applicationMetadata);
+    closeables.addAll(queue);
+    if (dictionaries != null) {
+      dictionaries.getDictionaryIds().forEach(id -> closeables.add(dictionaries.lookup(id).getVector()));
+    }
+
+    AutoCloseables.close(closeables);
+  }
+
   @Override
   public Schema getSchema() {
     throw new RuntimeException("Schema is not support!");

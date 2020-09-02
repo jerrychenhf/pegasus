@@ -18,6 +18,8 @@
 package org.apache.pegasus.rpc;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,44 +37,57 @@ import org.apache.arrow.vector.ipc.message.MessageMetadataResult;
  */
 public class FileBatch implements AutoCloseable {
   private boolean closed = false;
-  private final List<ArrowBuf> buffers;
-  
-  public FileBatch(List<ArrowBuf> buffers) {
+//  private final List<ArrowBuf> buffers;
+  private final List<ByteBuffer> byteBuffers;
+  private final int rowCount;
+
+  public FileBatch(List<ByteBuffer> byteBuffers, int rowCount) {
     super();
-    this.buffers = buffers;
-  }
-  
-  public static FileBatch deserializeFileBatch(MessageMetadataResult serializedMessage,
-                                               ArrowBuf body) throws IOException {
-    Message recordBatchMessage = serializedMessage.getMessage();
-    RecordBatch recordBatchFB = (RecordBatch) recordBatchMessage.header(new RecordBatch());
-    // Now read the body
-    int nodesLength = recordBatchFB.nodesLength();
-    List<ArrowFieldNode> nodes = new ArrayList<>();
-    for (int i = 0; i < nodesLength; ++i) {
-      FieldNode node = recordBatchFB.nodes(i);
-      if ((int) node.length() != node.length() ||
-              (int) node.nullCount() != node.nullCount()) {
-        throw new IOException("Cannot currently deserialize record batches with " +
-                "node length larger than INT_MAX records.");
-      }
-      nodes.add(new ArrowFieldNode(node.length(), node.nullCount()));
-    }
-    List<ArrowBuf> buffers = new ArrayList<>();
-    for (int i = 0; i < recordBatchFB.buffersLength(); ++i) {
-      Buffer bufferFB = recordBatchFB.buffers(i);
-      ArrowBuf vectorBuffer = body.slice(bufferFB.offset(), bufferFB.length());
-      buffers.add(vectorBuffer);
-    }
-    if ((int) recordBatchFB.length() != recordBatchFB.length()) {
-      throw new IOException("Cannot currently deserialize record batches with more than INT_MAX records.");
-    }
-    body.getReferenceManager().release();
-    return new FileBatch(buffers);    
+    this.byteBuffers = byteBuffers;
+    this.rowCount = rowCount;
   }
 
-  public List<ArrowBuf> getArrowBufs() {
-    return buffers;
+  public static FileBatch deserializeFileBatch(FileBatchMessageMetadata messageMetaData,
+                                               ArrowBuf body) throws IOException {
+    //TO DO
+    //get the buffers and create the FileBatch
+    List<ArrowBuf> buffers = new ArrayList<>();
+    List<ByteBuffer> byteBuffers = new ArrayList<>();
+    ByteBuffer metaBuffer = messageMetaData.getMessageBuffer();
+
+    //TO DO: make 16 const
+    int columns = messageMetaData.getMessageLength() / 16;
+    byte[] rowCountBytes = new byte[8];
+    metaBuffer.get(rowCountBytes);
+    ByteBuffer rowCountBuffer = ByteBuffer.wrap(rowCountBytes);
+    int rowCount = (int)rowCountBuffer.order(ByteOrder.LITTLE_ENDIAN).getLong();
+    for (int i = 0; i < columns; ++i) {
+      // TO DO: get the offset and length of each buffer
+      byte[] offsetBytes = new byte[8];
+      metaBuffer.get(offsetBytes);
+      ByteBuffer offsetBuffer = ByteBuffer.wrap(offsetBytes);
+      long offset = offsetBuffer.order(ByteOrder.LITTLE_ENDIAN).getLong();
+      byte[] lenBytes = new byte[8];
+      metaBuffer.get(lenBytes);
+      ByteBuffer lenBuffer = ByteBuffer.wrap(lenBytes);
+      int len = (int)lenBuffer.order(ByteOrder.LITTLE_ENDIAN).getLong();
+
+
+      ByteBuffer byteBuffer = ByteBuffer.allocate(len);
+      body.getBytes(offset, byteBuffer);
+      byteBuffers.add(byteBuffer);
+    }
+
+    body.getReferenceManager().release();
+    return new FileBatch(byteBuffers, rowCount);
+  }
+
+  public List<ByteBuffer> getbyteBuffers() {
+    return byteBuffers;
+  }
+
+  public int getRowCount() {
+    return rowCount;
   }
 
   /**
@@ -82,9 +97,6 @@ public class FileBatch implements AutoCloseable {
   public void close() {
     if (!closed) {
       closed = true;
-      for (ArrowBuf arrowBuf : buffers) {
-        arrowBuf.getReferenceManager().release();
-      }
     }
   }
 }
