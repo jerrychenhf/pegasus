@@ -208,6 +208,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       } else {
        
         std::shared_ptr<parquet::RowGroupReader> row_group_reader;
+        
         for(int i = 0; i < row_group_counts; i ++) {
           std::shared_ptr<Buffer> buffer;
           LOG(INFO) << "Begin read the raw column chunk with row group ID " << i << " col ID " << colId << " partition path " << partition_path;
@@ -228,7 +229,9 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
 
           std::shared_ptr<ObjectEntry> entry = std::shared_ptr<ObjectEntry>(new ObjectEntry(fd,
            offset, map_size, row_counts_per_rowgroup, buffer->size()));
+           
           object_entries[i] = std::move(entry);
+          
         }
       }
 
@@ -351,6 +354,7 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
           return Status::OK();
         } else {
           LOG(WARNING) << "All the columns are cached. And we will wrap the columns into Flight data stream";
+        
           return WrapDatasetStream(request_identity, cached_columns, data_stream);
         }
 
@@ -498,7 +502,10 @@ Status DatasetCacheManager::ReleaseLocalData(RequestIdentity* request_identity, 
    }
   }
 
-  // TODO: wrap the LocalReleaseResult
+  rpc::LocalReleaseResult* result_tmp = new rpc::LocalReleaseResult();
+  result_tmp->result_code = 0;
+  *result = std::unique_ptr<rpc::LocalReleaseResult>(result_tmp);
+
   return Status::OK();
 }
 

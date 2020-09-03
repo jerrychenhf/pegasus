@@ -66,7 +66,6 @@ endfunction()
 if(PEGASUS_BUILD_TESTS)
 
   add_pegasus_parquet_test(parquet_reader_test)
-  add_pegasus_parquet_test(parquet_raw_data_reader_test)
 
 endif()
 
