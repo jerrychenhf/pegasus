@@ -173,7 +173,7 @@ Status IpcServer::SendFileDescriptor(Client* client, uint8_t* message, size_t me
   // Send all of the file descriptors for the present objects.
   for (int i = 0; i  < count; i++) {
     int request_fd = *request_fds;
-    request_fd++;
+    request_fds++;
 
     // Only send the file descriptor if it hasn't been sent (see analogous
     // logic in GetStoreFd in client).
