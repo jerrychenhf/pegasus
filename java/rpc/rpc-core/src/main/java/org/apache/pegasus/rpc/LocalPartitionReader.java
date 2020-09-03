@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -66,7 +67,25 @@ public class LocalPartitionReader {
   }
   
   public void open() throws IOException {
-    this.conn = LocalMemoryMappingJNI.open(ipcSocketName, mmapFds);
+    int[] fds = getUniqueFds(localPartitionInfo);
+    this.conn = LocalMemoryMappingJNI.open(ipcSocketName, fds);
+  }
+  
+  private int[]  getUniqueFds(LocalPartitionInfo localPartitionInfo) {
+    HashSet<Integer> fdset = new HashSet<Integer>();
+    List<LocalColumnInfo> columnInfos = localPartitionInfo.getColumnInfos();
+    for( LocalColumnInfo columnInfo : columnInfos) {
+      List<LocalColumnChunkInfo> chunks = columnInfo.getColumnChunkInfos();
+      for( LocalColumnChunkInfo chunk : chunks)
+        fdset.add(chunk.getMmapFd());
+    }
+    
+    int[]  uniquefds = new int[fdset.size()];
+    int n = 0;
+    for (Integer fd: fdset) {
+    	 uniquefds[n++] = fd.intValue();
+    }
+    return uniquefds;
   }
   
   public void close() throws IOException {
