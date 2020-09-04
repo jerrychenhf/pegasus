@@ -108,7 +108,8 @@ class PegasusPartitionReader(configuration: Configuration,
 
   def isLocal(location: Location): Boolean = {
     val host = location.getUri.getHost
-    return localIPList.contains(host)
+    localIPList.contains(host)
+//    false
   }
 
   def getBatchFromFileBatch: ColumnarBatch = {
@@ -151,7 +152,6 @@ class PegasusPartitionReader(configuration: Configuration,
         while (addresses.hasMoreElements) {
           val ip = addresses.nextElement
           if (ip.getHostAddress.indexOf(':') == -1) {
-            System.out.println("local IP: " + ni.getName + "," + ip.getHostAddress)
             localIPList.add(ip.getHostAddress)
           }
         }

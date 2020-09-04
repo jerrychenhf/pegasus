@@ -75,7 +75,7 @@ public class FileBatch implements AutoCloseable {
 
       ByteBuffer byteBuffer = ByteBuffer.allocate(len);
       body.getBytes(offset, byteBuffer);
-      byteBuffers.add(byteBuffer);
+      byteBuffers.add((ByteBuffer)byteBuffer.clear());
     }
 
     body.getReferenceManager().release();

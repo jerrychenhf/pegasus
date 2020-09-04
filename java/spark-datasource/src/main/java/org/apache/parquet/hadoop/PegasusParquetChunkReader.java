@@ -84,7 +84,7 @@ public class PegasusParquetChunkReader extends ParquetFileReader {
 //      final Chunk chunk = new Chunk(new ChunkDescriptor(columnDescriptors.get(i), columnChunkMetaDataList.get(i),0,0), Collections.singletonList(ByteBuffer.wrap(data)));
 //      columnChunkMetaDataList.get(i);
 //      new ChunkDescriptor(columnDescriptors.get(i), columnChunkMetaDataList.get(i),0,0);
-      final Chunk chunk = new Chunk(new ChunkDescriptor(columnDescriptors.get(i), columnChunkMetaDataList.get(i),0,0), Collections.singletonList(ByteBuffer.wrap(byteBuffers.get(i).array())));
+      final Chunk chunk = new Chunk(new ChunkDescriptor(columnDescriptors.get(i), columnChunkMetaDataList.get(i),0,0), Collections.singletonList(byteBuffers.get(i)));
       currentRowGroup.addColumn(chunk.descriptor.col, chunk.readAllPages());
     }
 
