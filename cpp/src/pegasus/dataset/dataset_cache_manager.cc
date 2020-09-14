@@ -196,7 +196,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
     int64_t occupied_size = 0;
     for(auto iter = col_ids.begin(); iter != col_ids.end(); iter ++) {
       int colId = *iter;
-      int row_group_counts = parquet_raw_reader->RowGroupsNum();
+      
       unordered_map<int, std::shared_ptr<BufferEntry>> object_buffers;
       std::shared_ptr<arrow::ChunkedArray> chunked_array;
       unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries;
@@ -208,6 +208,7 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       } else {
        
         std::shared_ptr<parquet::RowGroupReader> row_group_reader;
+        int row_group_counts = parquet_raw_reader->RowGroupsNum();
         
         for(int i = 0; i < row_group_counts; i ++) {
           std::shared_ptr<Buffer> buffer;
