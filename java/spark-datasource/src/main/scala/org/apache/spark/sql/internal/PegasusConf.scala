@@ -54,4 +54,19 @@ object PegasusConf {
     .doc("password to access the planner.")
     .stringConf
     .createWithDefault("")
+
+  val FILEBATCH_ENABLE =
+    SQLConf.buildConf("spark.filebatch.enable")
+      .internal()
+      .doc("To indicate if enable filebatch, defalt true")
+      .booleanConf
+      .createWithDefault(true)
+
+  val ZEROCOPY_ENABLE =
+    SQLConf.buildConf("spark.zerocopy.enable")
+      .internal()
+      .doc("To indicate if enable zerocopy, defalt true")
+      .booleanConf
+      .createWithDefault(true)
+
 }

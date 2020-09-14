@@ -34,6 +34,7 @@ import org.apache.spark.memory.MemoryMode
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.execution.datasources.parquet.{ParquetReadSupport, PegasusVectorizedColumnReader, VectorizedColumnReader}
 import org.apache.spark.sql.execution.vectorized.{ColumnVectorUtils, OffHeapColumnVector, OnHeapColumnVector, WritableColumnVector}
+import org.apache.spark.sql.internal.PegasusConf
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.vectorized.{ArrowColumnVector, ColumnVector, ColumnarBatch}
 
@@ -49,11 +50,11 @@ class PegasusPartitionReader(configuration: Configuration,
 
   val localIPList:util.ArrayList[String] = getLocalList
 
-  val client = clientFactory.apply
-  //TODO make useFileBatch configurable
-  private var useFileBatch = true
+  val useFileBatch  = configuration.getBoolean(PegasusConf.FILEBATCH_ENABLE.key, true)
+  val client = clientFactory.apply(useFileBatch)
   var dataReader: DataReader = null
-  if(isLocal(location)) {
+  val useZeroCopy  = configuration.getBoolean(PegasusConf.ZEROCOPY_ENABLE.key, true)
+  if(useZeroCopy && isLocal(location)) {
     dataReader = new LocalDataReader(client, ticket)
   } else {
     dataReader = new GrpcDataReader(client, ticket)

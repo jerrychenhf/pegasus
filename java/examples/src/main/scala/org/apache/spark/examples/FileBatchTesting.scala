@@ -30,7 +30,7 @@ object FileBatchTesting {
 
         val plannerClientFactory = new PegasusClientFactory(
               Location.forGrpcInsecure("127.0.0.1", 30001), null, null)
-        val plannerClient = plannerClientFactory.apply
+        val plannerClient = plannerClientFactory.apply(true)
          // val path = "hdfs://10.239.47.55:9000/genData10/store_sales"
         val path = "hdfs://10.239.47.55:9000/genData10/customer"
         val properties = new HashMap[String, String]
@@ -74,7 +74,7 @@ object FileBatchTesting {
         val location = locations(0)
         System.out.println("location: " + location)
         val workerClientFactory = new PegasusClientFactory(location, null, null)
-        val workerClient = workerClientFactory.apply
+        val workerClient = workerClientFactory.apply(true)
         val stream = workerClient.getStream(ticket)
         var num = 0
         while (stream.next()) {

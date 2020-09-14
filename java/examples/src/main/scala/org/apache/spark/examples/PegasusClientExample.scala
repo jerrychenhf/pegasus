@@ -31,7 +31,7 @@ object PegasusClientExample {
 
         val plannerClientFactory = new PegasusClientFactory(
               Location.forGrpcInsecure("bdpe611n3", 30001), null, null)
-        val plannerClient = plannerClientFactory.apply
+        val plannerClient = plannerClientFactory.apply(true)
         val path = "hdfs://10.239.47.55:9000/genData1000/store_sales"
         val properties = new HashMap[String, String]
         properties.put(FlightDescriptor.TABLE_LOCATION , path)
@@ -77,7 +77,7 @@ object PegasusClientExample {
                     val location = locations(0)
                     System.out.println("location: " + location)
                     val workerClientFactory = new PegasusClientFactory(location, null, null)
-                    val workerClient = workerClientFactory.apply
+                    val workerClient = workerClientFactory.apply(true)
                     val stream = workerClient.getStream(ticket)
                     var num = 0
                     while (stream.next()) {
