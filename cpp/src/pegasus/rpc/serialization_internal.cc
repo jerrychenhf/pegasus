@@ -43,6 +43,8 @@
 #include "arrow/util/bit_util.h"
 #include "arrow/util/logging.h"
 
+DECLARE_bool(cache_format_arrow);
+
 namespace pb = pegasus::rpc::protocol;
 
 static constexpr int64_t kInt32Max = std::numeric_limits<int32_t>::max();
@@ -219,7 +221,7 @@ grpc::Status FlightDataSerialize(const FlightPayload& msg, ByteBuffer* out,
   }
   
   // TODO: consider the file batch feature enable or not.
-  if (has_body) {
+  if (has_body && !FLAGS_cache_format_arrow) {
 
     WireFormatLite::WriteTag(4,
                            WireFormatLite::WIRETYPE_LENGTH_DELIMITED, &header_stream);              
