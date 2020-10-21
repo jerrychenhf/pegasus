@@ -230,10 +230,12 @@ if(PEGASUS_RPC_JAVA_CLIENT_JNI)
 
   if(APPLE)
     target_link_libraries(pegasus_java
+                          pegasus_ipc
                           "-undefined dynamic_lookup"
                           ${PTHREAD_LIBRARY})
   else(APPLE)
     target_link_libraries(pegasus_java
+                          pegasus_ipc
                           ${PTHREAD_LIBRARY})
   endif(APPLE)
 endif()
