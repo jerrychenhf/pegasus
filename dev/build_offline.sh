@@ -15,17 +15,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 WORK_DIR="$(dirname "$0")"
 
 export PEGASUS_HOME=$WORK_DIR/../
+
+ARROW_THIRD_PARTY_DIR=$PEGASUS_HOME/../thirdparty/arrow-thirdparty
+if [ ! -d "$ARROW_THIRD_PARTY_DIR" ]; then
+  mkdir -p $ARROW_THIRD_PARTY_DIR
+fi
+
+sh $PEGASUS_HOME/cpp/thirdparty/download_arrow_dependencies.sh $ARROW_THIRD_PARTY_DIR > $PEGASUS_HOME/cpp/arrow_env.conf
+
+PEGASUS_THIRD_PARTY_DIR=$PEGASUS_HOME/../thirdparty/pegasus-thirdparty
+if [ ! -d "$PEGASUS_THIRD_PARTY_DIR" ]; then
+  mkdir -p $PEGASUS_THIRD_PARTY_DIR
+fi
+
+sh $PEGASUS_HOME/cpp/thirdparty/download_dependencies.sh $PEGASUS_THIRD_PARTY_DIR > $PEGASUS_HOME/cpp/pegasus_env.conf
 
 cd $PEGASUS_HOME/cpp
 source ./pegasus_env.conf 
 source ./arrow_env.conf
 
 if [ ! -d "$PEGASUS_HOME/cpp/build" ]; then
-  mkdir build
+  mkdir -p $PEGASUS_HOME/cpp/build
 fi
 
 cd  $PEGASUS_HOME/cpp/build
