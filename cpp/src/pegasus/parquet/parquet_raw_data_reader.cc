@@ -19,9 +19,9 @@
 
 namespace pegasus {
 
-ParquetRawDataReader::ParquetRawDataReader(const std::shared_ptr<arrow::io::RandomAccessFile>& file,
-                                           const parquet::ReaderProperties& properties) {
-
+ParquetRawDataReader::ParquetRawDataReader(
+  const std::shared_ptr<arrow::io::RandomAccessFile>& file,
+  const parquet::ReaderProperties& properties) {
   file_reader_ = parquet::ParquetFileReader::Open(file, properties);
 }
 
@@ -29,9 +29,11 @@ int ParquetRawDataReader::RowGroupsNum() const {
   return file_reader_->metadata()->num_row_groups();
 }
 
-Status ParquetRawDataReader::GetColumnBuffer(int row_group_index, int column_index,
-                                             std::shared_ptr<arrow::Buffer>* buffer) {
-  std::shared_ptr<parquet::RowGroupReader> row_group_reader = file_reader_->RowGroup(row_group_index);
+Status ParquetRawDataReader::GetColumnBuffer(
+  int row_group_index, int column_index,
+  std::shared_ptr<arrow::Buffer>* buffer) {
+  std::shared_ptr<parquet::RowGroupReader> row_group_reader =
+    file_reader_->RowGroup(row_group_index);
   
   *buffer = row_group_reader->GetColumnBuffer(column_index);
   return Status::OK();

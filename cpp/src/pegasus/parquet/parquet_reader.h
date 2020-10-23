@@ -19,10 +19,9 @@
 #define PEGASUS_PARQUET_READER_H
 
 #include "parquet/arrow/reader.h"
-#include "arrow/io/interfaces.h"
 #include "parquet/properties.h"
+#include "arrow/io/interfaces.h"
 #include "arrow/table.h"
-
 #include "common/status.h"
 
 namespace pegasus {
@@ -33,12 +32,16 @@ class ParquetReader {
                 arrow::MemoryPool* pool, const parquet::ArrowReaderProperties& properties);
 
   Status GetSchema(std::shared_ptr<arrow::Schema>* out);
-  Status ReadParquetTable(std::shared_ptr<arrow::Table>* table);
-  Status ReadParquetTable(const std::vector<int> column_indices, std::shared_ptr<::arrow::Table>* table);
-  Status ReadColumnChunk(int column_indice, std::shared_ptr<arrow::ChunkedArray>* chunked_out);
-  Status ReadColumnChunk(int column_indice,std::shared_ptr<arrow::ChunkedArray>* chunked_out, int size);
-  Status ReadColumnChunk(int64_t row_group_index, int column_id, std::shared_ptr<arrow::ChunkedArray>* chunked_out);
 
+  Status ReadParquetTable(std::shared_ptr<arrow::Table>* table);
+  Status ReadParquetTable(const std::vector<int> column_indices,
+    std::shared_ptr<::arrow::Table>* table);
+  Status ReadColumnChunk(int column_indice,
+    std::shared_ptr<arrow::ChunkedArray>* chunked_out);
+  Status ReadColumnChunk(int column_indice,
+    std::shared_ptr<arrow::ChunkedArray>* chunked_out, int size);
+  Status ReadColumnChunk(int64_t row_group_index,
+    int column_id, std::shared_ptr<arrow::ChunkedArray>* chunked_out);
  private:
   std::unique_ptr< parquet::arrow::FileReader> file_reader_;
 };

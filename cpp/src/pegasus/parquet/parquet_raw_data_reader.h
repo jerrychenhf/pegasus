@@ -19,27 +19,28 @@
 #define PEGASUS_PARQUET_RAW_DATA_READER_H
 
 #include "parquet/file_reader.h"
-#include "arrow/io/interfaces.h"
 #include "parquet/properties.h"
+#include "arrow/io/interfaces.h"
 #include "arrow/buffer.h"
 #include "arrow/table.h"
-
 #include "common/status.h"
 
 namespace pegasus {
 
 class ParquetRawDataReader {
  public:
-  ParquetRawDataReader(const std::shared_ptr<arrow::io::RandomAccessFile>& file,
-                       const parquet::ReaderProperties& properties);
+  ParquetRawDataReader(
+    const std::shared_ptr<arrow::io::RandomAccessFile>& file,
+    const parquet::ReaderProperties& properties);
 
   Status GetColumnBuffer(int row_group_index, int column_index,
-                         std::shared_ptr<arrow::Buffer>* buffer);
+    std::shared_ptr<arrow::Buffer>* buffer);
 
-  Status GetRowGroupReader(int i, std::shared_ptr<parquet::RowGroupReader>* row_group_reader);
-  Status GetColumnReader(int i, std::shared_ptr<parquet::ColumnReader>* column_reader);
+  Status GetRowGroupReader(int i, 
+    std::shared_ptr<parquet::RowGroupReader>* row_group_reader);
+  Status GetColumnReader(int i,
+    std::shared_ptr<parquet::ColumnReader>* column_reader);
   int RowGroupsNum() const;
-
  private:
   std::unique_ptr<parquet::ParquetFileReader> file_reader_;
 };
