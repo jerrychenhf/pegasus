@@ -15,8 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#ifndef PEGASUS_ALLOCATOR_H
-#define PEGASUS_ALLOCATOR_H
+#ifndef PEGASUS_IPC_ALLOCATOR_H
+#define PEGASUS_IPC_ALLOCATOR_H
 
 #include <cstddef>
 #include <cstdint>
@@ -61,4 +61,4 @@ class Allocator {
 
 }  // namespace pegasus
 
-#endif  // PEGASUS_ALLOCATOR_H
+#endif  // PEGASUS_IPC_ALLOCATOR_H

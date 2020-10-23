@@ -15,14 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/ipc/events.h"
+#include "ipc/events.h"
 
 #include <utility>
-
 #include <errno.h>
 
 extern "C" {
-#include "pegasus/ipc/thirdparty/ae/ae.h"
+#include "ipc/thirdparty/ae/ae.h"
 }
 
 namespace pegasus {

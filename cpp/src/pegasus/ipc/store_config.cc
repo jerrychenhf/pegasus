@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/ipc/store_config.h"
+#include "ipc/store_config.h"
 
 namespace pegasus {
 

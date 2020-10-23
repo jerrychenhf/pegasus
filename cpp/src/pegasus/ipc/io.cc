@@ -15,13 +15,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/ipc/io.h"
+#include "ipc/io.h"
 
 #include <cstdint>
 #include <memory>
 #include <sstream>
-
-#include "pegasus/common/logging.h"
+#include "common/logging.h"
 
 using pegasus::Status;
 

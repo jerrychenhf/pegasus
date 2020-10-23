@@ -15,7 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#pragma once
+#ifndef PEGASUS_EVENTS_H
+#define PEGASUS_EVENTS_H
 
 #include <functional>
 #include <memory>
@@ -106,3 +107,5 @@ class EventLoop {
 };
 
 }  // namespace pegasus
+
+#endif //PEGASUS_EVENTS_H

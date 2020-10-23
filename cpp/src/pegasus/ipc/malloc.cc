@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/ipc/malloc.h"
+#include "ipc/malloc.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -28,8 +28,7 @@
 #include <string>
 #include <vector>
 #include <mutex>
-
-#include "pegasus/common/logging.h"
+#include "common/logging.h"
 
 namespace pegasus {
 

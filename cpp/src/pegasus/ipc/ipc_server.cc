@@ -15,13 +15,13 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/ipc/ipc_server.h"
+#include "ipc/ipc_server.h"
 
 #include <utility>
 #include <errno.h>
-#include "pegasus/common/logging.h"
-#include "pegasus/ipc/io.h"
-#include "pegasus/ipc/fling.h"
+#include "common/logging.h"
+#include "ipc/io.h"
+#include "ipc/fling.h"
 
 namespace pegasus {
 

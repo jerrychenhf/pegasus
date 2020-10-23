@@ -15,7 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#pragma once
+#ifndef PEGASUS_IPC_SERVER_H
+#define PEGASUS_IPC_SERVER_H
 
 #include <functional>
 #include <memory>
@@ -81,3 +82,5 @@ class IpcServer {
 };
   
 }  // namespace pegasus
+
+#endif //PEGASUS_IPC_SERVER_H

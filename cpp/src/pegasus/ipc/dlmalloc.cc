@@ -15,8 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/ipc/malloc.h"
-
 #include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -24,13 +22,12 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
-
 #include <cerrno>
 #include <string>
 #include <vector>
-
-#include "pegasus/common/logging.h"
-#include "pegasus/ipc/store_config.h"
+#include "common/logging.h"
+#include "ipc/malloc.h"
+#include "ipc/store_config.h"
 
 namespace pegasus {
 
@@ -47,7 +44,7 @@ int fake_munmap(void*, int64_t);
 #define DEFAULT_GRANULARITY ((size_t)128U * 1024U)
 #define USE_LOCKS 1
 
-#include "pegasus/ipc/thirdparty/dlmalloc.c"  // NOLINT
+#include "ipc/thirdparty/dlmalloc.c"  // NOLINT
 
 #undef MMAP
 #undef MUNMAP

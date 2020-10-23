@@ -15,7 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#pragma once
+#ifndef PEGASUS_IPC_IO_H
+#define PEGASUS_IPC_IO_H
 
 #include <inttypes.h>
 #include <sys/socket.h>
@@ -26,7 +27,7 @@
 #include <string>
 #include <vector>
 
-#include "pegasus/common/status.h"
+#include "common/status.h"
 
 namespace pegasus {
 
@@ -60,4 +61,6 @@ Status WriteMessage(int fd, MessageType type, int64_t length, uint8_t* bytes);
 
 Status ReadMessage(int fd, MessageType* type, std::vector<uint8_t>* buffer);
 
-}  // namespace plasma
+}  // namespace pegasus
+
+#endif //PEGASUS_IPC_IO_H

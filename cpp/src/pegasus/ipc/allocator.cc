@@ -15,10 +15,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include <arrow/util/logging.h>
+#include "ipc/allocator.h"
 
-#include "pegasus/ipc/malloc.h"
-#include "pegasus/ipc/allocator.h"
+#include <arrow/util/logging.h>
+#include "ipc/malloc.h"
 
 namespace pegasus {
 

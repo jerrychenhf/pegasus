@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "pegasus/ipc/fling.h"
+#include "ipc/fling.h"
 
 #include <string.h>
-
-#include "pegasus/common/logging.h"
+#include "common/logging.h"
 
 void init_msg(struct msghdr* msg, struct iovec* iov, char* buf, size_t buf_len) {
   iov->iov_base = buf;
