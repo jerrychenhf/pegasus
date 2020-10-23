@@ -23,7 +23,7 @@
 #include <string>
 #include <utility>
 
-#include "pegasus/util/visibility.h"
+#include "util/visibility.h"
 
 namespace pegasus {
 namespace util {

@@ -43,13 +43,13 @@
 #include "arrow/util/logging.h"
 #include "arrow/util/uri.h"
 
-#include "pegasus/rpc/client_auth.h"
-#include "pegasus/rpc/client_middleware.h"
-#include "pegasus/rpc/internal.h"
-#include "pegasus/rpc/middleware.h"
-#include "pegasus/rpc/middleware_internal.h"
-#include "pegasus/rpc/serialization_internal.h"
-#include "pegasus/rpc/types.h"
+#include "rpc/client_auth.h"
+#include "rpc/client_middleware.h"
+#include "rpc/internal.h"
+#include "rpc/middleware.h"
+#include "rpc/middleware_internal.h"
+#include "rpc/serialization_internal.h"
+#include "rpc/types.h"
 
 namespace pb = pegasus::rpc::protocol;
 

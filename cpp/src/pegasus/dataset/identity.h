@@ -20,7 +20,7 @@
 
 #include <string>
 #include <vector>
-#include <pegasus/common/status.h>
+#include "common/status.h"
 
 using namespace std;
 

@@ -40,18 +40,18 @@ class Allocator {
   /// \param bytes Number of bytes to be freed.
   static void Free(void* mem, size_t bytes);
 
-  /// Sets the memory footprint limit for Plasma.
+  /// Sets the memory footprint limit for the allocator.
   ///
-  /// \param bytes Plasma memory footprint limit in bytes.
+  /// \param bytes the allocator memory footprint limit in bytes.
   static void SetFootprintLimit(size_t bytes);
 
-  /// Get the memory footprint limit for Plasma.
+  /// Get the memory footprint limit for the allocator.
   ///
-  /// \return Plasma memory footprint limit in bytes.
+  /// \return the allocator memory footprint limit in bytes.
   static int64_t GetFootprintLimit();
 
-  /// Get the number of bytes allocated by Plasma so far.
-  /// \return Number of bytes allocated by Plasma so far.
+  /// Get the number of bytes allocated by the allocator so far.
+  /// \return Number of bytes allocated by the allocator so far.
   static int64_t Allocated();
 
  private:

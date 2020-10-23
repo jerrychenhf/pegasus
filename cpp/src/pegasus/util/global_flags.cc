@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "pegasus/util/global_flags.h"
+#include "util/global_flags.h"
 
 // This will be defaulted to the host name returned by the OS.
 // This name is used in the principal generated for Kerberos authorization.

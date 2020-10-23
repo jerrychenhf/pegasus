@@ -4,7 +4,7 @@
 
 // This defines a set of argument wrappers and related factory methods that
 // can be used specify the refcounting and reference semantics of arguments
-// that are bound by the Bind() function in pegasus/gutil/bind.h.
+// that are bound by the Bind() function in gutil/bind.h.
 //
 // It also defines a set of simple functions and utilities that people want
 // when using Callback<> and Bind().

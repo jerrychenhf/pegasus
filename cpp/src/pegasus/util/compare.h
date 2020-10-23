@@ -21,7 +21,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "pegasus/util/macros.h"
+#include "util/macros.h"
 
 namespace pegasus {
 namespace util {

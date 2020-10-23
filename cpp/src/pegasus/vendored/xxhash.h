@@ -21,7 +21,7 @@
 #pragma warning(disable : 4146)
 #endif
 
-#include "pegasus/vendored/xxhash/xxhash.h"
+#include "vendored/xxhash/xxhash.h"
 
 #if defined(_MSC_VER)
 #pragma warning(pop)

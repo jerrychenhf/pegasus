@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/dataset/dataset_store.h"
+#include "dataset/dataset_store.h"
 
 namespace pegasus
 {

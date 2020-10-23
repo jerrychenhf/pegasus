@@ -24,7 +24,7 @@
 namespace pegasus {
 namespace internal {
 
-// See pegasus/gutil/callback.h for user documentation.
+// See gutil/callback.h for user documentation.
 //
 //
 // CONCEPTS:

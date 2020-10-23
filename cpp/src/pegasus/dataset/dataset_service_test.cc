@@ -23,16 +23,10 @@
 #include <gtest/gtest.h>
 #include "test/gtest-util.h"
 #include "dataset/dataset_service.h"
-#include "pegasus/runtime/exec_env.h"
-#include "pegasus/dataset/dataset_distributor.h"
-#include "consistent_hashing.h"
-#include "dataset_request.h"
-
-//#include "arrow/ipc/test_common.h"
-//#include "arrow/status.h"
-//#include "arrow/testing/gtest_util.h"
-//#include "arrow/testing/util.h"
-//#include "arrow/util/make_unique.h"
+#include "runtime/exec_env.h"
+#include "dataset/dataset_distributor.h"
+#include "dataset/consistent_hashing.h"
+#include "dataset/dataset_request.h"
 
 namespace pegasus
 {

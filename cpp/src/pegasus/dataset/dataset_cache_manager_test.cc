@@ -22,7 +22,7 @@
 #include <gtest/gtest.h>
 #include "test/gtest-util.h"
 #include "dataset/dataset_cache_manager.h"
-#include "pegasus/runtime/worker_exec_env.h"
+#include "runtime/worker_exec_env.h"
 
 namespace pegasus {
 

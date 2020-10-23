@@ -14,7 +14,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 
-#include "pegasus/rpc/protocol_internal.h"
+#include "rpc/protocol_internal.h"
 
 // NOTE(wesm): Including .cc files in another .cc file would ordinarily be a
 // no-no. We have customized the serialization path for FlightData, which is
@@ -22,5 +22,5 @@
 // included before either of these files is compiled. Because we don't want to
 // edit the generated C++ files, we include them here and do our gRPC
 // customizations in protocol-internal.h
-#include "pegasus/rpc/Flight.grpc.pb.cc"  // NOLINT
-#include "pegasus/rpc/Flight.pb.cc"       // NOLINT
+#include "rpc/Flight.grpc.pb.cc"  // NOLINT
+#include "rpc/Flight.pb.cc"       // NOLINT

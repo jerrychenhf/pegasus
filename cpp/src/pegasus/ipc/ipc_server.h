@@ -24,14 +24,14 @@
 #include <unordered_set>
 #include <vector>
 
-#include "pegasus/common/status.h"
-#include "pegasus/ipc/events.h"
+#include "common/status.h"
+#include "ipc/events.h"
 
 namespace pegasus {
 
 int WarnIfSigpipe(int status, int client_sock);
 
-/// Contains all information that is associated with a Plasma store client.
+/// Contains all information that is associated with the client.
 struct Client {
   explicit Client(int fd);
 

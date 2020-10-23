@@ -20,6 +20,6 @@
 #ifndef PEGASUS_UTIL_COMPILER_UTIL_H
 #define PEGASUS_UTIL_COMPILER_UTIL_H
 
-#include "pegasus/util/macros.h"
+#include "util/macros.h"
 
 #endif  // PEGASUS_UTIL_COMPILER_UTIL_H

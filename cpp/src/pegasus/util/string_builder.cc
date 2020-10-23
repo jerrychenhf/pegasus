@@ -17,8 +17,8 @@
 
 #include <sstream>
 
-#include "pegasus/util/make_unique.h"
-#include "pegasus/util/string_builder.h"
+#include "util/make_unique.h"
+#include "util/string_builder.h"
 
 namespace pegasus {
 namespace util {

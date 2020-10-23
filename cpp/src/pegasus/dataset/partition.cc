@@ -1,5 +1,5 @@
 
-#include "pegasus/dataset/partition.h"
+#include "dataset/partition.h"
 
 namespace pegasus {
 
