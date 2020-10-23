@@ -15,7 +15,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#pragma once
+#ifndef PEGASUS_LOCATION_H
+#define PEGASUS_LOCATION_H
 
 #include "rpc/types.h"
 
@@ -25,3 +26,5 @@ typedef rpc::Location Location;
 
 
 } // namespace pegasus
+
+#endif // PEGASUS_LOCATION_H

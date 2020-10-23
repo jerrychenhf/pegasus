@@ -25,9 +25,7 @@
 #include <memory>
 #include <string>
 #include <utility>
-
 #include "arrow/status.h"
-
 #include "common/compiler-util.h"
 #include "common/logging.h"
 #include "util/compare.h"

@@ -23,7 +23,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
-
 #include "arrow/type.h"
 #include "arrow/util/compression.h"
 #include "parquet/encryption.h"

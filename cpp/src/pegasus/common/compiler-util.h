@@ -15,7 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-
 #ifndef PEGASUS_COMMON_COMPILER_UTIL_H
 #define PEGASUS_COMMON_COMPILER_UTIL_H
 
