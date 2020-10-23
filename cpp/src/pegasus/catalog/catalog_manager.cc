@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-#include "pegasus/catalog/catalog_manager.h"
+#include "catalog/catalog_manager.h"
 
 namespace pegasus {
 

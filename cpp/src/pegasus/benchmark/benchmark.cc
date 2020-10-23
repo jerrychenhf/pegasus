@@ -20,9 +20,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
 #include <gflags/gflags.h>
-
 #include "arrow/api.h"
 #include "arrow/io/memory.h"
 #include "arrow/ipc/api.h"
@@ -30,7 +28,6 @@
 #include "arrow/testing/gtest_util.h"
 #include "arrow/util/stopwatch.h"
 #include "arrow/util/thread_pool.h"
-
 #include "rpc/api.h"
 #include "rpc/test_util.h"
 
@@ -86,7 +83,6 @@ arrow::Result<PerformanceResult> RunDoGetTest(rpc::FlightClient* client,
     }
 
     num_records += batch.data->num_rows();
-
     // Hard-coded
     num_bytes += batch.data->num_rows() * bytes_per_record;
   }
@@ -94,9 +90,7 @@ arrow::Result<PerformanceResult> RunDoGetTest(rpc::FlightClient* client,
 }
 
 arrow::Status RunPerformanceTest(rpc::FlightClient* client, bool test_put) {
-
   // Plan the query
-
   std::string path = "hdfs://10.239.47.55:9000/genData101/store_sales";
 
   std::unordered_map<std::string, std::string> options;
@@ -126,7 +120,6 @@ arrow::Status RunPerformanceTest(rpc::FlightClient* client, bool test_put) {
 
   StopWatch timer;
   timer.Start();
-
 
   ARROW_ASSIGN_OR_RAISE(auto pool, ThreadPool::Make(FLAGS_num_threads));
   std::vector<arrow::Future<arrow::Status>> tasks;

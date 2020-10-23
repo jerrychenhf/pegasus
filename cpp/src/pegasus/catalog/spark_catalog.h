@@ -18,11 +18,10 @@
 #ifndef PEGASUS_SPARK_CATALOG_H
 #define PEGASUS_SPARK_CATALOG_H
 
+#include <string>
 #include "catalog/catalog.h"
 #include "storage/storage.h"
 #include "storage/storage_factory.h"
-
-#include <string>
 
 using namespace std;
 
@@ -33,18 +32,17 @@ class SparkCatalog : public Catalog {
   SparkCatalog();
   ~SparkCatalog();
 
-  Status GetTableLocation(DataSetRequest* dataset_request, std::string& table_location);
+  Status GetTableLocation(DataSetRequest* dataset_request,
+    std::string& table_location);
   Status GetSchema(DataSetRequest* dataset_request,
-      std::shared_ptr<arrow::Schema>* schema);
+    std::shared_ptr<arrow::Schema>* schema);
   FileFormat GetFileFormat(DataSetRequest* dataset_request);
 
   CatalogType GetCatalogType();
-  
-  private:
-    std::shared_ptr<StorageFactory> storage_factory_;
-
-  public:
-    static const std::string FILE_FORMAT_ID_PARQUET;
+ private:
+   std::shared_ptr<StorageFactory> storage_factory_;
+ public:
+   static const std::string FILE_FORMAT_ID_PARQUET;
 };
 
 } // namespace pegasus
