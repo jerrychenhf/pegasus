@@ -36,7 +36,6 @@ class StoreManager {
   std::unordered_map<std::string, std::shared_ptr<Store>> GetStores() {
     return stores_;
   }
-
  private:
   std::unordered_map<std::string, std::shared_ptr<Store>> stores_;
   

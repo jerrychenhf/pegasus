@@ -20,7 +20,6 @@
 
 #include <unordered_map>
 #include <atomic>
-
 #include "cache/store.h"
 #include "common/status.h"
 #include "cache/store_region.h"
@@ -42,7 +41,6 @@ class FileStore : public Store {
   virtual int64_t GetUsedSize() override;
   
   virtual std::string GetStoreName() override;
-
  private:
   int64_t capacity_;
   std::atomic<int64_t> used_size_;

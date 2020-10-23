@@ -34,12 +34,10 @@ class CacheStoreManager {
    Status Init(const CacheStoreInfos& cache_store_infos);
    
    Status GetCacheStore(CacheStore** cache_store);
-
   private:
    std::unordered_map<std::string, std::shared_ptr<CacheStore>> cached_stores_;
 
-   Status GetCacheStore(const std::string& id, CacheStore** cache_store);
-   
+   Status GetCacheStore(const std::string& id, CacheStore** cache_store);   
   public:
    static const std::string CACHE_STORE_ID_DRAM;
    static const std::string CACHE_STORE_ID_DCPMM;

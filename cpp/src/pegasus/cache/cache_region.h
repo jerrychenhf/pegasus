@@ -35,8 +35,10 @@ namespace pegasus {
 class CacheMemoryPool;
 
 struct ObjectEntry {
-  ObjectEntry(int fd, ptrdiff_t offset, int64_t map_size, int64_t row_counts, int64_t data_size):
-  fd_(fd), offset_(offset), map_size_(map_size), row_counts_(row_counts), data_size_(data_size) {};
+  ObjectEntry(int fd, ptrdiff_t offset, int64_t map_size,
+  int64_t row_counts, int64_t data_size):
+  fd_(fd), offset_(offset), map_size_(map_size),
+  row_counts_(row_counts), data_size_(data_size) {};
 
   ~ObjectEntry() {};
 
@@ -68,8 +70,9 @@ class CacheRegion {
   CacheRegion();
   CacheRegion(const std::shared_ptr<CacheMemoryPool>& memory_pool,
     const std::shared_ptr<arrow::ChunkedArray>& chunked_array, int64_t size,
-     const unordered_map<int, std::shared_ptr<BufferEntry>> object_buffers = {},
-    unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries = {}, int64_t row_counts_per_rowgroup = 0 );
+    const unordered_map<int, std::shared_ptr<BufferEntry>> object_buffers = {},
+    unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries = {},
+    int64_t row_counts_per_rowgroup = 0 );
   
   ~CacheRegion();
   
@@ -84,7 +87,9 @@ class CacheRegion {
   // use shared ptr to managed the life time
   std::shared_ptr<CacheMemoryPool> memory_pool_;
   std::shared_ptr<arrow::ChunkedArray> chunked_array_;
+
   int64_t size_;
+
   // the key is the rowgroup_ids and the value is the buffers
   // TODO: Combine the chunked_array_ and chunked_arrays_
   unordered_map<int, std::shared_ptr<BufferEntry>> object_buffers_;

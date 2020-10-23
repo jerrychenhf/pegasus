@@ -20,6 +20,7 @@
 #include "cache/memory_store.h"
 #include "cache/dcpmm_store.h"
 #include "cache/file_store.h"
+
 namespace pegasus {
 
 const std::string StoreManager::STORE_ID_DRAM = "DRAM";

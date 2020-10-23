@@ -43,7 +43,6 @@ class DCPMMStore : public Store {
   virtual int64_t GetUsedSize() override;
   
   virtual std::string GetStoreName() override;
-
  private:
   int64_t capacity_;
   std::atomic<int64_t> used_size_;
