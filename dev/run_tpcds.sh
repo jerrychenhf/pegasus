@@ -21,28 +21,21 @@ if [ -z "${PEGASUS_HOME}" ]; then
   export PEGASUS_HOME="$(cd "`dirname "$0"`"/..; pwd)"
 fi
 
-ARROW_THIRD_PARTY_DIR=$PEGASUS_HOME/../thirdparty/arrow-thirdparty
-if [ ! -d "$ARROW_THIRD_PARTY_DIR" ]; then
-  mkdir -p $ARROW_THIRD_PARTY_DIR
-fi
+export BEAVER_HOME=/opt/Beaver
 
-sh $PEGASUS_HOME/cpp/thirdparty/download_arrow_dependencies.sh $ARROW_THIRD_PARTY_DIR > $PEGASUS_HOME/cpp/arrow_env.conf
+# first stop
+sh $PEGASUS_HOME/bin/stop-all.sh
+sleep 10
 
-PEGASUS_THIRD_PARTY_DIR=$PEGASUS_HOME/../thirdparty/pegasus-thirdparty
-if [ ! -d "$PEGASUS_THIRD_PARTY_DIR" ]; then
-  mkdir -p $PEGASUS_THIRD_PARTY_DIR
-fi
+# then build
+sh $PEGASUS_HOME/dev/build_all.sh
 
-sh $PEGASUS_HOME/cpp/thirdparty/download_dependencies.sh $PEGASUS_THIRD_PARTY_DIR > $PEGASUS_HOME/cpp/pegasus_env.conf
+# start the pegasus services
+sh $PEGASUS_HOME/bin/start-all.sh
 
-cd $PEGASUS_HOME/cpp
-source ./pegasus_env.conf 
-source ./arrow_env.conf
+# update the jars to Beaver
+cp -r  $PEGASUS_HOME/java/spark-datasource/target/pegasus-spark-datasource-1.0.0-SNAPSHOT-with-spark-3.0.0.jar    $BEAVER_HOME/OAP/oap_jar/
 
-if [ ! -d "$PEGASUS_HOME/cpp/build" ]; then
-  mkdir -p $PEGASUS_HOME/cpp/build
-fi
-
-cd  $PEGASUS_HOME/cpp/build
-cmake -DPEGASUS_USE_GLOG=ON -DPEGASUS_BUILD_TESTS=ON ..
-make
+# run tpc-ds
+cd $BEAVER_HOME/spark-sql-perf/tpcds_script/3.0.0/
+sh run_tpcds_sparksql.sh  4

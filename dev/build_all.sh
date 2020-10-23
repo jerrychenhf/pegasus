@@ -21,28 +21,13 @@ if [ -z "${PEGASUS_HOME}" ]; then
   export PEGASUS_HOME="$(cd "`dirname "$0"`"/..; pwd)"
 fi
 
-ARROW_THIRD_PARTY_DIR=$PEGASUS_HOME/../thirdparty/arrow-thirdparty
-if [ ! -d "$ARROW_THIRD_PARTY_DIR" ]; then
-  mkdir -p $ARROW_THIRD_PARTY_DIR
-fi
+# build arrow and install
 
-sh $PEGASUS_HOME/cpp/thirdparty/download_arrow_dependencies.sh $ARROW_THIRD_PARTY_DIR > $PEGASUS_HOME/cpp/arrow_env.conf
+# build spark and install
 
-PEGASUS_THIRD_PARTY_DIR=$PEGASUS_HOME/../thirdparty/pegasus-thirdparty
-if [ ! -d "$PEGASUS_THIRD_PARTY_DIR" ]; then
-  mkdir -p $PEGASUS_THIRD_PARTY_DIR
-fi
+# build pegasus server offline
+sh ./build_offline.sh
 
-sh $PEGASUS_HOME/cpp/thirdparty/download_dependencies.sh $PEGASUS_THIRD_PARTY_DIR > $PEGASUS_HOME/cpp/pegasus_env.conf
-
-cd $PEGASUS_HOME/cpp
-source ./pegasus_env.conf 
-source ./arrow_env.conf
-
-if [ ! -d "$PEGASUS_HOME/cpp/build" ]; then
-  mkdir -p $PEGASUS_HOME/cpp/build
-fi
-
-cd  $PEGASUS_HOME/cpp/build
-cmake -DPEGASUS_USE_GLOG=ON -DPEGASUS_BUILD_TESTS=ON ..
-make
+# build pegasus java for Spark
+cd $PEGASUS_HOME/java
+mvn clean package -DskipTests
