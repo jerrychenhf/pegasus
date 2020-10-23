@@ -61,14 +61,14 @@ public:
     auto it = drop_list_.begin();
     for (; it != drop_list_.end(); it++) {
       if (it->datasetpath == part.GetDataSetPath()) {
-        it->partitions.push_back(part.GetIdentPath());
+        it->partitions.push_back(part.GetIdentityPath());
         return Status::OK();
       }
     }
     if (it == drop_list_.end()) {
       rpc::PartitionDropList pdod;
       pdod.datasetpath = part.GetDataSetPath();
-      pdod.partitions.push_back(part.GetIdentPath());
+      pdod.partitions.push_back(part.GetIdentityPath());
       drop_list_.push_back(pdod);
     }
 

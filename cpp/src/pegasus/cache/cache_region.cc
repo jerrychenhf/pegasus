@@ -28,10 +28,16 @@ CacheRegion::CacheRegion()
 
 CacheRegion::CacheRegion(const std::shared_ptr<CacheMemoryPool>& memory_pool,
   const std::shared_ptr<arrow::ChunkedArray>& chunked_array,
-   int64_t size, const unordered_map<int, std::shared_ptr<BufferEntry>> object_buffers,
-   unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries, const int64_t row_counts_per_rowgroup)
-  : memory_pool_(memory_pool), chunked_array_(chunked_array), size_(size), object_buffers_(object_buffers) ,
-  object_entries_(object_entries), row_counts_per_rowgroup_(row_counts_per_rowgroup){
+   int64_t size,
+   const unordered_map<int, std::shared_ptr<BufferEntry>> object_buffers,
+   unordered_map<int, std::shared_ptr<ObjectEntry>> object_entries,
+    const int64_t row_counts_per_rowgroup)
+  : memory_pool_(memory_pool),
+    chunked_array_(chunked_array),
+    size_(size),
+    object_buffers_(object_buffers) ,
+    object_entries_(object_entries),
+    row_counts_per_rowgroup_(row_counts_per_rowgroup){
 }
 
 CacheRegion::~CacheRegion () {

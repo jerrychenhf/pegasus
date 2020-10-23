@@ -79,18 +79,18 @@ Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::Fl
 
   *endpoints = std::unique_ptr<std::vector<rpc::FlightEndpoint>>(new std::vector<rpc::FlightEndpoint>());
 
-  for (auto partit:dataset_->partitions())
+  for (auto partition:dataset_->partitions())
   {
-    rpc::FlightEndpoint fep;
+    rpc::FlightEndpoint endpoint;
     std::string schema_string;
     rpc::internal::SchemaToString(*schema, &schema_string);
-    fep.ticket.setSchema(schema_string);
-    fep.ticket.setDatasetpath(dataset_->dataset_path());
-    fep.ticket.setPartitionid(partit.GetIdentPath());
-    fep.ticket.setColids(indices);
-    fep.locations.push_back(partit.GetLocation());
+    endpoint.ticket.setSchema(schema_string);
+    endpoint.ticket.setDatasetpath(dataset_->dataset_path());
+    endpoint.ticket.setPartitionid(partition.GetIdentityPath());
+    endpoint.ticket.setColids(indices);
+    endpoint.locations.push_back(partition.GetLocation());
 
-    (*endpoints)->push_back(fep);
+    (*endpoints)->push_back(endpoint);
   }
 
   LOG(INFO) << "...GetFlightEndpoints()";

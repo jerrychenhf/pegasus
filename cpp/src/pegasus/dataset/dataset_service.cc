@@ -65,26 +65,26 @@ Status DataSetService::NotifyDataCacheDrop(std::shared_ptr<DataSet> pds,
 {
   // generate the list of partitions which needs to notify workernode to drop the cached data
   LOG(INFO) << "Generating list of partitions to drop cached data...";
-  auto partstodrop = std::make_shared<std::vector<Partition>>();
-  for (auto pttold : pds->partitions())
+  auto partitions_to_drop = std::make_shared<std::vector<Partition>>();
+  for (auto partition_old : pds->partitions())
   {
-    for (auto ptit = partitions->begin(); ptit != partitions->end(); ptit++)
+    for (auto partition = partitions->begin(); partition != partitions->end(); partition++)
     {
-      if ((pttold.GetIdentPath() == ptit->GetIdentPath()) &&
-        (pttold.GetLocationURI() != ptit->GetLocationURI()))
+      if ((partition_old.GetIdentityPath() == partition->GetIdentityPath()) &&
+        (partition_old.GetLocationURI() != partition->GetLocationURI()))
       {
-        partstodrop->push_back(pttold);
+        partitions_to_drop->push_back(partition_old);
         break;
       }
     }
   }
   LOG(INFO) << "Generated drop list (locationuri partitionid):";
-  for (auto ptt : *partstodrop)
+  for (auto partition : *partitions_to_drop)
   {
-    LOG(INFO) << ptt.GetLocationURI() << "\t" << ptt.GetIdentPath();
+    LOG(INFO) << partition.GetLocationURI() << "\t" << partition.GetIdentityPath();
   }
   
-  PlannerExecEnv::GetInstance()->get_worker_manager()->UpdateCacheDropLists(partstodrop);
+  PlannerExecEnv::GetInstance()->get_worker_manager()->UpdateCacheDropLists(partitions_to_drop);
   return Status::OK();
 }
 
@@ -107,9 +107,9 @@ Status DataSetService::RefreshDataSet(DataSetRequest *dataset_request,
     auto distributor = std::make_shared<ConsistentHashRing>();
     distributor->PrepareValidLocations(nullptr, nullptr);
     distributor->SetupDistribution();
-    for (auto ptt : pds->partitions())
+    for (auto partition : pds->partitions())
     {
-      Partition partition = Partition(Identity(pds->dataset_path(), ptt.GetIdentPath()));
+      Partition partition = Partition(Identity(pds->dataset_path(), partition.GetIdentityPath()));
       partitions->push_back(partition);
     }
     distributor->GetDistLocations(partitions);

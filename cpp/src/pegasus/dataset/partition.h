@@ -42,8 +42,7 @@ public:
   bool Equals(const Partition &other) const;
 
   std::string GetDataSetPath() { return identity.dataset_path(); }
-
-  std::string GetIdentPath() { return identity.partition_id(); }
+  std::string GetIdentityPath() { return identity.partition_id(); }
 
   Location GetLocation() { return location; }
   std::string GetLocationURI() { return location.ToString(); }
@@ -53,12 +52,11 @@ public:
   void UpdateLocation(Location lcn) { location = lcn; }
   void UpdateLocationURI(std::string &strURI) { Location::Parse(strURI, &location); }
 
-  friend bool operator==(const Partition &left, const Partition &right)
-  {
+  friend bool operator==(const Partition &left, const Partition &right) {
     return left.Equals(right);
   }
-  friend bool operator!=(const Partition &left, const Partition &right)
-  {
+  
+  friend bool operator!=(const Partition &left, const Partition &right) {
     return !(left == right);
   }
 };

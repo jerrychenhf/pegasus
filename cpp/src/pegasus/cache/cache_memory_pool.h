@@ -35,7 +35,6 @@ class MemoryPoolStats {
   MemoryPoolStats() : bytes_allocated_(0), max_memory_(0) {}
 
   int64_t max_memory() const { return max_memory_.load(); }
-
   int64_t bytes_allocated() const { return bytes_allocated_.load(); }
 
   inline void UpdateAllocatedBytes(int64_t diff) {
@@ -46,7 +45,6 @@ class MemoryPoolStats {
       max_memory_ = allocated;
     }
   }
-
  protected:
   std::atomic<int64_t> bytes_allocated_;
   std::atomic<int64_t> max_memory_;
@@ -62,13 +60,10 @@ public:
 
   arrow::Status Allocate(int64_t size, uint8_t **out) override;
   arrow::Status Reallocate(int64_t old_size, int64_t new_size, uint8_t **ptr) override;
-
   void Free(uint8_t *buffer, int64_t size) override;
-
+  
   int64_t bytes_allocated() const override;
-
   int64_t max_memory() const override;
-
   std::string backend_name() const override;
 
   CacheStore* GetCacheStore() { return cache_store_; }

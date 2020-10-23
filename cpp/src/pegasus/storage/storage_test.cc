@@ -63,7 +63,7 @@ TEST(StorageTest, Unit) {
 
   std::shared_ptr<Storage> worker_storage;
   for(auto partition : *partitions) {
-    std::string partition_path = partition.GetIdentPath();
+    std::string partition_path = partition.GetIdentityPath();
     ASSERT_OK(worker_storage_factory->GetStorage(partition_path,
         &worker_storage));
     ASSERT_NE(nullptr, worker_storage);

@@ -151,11 +151,11 @@ void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>
 {
 	crc32_hasher h;
 	ConHashMetrics chm;
-	for (auto partt : (*partitions))
+	for (auto partition : (*partitions))
 	{
-		LOG(INFO) << "h(partt.GetIdentPath()): " << h(partt.GetIdentPath());
+		LOG(INFO) << "h(partition.GetIdentityPath()): " << h(partition.GetIdentityPath());
 		consistent_hash_t::iterator it;
-		it = consistent_hash_.find(h(partt.GetIdentPath()));
+		it = consistent_hash_.find(h(partition.GetIdentityPath()));
 		LOG(INFO) << "found: " << it->second;
 		std::size_t pos = it->second.find_last_of("_");
 		std::string node = it->second.substr(0, pos);
@@ -164,8 +164,8 @@ void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>
 		//		Location lcn;
 		//		Location::Parse(node, &lcn);
 		//std::cout << "lcn.ToString(): " << lcn.ToString() << std::endl;
-		//		partt.UpdateLocation(lcn);
-		partt.UpdateLocationURI(node);
+		//		partition.UpdateLocation(lcn);
+		partition.UpdateLocationURI(node);
 		chm.Increment(node);
 	}
 	chm.WriteToLog();
