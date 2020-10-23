@@ -112,7 +112,7 @@ public:
 
 struct WorkerSetInfo {
   std::shared_ptr<std::vector<rpc::Location>> locations;
-  std::shared_ptr<std::vector<int64_t>> nodecacheMB;
+  std::shared_ptr<std::vector<int64_t>> node_cache_capacity;
 };
 
 // Get the worker locations

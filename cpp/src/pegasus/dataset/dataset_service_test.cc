@@ -61,11 +61,11 @@ TEST(DatasetServiceTest, ConHashBasic)
   validlocs->push_back(location1);
   validlocs->push_back(location2);
   validlocs->push_back(location3);
-  auto nodecacheMBs = std::make_shared<std::vector<int64_t>>();
-  nodecacheMBs->push_back(1024);
-  nodecacheMBs->push_back(1024);
-  nodecacheMBs->push_back(1024);
-  distributor->PrepareValidLocations(validlocs, nodecacheMBs);
+  auto node_cache_capacities = std::make_shared<std::vector<int64_t>>();
+  node_cache_capacities->push_back(1024);
+  node_cache_capacities->push_back(1024);
+  node_cache_capacities->push_back(1024);
+  distributor->PrepareValidLocations(validlocs, node_cache_capacities);
 
   // setup the distribution engine
   ASSERT_OK(distributor->SetupDistribution());

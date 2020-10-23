@@ -49,53 +49,53 @@ typedef consistent_hash_map<std::string, crc32_hasher> consistent_hash_t;
 
   // Consistent hash ring to distribute items across nodes (locations). If we add 
   // or remove nodes, it minimizes the item migration.
-  class ConsistentHashRing : DSDistributor {
+  class ConsistentHashRing : PartitionDistributor {
   public:
     ConsistentHashRing();
     ~ConsistentHashRing();
-    void PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations, std::shared_ptr<std::vector<int64_t>> nodecacheMB);
+    void PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations,
+      std::shared_ptr<std::vector<int64_t>> node_cache_capacity);
     Status SetupDistribution();
-    void AddLocation(unsigned int locidx);
-//    void AddLocation(Location location);
-//    void AddLocation(Location location, int num_virtual_nodes);
+
+    void AddLocation(unsigned int index);
     void RemoveLocation(Location location);
     Location GetLocation(Identity identity);
+
     std::string GetHash(std::string key);
-    void GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<std::vector<Location>> vectloc);
+
+    void GetDistLocations(std::shared_ptr<std::vector<Identity>> identities,
+      std::shared_ptr<std::vector<Location>> locations);
     void GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions);
   private:
     consistent_hash_t consistent_hash_;
   };
 
 struct ConHashMetrics {
-
   void Increment(std::string nodeaddr) {
-    std::unordered_map<std::string, uint64_t>::iterator it = conhashmetrics_.find(nodeaddr);
-    if (it == conhashmetrics_.end())
-      conhashmetrics_[nodeaddr] = 1;
+    std::unordered_map<std::string, uint64_t>::iterator it = metrics_.find(nodeaddr);
+    if (it == metrics_.end())
+      metrics_[nodeaddr] = 1;
     else
-      conhashmetrics_[nodeaddr]++;
+      metrics_[nodeaddr]++;
   }
 
   void WriteToLog() {
     LOG(INFO) << "conhashmetrics distribution:";
     uint64_t totalcount = 0;
-    for (auto& node : conhashmetrics_) {
+    for (auto& node : metrics_) {
       totalcount += node.second;
     }
-    for (auto& node : conhashmetrics_) {
+    for (auto& node : metrics_) {
       LOG(INFO) << node.first << " : " << node.second << "/" << totalcount \
                 << " (" << node.second*100/totalcount << "%)";
     }
   }
 
   void WriteAsJson() {
-    
+    // Not implemented yet
   }
   // Operation rates.
-  std::unordered_map<std::string, uint64_t> conhashmetrics_;
-// TODO: change to std::unordered_map<std::string, Counter> conhashmetrics_;
-
+  std::unordered_map<std::string, uint64_t> metrics_;
 };
 
 } // namespace pegasus

@@ -35,22 +35,28 @@ enum {
   LOCALPREFER
 };
 
-  class DSDistributor {
+  class PartitionDistributor {
   public:
-    DSDistributor() {};
-    ~DSDistributor() {};
-    virtual void PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations, std::shared_ptr<std::vector<int64_t>> nodecacheMB) = 0;
+    PartitionDistributor() {};
+    ~PartitionDistributor() {};
+    
+    virtual void PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations, 
+      std::shared_ptr<std::vector<int64_t>> node_cache_capacity) = 0;
     virtual Status SetupDistribution() = 0;
+    
     void AddLocation(Location location);
     void AddLocation(Location location, int num_virtual_nodes);
     void RemoveLocation(Location location);
     Location GetLocation(Identity identity);
+    
     std::string GetHash(std::string key);
-    virtual void GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, std::shared_ptr<std::vector<Location>> vectloc) = 0;
+      
+    virtual void GetDistLocations(std::shared_ptr<std::vector<Identity>> identities, 
+      std::shared_ptr<std::vector<Location>> locations) = 0;
     virtual void GetDistLocations(std::shared_ptr<std::vector<Partition>> partitions) = 0;
 
-    std::shared_ptr<std::vector<Location>> validlocations_;
-    std::shared_ptr<std::vector<int64_t>> nodecacheMB_;
+    std::shared_ptr<std::vector<Location>> valid_locations_;
+    std::shared_ptr<std::vector<int64_t>> node_cache_capacity_;
   };
 
 } // namespace pegasus

@@ -53,7 +53,7 @@ Status WorkerManager::GetWorkerSetInfo(std::shared_ptr<struct WorkerSetInfo>& wo
       it != workers_.end(); ++it) {
 				workersetinfo->locations->push_back(it->second->address());
 				LOG(INFO) << "- insert location: " << it->second->address().ToString();
-				workersetinfo->nodecacheMB->push_back(it->second->node_info()->get_cache_capacity() / (1024 * 1024));
+				workersetinfo->node_cache_capacity->push_back(it->second->node_info()->get_cache_capacity() / (1024 * 1024));
 				LOG(INFO) << "- nodecachesize(MB): " << it->second->node_info()->get_cache_capacity() / (1024 * 1024);
     }
   }

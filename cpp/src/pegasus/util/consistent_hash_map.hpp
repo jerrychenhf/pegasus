@@ -1,15 +1,28 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 #include <map>
 #include <string>
 #include <list>
 #include <functional> 
 #include <algorithm>
 
-
-
 #ifndef __CONSISTENT_HASH_H__
 #define __CONSISTENT_HASH_H__
-
-
 
 template <typename T,
         typename Hash,
@@ -17,7 +30,6 @@ template <typename T,
 class consistent_hash_map
 {
 public:
- 
     typedef typename Hash::result_type size_type;
     typedef std::map<size_type,T,std::less<size_type>,Alloc> map_type;
     typedef typename map_type::value_type value_type;
@@ -28,15 +40,11 @@ public:
     typedef Alloc allocator_type;
 
 public:
-    
     consistent_hash_map() {
-
     }
 
     ~consistent_hash_map() {
-
     }
-
 public:
     std::size_t size() const {
         return nodes_.size();
@@ -51,11 +59,9 @@ public:
         return nodes_.insert(value_type(hash,node));
     }
 
-
     void erase(iterator it) {
         nodes_.erase(it);
     }
-
 
     std::size_t erase(const T& node) {
         size_type hash = hasher_(node);
@@ -80,13 +86,9 @@ public:
     iterator end() { return nodes_.end(); }
     reverse_iterator rbegin() { return nodes_.rbegin(); }
     reverse_iterator rend() { return nodes_.rend(); }
-
-
 private:
-
     Hash hasher_;
     map_type nodes_;
 };
 
-
-#endif
+#endif //__CONSISTENT_HASH_H__

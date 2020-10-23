@@ -28,8 +28,8 @@ namespace pegasus
 
 ConsistentHashRing::ConsistentHashRing()
 {
-	validlocations_ = nullptr;
-	nodecacheMB_ = nullptr;
+	valid_locations_ = nullptr;
+	node_cache_capacity_ = nullptr;
 }
 
 ConsistentHashRing::~ConsistentHashRing()
@@ -38,13 +38,13 @@ ConsistentHashRing::~ConsistentHashRing()
 
 //TODO: GetValidLocations(), then assign them.
 void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Location>> locations,
-											   std::shared_ptr<std::vector<int64_t>> nodecacheMB)
+											   std::shared_ptr<std::vector<int64_t>> node_cache_capacity)
 {
 	//TODO: return early, reduce nested code
 	if (nullptr != locations)
 	{
-		validlocations_ = locations;
-		nodecacheMB_ = nodecacheMB;
+		valid_locations_ = locations;
+		node_cache_capacity_ = node_cache_capacity;
 	}
 	else // If the locations are not provided, get the worker locations from worker_manager
 	{
@@ -54,13 +54,13 @@ void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Locat
 		LOG(INFO) << "node count from workerregistration vector: " << wregs.size();
 		if (wregs.size() > 0)
 		{
-			validlocations_ = std::make_shared<std::vector<Location>>();
-			nodecacheMB_ = std::make_shared<std::vector<int64_t>>();
+			valid_locations_ = std::make_shared<std::vector<Location>>();
+			node_cache_capacity_ = std::make_shared<std::vector<int64_t>>();
 			for (auto it : wregs)
 			{
-				validlocations_->push_back(it->address());
+				valid_locations_->push_back(it->address());
 				LOG(INFO) << "- insert location: " << it->address().ToString();
-				nodecacheMB_->push_back(it->node_info()->get_cache_capacity() / (1024 * 1024));
+				node_cache_capacity_->push_back(it->node_info()->get_cache_capacity() / (1024 * 1024));
 				LOG(INFO) << "- nodecachesize(MB): " << it->node_info()->get_cache_capacity() / (1024 * 1024);
 			}
 		}
@@ -70,9 +70,9 @@ void ConsistentHashRing::PrepareValidLocations(std::shared_ptr<std::vector<Locat
 Status ConsistentHashRing::SetupDistribution()
 {
 	LOG(INFO) << "SetupDistribution()...";
-	if (validlocations_)
+	if (valid_locations_)
 	{
-		for (unsigned int i = 0; i < validlocations_->size(); i++)
+		for (unsigned int i = 0; i < valid_locations_->size(); i++)
 		{
 			AddLocation(i);
 			LOG(INFO) << "Added location: #" << i;
@@ -97,13 +97,13 @@ Status ConsistentHashRing::SetupDistribution()
 
 void ConsistentHashRing::AddLocation(unsigned int locationid)
 {
-	int vnodecount = nodecacheMB_->at(locationid) / VIRT_NODE_DIVISOR;
+	int vnodecount = node_cache_capacity_->at(locationid) / VIRT_NODE_DIVISOR;
 	vnodecount = std::max(MIN_VIRT_NODE_NUM, vnodecount);
 	vnodecount = std::min(FLAGS_max_virtual_node_num, vnodecount);
 
 	for (int i = 0; i < vnodecount; i++)
 	{
-		std::string node = validlocations_->at(locationid).ToString() + "_" + std::to_string(i);
+		std::string node = valid_locations_->at(locationid).ToString() + "_" + std::to_string(i);
 		//LOG(INFO) << "consistent_hash_.insert(" << node << ");";
 		consistent_hash_.insert(node);
 	}
@@ -112,7 +112,7 @@ void ConsistentHashRing::AddLocation(unsigned int locationid)
 void ConsistentHashRing::AddLocation(Location location)
 {
 
-	int vnodecount = nodecacheMB_ / 1000;
+	int vnodecount = node_cache_capacity_ / 1000;
 	vnodecount = std::max(MIN_VIRT_NODE_NUM, vnodecount);
 	vnodecount = std::min(MAX_VIRT_NODE_NUM, vnodecount);
 	AddLocation(location, vnodecount);
@@ -142,8 +142,8 @@ Location ConsistentHashRing::GetLocation(Identity identity)
 	return lcn;
 }
 
-void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident,
-										  std::shared_ptr<std::vector<Location>> vectloc)
+void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>> identities,
+										  std::shared_ptr<std::vector<Location>> locations)
 {
 }
 
@@ -172,19 +172,18 @@ void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Partition>
 }
 
 #if 0
-void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>> vectident, \
-								std::shared_ptr<std::vector<Location>> vectloc)
+void ConsistentHashRing::GetDistLocations(std::shared_ptr<std::vector<Identity>> identities, \
+								std::shared_ptr<std::vector<Location>> locations)
 {
-//	std::vector<Location> vectloc;
 	const struct node_s* pnode;
-	for (auto ident:(*vectident))
+	for (auto ident:(*identities))
 	{
 		std::string idstr = ident.partition_id();
 		pnode = conhash_lookup(conhash, idstr.c_str());
 		// create the location object and fill with phynode's location (uri).
 		Location lcn;
 		lcn.Parse(pnode->iden, &lcn);  	//TODO: refactor Location::Parse()?
-		vectloc->push_back(lcn);
+		locations->push_back(lcn);
 	}
 }
 #endif
