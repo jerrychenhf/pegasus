@@ -25,14 +25,14 @@ set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/common")
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/config.h)
     
-add_library(Common
+add_library(common
   status.cc
   init.cc
   logging.cc
   version.cc
 )
-add_dependencies(Common gen-deps)
+add_dependencies(common gen-deps)
 
-target_link_libraries(Common
-                      Util
+target_link_libraries(common
+                      util
                       ${GLOG_STATIC_LIB})

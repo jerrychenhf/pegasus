@@ -105,16 +105,16 @@ include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 
 set (PEGASUS_LIBS
   pegasus_ipc
-  Cache
-  Catalog
-  Common
-  DataSet
-  Parquet
-  Runtime
-  Planner
-  Worker
-  Storage
-  Util
+  cache
+  catalog
+  common
+  dataset
+  parquet
+  runtime
+  planner
+  worker
+  storage
+  util
   gutil
 )
 

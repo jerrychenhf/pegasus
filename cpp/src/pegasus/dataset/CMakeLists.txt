@@ -22,7 +22,7 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/dataset")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/dataset")
 
-add_library(DataSet
+add_library(dataset
   filter.cc
   partition.cc
   identity.cc
@@ -39,13 +39,13 @@ add_library(DataSet
   dataset_cache_engine_manager.cc
   request_identity.cc
 )
-add_dependencies(DataSet gen-deps pegasus_grpc_gen)
+add_dependencies(dataset gen-deps pegasus_grpc_gen)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++0x")
 
 if(PEGASUS_TEST_LINKAGE STREQUAL "static")
   set(PEGASUS_DATASET_TEST_LINK_LIBS
-      DataSet
+      dataset
       ${PARQUET_SHARED_LIB}
       pegasus_rpc_shared
       ${ARROW_STATIC_LIB}
@@ -53,7 +53,7 @@ if(PEGASUS_TEST_LINKAGE STREQUAL "static")
       ${PEGASUS_TEST_STATIC_LINK_LIBS})
 else()
   set(PEGASUS_DATASET_TEST_LINK_LIBS
-      DataSet
+      dataset
       ${PARQUET_SHARED_LIB}
       pegasus_rpc_shared
       ${ARROW_SHARED_LIB}

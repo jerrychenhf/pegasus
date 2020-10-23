@@ -107,9 +107,9 @@ Status DataSetService::RefreshDataSet(DataSetRequest *dataset_request,
     auto distributor = std::make_shared<ConsistentHashRing>();
     distributor->PrepareValidLocations(nullptr, nullptr);
     distributor->SetupDistribution();
-    for (auto partition : pds->partitions())
+    for (auto p : pds->partitions())
     {
-      Partition partition = Partition(Identity(pds->dataset_path(), partition.GetIdentityPath()));
+      Partition partition = Partition(Identity(pds->dataset_path(), p.GetIdentityPath()));
       partitions->push_back(partition);
     }
     distributor->GetDistLocations(partitions);

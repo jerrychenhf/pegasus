@@ -22,17 +22,17 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/storage")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/storage")
 
-add_library(Storage
+add_library(storage
   hdfs_storage.cc
   storage_factory.cc
 )
-add_dependencies(Storage gen-deps)
+add_dependencies(storage gen-deps)
 
 set(PEGASUS_STORAGE_TEST_LINK_LIBS
-    Storage
-    Common
-    Util
-    Parquet)
+    storage
+    common
+    util
+    parquet)
 
 if(PEGASUS_TEST_LINKAGE STREQUAL "static")
   list(APPEND PEGASUS_STORAGE_TEST_LINK_LIBS

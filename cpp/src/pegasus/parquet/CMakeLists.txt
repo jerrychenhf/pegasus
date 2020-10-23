@@ -22,16 +22,16 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/parquet")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/parquet")
 
-add_library(Parquet
+add_library(parquet
   parquet_reader.cc
   parquet_raw_data_reader.cc
 )
-add_dependencies(Parquet gen-deps)
+add_dependencies(parquet gen-deps)
 
 set(PEGASUS_PARQUET_TEST_LINK_LIBS
-    Common
-    Util
-    Parquet)
+    common
+    util
+    parquet)
 
 if(PEGASUS_TEST_LINKAGE STREQUAL "static")
   list(APPEND PEGASUS_PARQUET_TEST_LINK_LIBS
