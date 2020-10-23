@@ -41,18 +41,15 @@ public:
 
   Status BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flight_info,
                          std::shared_ptr<arrow::Schema> schema, std::vector<int32_t>& indices, rpc::FlightDescriptor& fldtr);
-
   Status BuildFlightListing(std::unique_ptr<rpc::FlightListing>* listings);
 
   Status GetFlightDescriptor(std::unique_ptr<rpc::FlightDescriptor> flight_descriptor);
-
   Status GetFlightEndpoints(std::unique_ptr<std::vector<rpc::FlightEndpoint>>* endpoints,
       std::shared_ptr<arrow::Schema> schema,
       std::vector<int32_t>& indices);
 
   int64_t GetTotalRecords();
   int64_t GetTotalBytes();
-
 private:
   std::shared_ptr<ResultDataSet> dataset_;
   std::shared_ptr<std::vector<std::shared_ptr<ResultDataSet>>> datasets_;

@@ -32,20 +32,14 @@ class DataSetBuilder {
 
   Status BuildDataset(DataSetRequest* dataset_request, std::shared_ptr<DataSet>* dataset,
                       int distpolicy);
-
   Status BuildDatasetPartitions(std::string table_location, std::shared_ptr<Storage> storage, 
                                 std::shared_ptr<std::vector<Partition>> partitions, int distpolicy);
 
   Status GetSchma(std::shared_ptr<std::string>* schema);
-
   Status GetDataSetPath(std::shared_ptr<std::string>* path);
-
   Status GetPartitions(std::shared_ptr<std::vector<Partition>>* partitions);
-
   Status GetTotalRecords(int64_t* total_records);
-    
   Status GetTotalBytes(int64_t* total_bytes);
-
  private:
   std::shared_ptr<CatalogManager> catalog_manager_;
   std::shared_ptr<StorageFactory> storage_factory_;
