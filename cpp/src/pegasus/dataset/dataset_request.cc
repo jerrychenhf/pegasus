@@ -24,18 +24,17 @@ namespace pegasus {
   const std::string DataSetRequest::COLUMN_NAMES = "column.names";
 
   DataSetRequest::DataSetRequest() {
-
-
   }
+
   DataSetRequest::~DataSetRequest() {
-
   }
-    
+
   void DataSetRequest::set_dataset_path(const std::string& dataset_path) {
     dataset_path_ = dataset_path;
   }
 
-  void DataSetRequest::set_properties(const DataSetRequest::RequestProperties& properties) {
+  void DataSetRequest::set_properties(
+    const DataSetRequest::RequestProperties& properties) {
     properties_ = properties;
   }
 

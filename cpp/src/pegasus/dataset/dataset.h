@@ -32,12 +32,10 @@ class rwlock
 public:
     rwlock() 
         : readCount(0), 
-          writeCount(0) 
-    {
+          writeCount(0)  {
     }
 
-    void lockread()
-    {   
+    void lockread() {   
         internal.lock();
         if (readCount == 0)
         {   
@@ -49,16 +47,14 @@ public:
         internal.unlock();
     }
     
-    void lockwrite()
-    {   
+    void lockwrite() {   
         content.lock();
         ++writeCount;
         assert(writeCount == 1);
         assert(readCount == 0);
     }
 
-    void unlockread()
-    {   
+    void unlockread() {   
         internal.lock();
         --readCount;
         assert(readCount >= 0);
@@ -70,14 +66,12 @@ public:
         internal.unlock();
     }
 
-    void unlockwrite()
-    {   
+    void unlockwrite() {   
         --writeCount;
         assert(writeCount == 0);
         assert(readCount == 0);
         content.unlock();
     }
-
 private:
     boost::mutex content;
     boost::mutex internal;
@@ -87,8 +81,6 @@ private:
 
 #define  DSRF_FILES_APPEND ((uint64_t)1)
 #define  DSRF_WORKERSET_CHG ((uint64_t)2)
-//#define  DSRF_XXX (4)
-//#define  DSRF_XXX (8)
 
 /// \brief The access coordinates for retireval of a dataset
 class PEGASUS_EXPORT DataSet {

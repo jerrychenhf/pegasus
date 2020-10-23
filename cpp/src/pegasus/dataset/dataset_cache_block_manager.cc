@@ -16,9 +16,9 @@
 // under the License.
 
 #include "dataset/dataset_cache_block_manager.h"
+
 #include <boost/thread/lock_guard.hpp>
 #include "common/logging.h"
-
 #include "cache/cache_engine.h"
 
 using namespace pegasus;
@@ -66,8 +66,7 @@ Status DatasetCacheBlockManager::Init() {
 }
 
 Status DatasetCacheBlockManager::GetCachedDataSet(const std::string dataset_path,
- std::shared_ptr<CachedDataset>* dataset) {
- 
+  std::shared_ptr<CachedDataset>* dataset) {
   {
     boost::lock_guard<boost::mutex> l(cached_datasets_lock_);
     auto entry = cached_datasets_.find(dataset_path);
@@ -93,10 +92,9 @@ Status DatasetCacheBlockManager::GetCachedDataSet(const std::string dataset_path
 
 
 Status CachedDataset::GetCachedPartition(
- const std::string partition_path,
-   std::shared_ptr<CachedPartition>* partition) {
-
-   {
+  const std::string partition_path,
+  std::shared_ptr<CachedPartition>* partition) {
+    {
     boost::lock_guard<boost::mutex> l(cached_partitions_lock_);
     auto entry = cached_partitions_.find(partition_path);
   
@@ -197,7 +195,6 @@ Status CachedDataset::DeletePartition(const std::string partition_path,
 }
 
 Status CachedPartition::DeleteEntry(std::shared_ptr<CacheEngine> cache_engine) {
-
   {
     boost::lock_guard<boost::mutex> l(cached_columns_lock_); 
     for (auto iter = cached_columns_.begin(); iter != cached_columns_.end(); iter ++) {

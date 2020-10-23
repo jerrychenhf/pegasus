@@ -21,7 +21,6 @@
 #include "common/status.h"
 #include "cache/cache_engine.h"
 
-
 using namespace std;
 
 namespace pegasus {
@@ -31,7 +30,8 @@ class DatasetCacheEngineManager {
   ~DatasetCacheEngineManager();
 
   Status Init();
-  Status GetCacheEngine(CacheEngine::CachePolicy cache_policy, std::shared_ptr<CacheEngine>* cache_engine);
+  Status GetCacheEngine(CacheEngine::CachePolicy cache_policy,
+    std::shared_ptr<CacheEngine>* cache_engine);
 
   private:
    std::unordered_map<std::string, std::shared_ptr<CacheEngine>> cached_engines_;

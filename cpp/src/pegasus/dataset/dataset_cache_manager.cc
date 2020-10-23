@@ -17,7 +17,9 @@
 
 #include <memory>
 #include <unordered_map>
-
+#include <boost/thread/mutex.hpp>
+#include <boost/shared_ptr.hpp>
+#include "arrow/buffer.h"
 #include "dataset/dataset_cache_manager.h"
 #include "runtime/worker_exec_env.h"
 #include "parquet/parquet_reader.h"
@@ -26,13 +28,9 @@
 #include "cache/lru_cache.h"
 #include "rpc/file_batch_reader.h"
 #include "ipc/malloc.h"
-#include <boost/thread/mutex.hpp>
 #include "rpc/types.h"
-#include "arrow/buffer.h"
-#include <boost/shared_ptr.hpp>
 
 DEFINE_int64(chunk_size, 2048, "The maximum chunk size of record batches");
-
 DECLARE_bool(cache_format_arrow);
 
 namespace pegasus {
@@ -69,14 +67,15 @@ Status DatasetCacheManager::Init() {
   return Status::OK();
 }
 
-CacheEngine::CachePolicy DatasetCacheManager::GetCachePolicy(RequestIdentity* request_identity) {
+CacheEngine::CachePolicy DatasetCacheManager::GetCachePolicy(
+  RequestIdentity* request_identity) {
   // TODO Choose the CachePolicy based on the data type in Identity
   return CacheEngine::CachePolicy::LRU;
 }
 
-Status DatasetCacheManager::GetPartition(RequestIdentity* request_identity,
- std::shared_ptr<CachedPartition>* new_partition) {
-    
+Status DatasetCacheManager::GetPartition(
+  RequestIdentity* request_identity,
+  std::shared_ptr<CachedPartition>* new_partition) {
     std::shared_ptr<CachedDataset> dataset;
     RETURN_IF_ERROR(cache_block_manager_->GetCachedDataSet(
       request_identity->dataset_path(), &dataset));
@@ -86,8 +85,9 @@ Status DatasetCacheManager::GetPartition(RequestIdentity* request_identity,
     return Status::OK();
 }
 
-Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
- unordered_map<int, std::shared_ptr<CachedColumn>> request_columns,
+Status DatasetCacheManager::WrapDatasetStream(
+  RequestIdentity* request_identity,
+  unordered_map<int, std::shared_ptr<CachedColumn>> request_columns,
   std::unique_ptr<rpc::FlightDataStream>* data_stream) {
   LOG(WARNING) << "Wrap the dataset into flight data stream";
 
@@ -115,14 +115,16 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
     // arrow data format
     std::shared_ptr<arrow::Table> table = arrow::Table::Make(schema, chunked_arrays);
   
-    std::shared_ptr<arrow::TableBatchReader> reader = std::make_shared<arrow::TableBatchReader>(*table);
+    std::shared_ptr<arrow::TableBatchReader> reader =
+      std::make_shared<arrow::TableBatchReader>(*table);
     reader->set_chunksize(FLAGS_chunk_size);
     *data_stream = std::unique_ptr<rpc::FlightDataStream>(
       new rpc::TableRecordBatchStream(reader, columns, table));
  } else {
    // file data format
    //TO DO: passed the cached column data to the reader
-   std::shared_ptr<rpc::CachedFileBatchReader> reader = std::make_shared<rpc::CachedFileBatchReader>(columns, schema);
+   std::shared_ptr<rpc::CachedFileBatchReader> reader =
+    std::make_shared<rpc::CachedFileBatchReader>(columns, schema);
    *data_stream = std::unique_ptr<rpc::FlightDataStream>(
       new rpc::FileBatchStream(reader, columns));
  }
@@ -130,7 +132,8 @@ Status DatasetCacheManager::WrapDatasetStream(RequestIdentity* request_identity,
  return Status::OK();
 }
 
-Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(RequestIdentity* request_identity,
+Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(
+  RequestIdentity* request_identity,
   std::vector<int> col_ids,
   unordered_map<int, std::shared_ptr<CachedColumn>> cached_columns,
   std::shared_ptr<CacheEngine> cache_engine,
@@ -152,7 +155,8 @@ Status DatasetCacheManager::GetDatasetStreamWithMissedColumns(RequestIdentity* r
     }
 }
 
-Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
+Status DatasetCacheManager::RetrieveColumns(
+  RequestIdentity* request_identity,
   const std::vector<int>& col_ids,
   std::shared_ptr<CacheEngine> cache_engine,
   unordered_map<int, std::shared_ptr<CachedColumn>>& retrieved_columns) {
@@ -218,7 +222,8 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
           RETURN_IF_ERROR(parquet_raw_reader->GetRowGroupReader(i, &row_group_reader));
           row_counts_per_rowgroup = row_group_reader->metadata()->num_rows();
 
-          std::shared_ptr<BufferEntry> buffer_entry = std::shared_ptr<BufferEntry>(new BufferEntry(buffer, row_counts_per_rowgroup));
+          std::shared_ptr<BufferEntry> buffer_entry =
+            std::shared_ptr<BufferEntry>(new BufferEntry(buffer, row_counts_per_rowgroup));
           object_buffers[i] = std::move(buffer_entry);
           
           int fd = -1;
@@ -232,7 +237,6 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
            offset, map_size, row_counts_per_rowgroup, buffer->size()));
            
           object_entries[i] = std::move(entry);
-          
         }
       }
 
@@ -263,7 +267,6 @@ Status DatasetCacheManager::RetrieveColumns(RequestIdentity* request_identity,
       }
     }
     LOG(INFO) << "the cached size is " << cache_metrics_.cached_size;
-    
     return Status::OK();
 }
 
@@ -280,8 +283,8 @@ std::vector<int> DatasetCacheManager::GetMissedColumnsIds(std::vector<int> col_i
     return missed_col_ids;
 }
 
-Status DatasetCacheManager::DropCachedDataset(std::vector<rpc::PartitionDropList> drop_lists) {
-  
+Status DatasetCacheManager::DropCachedDataset(
+  std::vector<rpc::PartitionDropList> drop_lists) {
   for (auto iter = drop_lists.begin(); iter != drop_lists.end(); iter ++) {
      std::string dataset_path = iter->get_dataset_path();
      std::vector<std::string> partitions = iter->get_partitions();
@@ -292,7 +295,6 @@ Status DatasetCacheManager::DropCachedDataset(std::vector<rpc::PartitionDropList
 
        // Get the cache store and delete the columns cached in lru cache when delete the partition
        std::shared_ptr<CacheEngine> cache_engine;
-       // CacheEngine::CachePolicy cache_policy = GetCachePolicy(request_identity);
        CacheEngine::CachePolicy cache_policy = CacheEngine::CachePolicy::LRU; // TODO get the cache policy based on the data set type.
        RETURN_IF_ERROR(cache_engine_manager_->GetCacheEngine(cache_policy, &cache_engine));
        cached_dataset->DeletePartition(partition_path, cache_engine);
@@ -308,8 +310,9 @@ Status DatasetCacheManager::DropCachedDataset(std::vector<rpc::PartitionDropList
 // If not, get dataset from hdfs and then put the dataset into CacheEngine.
 //         1. Choose the CachePolicy based on the Identity.
 //         2. Call DatasetCacheEngineManager#GetCacheEngine method to get CacheEngine;
-Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
- std::unique_ptr<rpc::FlightDataStream>* data_stream) {
+Status DatasetCacheManager::GetDatasetStream(
+  RequestIdentity* request_identity,
+  std::unique_ptr<rpc::FlightDataStream>* data_stream) {
   // Get cache engine.
   std::shared_ptr<CacheEngine> cache_engine;
   CacheEngine::CachePolicy cache_policy = GetCachePolicy(request_identity);
@@ -371,7 +374,8 @@ Status DatasetCacheManager::GetDatasetStream(RequestIdentity* request_identity,
   }
 }
 
-Status DatasetCacheManager::GetLocalData(RequestIdentity* request_identity, std::unique_ptr<rpc::LocalPartitionInfo>* result) {
+Status DatasetCacheManager::GetLocalData(
+  RequestIdentity* request_identity, std::unique_ptr<rpc::LocalPartitionInfo>* result) {
   // get the missed columns from hdfs and put the columns into cache and block manager.
   //  Then all the request columns are cached.
   GetDatasetStream(request_identity, nullptr);
@@ -460,8 +464,8 @@ Status DatasetCacheManager::GetLocalData(RequestIdentity* request_identity, std:
   return Status::OK();
 }
 
-Status DatasetCacheManager::ReleaseLocalData(RequestIdentity* request_identity, std::unique_ptr<rpc::LocalReleaseResult>* result) {
-
+Status DatasetCacheManager::ReleaseLocalData(
+  RequestIdentity* request_identity, std::unique_ptr<rpc::LocalReleaseResult>* result) {
    // get the columns and release the columns in in_used_columns_.
   std::shared_ptr<CachedDataset> dataset;
   cache_block_manager_->GetCachedDataSet(request_identity->dataset_path(), &dataset);
@@ -500,7 +504,7 @@ Status DatasetCacheManager::ReleaseLocalData(RequestIdentity* request_identity, 
         // directly delete the last value in in_used_columns_.
         in_use_entry->second.pop_back();
       }
-   }
+    }
   }
 
   rpc::LocalReleaseResult* result_tmp = new rpc::LocalReleaseResult();

@@ -126,7 +126,8 @@ class DatasetCacheBlockManager {
   
   Status Init();
   
-  Status GetCachedDataSet(const std::string dataset_path, std::shared_ptr<CachedDataset>* dataset);
+  Status GetCachedDataSet(const std::string dataset_path,
+    std::shared_ptr<CachedDataset>* dataset);
 
   Status DeleteDataset(const std::string dataset_path);
 

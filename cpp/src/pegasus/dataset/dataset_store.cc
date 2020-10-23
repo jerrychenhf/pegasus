@@ -30,7 +30,6 @@ DataSetStore::~DataSetStore()
 
 Status DataSetStore::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> *datasets)
 {
-
   boost::lock_guard<SpinLock> l(wholestore_lock_);
   datasets->get()->reserve(dataset_map_.size());
   for (auto entry : dataset_map_)
@@ -43,7 +42,6 @@ Status DataSetStore::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<Dat
 
 Status DataSetStore::GetDataSet(std::string dataset_path, std::shared_ptr<DataSet> *dataset)
 {
-
   LOG(INFO) << "GetDataSet()...";
   boost::lock_guard<SpinLock> l(wholestore_lock_);
   auto entry = dataset_map_.find(dataset_path);
@@ -62,7 +60,6 @@ Status DataSetStore::GetDataSet(std::string dataset_path, std::shared_ptr<DataSe
 
 Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset)
 {
-
   std::string key = dataset->dataset_path();
   boost::lock_guard<SpinLock> l(wholestore_lock_);
   dataset_map_[key] = std::move(dataset);
@@ -71,7 +68,6 @@ Status DataSetStore::InsertDataSet(std::shared_ptr<DataSet> dataset)
 
 Status DataSetStore::InvalidateAll()
 {
-
   boost::lock_guard<SpinLock> l(wholestore_lock_);
   for (auto i : dataset_map_)
   {
@@ -87,7 +83,6 @@ Status DataSetStore::UpdateDataSet(std::shared_ptr<DataSet> dataset)
 
 Status DataSetStore::RemoveDataSet(std::shared_ptr<DataSet> dataset)
 {
-
   std::string key = dataset->dataset_path();
   boost::lock_guard<SpinLock> l(wholestore_lock_);
   dataset_map_.erase(key);
