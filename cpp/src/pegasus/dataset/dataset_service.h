@@ -45,7 +45,7 @@ class FlightListing;
 
 } // namespace rpc
 
-class DataSetService : IWorkerManagerObserver
+class DataSetService : WorkerManagerObserver
 {
 public:
   DataSetService();

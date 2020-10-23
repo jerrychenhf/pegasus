@@ -44,7 +44,7 @@ class WorkerFailureDetector;
 /// provided by the subscriber at registration time.
 typedef std::string WorkerId;
 
-class IWorkerManagerObserver {
+class WorkerManagerObserver {
  public:
   virtual void ObserverUpdate(int wmevent) = 0;
 };  //WMObserver
@@ -58,27 +58,27 @@ public:
   Status InsertPartition(Partition& part) {
 
     // TODO: concurrent access control
-    auto it = partstodrop_.begin();
-    for (; it != partstodrop_.end(); it++) {
+    auto it = drop_list_.begin();
+    for (; it != drop_list_.end(); it++) {
       if (it->datasetpath == part.GetDataSetPath()) {
         it->partitions.push_back(part.GetIdentPath());
         return Status::OK();
       }
     }
-    if (it == partstodrop_.end()) {
+    if (it == drop_list_.end()) {
       rpc::PartitionDropList pdod;
       pdod.datasetpath = part.GetDataSetPath();
       pdod.partitions.push_back(part.GetIdentPath());
-      partstodrop_.push_back(pdod);
+      drop_list_.push_back(pdod);
     }
 
     return Status::OK();
   }
 
-  std::vector<rpc::PartitionDropList>& GetPartstodrop() { return partstodrop_; }
+  std::vector<rpc::PartitionDropList>& GetDropList() { return drop_list_; }
 
 private:
-  std::vector<rpc::PartitionDropList> partstodrop_;
+  std::vector<rpc::PartitionDropList> drop_list_;
 };
 
 class WorkerRegistration {
@@ -130,12 +130,12 @@ class WorkerManager {
   // Notified by failure detector that the worker failed
   Status OnWorkerFailed(const WorkerId& id);
 
-  void RegisterObserver(IWorkerManagerObserver *obs) { vobservers_.push_back(obs); }
-  void UnregisterObserver(IWorkerManagerObserver *obs) {
-    vobservers_.erase(std::remove(vobservers_.begin(), vobservers_.end(), obs), vobservers_.end());
+  void RegisterObserver(WorkerManagerObserver *obs) { worker_observers_.push_back(obs); }
+  void UnregisterObserver(WorkerManagerObserver *obs) {
+    worker_observers_.erase(std::remove(worker_observers_.begin(), worker_observers_.end(), obs), worker_observers_.end());
   }
   void NotifyObservers(int wmevent) {
-    for (auto ob : vobservers_)
+    for (auto ob : worker_observers_)
       ob->ObserverUpdate(wmevent);
   }
 
@@ -160,12 +160,12 @@ class WorkerManager {
 
   boost::scoped_ptr<WorkerFailureDetector> worker_failure_detector_;
 
-  std::vector<IWorkerManagerObserver *> vobservers_;
+  std::vector<WorkerManagerObserver *> worker_observers_;
 
   typedef boost::unordered_map<WorkerId, std::shared_ptr<WorkerCacheDropList>>
                  WorkerCacheDropListMap;
-  WorkerCacheDropListMap mapwkcachedroplist_;
-  boost::mutex mapcachedrop_lock_;
+  WorkerCacheDropListMap worker_cache_drop_map_;
+  boost::mutex worker_cache_drop_lock_;
 };
 
 } // namespace pegasus
