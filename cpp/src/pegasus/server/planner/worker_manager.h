@@ -20,7 +20,6 @@
 
 #include <atomic>
 #include <vector>
-
 #include <boost/thread/mutex.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/unordered_map.hpp>
@@ -47,10 +46,8 @@ typedef std::string WorkerId;
 class WorkerManagerObserver {
  public:
   virtual void ObserverUpdate(int wmevent) = 0;
-};  //WMObserver
+};  
 
-// <datasetpath_string, partitionidstring_vector>
-//typedef std::vector<std::string, std::vector<std::string>> PartitionsDropMap;
 class WorkerCacheDropList {
 public:
   WorkerCacheDropList() {}
@@ -139,9 +136,9 @@ class WorkerManager {
       ob->ObserverUpdate(wmevent);
   }
 
-  Status UpdateCacheDropLists(std::shared_ptr<std::vector<Partition>> partits);
+  Status UpdateCacheDropLists(std::shared_ptr<std::vector<Partition>> partitions);
   bool NeedtoDropCache(const WorkerId& id);
-  Status GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList>& sppartlist);
+  Status GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList>& droplist);
 
  private:
   std::shared_ptr<std::vector<std::shared_ptr<Location>>> locations;

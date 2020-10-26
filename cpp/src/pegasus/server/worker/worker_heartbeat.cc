@@ -18,19 +18,18 @@
 #include "server/worker/worker_heartbeat.h"
 
 #include <string>
+#include <boost/thread/lock_guard.hpp>
+#include "common/logging.h"
 #include "gutil/strings/substitute.h"
 #include "util/global_flags.h"
 #include "util/time.h"
-#include "common/logging.h"
 #include "util/thread-pool.h"
-#include "runtime/client_cache.h"
 #include "rpc/client.h"
 #include "rpc/types.h"
-#include <boost/thread/lock_guard.hpp>
 #include "runtime/worker_exec_env.h"
+#include "runtime/client_cache.h"
 #include "cache/store_manager.h"
 #include "dataset/dataset_cache_manager.h"
-
 
 using namespace boost;
 

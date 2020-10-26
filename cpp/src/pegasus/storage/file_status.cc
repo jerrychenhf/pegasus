@@ -35,4 +35,4 @@ namespace pegasus
       return size_in_bytes_;
   }
 
-  } // namespace pegasus
+} // namespace pegasus

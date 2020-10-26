@@ -16,8 +16,8 @@
 // under the License.
 
 #include "server/planner/worker_manager.h"
-#include "util/time.h"
 #include <boost/thread/lock_guard.hpp>
+#include "util/time.h"
 #include "gutil/strings/substitute.h"
 #include "server/planner/worker_failure_detector.h"
 
@@ -81,9 +81,9 @@ Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info,
     {
       LOG(INFO) << "Yes, " << info.hostname << " has data cache to drop. Building rpc cmd...";
       hbrc->hbrc_action = rpc::HeartbeatResultCmd::DROPCACHE;
-      auto sppartlist = std::make_shared<WorkerCacheDropList>();
-      RETURN_IF_ERROR(GetCacheDropList(info.hostname, sppartlist));
-      hbrc->hbrc_parameters = sppartlist->GetDropList();
+      auto droplist = std::make_shared<WorkerCacheDropList>();
+      RETURN_IF_ERROR(GetCacheDropList(info.hostname, droplist));
+      hbrc->hbrc_parameters = droplist->GetDropList();
       r->result_hascmd = true;
       r->result_command = std::move(*hbrc);
     } else {
@@ -204,13 +204,13 @@ Status WorkerManager::OnWorkerFailed(const WorkerId& id) {
   return Status::OK();
 }
 
-Status WorkerManager::UpdateCacheDropLists(std::shared_ptr<std::vector<Partition>> partits) {
+Status WorkerManager::UpdateCacheDropLists(std::shared_ptr<std::vector<Partition>> partitions) {
 
   // concurrent control
   lock_guard<mutex> l(worker_cache_drop_lock_);
 
   // for each partition, add it to corresponding worker-cachedroplist
-  for (auto part : (*partits))
+  for (auto part : (*partitions))
   {
     // get workerid (location hostname)
     WorkerId wkid = part.GetLocationHostname();
@@ -244,7 +244,7 @@ bool WorkerManager::NeedtoDropCache(const WorkerId& id) {
     return false;
 }
 
-Status WorkerManager::GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList>& sppartlist) {
+Status WorkerManager::GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList>& droplist) {
 
   // concurrent control
   lock_guard<mutex> l(worker_cache_drop_lock_);
@@ -253,7 +253,7 @@ Status WorkerManager::GetCacheDropList(const WorkerId& id, std::shared_ptr<Worke
   if (it != worker_cache_drop_map_.end())
   {
     LOG(INFO) << "Fetching " << id << " from worker_cache_drop_map_...";
-    sppartlist = std::move(worker_cache_drop_map_[id]);
+    droplist = std::move(worker_cache_drop_map_[id]);
     worker_cache_drop_map_.erase(it);
     LOG(INFO) << "Fetched.";
   }

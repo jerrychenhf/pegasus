@@ -18,11 +18,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <gtest/gtest.h>
 
 #include "arrow/io/hdfs.h"
 #include "arrow/util/uri.h"
-#include <gtest/gtest.h>
-
 #include "test/gtest-util.h"
 #include "storage/storage.h"
 #include "storage/storage_factory.h"

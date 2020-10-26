@@ -22,14 +22,12 @@
 #include <list>
 #include <string>
 #include <unordered_map>
-// #include <boost/unordered_map.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 
 #include "util/network-util.h"
 #include "util/time.h"
-
 #include "common/status.h"
 #include "runtime/client-cache-types.h"
 

@@ -22,9 +22,7 @@
 #include "dataset/request_identity.h"
 
 namespace arrow {
-
 class Status;
-
 }  // namespace arrow
 
 namespace pegasus {
@@ -38,7 +36,6 @@ class FlightMetadataWriter;
 class FlightDataStream;
 
 struct Ticket;
-
 }  //namespace rpc
 
 class DatasetCacheManager;

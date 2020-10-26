@@ -23,7 +23,6 @@
 #include "util/time.h"
 #include "common/logging.h"
 
-
 using namespace boost;
 
 DECLARE_string(ipc_socket_name);
