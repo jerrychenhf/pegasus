@@ -24,7 +24,7 @@ source $WORK_DIR/set_project_home.sh
 $PEGASUS_HOME/dev/check_cmake.sh
 
 if [ -z "${THIRD_PARTY_DIR}" ]; then
-  export THIRD_PARTY_DIR=$PEGASUS_HOME/../thirdparty
+  export THIRD_PARTY_DIR=$PEGASUS_HOME/dev/thirdparty
   echo "Set THIRD_PARTY_DIR to $THIRD_PARTY_DIR"
 fi
 
