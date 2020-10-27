@@ -15,9 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
 
 if [ -z "${PEGASUS_HOME}" ]; then
-  export PEGASUS_HOME="$(cd "`dirname "$0"`"/..; pwd)"
+  export PEGASUS_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. >/dev/null 2>&1 && pwd )"
   echo "Setup PEGASUS_HOME to $PEGASUS_HOME"
 fi

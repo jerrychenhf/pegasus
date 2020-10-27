@@ -17,7 +17,7 @@
 #
 WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
 
-source $WORK_DIR/setup_project_home.sh
+source $WORK_DIR/set_project_home.sh
 
 #set -eu
 
@@ -45,6 +45,3 @@ fi
 echo "Downloading Pegasus dependencies..."
 sh $PEGASUS_HOME/cpp/thirdparty/download_dependencies.sh $PEGASUS_THIRD_PARTY_DIR > $PEGASUS_HOME/cpp/pegasus_env.conf
 echo "Finished downloading Pegasus dependencies."
-
-source $PEGASUS_HOME/cpp/pegasus_env.conf 
-source $PEGASUS_HOME/cpp/arrow_env.conf

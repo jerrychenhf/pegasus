@@ -18,7 +18,7 @@
 WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
 CURRENT_DIR=$(pwd)
 
-source $WORK_DIR/setup_project_home.sh
+source $WORK_DIR/set_project_home.sh
 
 #set -eu
 

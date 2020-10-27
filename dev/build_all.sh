@@ -17,7 +17,7 @@
 #
 WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
 
-source $WORK_DIR/setup_project_home.sh
+source $WORK_DIR/set_project_home.sh
 
 # build arrow and install
 sh $PEGASUS_HOME/dev/build_arrow.sh

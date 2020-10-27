@@ -17,7 +17,7 @@
 #
 WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
 
-source $WORK_DIR/setup_project_home.sh
+source $WORK_DIR/set_project_home.sh
 
 ACTION=build
 
@@ -35,7 +35,8 @@ case $key in
 esac
 done
 
-source $PEGASUS_HOME/dev/install_dependencies_offline.sh
+$PEGASUS_HOME/dev/install_dependencies_offline.sh
+source $PEGASUS_HOME/dev/set_dependancy_urls.sh
 
 case "$ACTION" in
   rebuild)
@@ -50,5 +51,5 @@ if [ ! -d "$PEGASUS_HOME/cpp/build" ]; then
 fi
 
 cd  $PEGASUS_HOME/cpp/build
-cmake -DPEGASUS_USE_GLOG=ON -DPEGASUS_BUILD_TESTS=ON ..
+cmake -DPEGASUS_USE_GLOG=ON -DPEGASUS_BUILD_TESTS=ON -DPEGASUS_DEPENDENCY_SOURCE=AUTO ..
 make

@@ -18,11 +18,12 @@
 WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
 CURRENT_DIR=$(pwd)
 
-source $WORK_DIR/setup_project_home.sh
+source $WORK_DIR/set_project_home.sh
 
 #set -eu
 
-source $PEGASUS_HOME/dev/install_dependencies_offline.sh
+$PEGASUS_HOME/dev/install_dependencies_offline.sh
+source $PEGASUS_HOME/dev/set_dependancy_urls.sh
 
 # install ARROW
 function build_arrow_from_source(){
@@ -35,7 +36,7 @@ function build_arrow_from_source(){
        fi
       cd build-arrow
       yum install openssl-devel flex bison -y
-      cmake -DARROW_FLIGHT=ON -DARROW_PARQUET=ON -DARROW_HDFS=ON -DARROW_WITH_SNAPPY=ON -DARROW_BUILD_TESTS=ON ..
+      cmake -DARROW_FLIGHT=ON -DARROW_PARQUET=ON -DARROW_HDFS=ON -DARROW_WITH_SNAPPY=ON -DARROW_BUILD_TESTS=ON -DARROW_DEPENDENCY_SOURCE=AUTO ..
       make
       make install
       cp -r $(pwd)/src/arrow/filesystem /usr/local/include/arrow/
