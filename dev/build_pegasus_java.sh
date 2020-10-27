@@ -16,37 +16,11 @@
 # limitations under the License.
 #
 WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
-CURRENT_DIR=$(pwd)
 
 source $WORK_DIR/set_project_home.sh
 
-#set -eu
-
-# complile spark from source
-function build_spark_from_source(){
-      if [ ! -d "./spark" ]; then
-        git clone https://github.com/Intel-bigdata/spark.git -b branch-3.0-pegasus
-      fi
-      cd spark
-      mvn -DskipTests clean install
-      cd $CURRENT_DIR
-}
-
-REBUILD=false
-
-while [[ $# -gt 0 ]]
-do
-key="$1"
-case $key in
-    --rebuild)
-    shift 1 # past argument
-    REBUILD=true
-    ;;
-    *)    # completed this shell arugemnts procesing
-    break
-    ;;
-esac
-done
-
 source $PEGASUS_HOME/dev/check_maven.sh
-build_spark_from_source
+
+cd $PEGASUS_HOME/java
+mvn clean package -DskipTests
+

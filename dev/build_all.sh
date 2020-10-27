@@ -29,5 +29,4 @@ sh $PEGASUS_HOME/dev/build_spark.sh
 sh $PEGASUS_HOME/dev/build_offline.sh
 
 # build pegasus java for Spark
-cd $PEGASUS_HOME/java
-mvn clean package -DskipTests
+sh $PEGASUS_HOME/dev/build_pegasus_java.sh

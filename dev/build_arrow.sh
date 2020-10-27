@@ -63,10 +63,7 @@ case $key in
 esac
 done
 
-if [ "$REBUILD" = true ] ; then
-    build_arrow_from_source
-else
-     if [ ! -d "./arrow" ]; then
-        build_arrow_from_source
-     fi
-fi
+source $PEGASUS_HOME/dev/check_maven.sh
+
+build_arrow_from_source
+ 
