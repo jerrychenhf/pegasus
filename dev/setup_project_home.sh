@@ -19,4 +19,5 @@ WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
 
 if [ -z "${PEGASUS_HOME}" ]; then
   export PEGASUS_HOME="$(cd "`dirname "$0"`"/..; pwd)"
+  echo "Setup PEGASUS_HOME to $PEGASUS_HOME"
 fi

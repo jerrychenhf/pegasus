@@ -23,19 +23,28 @@ source $WORK_DIR/setup_project_home.sh
 
 $PEGASUS_HOME/dev/check_cmake.sh
 
-ARROW_THIRD_PARTY_DIR=$PEGASUS_HOME/../thirdparty/arrow-thirdparty
+if [ -z "${THIRD_PARTY_DIR}" ]; then
+  export THIRD_PARTY_DIR=$PEGASUS_HOME/../thirdparty
+  echo "Set THIRD_PARTY_DIR to $THIRD_PARTY_DIR"
+fi
+
+ARROW_THIRD_PARTY_DIR=$THIRD_PARTY_DIR/arrow-thirdparty
 if [ ! -d "$ARROW_THIRD_PARTY_DIR" ]; then
   mkdir -p $ARROW_THIRD_PARTY_DIR
 fi
 
+echo "Downloading Arrow dependencies..."
 sh $PEGASUS_HOME/cpp/thirdparty/download_arrow_dependencies.sh $ARROW_THIRD_PARTY_DIR > $PEGASUS_HOME/cpp/arrow_env.conf
+echo "Finished downloading Arrow dependencies."
 
-PEGASUS_THIRD_PARTY_DIR=$PEGASUS_HOME/../thirdparty/pegasus-thirdparty
+PEGASUS_THIRD_PARTY_DIR=$THIRD_PARTY_DIR/pegasus-thirdparty
 if [ ! -d "$PEGASUS_THIRD_PARTY_DIR" ]; then
   mkdir -p $PEGASUS_THIRD_PARTY_DIR
 fi
 
+echo "Downloading Pegasus dependencies..."
 sh $PEGASUS_HOME/cpp/thirdparty/download_dependencies.sh $PEGASUS_THIRD_PARTY_DIR > $PEGASUS_HOME/cpp/pegasus_env.conf
+echo "Finished downloading Pegasus dependencies."
 
 source $PEGASUS_HOME/cpp/pegasus_env.conf 
 source $PEGASUS_HOME/cpp/arrow_env.conf
