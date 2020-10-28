@@ -21,7 +21,8 @@ CURRENT_DIR=$(pwd)
 #set -eu
 
 # check cmake version
-TARGET_CMAKE_VERSION=3.7.1
+CMAKE_TARGET_VERSION=3.7.1
+CMAKE_MIN_VERSION=3.7
 TARGET_CMAKE_SOURCE_URL=https://cmake.org/files/v3.7/cmake-3.7.1.tar.gz
 
 function version_lt() { test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" != "$1"; }
