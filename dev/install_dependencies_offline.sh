@@ -34,7 +34,7 @@ if [ ! -d "$ARROW_THIRD_PARTY_DIR" ]; then
 fi
 
 echo "Downloading Arrow dependencies..."
-sh $PEGASUS_HOME/cpp/thirdparty/download_arrow_dependencies.sh $ARROW_THIRD_PARTY_DIR > $PEGASUS_HOME/cpp/arrow_env.conf
+sh $PEGASUS_HOME/cpp/thirdparty/download_arrow_dependencies.sh $ARROW_THIRD_PARTY_DIR > $PEGASUS_HOME/dev/arrow_env.conf
 echo "Finished downloading Arrow dependencies."
 
 PEGASUS_THIRD_PARTY_DIR=$THIRD_PARTY_DIR/pegasus-thirdparty
@@ -43,5 +43,5 @@ if [ ! -d "$PEGASUS_THIRD_PARTY_DIR" ]; then
 fi
 
 echo "Downloading Pegasus dependencies..."
-sh $PEGASUS_HOME/cpp/thirdparty/download_dependencies.sh $PEGASUS_THIRD_PARTY_DIR > $PEGASUS_HOME/cpp/pegasus_env.conf
+sh $PEGASUS_HOME/cpp/thirdparty/download_dependencies.sh $PEGASUS_THIRD_PARTY_DIR > $PEGASUS_HOME/dev/pegasus_env.conf
 echo "Finished downloading Pegasus dependencies."

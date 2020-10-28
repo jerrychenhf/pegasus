@@ -19,5 +19,5 @@ WORKDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 source $WORK_DIR/set_project_home.sh
 
-source $PEGASUS_HOME/cpp/pegasus_env.conf 
-source $PEGASUS_HOME/cpp/arrow_env.conf
+source $PEGASUS_HOME/dev/pegasus_env.conf 
+source $PEGASUS_HOME/dev/arrow_env.conf

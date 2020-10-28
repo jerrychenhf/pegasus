@@ -21,23 +21,25 @@ CURRENT_DIR=$(pwd)
 # check cmake version
 MAVEN_VERSION=3.6.3
 MAVEN_DOWNLOAD_URL=https://mirrors.sonic.net/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
-#https://apache.osuosl.org/maven/maven-3/3.6.3/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz
 
 CURRENT_MAVEN_VERSION_STR="$(mvn --version)"
 if [[ "$CURRENT_MAVEN_VERSION_STR" == "Apache Maven "* ]]; then
   echo "Maven is installed in the system"
 else
   echo "Maven is not installed in the system. Will download one."
-  mkdir -p maven
-  cd maven
-  echo "$CURRENT_DIR/maven/apache-maven-$MAVEN_VERSION-bin.tar.gz"
-  if [ ! -f "apache-maven-$MAVEN_VERSION-bin.tar.gz" ]; then
-    wget $MAVEN_DOWNLOAD_URL
+  
+   if [ ! -d "$CURRENT_DIR/maven/apache-maven-$MAVEN_VERSION" ]; then
+    mkdir -p maven
+    cd maven
+    echo "$CURRENT_DIR/maven/apache-maven-$MAVEN_VERSION-bin.tar.gz"
+    if [ ! -f "apache-maven-$MAVEN_VERSION-bin.tar.gz" ]; then
+      wget $MAVEN_DOWNLOAD_URL
+    fi
+  
+    tar xvf apache-maven-$MAVEN_VERSION-bin.tar.gz
   fi
   
-  tar xvf apache-maven-$MAVEN_VERSION-bin.tar.gz
-  
-  export export MAVEN_HOME=$CURRENT_DIR/maven/apache-maven-$MAVEN_VERSION-bin
+  export MAVEN_HOME=$CURRENT_DIR/maven/apache-maven-$MAVEN_VERSION
   PATH=$PATH:$MAVEN_HOME/bin
   export PATH
   
