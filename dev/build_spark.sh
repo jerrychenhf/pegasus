@@ -16,26 +16,42 @@
 # limitations under the License.
 #
 WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
+CURRENT_DIR=$(pwd)
 
 source $WORK_DIR/setup_project_home.sh
 
 #set -eu
 
-$PEGASUS_HOME/dev/check_cmake.sh
+# complile spark from source
+function build_spark_from_source(){
+      if [ ! -d "./spark" ]; then
+        git clone https://github.com/Intel-bigdata/spark.git -b branch-3.0-pegasus
+      fi
+      cd spark
+      mvn -DskipTests clean install
+      cd $CURRENT_DIR
+}
 
-ARROW_THIRD_PARTY_DIR=$PEGASUS_HOME/../thirdparty/arrow-thirdparty
-if [ ! -d "$ARROW_THIRD_PARTY_DIR" ]; then
-  mkdir -p $ARROW_THIRD_PARTY_DIR
+REBUILD=false
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+case $key in
+    --rebuild)
+    shift 1 # past argument
+    REBUILD=true
+    ;;
+    *)    # completed this shell arugemnts procesing
+    break
+    ;;
+esac
+done
+
+if [ "$REBUILD" = true ] ; then
+    build_spark_from_source
+else
+     if [ ! -d "./spark" ]; then
+        build_spark_from_source
+     fi
 fi
-
-sh $PEGASUS_HOME/cpp/thirdparty/download_arrow_dependencies.sh $ARROW_THIRD_PARTY_DIR > $PEGASUS_HOME/cpp/arrow_env.conf
-
-PEGASUS_THIRD_PARTY_DIR=$PEGASUS_HOME/../thirdparty/pegasus-thirdparty
-if [ ! -d "$PEGASUS_THIRD_PARTY_DIR" ]; then
-  mkdir -p $PEGASUS_THIRD_PARTY_DIR
-fi
-
-sh $PEGASUS_HOME/cpp/thirdparty/download_dependencies.sh $PEGASUS_THIRD_PARTY_DIR > $PEGASUS_HOME/cpp/pegasus_env.conf
-
-source $PEGASUS_HOME/cpp/pegasus_env.conf 
-source $PEGASUS_HOME/cpp/arrow_env.conf

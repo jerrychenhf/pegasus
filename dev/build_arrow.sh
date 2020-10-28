@@ -16,10 +16,37 @@
 # limitations under the License.
 #
 WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
+CURRENT_DIR=$(pwd)
 
 source $WORK_DIR/setup_project_home.sh
 
-ACTION=build
+#set -eu
+
+source $PEGASUS_HOME/dev/install_dependencies_offline.sh
+
+# install ARROW
+function build_arrow_from_source(){
+      if [ ! -d "./arrow" ]; then
+        git clone https://github.com/Intel-bigdata/arrow.git -b branch-1.0-pegasus
+      fi
+      cd arrow/cpp
+       if [ ! -d "./build-arrow" ]; then
+          mkdir -p build-arrow
+       fi
+      cd build-arrow
+      yum install openssl-devel flex bison -y
+      cmake -DARROW_FLIGHT=ON -DARROW_PARQUET=ON -DARROW_HDFS=ON -DARROW_WITH_SNAPPY=ON -DARROW_BUILD_TESTS=ON ..
+      make
+      make install
+      cp -r $(pwd)/src/arrow/filesystem /usr/local/include/arrow/
+      cd ../../java
+      mvn -DskipTests clean install
+      cd $CURRENT_DIR
+      echo "export ARROW_HOME=/usr/local" >> ~/.bashrc
+      source ~/.bashrc
+}
+
+REBUILD=false
 
 while [[ $# -gt 0 ]]
 do
@@ -27,7 +54,7 @@ key="$1"
 case $key in
     --rebuild)
     shift 1 # past argument
-    ACTION=rebuild
+    REBUILD=true
     ;;
     *)    # completed this shell arugemnts procesing
     break
@@ -35,20 +62,10 @@ case $key in
 esac
 done
 
-source $PEGASUS_HOME/dev/install_dependencies_offline.sh
-
-case "$ACTION" in
-  rebuild)
-    rm -rf $PEGASUS_HOME/cpp/build
-    ;;
-  *)
-    ;;
-esac
-
-if [ ! -d "$PEGASUS_HOME/cpp/build" ]; then
-  mkdir -p $PEGASUS_HOME/cpp/build
+if [ "$REBUILD" = true ] ; then
+    build_arrow_from_source
+else
+     if [ ! -d "./arrow" ]; then
+        build_arrow_from_source
+     fi
 fi
-
-cd  $PEGASUS_HOME/cpp/build
-cmake -DPEGASUS_USE_GLOG=ON -DPEGASUS_BUILD_TESTS=ON ..
-make

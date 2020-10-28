@@ -1,13 +1,27 @@
 #!/bin/bash
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
+CURRENT_DIR=$(pwd)
 
 #set -eu
 
-START_PATH=$(pwd)
-
-
 # check cmake version
-CMAKE_TARGET_VERSION=3.7.1
-CMAKE_MIN_VERSION=3.7
+TARGET_CMAKE_VERSION=3.7.1
 TARGET_CMAKE_SOURCE_URL=https://cmake.org/files/v3.7/cmake-3.7.1.tar.gz
 
 function version_lt() { test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" != "$1"; }
@@ -15,7 +29,7 @@ function version_ge() { test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)"
 
 function prepare_cmake() {
   CURRENT_CMAKE_VERSION_STR="$(cmake --version)"
-  cd $START_PATH
+  cd $CURRENT_DIR
 
   if [[ "$CURRENT_CMAKE_VERSION_STR" == "cmake version"* ]]; then
     echo "cmake is installed"
@@ -25,8 +39,8 @@ function prepare_cmake() {
       echo "$CURRENT_CMAKE_VERSION is less than $CMAKE_MIN_VERSION,install cmake $CMAKE_TARGET_VERSION"
       mkdir -p thirdparty
       cd thirdparty
-      echo "$START_PATH/thirdparty/cmake-$CMAKE_TARGET_VERSION.tar.gz"
-      if [ ! -f "$START_PATH/thirdparty/cmake-$CMAKE_TARGET_VERSION.tar.gz" ]; then
+      echo "$CURRENT_DIR/thirdparty/cmake-$CMAKE_TARGET_VERSION.tar.gz"
+      if [ ! -f "$CURRENT_DIR/thirdparty/cmake-$CMAKE_TARGET_VERSION.tar.gz" ]; then
         wget $TARGET_CMAKE_SOURCE_URL
       fi
       tar xvf cmake-$CMAKE_TARGET_VERSION.tar.gz
@@ -36,12 +50,13 @@ function prepare_cmake() {
       gmake install
       yum remove cmake -y
       ln -s /usr/local/bin/cmake /usr/bin/
-      cd $START_PATH
+      cd $CURRENT_DIR
     fi
   else
     echo "cmake is not installed"
     mkdir -p thirdparty
     cd thirdparty
+    echo "$CURRENT_DIR/thirdparty/cmake-$CMAKE_TARGET_VERSION.tar.gz"
     if [ ! -f "cmake-$CMAKE_TARGET_VERSION.tar.gz" ]; then
       wget $TARGET_CMAKE_SOURCE_URL
     fi
@@ -51,29 +66,8 @@ function prepare_cmake() {
     ./bootstrap
     gmake
     gmake install
-    cd $START_PATH
+    cd $CURRENT_DIR
   fi
 }
 
-# check dependencies arrow
-# install ARROW
-function prepare_arrow(){
-   if [ ! -d "/usr/local/include/arrow" ]; then
-      git clone https://github.com/Intel-bigdata/arrow.git -b branch-1.0-pegasus
-      cd arrow/cpp
-      mkdir -p build-arrow
-      cd build-arrow
-      yum install openssl-devel flex bison -y
-      cmake -DARROW_FLIGHT=ON -DARROW_PARQUET=ON -DARROW_HDFS=ON -DARROW_WITH_SNAPPY=ON -DARROW_BUILD_TESTS=ON ..
-      make
-      make install
-      cp -r $(pwd)/src/arrow/filesystem /usr/local/include/arrow/
-      cd ../../java
-      mvn -DskipTests clean install
-      cd $START_PATH
-      echo "export ARROW_HOME=/usr/local" >> ~/.bashrc
-      source ~/.bashrc
-   fi
-}
-
-
+prepare_cmake

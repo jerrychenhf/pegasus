@@ -17,16 +17,16 @@
 #
 WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
 
-if [ -z "${PEGASUS_HOME}" ]; then
-  export PEGASUS_HOME="$(cd "`dirname "$0"`"/..; pwd)"
-fi
+source $WORK_DIR/setup_project_home.sh
 
 # build arrow and install
+sh $PEGASUS_HOME/dev/build_arrow.sh
 
 # build spark and install
+sh $PEGASUS_HOME/dev/build_spark.sh
 
 # build pegasus server offline
-sh ./build_offline.sh
+sh $PEGASUS_HOME/dev/build_offline.sh
 
 # build pegasus java for Spark
 cd $PEGASUS_HOME/java
