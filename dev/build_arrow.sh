@@ -25,12 +25,26 @@ source $WORK_DIR/set_project_home.sh
 $PEGASUS_HOME/dev/install_dependencies_offline.sh
 source $PEGASUS_HOME/dev/set_dependancy_urls.sh
 
+source $PEGASUS_HOME/dev/check_maven.sh
+
+MVN_CMD="mvn"
+if [ ! -z "${MAVEN_PROXY_OPTS}" ]; then
+  MVN_CMD="mvn ${MAVEN_PROXY_OPTS}"
+fi
+
+REBUILD=false
+
 # install ARROW
 function build_arrow_from_source(){
       if [ ! -d "./arrow" ]; then
         git clone https://github.com/Intel-bigdata/arrow.git -b branch-1.0-pegasus
       fi
       cd arrow/cpp
+
+      if [ "$REBUILD" = true ] ; then
+        rm -rf ./build-arrow
+      fi
+      
        if [ ! -d "./build-arrow" ]; then
           mkdir -p build-arrow
        fi
@@ -41,13 +55,17 @@ function build_arrow_from_source(){
       make install
       cp -r $(pwd)/src/arrow/filesystem /usr/local/include/arrow/
       cd ../../java
-      mvn -DskipTests clean install
+      
+      if [ "$REBUILD" = true ] ; then
+        $MVN_CMD -DskipTests clean install
+      else
+        $MVN_CMD -DskipTests install
+      fi
+
       cd $CURRENT_DIR
       echo "export ARROW_HOME=/usr/local" >> ~/.bashrc
       source ~/.bashrc
 }
-
-REBUILD=false
 
 while [[ $# -gt 0 ]]
 do
@@ -62,8 +80,6 @@ case $key in
     ;;
 esac
 done
-
-source $PEGASUS_HOME/dev/check_maven.sh
 
 build_arrow_from_source
  

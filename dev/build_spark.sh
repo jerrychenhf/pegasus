@@ -22,17 +22,26 @@ source $WORK_DIR/set_project_home.sh
 
 #set -eu
 
+REBUILD=false
+
 # complile spark from source
 function build_spark_from_source(){
       if [ ! -d "./spark" ]; then
         git clone https://github.com/Intel-bigdata/spark.git -b branch-3.0-pegasus
       fi
       cd spark
-      mvn -DskipTests clean install
-      cd $CURRENT_DIR
+      
+      MVN_CMD="mvn"
+      if [ ! -z "${MAVEN_PROXY_OPTS}" ]; then
+        MVN_CMD="mvn ${MAVEN_PROXY_OPTS}"
+      fi
+      
+      if [ "$REBUILD" = true ] ; then
+        $MVN_CMD -DskipTests clean install
+      else
+        $MVN_CMD -DskipTests install
+      fi
 }
-
-REBUILD=false
 
 while [[ $# -gt 0 ]]
 do

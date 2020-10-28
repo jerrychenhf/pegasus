@@ -22,5 +22,32 @@ source $WORK_DIR/set_project_home.sh
 source $PEGASUS_HOME/dev/check_maven.sh
 
 cd $PEGASUS_HOME/java
-mvn clean package -DskipTests
+
+MVN_CMD="mvn"
+if [ ! -z "${MAVEN_PROXY_OPTS}" ]; then
+  MVN_CMD="mvn ${MAVEN_PROXY_OPTS}"
+fi
+
+REBUILD=false
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+case $key in
+    --rebuild)
+    shift 1 # past argument
+    REBUILD=true
+    ;;
+    *)    # completed this shell arugemnts procesing
+    break
+    ;;
+esac
+done
+
+if [ "$REBUILD" = true ] ; then
+  $MVN_CMD -DskipTests clean package
+else
+  $MVN_CMD -DskipTests package
+fi
+
 
