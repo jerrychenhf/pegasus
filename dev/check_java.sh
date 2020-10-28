@@ -25,12 +25,12 @@ JAVA_PACKAGE_FILE=jdk-8u261-linux-x64.tar.gz
 JAVA_DOWNLOAD_URL=https://enos.itcollege.ee/~jpoial/allalaadimised/jdk8/$JAVA_PACKAGE_FILE
 
 CURRENT_JAVA_VERSION_STR="$(java -version)"
-if [[ "$CURRENT_JAVA_VERSION_STR" == "1java version "* ]]; then
+if [[ "$CURRENT_JAVA_VERSION_STR" == "java version "* ]]; then
   echo "Java is installed in the system."
 else
   echo "Java is not installed in the system. We will download and install one."
   
-   if [ ! -d "$THIRD_PARTY_DIR/java/apache-maven-$MAVEN_VERSION" ]; then
+   if [ ! -d "$THIRD_PARTY_DIR/java/jdk1.8.0_261" ]; then
     mkdir -p $THIRD_PARTY_DIR
     cd $THIRD_PARTY_DIR
     mkdir -p java
@@ -40,8 +40,7 @@ else
       wget $JAVA_DOWNLOAD_URL
     fi
     
-    gunzip $JAVA_PACKAGE_FILE
-    tar -xf jdk-8u261-linux-x64.tar -C $THIRD_PARTY_DIR/java
+    tar xvf $JAVA_PACKAGE_FILE
   fi
   
   export JAVA_HOME=$THIRD_PARTY_DIR/java/jdk1.8.0_261
