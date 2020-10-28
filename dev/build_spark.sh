@@ -20,6 +20,9 @@ CURRENT_DIR=$(pwd)
 
 source $WORK_DIR/set_project_home.sh
 
+source $PEGASUS_HOME/dev/check_java.sh
+source $PEGASUS_HOME/dev/check_maven.sh
+
 #set -eu
 
 REBUILD=false
@@ -57,5 +60,4 @@ case $key in
 esac
 done
 
-source $PEGASUS_HOME/dev/check_maven.sh
 build_spark_from_source

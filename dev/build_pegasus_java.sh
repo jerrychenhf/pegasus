@@ -19,6 +19,7 @@ WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
 
 source $WORK_DIR/set_project_home.sh
 
+source $PEGASUS_HOME/dev/check_java.sh
 source $PEGASUS_HOME/dev/check_maven.sh
 
 cd $PEGASUS_HOME/java

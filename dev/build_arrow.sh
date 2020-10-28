@@ -25,6 +25,7 @@ source $WORK_DIR/set_project_home.sh
 $PEGASUS_HOME/dev/download_dependencies.sh
 source $PEGASUS_HOME/dev/set_dependancy_urls.sh
 
+source $PEGASUS_HOME/dev/check_java.sh
 source $PEGASUS_HOME/dev/check_maven.sh
 
 MVN_CMD="mvn"
