@@ -22,7 +22,7 @@ source $WORK_DIR/set_project_home.sh
 
 #set -eu
 
-$PEGASUS_HOME/dev/install_dependencies_offline.sh
+$PEGASUS_HOME/dev/download_dependencies.sh
 source $PEGASUS_HOME/dev/set_dependancy_urls.sh
 
 source $PEGASUS_HOME/dev/check_maven.sh

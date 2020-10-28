@@ -26,7 +26,7 @@ sh $PEGASUS_HOME/dev/build_arrow.sh
 sh $PEGASUS_HOME/dev/build_spark.sh
 
 # build pegasus server offline
-sh $PEGASUS_HOME/dev/build_offline.sh
+sh $PEGASUS_HOME/dev/build_pegasus.sh
 
 # build pegasus java for Spark
 sh $PEGASUS_HOME/dev/build_pegasus_java.sh

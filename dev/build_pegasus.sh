@@ -35,7 +35,7 @@ case $key in
 esac
 done
 
-$PEGASUS_HOME/dev/install_dependencies_offline.sh
+$PEGASUS_HOME/dev/download_dependencies.sh
 source $PEGASUS_HOME/dev/set_dependancy_urls.sh
 
 case "$ACTION" in
