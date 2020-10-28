@@ -15,8 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-WORK_DIR="$(cd "`dirname "$0"`"; pwd)"
+WORK_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 CURRENT_DIR=$(pwd)
+
+source $WORK_DIR/set_project_home.sh
 
 #set -eu
 
@@ -28,20 +30,13 @@ TARGET_CMAKE_SOURCE_URL=https://cmake.org/files/v3.7/cmake-3.7.1.tar.gz
 function version_lt() { test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" != "$1"; }
 function version_ge() { test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" == "$1"; }
 
-function prepare_cmake() {
-  CURRENT_CMAKE_VERSION_STR="$(cmake --version)"
-  cd $CURRENT_DIR
-
-  if [[ "$CURRENT_CMAKE_VERSION_STR" == "cmake version"* ]]; then
-    echo "cmake is installed"
-    array=(${CURRENT_CMAKE_VERSION_STR//,/ })
-    CURRENT_CMAKE_VERSION=${array[2]}
-    if version_lt $CURRENT_CMAKE_VERSION $CMAKE_MIN_VERSION; then
-      echo "$CURRENT_CMAKE_VERSION is less than $CMAKE_MIN_VERSION,install cmake $CMAKE_TARGET_VERSION"
-      mkdir -p thirdparty
-      cd thirdparty
-      echo "$CURRENT_DIR/thirdparty/cmake-$CMAKE_TARGET_VERSION.tar.gz"
-      if [ ! -f "$CURRENT_DIR/thirdparty/cmake-$CMAKE_TARGET_VERSION.tar.gz" ]; then
+function download_and_install_cmake() {
+      mkdir -p $THIRD_PARTY_DIR
+      cd $THIRD_PARTY_DIR
+      mkdir -p cmake
+      cd cmake
+      echo "Will use $THIRD_PARTY_DIR/cmake/cmake-$CMAKE_TARGET_VERSION.tar.gz"
+      if [ ! -f "$THIRD_PARTY_DIR/cmake/cmake-$CMAKE_TARGET_VERSION.tar.gz" ]; then
         wget $TARGET_CMAKE_SOURCE_URL
       fi
       tar xvf cmake-$CMAKE_TARGET_VERSION.tar.gz
@@ -49,24 +44,25 @@ function prepare_cmake() {
       ./bootstrap
       gmake
       gmake install
+}
+
+function prepare_cmake() {
+  CURRENT_CMAKE_VERSION_STR="$(cmake --version)"
+
+  if [[ "$CURRENT_CMAKE_VERSION_STR" == "cmake version"* ]]; then
+    echo "cmake is installed"
+    array=(${CURRENT_CMAKE_VERSION_STR//,/ })
+    CURRENT_CMAKE_VERSION=${array[2]}
+    if version_lt $CURRENT_CMAKE_VERSION $CMAKE_MIN_VERSION; then
+      echo "$CURRENT_CMAKE_VERSION is less than $CMAKE_MIN_VERSION,install cmake $CMAKE_TARGET_VERSION"
+      download_and_install_cmake
       yum remove cmake -y
       ln -s /usr/local/bin/cmake /usr/bin/
       cd $CURRENT_DIR
     fi
   else
     echo "cmake is not installed"
-    mkdir -p thirdparty
-    cd thirdparty
-    echo "$CURRENT_DIR/thirdparty/cmake-$CMAKE_TARGET_VERSION.tar.gz"
-    if [ ! -f "cmake-$CMAKE_TARGET_VERSION.tar.gz" ]; then
-      wget $TARGET_CMAKE_SOURCE_URL
-    fi
-
-    tar xvf cmake-$CMAKE_TARGET_VERSION.tar.gz
-    cd cmake-$CMAKE_TARGET_VERSION/
-    ./bootstrap
-    gmake
-    gmake install
+    download_and_install_cmake
     cd $CURRENT_DIR
   fi
 }

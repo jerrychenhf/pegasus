@@ -20,3 +20,8 @@ if [ -z "${PEGASUS_HOME}" ]; then
   export PEGASUS_HOME="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. >/dev/null 2>&1 && pwd )"
   echo "Setup PEGASUS_HOME to $PEGASUS_HOME"
 fi
+
+if [ -z "${THIRD_PARTY_DIR}" ]; then
+  export THIRD_PARTY_DIR=$PEGASUS_HOME/dev/thirdparty
+  echo "Set THIRD_PARTY_DIR to $THIRD_PARTY_DIR"
+fi

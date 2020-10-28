@@ -18,6 +18,8 @@
 WORK_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 CURRENT_DIR=$(pwd)
 
+source $WORK_DIR/set_project_home.sh
+
 # check cmake version
 MAVEN_VERSION=3.6.3
 MAVEN_DOWNLOAD_URL=https://mirrors.sonic.net/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
@@ -28,10 +30,12 @@ if [[ "$CURRENT_MAVEN_VERSION_STR" == "Apache Maven "* ]]; then
 else
   echo "Maven is not installed in the system. Will download one."
   
-   if [ ! -d "$CURRENT_DIR/maven/apache-maven-$MAVEN_VERSION" ]; then
+   if [ ! -d "$THIRD_PARTY_DIR/maven/apache-maven-$MAVEN_VERSION" ]; then
+    mkdir -p $THIRD_PARTY_DIR
+    cd $THIRD_PARTY_DIR
     mkdir -p maven
     cd maven
-    echo "$CURRENT_DIR/maven/apache-maven-$MAVEN_VERSION-bin.tar.gz"
+    echo "Will use $THIRD_PARTY_DIR/maven/apache-maven-$MAVEN_VERSION-bin.tar.gz"
     if [ ! -f "apache-maven-$MAVEN_VERSION-bin.tar.gz" ]; then
       wget $MAVEN_DOWNLOAD_URL
     fi
@@ -39,7 +43,7 @@ else
     tar xvf apache-maven-$MAVEN_VERSION-bin.tar.gz
   fi
   
-  export MAVEN_HOME=$CURRENT_DIR/maven/apache-maven-$MAVEN_VERSION
+  export MAVEN_HOME=$THIRD_PARTY_DIR/maven/apache-maven-$MAVEN_VERSION
   PATH=$PATH:$MAVEN_HOME/bin
   export PATH
   
