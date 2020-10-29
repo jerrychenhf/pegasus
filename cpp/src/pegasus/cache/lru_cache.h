@@ -20,14 +20,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <utility>
-
 #include "gutil/gscoped_ptr.h"
 #include "gutil/macros.h"
 #include "gutil/port.h"
 #include "gutil/singleton.h"
 #include "util/cache.h"
 #include "util/slice.h"
-
 #include "dataset/dataset_cache_block_manager.h"
 
 template <class T> class scoped_refptr;
@@ -99,7 +97,6 @@ class LRUCache {
        // Before insert into the column, check whether the dataset is inserted.
       std::shared_ptr<CachedDataset> dataset;
       cache_block_manager_->GetCachedDataSet(dataset_path, &dataset);
-     
 
       if(dataset->GetCachedPartitions().size() == 0) {
         return;

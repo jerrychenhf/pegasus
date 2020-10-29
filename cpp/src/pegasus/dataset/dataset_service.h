@@ -45,26 +45,36 @@ class FlightListing;
 
 } // namespace rpc
 
-class DataSetService : IWorkerManagerObserver
+class DataSetService : WorkerManagerObserver
 {
 public:
   DataSetService();
   ~DataSetService();
+
   Status Init();
   Status Start();
   Status Stop();
-  Status GetFlightInfo(DataSetRequest *dataset_request, std::unique_ptr<rpc::FlightInfo> *flight_info, const rpc::FlightDescriptor &fldtr);
+
+  Status GetFlightInfo(DataSetRequest *dataset_request,
+    std::unique_ptr<rpc::FlightInfo> *flight_info,
+    const rpc::FlightDescriptor &fldtr);
   Status GetFlightListing(std::unique_ptr<rpc::FlightListing> *listings);
   Status GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>> *datasets);
   Status GetDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset);
-
 private:
-  Status NotifyDataCacheDrop(std::shared_ptr<DataSet> pds, std::shared_ptr<std::vector<Partition>> partitions);
-  Status RefreshDataSet(DataSetRequest *dataset_request, std::string table_location, std::shared_ptr<Storage> storage, std::shared_ptr<DataSet> pds, std::shared_ptr<DataSet> *dataset);
-  Status CacheDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset, int distpolicy);
+  Status NotifyDataCacheDrop(std::shared_ptr<DataSet> pds,
+    std::shared_ptr<std::vector<Partition>> partitions);
+  Status RefreshDataSet(DataSetRequest *dataset_request,
+    std::string table_location, std::shared_ptr<Storage> storage,
+      std::shared_ptr<DataSet> pds, std::shared_ptr<DataSet> *dataset);
+  Status CacheDataSet(DataSetRequest *dataset_request,
+    std::shared_ptr<DataSet> *dataset, int distpolicy);
   Status RemoveDataSet(DataSetRequest *dataset_request);
-  Status FilterDataSet(const std::vector<Filter> &parttftr, std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet> *resultdataset);
+  Status FilterDataSet(const std::vector<Filter> &parttftr,
+    std::shared_ptr<DataSet> dataset, std::shared_ptr<ResultDataSet> *resultdataset);
+    
   void ObserverUpdate(int wmevent);
+
   Status GetColumnIndices(DataSetRequest *dataset_request,
                           std::shared_ptr<arrow::Schema> schema,
                           std::shared_ptr<std::vector<int32_t>>* column_indices,

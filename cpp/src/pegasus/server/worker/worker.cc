@@ -42,11 +42,14 @@ Worker::~Worker() {
 }
 
 Status Worker::Init() {
+  ipc_server_thread_ =
+    std::unique_ptr<IpcServerThread>(new IpcServerThread());
   worker_heartbeat_ =
     std::unique_ptr<WorkerHeartbeat>(new WorkerHeartbeat());
   worker_table_api_service_ =
     std::unique_ptr<WorkerTableAPIService>(new WorkerTableAPIService(exec_env_->GetDatasetCacheManager()));
-  
+
+  RETURN_IF_ERROR(ipc_server_thread_->Init());
   RETURN_IF_ERROR(worker_heartbeat_->Init());
   RETURN_IF_ERROR(worker_table_api_service_->Init());
   
@@ -54,6 +57,7 @@ Status Worker::Init() {
 }
 
 Status Worker::Start() {
+  RETURN_IF_ERROR(ipc_server_thread_->Start());
   RETURN_IF_ERROR(worker_heartbeat_->Start());
   
   LOG(INFO) << "Worker listening on:" << FLAGS_hostname << ":" << FLAGS_worker_port;

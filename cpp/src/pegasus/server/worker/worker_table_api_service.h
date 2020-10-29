@@ -22,9 +22,7 @@
 #include "dataset/request_identity.h"
 
 namespace arrow {
-
 class Status;
-
 }  // namespace arrow
 
 namespace pegasus {
@@ -38,7 +36,6 @@ class FlightMetadataWriter;
 class FlightDataStream;
 
 struct Ticket;
-
 }  //namespace rpc
 
 class DatasetCacheManager;
@@ -59,6 +56,14 @@ class WorkerTableAPIService : public rpc::FlightServerBase {
                std::unique_ptr<rpc::FlightMessageReader> reader,
                std::unique_ptr<rpc::FlightMetadataWriter> writer) override;
 
+
+  virtual arrow::Status GetLocalData(const rpc::ServerCallContext& context,
+                               const rpc::Ticket& request,
+                               std::unique_ptr<rpc::LocalPartitionInfo>* response);
+                                
+  virtual arrow::Status ReleaseLocalData(const rpc::ServerCallContext& context,
+                               const rpc::Ticket& request,
+                               std::unique_ptr<rpc::LocalReleaseResult>* response);
 private:
   std::shared_ptr<DatasetCacheManager> dataset_cache_manager_;
   WorkerExecEnv* env_;

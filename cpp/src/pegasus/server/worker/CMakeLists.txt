@@ -21,12 +21,13 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/worker")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/worker")
 
-add_library(Worker
+add_library(worker
   worker_table_api_service.cc
   worker.cc
   worker_heartbeat.cc
+  ipc_server_thread.cc
 )
-add_dependencies(Worker gen-deps)
+add_dependencies(worker gen-deps)
 
 add_executable(workerd worker_main.cc)
 target_link_libraries(workerd

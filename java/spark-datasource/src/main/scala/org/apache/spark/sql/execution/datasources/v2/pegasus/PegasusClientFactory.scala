@@ -26,8 +26,13 @@ class PegasusClientFactory(location: Location,
 
   private val allocator = new RootAllocator(Long.MaxValue)
 
-  def apply: FlightClient = {
-    val client = FlightClient.builder(allocator, location).build
+  def apply(useFileBatch: Boolean): FlightClient = {
+    var client: FlightClient = null
+    if(useFileBatch) {
+      client = FlightClient.builder(allocator, location).useFileBatch().build
+    } else {
+      client = FlightClient.builder(allocator, location).build
+    }
 //    client.authenticateBasic(username, password)
     client
   }

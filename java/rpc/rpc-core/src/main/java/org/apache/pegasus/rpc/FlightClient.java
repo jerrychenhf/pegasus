@@ -80,14 +80,21 @@ public class FlightClient implements AutoCloseable {
   private final ClientAuthInterceptor authInterceptor = new ClientAuthInterceptor();
   private final MethodDescriptor<Flight.Ticket, ArrowMessage> doGetDescriptor;
   private final MethodDescriptor<ArrowMessage, Flight.PutResult> doPutDescriptor;
+  private final boolean useFileBatch;
 
   /**
    * Create a Flight client from an allocator and a gRPC channel.
    */
   FlightClient(BufferAllocator incomingAllocator, ManagedChannel channel,
       List<FlightClientMiddleware.Factory> middleware) {
+    this(incomingAllocator, channel, middleware, false);
+  }
+  
+  FlightClient(BufferAllocator incomingAllocator, ManagedChannel channel,
+      List<FlightClientMiddleware.Factory> middleware, boolean useFileBatch) {
     this.allocator = incomingAllocator.newChildAllocator("flight-client", 0, Long.MAX_VALUE);
     this.channel = channel;
+    this.useFileBatch = useFileBatch;
 
     final ClientInterceptor[] interceptors;
     interceptors = new ClientInterceptor[]{authInterceptor, new ClientInterceptorAdapter(middleware)};
@@ -97,7 +104,7 @@ public class FlightClient implements AutoCloseable {
 
     blockingStub = FlightServiceGrpc.newBlockingStub(interceptedChannel);
     asyncStub = FlightServiceGrpc.newStub(interceptedChannel);
-    doGetDescriptor = FlightBindingService.getDoGetDescriptor(allocator);
+    doGetDescriptor = FlightBindingService.getDoGetDescriptor(allocator, useFileBatch);
     doPutDescriptor = FlightBindingService.getDoPutDescriptor(allocator);
   }
 
@@ -251,6 +258,40 @@ public class FlightClient implements AutoCloseable {
   }
 
   /**
+   * Request data columns for a partition from a local worker in shared memory mapping way.
+   * @param ticket The ticket of the partition and colums to read
+   * @param options RPC-layer hints for this call.
+   */
+  public LocalPartitionInfo getLocalData(Ticket ticket, CallOption... options) {
+    try {
+      return new LocalPartitionInfo(CallOptions.wrapStub(blockingStub, options).getLocalData(ticket.toProtocol()));
+    } catch (URISyntaxException e) {
+      // We don't expect this will happen for conforming Flight implementations. For instance, a Java server
+      // itself wouldn't be able to construct an invalid Location.
+      throw new RuntimeException(e);
+    } catch (StatusRuntimeException sre) {
+      throw StatusUtils.fromGrpcRuntimeException(sre);
+    }
+  }
+
+ /**
+   * Release data columns for a partition from a local worker in shared memory mapping way.
+   * @param ticket The ticket of the partition and colums to release
+   * @param options RPC-layer hints for this call.
+   */
+  public LocalReleaseResult releaseLocalData(Ticket ticket, CallOption... options) {
+    try {
+      return new LocalReleaseResult(CallOptions.wrapStub(blockingStub, options).releaseLocalData(ticket.toProtocol()));
+    } catch (URISyntaxException e) {
+      // We don't expect this will happen for conforming Flight implementations. For instance, a Java server
+      // itself wouldn't be able to construct an invalid Location.
+      throw new RuntimeException(e);
+    } catch (StatusRuntimeException sre) {
+      throw StatusUtils.fromGrpcRuntimeException(sre);
+    }
+  }
+
+  /**
    * Retrieve a stream from the server.
    * @param ticket The ticket granting access to the data stream.
    * @param options RPC-layer hints for this call.
@@ -258,11 +299,20 @@ public class FlightClient implements AutoCloseable {
   public FlightStream getStream(Ticket ticket, CallOption... options) {
     final io.grpc.CallOptions callOptions = CallOptions.wrapStub(asyncStub, options).getCallOptions();
     ClientCall<Flight.Ticket, ArrowMessage> call = interceptedChannel.newCall(doGetDescriptor, callOptions);
-    FlightStream stream = new FlightStream(
+    FlightStream stream;
+    if (!useFileBatch) {
+      stream = new FlightStream(
         allocator,
         PENDING_REQUESTS,
         (String message, Throwable cause) -> call.cancel(message, cause),
         (count) -> call.request(count));
+    } else {
+      stream = new FlightFileBatchStream(
+        allocator,
+        PENDING_REQUESTS,
+        (String message, Throwable cause) -> call.cancel(message, cause),
+        (count) -> call.request(count));
+    }
 
     final StreamObserver<ArrowMessage> delegate = stream.asObserver();
     ClientResponseObserver<Flight.Ticket, ArrowMessage> clientResponseObserver =
@@ -477,6 +527,7 @@ public class FlightClient implements AutoCloseable {
     private InputStream clientKey = null;
     private String overrideHostname = null;
     private List<FlightClientMiddleware.Factory> middleware = new ArrayList<>();
+    private boolean useFileBatch = false;
 
     private Builder() {
     }
@@ -533,6 +584,14 @@ public class FlightClient implements AutoCloseable {
 
     public Builder intercept(FlightClientMiddleware.Factory factory) {
       middleware.add(factory);
+      return this;
+    }
+    
+    /**
+     * Force the client to use file batch with Server
+     */
+    public Builder useFileBatch() {
+      this.useFileBatch = true;
       return this;
     }
 
@@ -606,7 +665,7 @@ public class FlightClient implements AutoCloseable {
       builder
           .maxTraceEvents(MAX_CHANNEL_TRACE_EVENTS)
           .maxInboundMessageSize(maxInboundMessageSize);
-      return new FlightClient(allocator, builder.build(), middleware);
+      return new FlightClient(allocator, builder.build(), middleware, useFileBatch);
     }
   }
 }

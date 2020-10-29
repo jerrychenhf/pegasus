@@ -23,16 +23,10 @@
 #include <gtest/gtest.h>
 #include "test/gtest-util.h"
 #include "dataset/dataset_service.h"
-#include "pegasus/runtime/exec_env.h"
-#include "pegasus/dataset/dataset_distributor.h"
-#include "consistent_hashing.h"
-#include "dataset_request.h"
-
-//#include "arrow/ipc/test_common.h"
-//#include "arrow/status.h"
-//#include "arrow/testing/gtest_util.h"
-//#include "arrow/testing/util.h"
-//#include "arrow/util/make_unique.h"
+#include "runtime/exec_env.h"
+#include "dataset/dataset_distributor.h"
+#include "dataset/consistent_hashing.h"
+#include "dataset/dataset_request.h"
 
 namespace pegasus
 {
@@ -61,11 +55,11 @@ TEST(DatasetServiceTest, ConHashBasic)
   validlocs->push_back(location1);
   validlocs->push_back(location2);
   validlocs->push_back(location3);
-  auto nodecacheMBs = std::make_shared<std::vector<int64_t>>();
-  nodecacheMBs->push_back(1024);
-  nodecacheMBs->push_back(1024);
-  nodecacheMBs->push_back(1024);
-  distributor->PrepareValidLocations(validlocs, nodecacheMBs);
+  auto node_cache_capacities = std::make_shared<std::vector<int64_t>>();
+  node_cache_capacities->push_back(1024);
+  node_cache_capacities->push_back(1024);
+  node_cache_capacities->push_back(1024);
+  distributor->PrepareValidLocations(validlocs, node_cache_capacities);
 
   // setup the distribution engine
   ASSERT_OK(distributor->SetupDistribution());

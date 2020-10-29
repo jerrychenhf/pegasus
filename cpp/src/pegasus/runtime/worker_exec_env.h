@@ -32,9 +32,7 @@ class DatasetCacheManager;
 /// It should always be accessed by calling WorkerExecEnv::GetInstance().
 class WorkerExecEnv : public ExecEnv {
  public:
- 
   WorkerExecEnv();
-
   WorkerExecEnv(const std::string& hostname, int32_t port);
 
   static WorkerExecEnv* GetInstance() { return exec_env_; }
@@ -42,7 +40,6 @@ class WorkerExecEnv : public ExecEnv {
   Status Init();
 
   std::string GetWorkerGrpcHost();
-
   int32_t GetWorkerGrpcPort();
 
   const StoreInfos& GetStores();

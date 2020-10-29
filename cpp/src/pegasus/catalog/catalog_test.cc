@@ -18,11 +18,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
-
+#include <gtest/gtest.h>
 #include "arrow/util/uri.h"
 #include "arrow/type.h"
-#include <gtest/gtest.h>
-
 #include "catalog/catalog.h"
 #include "catalog/catalog_manager.h"
 #include "dataset/dataset_request.h"
@@ -31,7 +29,6 @@
 namespace pegasus {
 
 TEST(SpakrCatalogTest, Unit) {
-
   //TODO: create a test file.
   std::string dataset_path = "hdfs://10.239.47.55:9000/genData1000/customer";
 

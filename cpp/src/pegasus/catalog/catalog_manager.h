@@ -31,14 +31,13 @@ class CatalogManager {
  public:
   CatalogManager();
 
-  Status GetCatalog(DataSetRequest* dataset_request, std::shared_ptr<Catalog>* catalog);
-
+  Status GetCatalog(DataSetRequest* dataset_request,
+    std::shared_ptr<Catalog>* catalog);
  private:
   // provider: spark catalog or pegasus catalog
   std::string provider_;
   std::shared_ptr<SparkCatalog> spark_catalog_;
   std::shared_ptr<PegasusCatalog> pegasus_catalog_;
-
  public:
   static const std::string CATALOG_ID_SPARK;
   static const std::string CATALOG_ID_PEGASUS;

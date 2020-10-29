@@ -23,9 +23,9 @@ using namespace std;
 namespace pegasus {
   CacheStore::CacheStore(Store* store, int64_t capacity):
    store_(store), capacity_(capacity), used_size_(0) {}
+ 
   CacheStore::~CacheStore(){}
   
-
   Status CacheStore::Allocate(int64_t size, StoreRegion* store_region) {
     if (store_ == nullptr) {
       stringstream ss;

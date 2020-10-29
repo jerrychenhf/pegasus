@@ -245,13 +245,15 @@ arrow::Status FromProto(const pb::Ticket& pb_ticket, Ticket* ticket) {
   return arrow::Status::OK();
 }
 
-void ToProto(const Ticket& ticket, pb::Ticket* pb_ticket) {
+arrow::Status ToProto(const Ticket& ticket, pb::Ticket* pb_ticket) {
   pb_ticket->set_dataset_path(ticket.dataset_path);
   pb_ticket->set_partition_identity(ticket.partition_identity);
   pb_ticket->set_schema(ticket.serialized_schema());
   for (int32_t column_indice : ticket.column_indices) {
     pb_ticket->add_column_indice(column_indice);
   }
+  
+  return arrow::Status::OK();
 }
 
 // FlightData
@@ -563,6 +565,72 @@ arrow::Status ToProto(const HeartbeatResult& result, pb::HeartbeatResult* pb_res
     pb_result->set_result_hascmd(false);
   }
 
+  return arrow::Status::OK();
+}
+
+arrow::Status FromProto(const pb::LocalColumnChunkInfo& pb_info, LocalColumnChunkInfo* info) {
+  info->chunk_index = pb_info.chunk_index();
+  info->data_offset = pb_info.data_offset();
+  info->data_size = pb_info.data_size();
+  info->mmap_fd = pb_info.mmap_fd();
+  info->mmap_size = pb_info.mmap_size();
+  info->row_counts = pb_info.row_counts();
+  return arrow::Status::OK();
+}
+
+arrow::Status FromProto(const pb::LocalColumnInfo& pb_info, LocalColumnInfo* info) {
+  info->column_index = pb_info.column_index();
+
+  info->chunks.resize(pb_info.columnchunkinfo_size());
+  for (int i = 0; i < pb_info.columnchunkinfo_size(); ++i) {
+    RETURN_NOT_OK(FromProto(pb_info.columnchunkinfo(i), &info->chunks[i]));
+  }
+  return arrow::Status::OK();
+}
+
+arrow::Status FromProto(const pb::LocalPartitionInfo& pb_info, LocalPartitionInfo* info) {
+  info->columns.resize(pb_info.columninfo_size());
+  for (int i = 0; i < pb_info.columninfo_size(); ++i) {
+    RETURN_NOT_OK(FromProto(pb_info.columninfo(i), &info->columns[i]));
+  }
+  return arrow::Status::OK();
+}
+
+arrow::Status FromProto(const pb::LocalReleaseResult& pb_result, LocalReleaseResult* result) {
+  result->result_code = pb_result.result_code();
+  return arrow::Status::OK();
+}
+
+arrow::Status ToProto(const LocalColumnChunkInfo& info, pb::LocalColumnChunkInfo* pb_info) {
+  pb_info->set_chunk_index(info.chunk_index);
+  pb_info->set_data_offset(info.data_offset);
+  pb_info->set_data_size(info.data_size);
+  pb_info->set_mmap_fd(info.mmap_fd);
+  pb_info->set_mmap_size(info.mmap_size);
+  pb_info->set_row_counts(info.row_counts);
+  return arrow::Status::OK();
+}
+
+arrow::Status ToProto(const LocalColumnInfo& info, pb::LocalColumnInfo* pb_info) {
+  pb_info->set_column_index(info.column_index);
+
+  pb_info->clear_columnchunkinfo();
+  for (const LocalColumnChunkInfo& chunk : info.chunks) {
+    ToProto(chunk, pb_info->add_columnchunkinfo());
+  }
+  return arrow::Status::OK();
+}
+
+arrow::Status ToProto(const LocalPartitionInfo& info, pb::LocalPartitionInfo* pb_info) {
+  pb_info->clear_columninfo();
+  for (const LocalColumnInfo& column : info.columns) {
+    ToProto(column, pb_info->add_columninfo());
+  }
+  return arrow::Status::OK();
+}
+
+arrow::Status ToProto(const LocalReleaseResult& result, pb::LocalReleaseResult* pb_result) {
+  pb_result->set_result_code(result.result_code);
   return arrow::Status::OK();
 }
 

@@ -104,16 +104,17 @@ include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 
 set (PEGASUS_LIBS
-  Cache
-  Catalog
-  Common
-  DataSet
-  Parquet
-  Runtime
-  Planner
-  Worker
-  Storage
-  Util
+  pegasus_ipc
+  cache
+  catalog
+  common
+  dataset
+  parquet
+  runtime
+  planner
+  worker
+  storage
+  util
   gutil
 )
 
@@ -133,10 +134,9 @@ add_subdirectory(client)
 add_subdirectory(dataset)
 add_subdirectory(storage)
 add_subdirectory(runtime)
+add_subdirectory(ipc)
 add_subdirectory(server/planner)
 add_subdirectory(server/worker)
-add_subdirectory(plasma)
-add_subdirectory(benchmark)
 
 if(NOT APPLE AND NOT MSVC)
   # Localize thirdparty symbols using a linker version script. This hides them
@@ -201,6 +201,43 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/pegasus-config.cmake
         DESTINATION "${PEGASUS_CMAKE_INSTALL_DIR}")
 
 
+if(PEGASUS_RPC_JAVA_CLIENT_JNI)
+  # rpc java client jni support
+  find_package(JNI REQUIRED)
+  # add jni support
+  include_directories(${JAVA_INCLUDE_PATH})
+  include_directories(${JAVA_INCLUDE_PATH2})
+  if(JNI_FOUND)
+    message(STATUS "JNI_INCLUDE_DIRS = ${JNI_INCLUDE_DIRS}")
+    message(STATUS "JNI_LIBRARIES = ${JNI_LIBRARIES}")
+  else()
+    message(WARNING "Could not find JNI")
+  endif()
 
+  add_compile_options("-I$ENV{JAVA_HOME}/include/")
+  if(WIN32)
+    add_compile_options("-I$ENV{JAVA_HOME}/include/win32")
+  elseif(APPLE)
+    add_compile_options("-I$ENV{JAVA_HOME}/include/darwin")
+  else() # linux
+    add_compile_options("-I$ENV{JAVA_HOME}/include/linux")
+  endif()
+
+  include_directories("${CMAKE_CURRENT_LIST_DIR}/java")
+
+  file(GLOB_RECURSE PEGASUS_RPC_JAVA_CLIENT_JNI_SRC java/*.cc)
+  add_library(pegasus_java SHARED ${PEGASUS_RPC_JAVA_CLIENT_JNI_SRC})
+
+  if(APPLE)
+    target_link_libraries(pegasus_java
+                          pegasus_ipc
+                          "-undefined dynamic_lookup"
+                          ${PTHREAD_LIBRARY})
+  else(APPLE)
+    target_link_libraries(pegasus_java
+                          pegasus_ipc
+                          ${PTHREAD_LIBRARY})
+  endif(APPLE)
+endif()
 
 

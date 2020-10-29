@@ -87,7 +87,7 @@ class CachedPartition {
 
   const std::string GetDatasetPath() { return dataset_path_; }
   const std::string GetPartitionPath() {return partition_path_; }
-  unordered_map<int, std::shared_ptr<CachedColumn>> GetCachedColumns() {
+  unordered_map<int, std::shared_ptr<CachedColumn>>& GetCachedColumns() {
     return cached_columns_;
   }
 
@@ -109,7 +109,7 @@ class CachedDataset {
   Status DeletePartition(const std::string partition_path, std::shared_ptr<CacheEngine> cache_engine);
   
   const std::string& GetDatasetPath() { return dataset_path_; }
-  std::unordered_map<string, std::shared_ptr<CachedPartition>> GetCachedPartitions() {
+  std::unordered_map<string, std::shared_ptr<CachedPartition>>& GetCachedPartitions() {
     return cached_partitions_;
   }
 
@@ -126,11 +126,12 @@ class DatasetCacheBlockManager {
   
   Status Init();
   
-  Status GetCachedDataSet(const std::string dataset_path, std::shared_ptr<CachedDataset>* dataset);
+  Status GetCachedDataSet(const std::string dataset_path,
+    std::shared_ptr<CachedDataset>* dataset);
 
   Status DeleteDataset(const std::string dataset_path);
 
-  std::unordered_map<string, std::shared_ptr<CachedDataset>> GetCachedDatasets() {
+  const std::unordered_map<string, std::shared_ptr<CachedDataset>>& GetCachedDatasets() {
     return cached_datasets_;
   }
 

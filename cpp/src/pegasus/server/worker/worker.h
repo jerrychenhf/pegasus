@@ -23,6 +23,7 @@
 #include "runtime/worker_exec_env.h"
 #include "storage/storage.h"
 #include "server/worker/worker_table_api_service.h"
+#include "server/worker/ipc_server_thread.h"
 
 using namespace std;
 
@@ -43,6 +44,7 @@ class Worker {
   WorkerExecEnv* exec_env_;
   std::shared_ptr<WorkerTableAPIService> worker_table_api_service_;
   std::shared_ptr<WorkerHeartbeat> worker_heartbeat_;
+  std::shared_ptr<IpcServerThread> ipc_server_thread_;
 };
 
 } // namespace pegasus

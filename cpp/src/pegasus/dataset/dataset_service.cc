@@ -48,7 +48,8 @@ Status DataSetService::Init()
 
 void DataSetService::ObserverUpdate(int wmevent)
 {
-  if ((WMEVENT_WORKERNODE_ADDED == wmevent) || (WMEVENT_WORKERNODE_REMOVED == wmevent))
+  if ((WMEVENT_WORKERNODE_ADDED == wmevent) ||
+    (WMEVENT_WORKERNODE_REMOVED == wmevent))
     dataset_store_->InvalidateAll();
 }
 
@@ -59,33 +60,37 @@ Status DataSetService::GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<D
   return Status::OK();
 }
 
-Status DataSetService::NotifyDataCacheDrop(std::shared_ptr<DataSet> pds, std::shared_ptr<std::vector<Partition>> partitions)
+Status DataSetService::NotifyDataCacheDrop(std::shared_ptr<DataSet> pds,
+  std::shared_ptr<std::vector<Partition>> partitions)
 {
   // generate the list of partitions which needs to notify workernode to drop the cached data
   LOG(INFO) << "Generating list of partitions to drop cached data...";
-  auto partstodrop = std::make_shared<std::vector<Partition>>();
-  for (auto pttold : pds->partitions())
+  auto partitions_to_drop = std::make_shared<std::vector<Partition>>();
+  for (auto partition_old : pds->partitions())
   {
-    for (auto ptit = partitions->begin(); ptit != partitions->end(); ptit++)
+    for (auto partition = partitions->begin(); partition != partitions->end(); partition++)
     {
-      if ((pttold.GetIdentPath() == ptit->GetIdentPath()) && (pttold.GetLocationURI() != ptit->GetLocationURI()))
+      if ((partition_old.GetIdentityPath() == partition->GetIdentityPath()) &&
+        (partition_old.GetLocationURI() != partition->GetLocationURI()))
       {
-        partstodrop->push_back(pttold);
+        partitions_to_drop->push_back(partition_old);
         break;
       }
     }
   }
   LOG(INFO) << "Generated drop list (locationuri partitionid):";
-  for (auto ptt : *partstodrop)
+  for (auto partition : *partitions_to_drop)
   {
-    LOG(INFO) << ptt.GetLocationURI() << "\t" << ptt.GetIdentPath();
+    LOG(INFO) << partition.GetLocationURI() << "\t" << partition.GetIdentityPath();
   }
-  PlannerExecEnv::GetInstance()->get_worker_manager()->UpdateCacheDropLists(partstodrop);
-
+  
+  PlannerExecEnv::GetInstance()->get_worker_manager()->UpdateCacheDropLists(partitions_to_drop);
   return Status::OK();
 }
 
-Status DataSetService::RefreshDataSet(DataSetRequest *dataset_request, std::string table_location, std::shared_ptr<Storage> storage, std::shared_ptr<DataSet> pds, std::shared_ptr<DataSet> *dataset)
+Status DataSetService::RefreshDataSet(DataSetRequest *dataset_request,
+  std::string table_location, std::shared_ptr<Storage> storage,
+    std::shared_ptr<DataSet> pds, std::shared_ptr<DataSet> *dataset)
 {
   auto partitions = std::make_shared<std::vector<Partition>>();
 
@@ -102,9 +107,9 @@ Status DataSetService::RefreshDataSet(DataSetRequest *dataset_request, std::stri
     auto distributor = std::make_shared<ConsistentHashRing>();
     distributor->PrepareValidLocations(nullptr, nullptr);
     distributor->SetupDistribution();
-    for (auto ptt : pds->partitions())
+    for (auto p : pds->partitions())
     {
-      Partition partition = Partition(Identity(pds->dataset_path(), ptt.GetIdentPath()));
+      Partition partition = Partition(Identity(pds->dataset_path(), p.GetIdentityPath()));
       partitions->push_back(partition);
     }
     distributor->GetDistLocations(partitions);
@@ -127,7 +132,8 @@ Status DataSetService::RefreshDataSet(DataSetRequest *dataset_request, std::stri
 }
 
 //TODO: lockread/write move into function
-Status DataSetService::GetDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset)
+Status DataSetService::GetDataSet(DataSetRequest *dataset_request,
+  std::shared_ptr<DataSet> *dataset)
 {
 
   std::shared_ptr<DataSet> pds = NULL;
@@ -207,11 +213,11 @@ Status DataSetService::GetDataSet(DataSetRequest *dataset_request, std::shared_p
   } // pds is not NULL
 
   LOG(INFO) << "DataSetService::GetDataSet() finished successfully.";
-
   return Status::OK();
 }
 
-Status DataSetService::CacheDataSet(DataSetRequest *dataset_request, std::shared_ptr<DataSet> *dataset, int distpolicy)
+Status DataSetService::CacheDataSet(DataSetRequest *dataset_request,
+  std::shared_ptr<DataSet> *dataset, int distpolicy)
 {
 
   // build the dataset and insert it to dataset store.
@@ -229,7 +235,6 @@ Status DataSetService::CacheDataSet(DataSetRequest *dataset_request, std::shared
 
 Status DataSetService::RemoveDataSet(DataSetRequest *dataset_request)
 {
-
   std::shared_ptr<DataSet> pds = NULL;
   std::string dataset_path = dataset_request->get_dataset_path();
   dataset_store_->GetDataSet(dataset_path, &pds);

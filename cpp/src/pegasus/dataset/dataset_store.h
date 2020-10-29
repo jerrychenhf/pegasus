@@ -32,6 +32,7 @@ class DataSetStore {
  public:
   DataSetStore();
   ~DataSetStore();
+  
   Status GetDataSets(std::shared_ptr<std::vector<std::shared_ptr<DataSet>>>* datasets);
   Status GetDataSet(std::string dataset_path, std::shared_ptr<DataSet>* dataset);
   Status InsertDataSet(std::shared_ptr<DataSet> dataset);

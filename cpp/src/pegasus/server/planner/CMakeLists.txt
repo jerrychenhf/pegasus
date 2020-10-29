@@ -21,14 +21,14 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/planner")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/planner")
 
-add_library(Planner
+add_library(planner
   planner_table_api_service.cc
   planner.cc
   worker_manager.cc
   worker_failure_detector.cc
   failure-detector.cc
 )
-add_dependencies(Planner gen-deps)
+add_dependencies(planner gen-deps)
 
 add_executable(plannerd planner_main.cc)
 target_link_libraries(plannerd

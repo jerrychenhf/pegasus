@@ -43,7 +43,7 @@ class PegasusDataSetReader(
 
   private val clientFactory = new PegasusClientFactory(
       location, userName, passWord)
-  private val client = clientFactory.apply
+  private val client = clientFactory.apply(true)
 
 
   private val fileFormat = options.getOrElse("provider",

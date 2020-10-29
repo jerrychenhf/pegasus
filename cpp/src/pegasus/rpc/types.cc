@@ -380,5 +380,38 @@ bool HeartbeatResult::Equals(const HeartbeatResult& other) const {
   return true;
 }
 
+bool LocalColumnChunkInfo::Equals(const LocalColumnChunkInfo& other) const {
+  if (chunk_index != other.chunk_index ||
+    data_offset != other.data_offset ||
+    data_size != other.data_size ||
+    mmap_fd != other.mmap_fd ||
+    mmap_size != other.mmap_size ||
+    row_counts != other.row_counts) {
+    return false;
+  }
+  
+  return true;
+}
+
+bool LocalColumnInfo::Equals(const LocalColumnInfo& other) const {
+  if (column_index != other.column_index ||
+    chunks != other.chunks) {
+    return false;
+  }
+  
+  return true;
+}
+
+bool LocalPartitionInfo::Equals(const LocalPartitionInfo& other) const {
+  return columns == other.columns;
+}
+
+bool LocalReleaseResult::Equals(const LocalReleaseResult& other) const {
+  if (result_code != other.result_code) {
+    return false;
+  }
+  return true;
+}
+
 }  // namespace rpc
 }  // namespace pegasus

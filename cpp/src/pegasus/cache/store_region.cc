@@ -17,11 +17,16 @@
 
 /// \brief Data structure providing an opaque identifier or credential to use
 /// when requesting a data stream with the DoGet RPC
+
 #include "cache/store_region.h"
 
 namespace pegasus {
 
-StoreRegion::StoreRegion(){}
+StoreRegion::StoreRegion() :
+  address_(nullptr),
+  length_(0),
+  occupied_size_(0) {
+}
 
 StoreRegion::StoreRegion(uint8_t* base_offset, int64_t length,
  int64_t occupied_size): address_(base_offset), length_(length),

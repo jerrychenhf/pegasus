@@ -30,6 +30,7 @@
 #include "rpc/visibility.h"
 #include "arrow/ipc/writer.h"
 #include "arrow/buffer.h"
+#include "rpc/file_batch.h"
 
 namespace arrow {
 class Buffer;
@@ -503,6 +504,36 @@ class PEGASUS_RPC_EXPORT MetadataRecordBatchReader {
   virtual arrow::Status ReadAll(std::shared_ptr<arrow::Table>* table);
 };
 
+/// \brief A holder for a Batch data with associated Flight metadata.
+class PEGASUS_RPC_EXPORT FlightStreamData {
+ public:
+  std::shared_ptr<arrow::Buffer> app_metadata;
+};
+
+class PEGASUS_RPC_EXPORT FlightStreamRecordBatch: public FlightStreamData {
+ public:
+  std::shared_ptr<arrow::RecordBatch> data;
+};
+
+class PEGASUS_RPC_EXPORT FlightStreamFileBatch: public FlightStreamData {
+ public:
+  //TO DO: FileBatch should be a list of buffers for each columns
+  std::shared_ptr<FileBatch> data;
+};
+
+/// \brief An interface to read Flight data with metadata.
+class PEGASUS_RPC_EXPORT FlightStreamDataReader {
+ public:
+  virtual ~FlightStreamDataReader() = default;
+
+  /// \brief Get the schema for this stream.
+  virtual std::shared_ptr<arrow::Schema> schema() const = 0;
+  /// \brief Get the next message from Flight. If the stream is
+  /// finished, then the members of \a FlightStreamData will be
+  /// nullptr.
+  virtual arrow::Status Next(FlightStreamData* next) = 0;
+};
+
 /// \brief A FlightListing implementation based on a vector of
 /// FlightInfo objects.
 ///
@@ -643,6 +674,107 @@ struct PEGASUS_RPC_EXPORT HeartbeatResult {
     return left.Equals(right);
   }
   friend bool operator!=(const HeartbeatResult& left, const HeartbeatResult& right) {
+    return !(left == right);
+  }
+};
+
+/// \brief Column chunk data information for local memory mapping
+struct PEGASUS_RPC_EXPORT LocalColumnChunkInfo {
+  /*
+   * The chunk index (row group index)
+   */
+  int32_t chunk_index;
+  
+  /*
+   * The data offset in the mapping
+   */
+  int32_t data_offset;
+  
+  /*
+   * The data size
+   */
+  int64_t data_size;
+  
+  /*
+   * The file descriptor for memory mapping the column data
+   */
+  int32_t mmap_fd;
+  
+  /*
+   * The mmap size for the file descriptor
+   */
+  int64_t mmap_size;
+
+  /*
+   * The row counts number
+   */
+  int64_t row_counts;
+
+  bool Equals(const LocalColumnChunkInfo& other) const;
+
+  friend bool operator==(const LocalColumnChunkInfo& left, const LocalColumnChunkInfo& right) {
+    return left.Equals(right);
+  }
+  friend bool operator!=(const LocalColumnChunkInfo& left, const LocalColumnChunkInfo& right) {
+    return !(left == right);
+  }
+};
+
+/// \brief Column data information for local memory mapping
+struct PEGASUS_RPC_EXPORT LocalColumnInfo {
+  /*
+   * The column index
+   */
+  int32_t column_index;
+  
+  /// List of local column chunk info for memory mapping each column
+  std::vector<LocalColumnChunkInfo> chunks;
+    
+  bool Equals(const LocalColumnInfo& other) const;
+
+  friend bool operator==(const LocalColumnInfo& left, const LocalColumnInfo& right) {
+    return left.Equals(right);
+  }
+  friend bool operator!=(const LocalColumnInfo& left, const LocalColumnInfo& right) {
+    return !(left == right);
+  }
+};
+
+/// \brief Partion data information for memory mapping which include a list of column data
+/// redeemed
+struct PEGASUS_RPC_EXPORT LocalPartitionInfo {
+   /// List of local column info for memory mapping each column
+  std::vector<LocalColumnInfo> columns;
+
+  explicit LocalPartitionInfo() {}
+
+
+  explicit LocalPartitionInfo(std::vector<LocalColumnInfo> columns) :
+    columns(columns) {}
+
+  bool Equals(const LocalPartitionInfo& other) const;
+
+  friend bool operator==(const LocalPartitionInfo left, const LocalPartitionInfo& right) {
+    return left.Equals(right);
+  }
+  friend bool operator!=(const LocalPartitionInfo& left, const LocalPartitionInfo& right) {
+    return !(left == right);
+  }
+};
+
+/// \brief Column data information for local memory mapping
+struct PEGASUS_RPC_EXPORT LocalReleaseResult {
+  /*
+   * The result code of release using of local data
+   */
+  int32_t result_code;
+
+  bool Equals(const LocalReleaseResult& other) const;
+
+  friend bool operator==(const LocalReleaseResult& left, const LocalReleaseResult& right) {
+    return left.Equals(right);
+  }
+  friend bool operator!=(const LocalReleaseResult& left, const LocalReleaseResult& right) {
     return !(left == right);
   }
 };

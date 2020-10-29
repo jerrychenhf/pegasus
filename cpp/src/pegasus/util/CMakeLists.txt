@@ -23,7 +23,7 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/util")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/util")
 
-add_library(Util
+add_library(util
   global_flags.cc
   string_builder.cc
   time.cc
@@ -44,9 +44,9 @@ add_library(Util
   faststring.cc
   test_util_prod
 )
-add_dependencies(Util gen-deps)
+add_dependencies(util gen-deps)
 
-target_link_libraries(Util
+target_link_libraries(util
                       ${BOOST_STATIC_FILESYSTEM_LIBRARY}
                       ${BOOST_STATIC_THREAD_LIBRARY}
                       ${GFLAGS_LIBRARIES}
@@ -55,11 +55,11 @@ target_link_libraries(Util
 
 if(PEGASUS_TEST_LINKAGE STREQUAL "static")
   set(PEGASUS_UTIL_TEST_LINK_LIBS
-      Util
+      util
       ${PEGASUS_TEST_STATIC_LINK_LIBS})
 else()
   set(PEGASUS_UTIL_TEST_LINK_LIBS
-      Util
+      util
       ${PEGASUS_TEST_SHARED_LINK_LIBS})
 endif()
 

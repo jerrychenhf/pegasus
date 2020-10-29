@@ -107,13 +107,23 @@ arrow::Status ToProto(const ActionType& type, pb::ActionType* pb_type);
 arrow::Status ToProto(const Action& action, pb::Action* pb_action);
 arrow::Status ToProto(const Result& result, pb::Result* pb_result);
 arrow::Status ToProto(const SchemaResult& result, pb::SchemaResult* pb_result);
-void ToProto(const Ticket& ticket, pb::Ticket* pb_ticket);
+arrow::Status ToProto(const Ticket& ticket, pb::Ticket* pb_ticket);
 arrow::Status ToProto(const BasicAuth& basic_auth, pb::BasicAuth* pb_basic_auth);
 arrow::Status ToProto(const NodeInfo& info, pb::NodeInfo* pb_info);
 arrow::Status ToProto(const HeartbeatInfo& info, pb::HeartbeatInfo* pb_info);
 arrow::Status ToProto(const PartitionDropList& partsdroplist, pb::PartitionDropList* pb_partsdroplist);
 arrow::Status ToProto(const HeartbeatResultCmd& resultcmd, pb::HeartbeatResultCmd* pb_resultcmd);
 arrow::Status ToProto(const HeartbeatResult& result, pb::HeartbeatResult* pb_result);
+
+arrow::Status FromProto(const pb::LocalColumnChunkInfo& pb_info, LocalColumnChunkInfo* info);
+arrow::Status FromProto(const pb::LocalColumnInfo& pb_info, LocalColumnInfo* info);
+arrow::Status FromProto(const pb::LocalPartitionInfo& pb_info, LocalPartitionInfo* info);
+arrow::Status FromProto(const pb::LocalReleaseResult& pb_result, LocalReleaseResult* result);
+arrow::Status ToProto(const LocalColumnChunkInfo& info, pb::LocalColumnChunkInfo* pb_info);
+arrow::Status ToProto(const LocalColumnInfo& info, pb::LocalColumnInfo* pb_info);
+arrow::Status ToProto(const LocalPartitionInfo& info, pb::LocalPartitionInfo* pb_info);
+arrow::Status ToProto(const LocalReleaseResult& result, pb::LocalReleaseResult* pb_result);
+  
 }  // namespace internal
 }  // namespace rpc
 }  // namespace pegasus

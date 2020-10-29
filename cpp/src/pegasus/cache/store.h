@@ -20,7 +20,6 @@
 
 #include <unordered_map>
 #include <atomic>
-
 #include "common/status.h"
 #include "cache/store_region.h"
 
@@ -48,7 +47,6 @@ class Store {
     DCPMM,
     FILE
   };
-
 };
 
 } // namespace pegasus

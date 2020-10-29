@@ -32,6 +32,8 @@ import org.apache.pegasus.rpc.FlightDescriptor;
 import org.apache.pegasus.rpc.FlightInfo;
 import org.apache.pegasus.rpc.FlightProducer;
 import org.apache.pegasus.rpc.FlightStream;
+import org.apache.pegasus.rpc.LocalPartitionInfo;
+import org.apache.pegasus.rpc.LocalReleaseResult;
 import org.apache.pegasus.rpc.Location;
 import org.apache.pegasus.rpc.PutResult;
 import org.apache.pegasus.rpc.Result;
@@ -156,6 +158,17 @@ public class InMemoryStore implements FlightProducer, AutoCloseable {
     listener.onNext(new ActionType("put", "push a stream. Action must be done via standard put mechanism"));
     listener.onNext(new ActionType("drop", "delete a flight. Action body is a JSON encoded path."));
     listener.onCompleted();
+  }
+
+
+  @Override
+  public LocalPartitionInfo getLocalData(CallContext context, Ticket ticket) {
+    throw CallStatus.UNIMPLEMENTED.withDescription("Not implemented.").toRuntimeException();
+  }
+
+  @Override
+  public LocalReleaseResult releaseLocalData(CallContext context, Ticket ticket) {
+    throw CallStatus.UNIMPLEMENTED.withDescription("Not implemented.").toRuntimeException();
   }
 
   @Override

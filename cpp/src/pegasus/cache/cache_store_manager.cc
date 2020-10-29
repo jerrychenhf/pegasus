@@ -15,7 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-
 #include "cache/cache_store_manager.h"
 #include "runtime/worker_exec_env.h"
 #include "cache/store_manager.h"

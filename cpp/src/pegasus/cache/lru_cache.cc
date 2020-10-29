@@ -22,10 +22,8 @@
 #include <memory>
 #include <ostream>
 #include <string>
-
 #include <gflags/gflags.h>
 #include <glog/logging.h>
-
 #include "gutil/gscoped_ptr.h"
 #include "gutil/macros.h"
 #include "gutil/strings/substitute.h"
@@ -35,7 +33,6 @@
 #include "util/slice.h"
 #include "util/string_case.h"
 #include "common/logging.h"
-
 #include "runtime/worker_exec_env.h"
 #include "dataset/dataset_cache_manager.h"
 
@@ -74,9 +71,9 @@ Cache* CreateCache(int64_t capacity) {
     case Cache::MemoryType::DRAM:
       return NewCache<Cache::EvictionPolicy::LRU, Cache::MemoryType::DRAM>(
           capacity, "lru_cache");
-    // case Cache::MemoryType::NVM:
-    //   return NewCache<Cache::EvictionPolicy::LRU, Cache::MemoryType::NVM>(
-    //       capacity, "lru_cache");
+    /*case Cache::MemoryType::NVM:
+      return NewCache<Cache::EvictionPolicy::LRU, Cache::MemoryType::NVM>(
+          capacity, "lru_cache"); */
     default:
       LOG(FATAL) << "unsupported LRU cache memory type: " << mem_type;
       return nullptr;
@@ -84,39 +81,40 @@ Cache* CreateCache(int64_t capacity) {
 }
 
 bool ValidateLRUCacheCapacity() {
-  // if (FLAGS_force_lru_cache_capacity) {
-  //   return true;
-  // }
-  // if (FLAGS_lru_cache_type != "DRAM") {
-  //   return true;
-  // }
-  // int64_t capacity = FLAGS_lru_cache_capacity_mb * 1024 * 1024;
-//   int64_t mpt = process_memory::MemoryPressureThreshold();
-//   if (capacity > mpt) {
-//     LOG(ERROR) << Substitute("lru cache capacity exceeds the memory pressure "
-//                              "threshold ($0 bytes vs. $1 bytes). This will "
-//                              "cause instability and harmful flushing behavior. "
-//                              "Lower --lru_cache_capacity_mb or raise "
-//                              "--memory_limit_hard_bytes.",
-//                              capacity, mpt);
-//     return false;
-//   }
-//   if (capacity > mpt / 2) {
-//     LOG(WARNING) << Substitute("lru cache capacity exceeds 50% of the memory "
-//                                "pressure threshold ($0 bytes vs. 50% of $1 bytes). "
-//                                "This may cause performance problems. Consider "
-//                                "lowering --lru_cache_capacity_mb or raising "
-//                                "--memory_limit_hard_bytes.",
-//                                capacity, mpt);
-//   }
+  // For testing and debugging
+  /*
+  if (FLAGS_force_lru_cache_capacity) {
+     return true;
+  }
+  if (FLAGS_lru_cache_type != "DRAM") {
+     return true;
+  }
+  int64_t capacity = FLAGS_lru_cache_capacity_mb * 1024 * 1024;
+  int64_t mpt = process_memory::MemoryPressureThreshold();
+  if (capacity > mpt) {
+     LOG(ERROR) << Substitute("lru cache capacity exceeds the memory pressure "
+                              "threshold ($0 bytes vs. $1 bytes). This will "
+                              "cause instability and harmful flushing behavior. "
+                              "Lower --lru_cache_capacity_mb or raise "
+                              "--memory_limit_hard_bytes.",
+                              capacity, mpt);
+     return false;
+  }
+  if (capacity > mpt / 2) {
+     LOG(WARNING) << Substitute("lru cache capacity exceeds 50% of the memory "
+                                "pressure threshold ($0 bytes vs. 50% of $1 bytes). "
+                                "This may cause performance problems. Consider "
+                                "lowering --lru_cache_capacity_mb or raising "
+                                "--memory_limit_hard_bytes.",
+                                capacity, mpt);
+  }
   return true;
+  */
 }
-
 
 // GROUP_FLAG_VALIDATOR(lru_cache_capacity_mb, ValidateLRUCacheCapacity);
 
 Cache::MemoryType LRUCache::GetConfiguredCacheMemoryTypeOrDie() {
-    // ToUpperCase(FLAGS_lru_cache_type, &FLAGS_lru_cache_type);
   if (FLAGS_lru_cache_type == "NVM") {
     return Cache::MemoryType::NVM;
   }
@@ -153,7 +151,6 @@ void LRUCache::Insert(const CacheKey* key, int64_t column_size) {
   
   auto h(cache_->Insert(std::move(handle),
                         eviction_callback_));
-  return;
 }
 
 void LRUCache::Touch(const CacheKey* key) {
@@ -165,13 +162,11 @@ void LRUCache::Touch(const CacheKey* key) {
   } else {
     LOG(INFO) << "the cache key is not in lru cache";
   }
-  return;
 }
 
 void LRUCache::Erase(const CacheKey* key) {
   Slice key_slice(reinterpret_cast<const uint8_t*>(key), sizeof(key));
   cache_->Erase(key_slice);
-  return;
 }
 
 } // namespace pegasus

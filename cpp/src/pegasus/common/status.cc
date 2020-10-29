@@ -19,7 +19,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
-
 #include "common/status.h"
 
 namespace pegasus {

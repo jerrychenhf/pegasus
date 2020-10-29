@@ -19,8 +19,8 @@
 
 #include <sstream>
 #include <memory>
-
 #include <boost/thread/lock_guard.hpp>
+
 #include "gutil/strings/substitute.h"
 #include "common/logging.h"
 #include "common/location.h"

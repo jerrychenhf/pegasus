@@ -34,7 +34,6 @@ namespace pegasus {
 
 Planner::Planner(PlannerExecEnv* exec_env)
   : exec_env_(exec_env) {
-  
 }
 
 Planner::~Planner() {

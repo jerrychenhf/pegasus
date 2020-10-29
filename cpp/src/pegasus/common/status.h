@@ -25,9 +25,7 @@
 #include <memory>
 #include <string>
 #include <utility>
-
 #include "arrow/status.h"
-
 #include "common/compiler-util.h"
 #include "common/logging.h"
 #include "util/compare.h"
@@ -68,7 +66,7 @@
     PEGASUS_RETURN_IF_(!__s.ok(), __s, PEGASUS_STRINGIFY(status));        \
   } while (false)
 
-#define RETURN_IF_EROR_ELSE(s, else_)                            \
+#define RETURN_IF_ERROR_ELSE(s, else_)                            \
   do {                                                          \
     ::pegasus::Status _s = ::pegasus::internal::GenericToStatus(s); \
     if (!_s.ok()) {                                             \

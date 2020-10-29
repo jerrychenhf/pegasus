@@ -22,12 +22,12 @@
 
 namespace pegasus {
 
-FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<ResultDataSet> dataset) : dataset_(dataset){
-
+FlightInfoBuilder::FlightInfoBuilder(
+  std::shared_ptr<ResultDataSet> dataset) : dataset_(dataset){
 }
 
-FlightInfoBuilder::FlightInfoBuilder(std::shared_ptr<std::vector<std::shared_ptr<ResultDataSet>>> datasets) {
-
+FlightInfoBuilder::FlightInfoBuilder(
+  std::shared_ptr<std::vector<std::shared_ptr<ResultDataSet>>> datasets) {
 }
 
 Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flight_info,
@@ -35,16 +35,10 @@ Status FlightInfoBuilder::BuildFlightInfo(std::unique_ptr<rpc::FlightInfo>* flig
                                           std::vector<int32_t>& indices,
                                           rpc::FlightDescriptor& fldtr) {
 
-LOG(INFO) << "BuildFlightInfo()...";
-//  std::unique_ptr<rpc::FlightDescriptor> flight_descriptor;
-//  GetFlightDescriptor(flight_descriptor);
+  LOG(INFO) << "BuildFlightInfo()...";
   std::unique_ptr<std::vector<rpc::FlightEndpoint>> endpoints;
-
   GetFlightEndpoints(&endpoints, schema, indices);
-//LOG(INFO) << "endpoints->at(0).ticket.dataset_path: " << endpoints->at(0).ticket.dataset_path;
-//LOG(INFO) << "endpoints->at(0).ticket.partition_identity: " << endpoints->at(0).ticket.partition_identity;
-//LOG(INFO) << "endpoints->at(0).locations.at(0).Tostring(): " << endpoints->at(0).locations.at(0).Tostring();
- 
+
   std::string schema_string;
   rpc::internal::SchemaToString(*(dataset_->get_schema()), &schema_string);
 
@@ -54,21 +48,18 @@ LOG(INFO) << "BuildFlightInfo()...";
   flight_data.endpoints = *endpoints;
   flight_data.total_records = GetTotalRecords();
   flight_data.total_bytes = GetTotalBytes();
-//  rpc::FlightInfo value(flight_data);
-//  *flight_info = std::unique_ptr<rpc::FlightInfo>(new rpc::FlightInfo(std::move(value)));
+
   *flight_info  = std::unique_ptr<rpc::FlightInfo>(new rpc::FlightInfo(std::move(flight_data)));
 
-LOG(INFO) << "FlightInfoBuilder::BuildFlightInfo() finished successfully.";
+  LOG(INFO) << "FlightInfoBuilder::BuildFlightInfo() finished successfully.";
   return Status::OK();
 }
 
 Status FlightInfoBuilder::BuildFlightListing(std::unique_ptr<rpc::FlightListing>* listings) {
-  
   return Status::OK();
 }
 
 Status FlightInfoBuilder::GetFlightDescriptor(std::unique_ptr<rpc::FlightDescriptor> flight_descriptor) {
-
   return Status::OK();
 }
 
@@ -76,7 +67,7 @@ Status FlightInfoBuilder::GetFlightEndpoints(std::unique_ptr<std::vector<rpc::Fl
                                              std::shared_ptr<arrow::Schema> schema,
                                              std::vector<int32_t>& indices) {
 
-LOG(INFO) << "GetFlightEndpoints()...";
+  LOG(INFO) << "GetFlightEndpoints()...";
   // fill ticket and locations in the endpoints
   // every endpoint has 1 ticket + many locations
   // every ticket has 1 dataset_path, 1 partition_id, many column indices.
@@ -86,40 +77,31 @@ LOG(INFO) << "GetFlightEndpoints()...";
   // every identity has 1 dataset_path, 1 partition_id.
   // so, every dataset has 1 schema + 1 dataset_path + many partition ids + many locations.
 
-//  *endpoints = std::make_unique<std::vector<rpc::FlightEndpoint>>();
   *endpoints = std::unique_ptr<std::vector<rpc::FlightEndpoint>>(new std::vector<rpc::FlightEndpoint>());
 
-  for (auto partit:dataset_->partitions())
+  for (auto partition:dataset_->partitions())
   {
-    rpc::FlightEndpoint fep;
-  // Ticket ticket;    std::string dataset_path;  std::string partition_identity;  std::vector<int> column_indices;
-  // std::vector<Location> locations;
+    rpc::FlightEndpoint endpoint;
     std::string schema_string;
-    // rpc::internal::SchemaToString(*(dataset_->get_schema()), &schema);
     rpc::internal::SchemaToString(*schema, &schema_string);
-    fep.ticket.setSchema(schema_string);
-    fep.ticket.setDatasetpath(dataset_->dataset_path());
-    fep.ticket.setPartitionid(partit.GetIdentPath());
-    fep.ticket.setColids(indices);
+    endpoint.ticket.setSchema(schema_string);
+    endpoint.ticket.setDatasetpath(dataset_->dataset_path());
+    endpoint.ticket.setPartitionid(partition.GetIdentityPath());
+    endpoint.ticket.setColids(indices);
+    endpoint.locations.push_back(partition.GetLocation());
 
-    fep.locations.push_back(partit.GetLocation());
-//    Location lcn;
-//    rpc::Location::Parse(partit.GetLocationURI(), lcn);
-//    fep.locations.push_back(lcn);
-    (*endpoints)->push_back(fep);
+    (*endpoints)->push_back(endpoint);
   }
 
-LOG(INFO) << "...GetFlightEndpoints()";
+  LOG(INFO) << "...GetFlightEndpoints()";
   return Status::OK();
 }
 
-int64_t FlightInfoBuilder::GetTotalRecords() {
-    
+int64_t FlightInfoBuilder::GetTotalRecords() {  
   return dataset_->total_records();
 }
 
 int64_t FlightInfoBuilder::GetTotalBytes() {
-
   return dataset_->total_bytes();
 }
 

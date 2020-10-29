@@ -16,8 +16,8 @@
 // under the License.
 
 #include "server/planner/worker_manager.h"
-#include "util/time.h"
 #include <boost/thread/lock_guard.hpp>
+#include "util/time.h"
 #include "gutil/strings/substitute.h"
 #include "server/planner/worker_failure_detector.h"
 
@@ -53,7 +53,7 @@ Status WorkerManager::GetWorkerSetInfo(std::shared_ptr<struct WorkerSetInfo>& wo
       it != workers_.end(); ++it) {
 				workersetinfo->locations->push_back(it->second->address());
 				LOG(INFO) << "- insert location: " << it->second->address().ToString();
-				workersetinfo->nodecacheMB->push_back(it->second->node_info()->get_cache_capacity() / (1024 * 1024));
+				workersetinfo->node_cache_capacity->push_back(it->second->node_info()->get_cache_capacity() / (1024 * 1024));
 				LOG(INFO) << "- nodecachesize(MB): " << it->second->node_info()->get_cache_capacity() / (1024 * 1024);
     }
   }
@@ -81,9 +81,9 @@ Status WorkerManager::Heartbeat(const rpc::HeartbeatInfo& info,
     {
       LOG(INFO) << "Yes, " << info.hostname << " has data cache to drop. Building rpc cmd...";
       hbrc->hbrc_action = rpc::HeartbeatResultCmd::DROPCACHE;
-      auto sppartlist = std::make_shared<WorkerCacheDropList>();
-      RETURN_IF_ERROR(GetCacheDropList(info.hostname, sppartlist));
-      hbrc->hbrc_parameters = sppartlist->GetPartstodrop();
+      auto droplist = std::make_shared<WorkerCacheDropList>();
+      RETURN_IF_ERROR(GetCacheDropList(info.hostname, droplist));
+      hbrc->hbrc_parameters = droplist->GetDropList();
       r->result_hascmd = true;
       r->result_command = std::move(*hbrc);
     } else {
@@ -204,29 +204,29 @@ Status WorkerManager::OnWorkerFailed(const WorkerId& id) {
   return Status::OK();
 }
 
-Status WorkerManager::UpdateCacheDropLists(std::shared_ptr<std::vector<Partition>> partits) {
+Status WorkerManager::UpdateCacheDropLists(std::shared_ptr<std::vector<Partition>> partitions) {
 
   // concurrent control
-  lock_guard<mutex> l(mapcachedrop_lock_);
+  lock_guard<mutex> l(worker_cache_drop_lock_);
 
   // for each partition, add it to corresponding worker-cachedroplist
-  for (auto part : (*partits))
+  for (auto part : (*partitions))
   {
     // get workerid (location hostname)
     WorkerId wkid = part.GetLocationHostname();
     // add this partition to WorkerCacheDropList, first check if it exists
-    auto it = mapwkcachedroplist_.find(wkid);
-    if (it == mapwkcachedroplist_.end())
+    auto it = worker_cache_drop_map_.find(wkid);
+    if (it == worker_cache_drop_map_.end())
     {
-      mapwkcachedroplist_[wkid] = std::make_shared<WorkerCacheDropList>();
+      worker_cache_drop_map_[wkid] = std::make_shared<WorkerCacheDropList>();
     }
-    mapwkcachedroplist_[wkid]->InsertPartition(part);
+    worker_cache_drop_map_[wkid]->InsertPartition(part);
   }
 
   // debug output
-  LOG(INFO) << "mapwkcachedroplist_:";
-  for (auto it : mapwkcachedroplist_) {
-    LOG(INFO) << "\t" << it.first << ", with " << it.second->GetPartstodrop().size() << " partition(s).";
+  LOG(INFO) << "worker_cache_drop_map_:";
+  for (auto it : worker_cache_drop_map_) {
+    LOG(INFO) << "\t" << it.first << ", with " << it.second->GetDropList().size() << " partition(s).";
   }
 
   return Status::OK();
@@ -235,26 +235,26 @@ Status WorkerManager::UpdateCacheDropLists(std::shared_ptr<std::vector<Partition
 bool WorkerManager::NeedtoDropCache(const WorkerId& id) {
   LOG(INFO) << "Checking if " << id << " has partitions to drop...";
 
-  lock_guard<mutex> l(mapcachedrop_lock_);
+  lock_guard<mutex> l(worker_cache_drop_lock_);
 
-  auto it = mapwkcachedroplist_.find(id);
-  if (it != mapwkcachedroplist_.end())
+  auto it = worker_cache_drop_map_.find(id);
+  if (it != worker_cache_drop_map_.end())
     return true;
   else
     return false;
 }
 
-Status WorkerManager::GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList>& sppartlist) {
+Status WorkerManager::GetCacheDropList(const WorkerId& id, std::shared_ptr<WorkerCacheDropList>& droplist) {
 
   // concurrent control
-  lock_guard<mutex> l(mapcachedrop_lock_);
+  lock_guard<mutex> l(worker_cache_drop_lock_);
 
-  auto it = mapwkcachedroplist_.find(id);
-  if (it != mapwkcachedroplist_.end())
+  auto it = worker_cache_drop_map_.find(id);
+  if (it != worker_cache_drop_map_.end())
   {
-    LOG(INFO) << "Fetching " << id << " from mapwkcachedroplist_...";
-    sppartlist = std::move(mapwkcachedroplist_[id]);
-    mapwkcachedroplist_.erase(it);
+    LOG(INFO) << "Fetching " << id << " from worker_cache_drop_map_...";
+    droplist = std::move(worker_cache_drop_map_[id]);
+    worker_cache_drop_map_.erase(it);
     LOG(INFO) << "Fetched.";
   }
 

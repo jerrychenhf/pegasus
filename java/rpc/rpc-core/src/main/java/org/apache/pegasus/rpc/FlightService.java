@@ -301,6 +301,36 @@ class FlightService extends FlightServiceImplBase {
       responseObserver.onError(StatusUtils.toGrpcException(ex));
     }
   }
+  
+  @Override
+  public void getLocalData(Flight.Ticket request, StreamObserver<Flight.LocalPartitionInfo> responseObserver) {
+    final LocalPartitionInfo info;
+    try {
+      info = producer
+          .getLocalData(makeContext((ServerCallStreamObserver<?>) responseObserver), new Ticket(request));
+    } catch (Exception ex) {
+      // Don't capture exceptions from onNext or onCompleted with this block - because then we can't call onError
+      responseObserver.onError(StatusUtils.toGrpcException(ex));
+      return;
+    }
+    responseObserver.onNext(info.toProtocol());
+    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void releaseLocalData(Flight.Ticket request, StreamObserver<Flight.LocalReleaseResult> responseObserver) {
+    final LocalReleaseResult result;
+    try {
+      result = producer
+          .releaseLocalData(makeContext((ServerCallStreamObserver<?>) responseObserver), new Ticket(request));
+    } catch (Exception ex) {
+      // Don't capture exceptions from onNext or onCompleted with this block - because then we can't call onError
+      responseObserver.onError(StatusUtils.toGrpcException(ex));
+      return;
+    }
+    responseObserver.onNext(result.toProtocol());
+    responseObserver.onCompleted();
+  }
 
   /**
    * Call context for the service.

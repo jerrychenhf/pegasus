@@ -16,10 +16,8 @@
 // under the License.
 #include <arrow/record_batch.h>
 #include <arrow/type.h>
-
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-
 #include "catalog/spark_catalog.h"
 #include "parquet/parquet_reader.h"
 #include "runtime/planner_exec_env.h"
@@ -31,11 +29,9 @@ namespace pegasus {
 const std::string SparkCatalog::FILE_FORMAT_ID_PARQUET = "PARQUET";
 
 SparkCatalog::SparkCatalog() : storage_factory_(new StorageFactory()) {
-
 }
 
 SparkCatalog::~SparkCatalog() {
-    
 }
 
 Status SparkCatalog::GetTableLocation(DataSetRequest* dataset_request,
@@ -66,16 +62,19 @@ Status SparkCatalog::GetSchema(DataSetRequest* dataset_request,
     RETURN_IF_ERROR(std::dynamic_pointer_cast<HDFSStorage>(storage)
         ->GetReadableFile(file_list[0], &file));
 
-    parquet::ArrowReaderProperties properties = parquet::default_arrow_reader_properties();
+    parquet::ArrowReaderProperties properties =
+      parquet::default_arrow_reader_properties();
     arrow::MemoryPool *pool = arrow::default_memory_pool();
-    std::unique_ptr<ParquetReader> parquet_reader(new ParquetReader(file, pool, properties));
+    std::unique_ptr<ParquetReader> parquet_reader(
+      new ParquetReader(file, pool, properties));
     RETURN_IF_ERROR(parquet_reader->GetSchema(schema));
   }
 
   return Status::OK();
 }
 
-Catalog::FileFormat SparkCatalog::GetFileFormat(DataSetRequest* dataset_request) {
+Catalog::FileFormat SparkCatalog::GetFileFormat(
+  DataSetRequest* dataset_request) {
   const auto properties = dataset_request->get_properties();
   std::unordered_map<std::string, std::string>::const_iterator it = 
       properties.find(DataSetRequest::FILE_FORMAT);

@@ -20,15 +20,13 @@
 #include <dlfcn.h>
 #include <mutex>
 #include <glog/logging.h>
-
 #include "gutil/strings/substitute.h"
 #include "util/scoped_cleanup.h"
 #include "util/flag_tags.h"
-
 #include "cache/store_manager.h"
 
 #ifndef MEMKIND_PMEM_MIN_SIZE
-#define MEMKIND_PMEM_MIN_SIZE (1024 * 1024 * 16) // Taken from memkind 1.9.0.
+  #define MEMKIND_PMEM_MIN_SIZE (1024 * 1024 * 16) // Taken from memkind 1.9.0.
 #endif
 
 DEFINE_bool(dcpmm_cache_simulate_allocation_failure, false,

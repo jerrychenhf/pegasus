@@ -17,7 +17,7 @@
 // Usage documentation
 // -----------------------------------------------------------------------------
 //
-// See pegasus/gutil/callback.h for documentation.
+// See gutil/callback.h for documentation.
 //
 //
 // -----------------------------------------------------------------------------
@@ -25,7 +25,7 @@
 // -----------------------------------------------------------------------------
 //
 // If you're reading the implementation, before proceeding further, you should
-// read the top comment of pegasus/gutil/bind_internal.h for a definition of common
+// read the top comment of gutil/bind_internal.h for a definition of common
 // terms and concepts.
 //
 // RETURN TYPES

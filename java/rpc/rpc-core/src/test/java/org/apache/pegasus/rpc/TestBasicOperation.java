@@ -371,6 +371,16 @@ public class TestBasicOperation {
       listener.onCompleted();
     }
 
+    @Override
+    public LocalPartitionInfo getLocalData(CallContext context, Ticket ticket) {
+      return null;
+    }
+
+    @Override
+    public LocalReleaseResult releaseLocalData(CallContext context, Ticket ticket) {
+      return null;
+    }
+
   }
 
 

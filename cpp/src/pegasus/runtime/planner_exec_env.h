@@ -30,7 +30,6 @@ namespace pegasus {
 class PlannerExecEnv : public ExecEnv {
  public:
   PlannerExecEnv();
-
   PlannerExecEnv(const std::string& hostname, int32_t port);
 
   static PlannerExecEnv* GetInstance() { return exec_env_; }
@@ -40,7 +39,6 @@ class PlannerExecEnv : public ExecEnv {
   std::shared_ptr<WorkerManager> get_worker_manager();
 
   std::string GetPlannerGrpcHost();
-
   int32_t GetPlannerGrpcPort();
 
  private:

@@ -17,12 +17,12 @@
 #pragma once
 
 // This addresses platform-specific defines, e.g. on Windows
-#include "pegasus/rpc/platform.h"  // IWYU pragma: keep
+#include "rpc/platform.h"  // IWYU pragma: keep
 
 // This header holds the Flight protobuf definitions.
 
 // Need to include this first to get our gRPC customizations
-#include "pegasus/rpc/customize_protobuf.h"  // IWYU pragma: export
+#include "rpc/customize_protobuf.h"  // IWYU pragma: export
 
-#include "pegasus/rpc/Flight.grpc.pb.h"  // IWYU pragma: export
-#include "pegasus/rpc/Flight.pb.h"       // IWYU pragma: export
+#include "rpc/Flight.grpc.pb.h"  // IWYU pragma: export
+#include "rpc/Flight.pb.h"       // IWYU pragma: export

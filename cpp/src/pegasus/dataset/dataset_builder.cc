@@ -34,7 +34,6 @@ DataSetBuilder::DataSetBuilder(std::shared_ptr<CatalogManager> catalog_manager)
 Status DataSetBuilder::BuildDataset(DataSetRequest *dataset_request,
                                     std::shared_ptr<DataSet> *dataset, int distpolicy)
 {
-
   auto distributor = std::make_shared<ConsistentHashRing>();
   // TODO: get locations here to decouple distributor from workermanager
   distributor->PrepareValidLocations(nullptr, nullptr);
@@ -71,7 +70,6 @@ Status DataSetBuilder::BuildDataset(DataSetRequest *dataset_request,
     }
 
     RETURN_IF_ERROR(catalog->GetSchema(dataset_request, &schema));
-
     RETURN_IF_ERROR(storage->GetModifedTime(table_location, &timestamp));
   }
   else
@@ -95,7 +93,6 @@ Status DataSetBuilder::BuildDataset(DataSetRequest *dataset_request,
   (*dataset)->setTimestamp(timestamp);
 
   LOG(INFO) << "BuildDataset() finished successfully.";
-
   return Status::OK();
 }
 

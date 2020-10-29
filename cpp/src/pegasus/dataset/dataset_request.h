@@ -22,7 +22,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-
 #include <arrow/type.h>
 #include <boost/algorithm/string.hpp>
 
@@ -33,7 +32,6 @@ using namespace std;
 namespace pegasus {
 
 class DataSetRequest {
-
  public:
   DataSetRequest();
   ~DataSetRequest();
@@ -55,7 +53,6 @@ class DataSetRequest {
   static const std::string FILE_FORMAT;
   static const std::string TABLE_LOCATION;
   static const std::string COLUMN_NAMES;
-
   private:
    std::string dataset_path_;
    RequestProperties properties_;
@@ -66,7 +63,6 @@ class DataSetRequest {
    std::vector<std::int32_t> column_indices_;
    std::shared_ptr<arrow::Schema> schema_;
 };
-
 
 } // namespace pegasus
 

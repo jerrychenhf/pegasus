@@ -25,7 +25,6 @@ const std::string DatasetCacheEngineManager::ENGINE_ID_LRU = "LRU";
 const std::string DatasetCacheEngineManager::ENGINE_ID_NONEVICT = "NONEVICT";
 
 DatasetCacheEngineManager::DatasetCacheEngineManager() {
-
 }
 
 DatasetCacheEngineManager::~DatasetCacheEngineManager() {
@@ -57,7 +56,8 @@ Status DatasetCacheEngineManager::Init() {
 }
 
 // Get the specific cache engine based on the available capacity.
-Status DatasetCacheEngineManager::GetCacheEngine(CacheEngine::CachePolicy cache_policy, std::shared_ptr<CacheEngine>* cache_engine) {
+Status DatasetCacheEngineManager::GetCacheEngine(
+  CacheEngine::CachePolicy cache_policy, std::shared_ptr<CacheEngine>* cache_engine) {
     if (cache_policy == CacheEngine::CachePolicy::LRU) {
       auto entry = cached_engines_.find(ENGINE_ID_LRU);
       if (entry == cached_engines_.end()) {

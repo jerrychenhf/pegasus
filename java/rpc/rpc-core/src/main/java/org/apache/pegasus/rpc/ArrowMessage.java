@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.flatbuffers.FlatBufferBuilder;
+import org.apache.arrow.flatbuf.Message;
 import org.apache.arrow.memory.BufferAllocator;
 import org.apache.arrow.util.AutoCloseables;
 import org.apache.arrow.util.Preconditions;
@@ -65,16 +67,18 @@ class ArrowMessage implements AutoCloseable {
 
   public static final boolean FAST_PATH = true;
 
-  private static final int DESCRIPTOR_TAG =
+  protected static final int DESCRIPTOR_TAG =
       (FlightData.FLIGHT_DESCRIPTOR_FIELD_NUMBER << 3) | WireFormat.WIRETYPE_LENGTH_DELIMITED;
-  private static final int BODY_TAG =
+  protected static final int BODY_TAG =
       (FlightData.DATA_BODY_FIELD_NUMBER << 3) | WireFormat.WIRETYPE_LENGTH_DELIMITED;
-  private static final int HEADER_TAG =
+  protected static final int HEADER_TAG =
       (FlightData.DATA_HEADER_FIELD_NUMBER << 3) | WireFormat.WIRETYPE_LENGTH_DELIMITED;
-  private static final int APP_METADATA_TAG =
+  protected static final int FILEBATCH_HEADER_TAG =
+          (4 << 3) | WireFormat.WIRETYPE_LENGTH_DELIMITED;
+  protected static final int APP_METADATA_TAG =
       (FlightData.APP_METADATA_FIELD_NUMBER << 3) | WireFormat.WIRETYPE_LENGTH_DELIMITED;
 
-  private static Marshaller<FlightData> NO_BODY_MARSHALLER = ProtoUtils.marshaller(FlightData.getDefaultInstance());
+  protected static Marshaller<FlightData> NO_BODY_MARSHALLER = ProtoUtils.marshaller(FlightData.getDefaultInstance());
 
   /** Get the application-specific metadata in this message. The ArrowMessage retains ownership of the buffer. */
   public ArrowBuf getApplicationMetadata() {
@@ -105,7 +109,7 @@ class ArrowMessage implements AutoCloseable {
   }
 
   // Pre-allocated buffers for padding serialized ArrowMessages.
-  private static List<ByteBuf> PADDING_BUFFERS = Arrays.asList(
+  protected static List<ByteBuf> PADDING_BUFFERS = Arrays.asList(
       null,
       Unpooled.copiedBuffer(new byte[] { 0 }),
       Unpooled.copiedBuffer(new byte[] { 0, 0 }),
@@ -116,10 +120,10 @@ class ArrowMessage implements AutoCloseable {
       Unpooled.copiedBuffer(new byte[] { 0, 0, 0, 0, 0, 0, 0 })
   );
 
-  private final FlightDescriptor descriptor;
-  private final MessageMetadataResult message;
-  private final ArrowBuf appMetadata;
-  private final List<ArrowBuf> bufs;
+  protected final FlightDescriptor descriptor;
+  protected final MessageMetadataResult message;
+  protected final ArrowBuf appMetadata;
+  protected final List<ArrowBuf> bufs;
 
 
   public ArrowMessage(FlightDescriptor descriptor, Schema schema) {
@@ -155,7 +159,7 @@ class ArrowMessage implements AutoCloseable {
     this.appMetadata = null;
   }
 
-  private ArrowMessage(FlightDescriptor descriptor, MessageMetadataResult message, ArrowBuf appMetadata,
+  protected ArrowMessage(FlightDescriptor descriptor, MessageMetadataResult message, ArrowBuf appMetadata,
                        ArrowBuf buf) {
     this.message = message;
     this.descriptor = descriptor;
@@ -227,6 +231,8 @@ class ArrowMessage implements AutoCloseable {
             byte[] bytes = new byte[size];
             ByteStreams.readFully(stream, bytes);
             header = MessageMetadataResult.create(ByteBuffer.wrap(bytes), size);
+            FlatBufferBuilder builder = new FlatBufferBuilder();
+            int a = Message.createMessage(builder, (short)1, (byte)1, 1, 0, 0);
             break;
           }
           case APP_METADATA_TAG: {
@@ -258,7 +264,7 @@ class ArrowMessage implements AutoCloseable {
 
   }
 
-  private static int readRawVarint32(InputStream is) throws IOException {
+  protected static int readRawVarint32(InputStream is) throws IOException {
     int firstByte = is.read();
     return CodedInputStream.readRawVarint32(firstByte, is);
   }
@@ -366,7 +372,15 @@ class ArrowMessage implements AutoCloseable {
   }
 
   public static Marshaller<ArrowMessage> createMarshaller(BufferAllocator allocator) {
-    return new ArrowMessageHolderMarshaller(allocator);
+    return createMarshaller(allocator, false);
+  }
+  
+  public static Marshaller<ArrowMessage> createMarshaller(BufferAllocator allocator, boolean useFileBatch) {
+    if (!useFileBatch) {
+      return new ArrowMessageHolderMarshaller(allocator);
+    } else {
+      return new FileBatchMessage.MessageHolderMarshaller(allocator);
+    }
   }
 
   private static class ArrowMessageHolderMarshaller implements MethodDescriptor.Marshaller<ArrowMessage> {

@@ -57,12 +57,16 @@ class FlightBindingService implements BindableService {
   }
 
   public static MethodDescriptor<Flight.Ticket, ArrowMessage> getDoGetDescriptor(BufferAllocator allocator) {
+    return getDoGetDescriptor(allocator, false);
+  }
+  
+  public static MethodDescriptor<Flight.Ticket, ArrowMessage> getDoGetDescriptor(BufferAllocator allocator, boolean useFileBatch) {
     return MethodDescriptor.<Flight.Ticket, ArrowMessage>newBuilder()
         .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
         .setFullMethodName(DO_GET)
         .setSampledToLocalTracing(false)
         .setRequestMarshaller(ProtoUtils.marshaller(Flight.Ticket.getDefaultInstance()))
-        .setResponseMarshaller(ArrowMessage.createMarshaller(allocator))
+        .setResponseMarshaller(ArrowMessage.createMarshaller(allocator, useFileBatch))
         .setSchemaDescriptor(FlightServiceGrpc.getDoGetMethod().getSchemaDescriptor())
         .build();
   }

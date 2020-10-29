@@ -34,6 +34,7 @@ class CacheStoreManager;
 class CacheEngine {
  public:
  virtual Status Init(const std::shared_ptr<CacheEngineInfo>& info) = 0;
+
  virtual Status GetCacheStore(CacheStore** cache_store) = 0;
  virtual Status PutValue(LRUCache::CacheKey* key, int64_t column_size) = 0;
  virtual Status TouchValue(LRUCache::CacheKey* key) = 0;
@@ -61,11 +62,8 @@ class LruCacheEngine : public CacheEngine {
   virtual Status Init(const std::shared_ptr<CacheEngineInfo>& info);
   
   Status GetCacheStore(CacheStore** cache_store) override;
-
   Status PutValue(LRUCache::CacheKey* key, int64_t column_size) override;
-
   Status TouchValue(LRUCache::CacheKey* key) override;
-
   Status EraseValue(LRUCache::CacheKey* key) override;
 
  private:

@@ -74,11 +74,13 @@ class PEGASUS_RPC_EXPORT FlightClientOptions {
   std::string override_hostname;
   /// \brief A list of client middleware to apply.
   std::vector<std::shared_ptr<ClientMiddlewareFactory>> middleware;
+  /// \the cache format to use
+  bool cache_format_arrow;
 };
 
 /// \brief A RecordBatchReader exposing Flight metadata and cancel
 /// operations.
-class PEGASUS_RPC_EXPORT FlightStreamReader : public MetadataRecordBatchReader {
+class PEGASUS_RPC_EXPORT FlightStreamReader : public FlightStreamDataReader {
  public:
   /// \brief Try to cancel the call.
   virtual void Cancel() = 0;
@@ -257,6 +259,32 @@ class PEGASUS_RPC_EXPORT FlightClient {
   Status Heartbeat(const HeartbeatInfo& info,
                        std::unique_ptr<HeartbeatResult>* result) {
     return Heartbeat({}, info, result);
+  }
+  
+  /// \brief Request data columns for a partition from a local worker in shared memory mapping way.
+  /// \param[in] options Per-RPC options
+  /// \param[in] the ticket for the partition and columns to get
+  /// \param[out] the result contains information to read the data through shared memory
+  /// \return Status
+  Status GetLocalData(const FlightCallOptions& options,
+                       const Ticket& ticket,
+                       std::unique_ptr<LocalPartitionInfo>* result);
+  Status GetLocalData(const Ticket& ticket,
+                       std::unique_ptr<LocalPartitionInfo>* result) {
+    return GetLocalData({}, ticket, result);
+  }
+  
+  /// \brief Release data columns for a partition from a local worker in shared memory mapping way.
+  /// \param[in] options Per-RPC options
+  /// \param[in] the ticket for the partition and columns to release
+  /// \param[out] the result of the release operation
+  /// \return Status
+  Status ReleaseLocalData(const FlightCallOptions& options,
+                       const Ticket& ticket,
+                       std::unique_ptr<LocalReleaseResult>* result);
+  Status ReleaseLocalData(const Ticket& ticket,
+                       std::unique_ptr<LocalReleaseResult>* result) {
+    return ReleaseLocalData({}, ticket, result);
   }
 
  private:

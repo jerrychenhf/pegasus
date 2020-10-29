@@ -55,6 +55,8 @@
 #include "rpc/server_middleware.h"
 #include "rpc/types.h"
 
+#include "rpc/file_batch_reader.h"
+
 using FlightService = pegasus::rpc::protocol::FlightService;
 using ServerContext = grpc::ServerContext;
 
@@ -595,6 +597,44 @@ class FlightServiceImpl : public FlightService::Service {
     SERVICE_RETURN_NOT_OK(flight_context, internal::ToProto(*result, response));
     RETURN_WITH_MIDDLEWARE(flight_context, grpc::Status::OK);
   }
+  
+  grpc::Status GetLocalData(ServerContext* context, const pb::Ticket* request,
+                             pb::LocalPartitionInfo* response) {
+    GrpcServerCallContext flight_context;
+    GRPC_RETURN_NOT_GRPC_OK(
+        CheckAuth(FlightMethod::GetLocalData, context, flight_context));
+
+    CHECK_ARG_NOT_NULL(flight_context, request, "Ticket cannot be null");
+
+    Ticket ticket;
+    SERVICE_RETURN_NOT_OK(flight_context, internal::FromProto(*request, &ticket));
+
+    std::unique_ptr<LocalPartitionInfo> result;
+    SERVICE_RETURN_NOT_OK(flight_context,
+                          server_->GetLocalData(flight_context, ticket, &result));
+
+    SERVICE_RETURN_NOT_OK(flight_context, internal::ToProto(*result, response));
+    RETURN_WITH_MIDDLEWARE(flight_context, grpc::Status::OK);
+  }
+  
+  grpc::Status ReleaseLocalData(ServerContext* context, const pb::Ticket* request,
+                             pb::LocalReleaseResult* response) {
+    GrpcServerCallContext flight_context;
+    GRPC_RETURN_NOT_GRPC_OK(
+        CheckAuth(FlightMethod::GetLocalData, context, flight_context));
+
+    CHECK_ARG_NOT_NULL(flight_context, request, "Ticket cannot be null");
+
+    Ticket ticket;
+    SERVICE_RETURN_NOT_OK(flight_context, internal::FromProto(*request, &ticket));
+
+    std::unique_ptr<LocalReleaseResult> result;
+    SERVICE_RETURN_NOT_OK(flight_context,
+                          server_->ReleaseLocalData(flight_context, ticket, &result));
+
+    SERVICE_RETURN_NOT_OK(flight_context, internal::ToProto(*result, response));
+    RETURN_WITH_MIDDLEWARE(flight_context, grpc::Status::OK);
+  }
 
  private:
   std::shared_ptr<ServerAuthHandler> auth_handler_;
@@ -814,6 +854,18 @@ arrow::Status FlightServerBase::Heartbeat(const ServerCallContext& context,
   return arrow::Status::NotImplemented("NYI");
 }
 
+arrow::Status FlightServerBase::GetLocalData(const ServerCallContext& context,
+                                       const Ticket& request,
+                                       std::unique_ptr<LocalPartitionInfo>* response) {
+  return arrow::Status::NotImplemented("NYI");
+}
+
+arrow::Status FlightServerBase::ReleaseLocalData(const ServerCallContext& context,
+                                       const Ticket& request,
+                                       std::unique_ptr<LocalReleaseResult>* response) {
+  return arrow::Status::NotImplemented("NYI");
+}
+
 // ----------------------------------------------------------------------
 // Implement RecordBatchStream
 
@@ -921,6 +973,64 @@ TableRecordBatchStream::TableRecordBatchStream(std::shared_ptr<arrow::TableBatch
                                                std::shared_ptr<arrow::Table> table) :
                                                RecordBatchStream(reader), columns_(columns), table_(table) {
 }
+
+// ----------------------------------------------------------------------
+// Implement FileBatchStream
+
+class FileBatchStream::FileBatchStreamImpl {
+ public:
+  FileBatchStreamImpl(const std::shared_ptr<FileBatchReader>& reader,
+                      std::vector<std::shared_ptr<CachedColumn>> columns,
+  										arrow::MemoryPool* pool)
+      : pool_(pool), reader_(reader), columns_(columns),
+        ipc_options_(arrow::ipc::IpcOptions::Defaults()) {}
+
+  std::shared_ptr<arrow::Schema> schema() { return reader_->schema(); }
+
+  arrow::Status GetSchemaPayload(FlightPayload* payload) {
+    return arrow::ipc::internal::GetSchemaPayload(*reader_->schema(), ipc_options_,
+                                           &dictionary_memo_, &payload->ipc_message);
+  }
+
+  arrow::Status Next(FlightPayload* payload) {
+    
+    RETURN_NOT_OK(reader_->ReadNext(&current_batch_));
+
+    // TODO(wesm): Delta dictionaries
+    if (!current_batch_) {
+      // Signal that iteration is over
+      payload->ipc_message.metadata = nullptr;
+      return arrow::Status::OK();
+    } else {
+      return internal::GetFileBatchPayload(*current_batch_, ipc_options_,
+                                                  &payload->ipc_message);
+    }
+  }
+
+ private:
+  std::shared_ptr<FileBatchReader> reader_;
+  std::vector<std::shared_ptr<CachedColumn>> columns_;
+  arrow::MemoryPool* pool_;
+  arrow::ipc::DictionaryMemo dictionary_memo_;
+  arrow::ipc::IpcOptions ipc_options_;
+  std::shared_ptr<FileBatch> current_batch_;
+};
+
+FileBatchStream::FileBatchStream(const std::shared_ptr<FileBatchReader>& reader,
+                                 std::vector<std::shared_ptr<CachedColumn>> columns,
+                                 arrow::MemoryPool* pool) {
+  impl_.reset(new FileBatchStreamImpl(reader, columns, pool));
+}
+
+FileBatchStream::~FileBatchStream() {}
+
+std::shared_ptr<arrow::Schema> FileBatchStream::schema() { return impl_->schema(); }
+
+arrow::Status FileBatchStream::GetSchemaPayload(FlightPayload* payload) {
+  return impl_->GetSchemaPayload(payload);
+}
+
+arrow::Status FileBatchStream::Next(FlightPayload* payload) { return impl_->Next(payload); }
 
 }  // namespace rpc
 }  // namespace pegasus

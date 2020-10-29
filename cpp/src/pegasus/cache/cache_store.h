@@ -27,21 +27,21 @@
 namespace pegasus {
 
 class CacheStore {
-  public:
-   CacheStore(Store* store, int64_t capacity);
-   ~CacheStore();
+ public:
+  CacheStore(Store* store, int64_t capacity);
+  ~CacheStore();
    
-   Status Allocate(int64_t size, StoreRegion* store_region);
-   Status Reallocate(int64_t old_size, int64_t new_size, StoreRegion* store_region);
-   Status Free(StoreRegion* store_region);
+  Status Allocate(int64_t size, StoreRegion* store_region);
+  Status Reallocate(int64_t old_size, int64_t new_size, StoreRegion* store_region);
+  Status Free(StoreRegion* store_region);
    
-   Store* GetStore() { return store_; }
+  Store* GetStore() { return store_; }
    
-   int64_t GetUsedSize() const { return used_size_; }
-   int64_t GetCapacity() const { return capacity_; }
-   int64_t GetAvailableSize() const { return capacity_ - used_size_; }
+  int64_t GetUsedSize() const { return used_size_; }
+  int64_t GetCapacity() const { return capacity_; }
+  int64_t GetAvailableSize() const { return capacity_ - used_size_; }
    
-  private:
+ private:
   Store* store_;
   int64_t capacity_;
   std::atomic<int64_t> used_size_;

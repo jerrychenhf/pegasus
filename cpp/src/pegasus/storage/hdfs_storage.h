@@ -19,11 +19,9 @@
 #define PEGASUS_HDFS_STORAGE_H
 
 #include <arrow/io/hdfs.h>
-
 #include "storage/storage.h"
 
 namespace pegasus {
-
 using HadoopFileSystem = arrow::io::HadoopFileSystem;
 using HdfsConnectionConfig = arrow::io::HdfsConnectionConfig;
 using HdfsReadableFile = arrow::io::HdfsReadableFile;
@@ -33,6 +31,7 @@ class HDFSStorage : public Storage {
  public:
   HDFSStorage();
   ~HDFSStorage();
+
   Status Init(std::string host, int32_t port) override;
   Status Connect() override;
   Status GetModifedTime(std::string dataset_path, uint64_t* modified_time) override;

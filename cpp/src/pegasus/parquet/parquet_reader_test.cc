@@ -18,19 +18,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
-
-#include "arrow/util/uri.h"
 #include <gtest/gtest.h>
-
+#include "arrow/util/uri.h"
 #include "parquet/parquet_reader.h"
-#include "test/gtest-util.h"
 #include "storage/storage.h"
 #include "storage/storage_factory.h"
+#include "test/gtest-util.h"
 
 namespace pegasus {
 
 TEST(ParquetReaderTest, Unit) {
-
   std::string partition_path = 
       "hdfs://10.239.47.55:9000/genData1000/customer/part-00005-f6fb1ced-d4d4-4dac-a584-02e398d988b4-c000.snappy.parquet";
   std::shared_ptr<StorageFactory> worker_storage_factory(
@@ -84,7 +81,6 @@ TEST(ParquetReaderTest, Unit) {
   ASSERT_OK(parquet_reader->ReadColumnChunk(0, &chunked_out3));
   // ASSERT_EQ(144000, chunked_out3->length());
   // ASSERT_EQ(1, chunked_out3->num_chunks());
-
 }
 }
 

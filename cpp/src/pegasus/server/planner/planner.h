@@ -19,15 +19,14 @@
 #define PEGASUS_PLANNER_H
 
 #include "common/logging.h"
-#include "server/planner/worker_manager.h"
 #include "dataset/dataset_service.h"
 #include "storage/storage.h"
+#include "server/planner/worker_manager.h"
 #include "server/planner/planner_table_api_service.h"
 
 using namespace std;
 
 namespace pegasus {
-
 class PlannerTableAPIService;
 class PlannerExecEnv;
 

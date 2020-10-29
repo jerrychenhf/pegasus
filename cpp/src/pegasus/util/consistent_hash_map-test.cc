@@ -168,8 +168,6 @@ TEST(ConsistentHashMapTest, Unit) {
 }
 #endif
 }
-
-
 }
 
 PEGASUS_TEST_MAIN();

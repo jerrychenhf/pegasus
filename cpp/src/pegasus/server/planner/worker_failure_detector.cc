@@ -18,12 +18,13 @@
 #include "server/planner/worker_failure_detector.h"
 
 #include <string>
+#include <boost/thread/lock_guard.hpp>
+
+#include "common/logging.h"
 #include "gutil/strings/substitute.h"
 #include "util/global_flags.h"
 #include "util/time.h"
-#include "common/logging.h"
 #include "util/thread-pool.h"
-#include <boost/thread/lock_guard.hpp>
 #include "server/planner/worker_manager.h"
 
 using namespace boost;

@@ -17,6 +17,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/algorithm/string.hpp>
 
 #include "arrow/filesystem/filesystem.h"
 #include "arrow/status.h"
@@ -24,8 +25,6 @@
 
 #include "storage/hdfs_storage.h"
 #include "dataset/consistent_hashing.h"
-
-#include <boost/algorithm/string.hpp>
 
 DECLARE_string(namenode_hostname);
 DECLARE_int32(namenode_port);
@@ -39,13 +38,10 @@ using HdfsPathInfo = arrow::io::HdfsPathInfo;
 using ObjectType = arrow::io::ObjectType;
 using FileStats = arrow::fs::FileStats;
 
-
 HDFSStorage::HDFSStorage() {
-
 }
 
 HDFSStorage::~HDFSStorage() {
-
 }
 
 Status HDFSStorage::Init(std::string host, int32_t port) {
@@ -63,7 +59,8 @@ Status HDFSStorage::Init(std::string host, int32_t port) {
   arrow::Status arrowStatus = arrow::io::HaveLibHdfs();
 
   if(arrowStatus.IsIOError()){
-    LOG(ERROR) << "ArrowStatus: IOError. Plesae check your environment variables HADOOP_HOME and CLASSPATH. CLASSPATH must contain the Hadoop jars. You can set these using: export CLASSPATH=`$HADOOP_HOME/bin/hadoop classpath --glob`";
+    LOG(ERROR) << "ArrowStatus: IOError. Plesae check your environment variables HADOOP_HOME and CLASSPATH." << 
+      "CLASSPATH must contain the Hadoop jars. You can set these using: export CLASSPATH=`$HADOOP_HOME/bin/hadoop classpath --glob`";
   }
   
   Status status = Status::fromArrowStatus(arrowStatus);

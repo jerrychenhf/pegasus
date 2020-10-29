@@ -35,6 +35,11 @@ DECLARE_int32(store_dcpmm_initial_capacity_gb);
 DECLARE_int32(store_dcpmm_reserved_capacity_gb);
 DECLARE_string(storage_dcpmm_path);
 
+DECLARE_bool(cache_format_arrow);
+DECLARE_int32(store_file_capacity_gb);
+DECLARE_string(store_file_path);
+DECLARE_bool(zero_copy_enable);
+
 namespace pegasus {
 
 WorkerExecEnv* WorkerExecEnv::exec_env_ = nullptr;
@@ -92,6 +97,27 @@ Status WorkerExecEnv::InitStoreInfo() {
       new StoreInfo(StoreManager::STORE_ID_DCPMM, Store::StoreType::DCPMM,
       available_capacity, properties));
     stores_.insert(std::make_pair(StoreManager::STORE_ID_DCPMM, store_info));
+  }
+  
+  // if file store configured
+  if(FLAGS_zero_copy_enable) {
+    // read capacity
+    int64_t capacity = ((int64_t) FLAGS_store_file_capacity_gb) * StoreManager::GIGABYTE;
+
+    LOG(INFO) << "The capacity of file store is " << capacity;
+
+    if (capacity <= 0) {
+      return Status::Invalid("The available capacity must be > 0 when file store enabled");
+    }
+
+    std::shared_ptr<StoreProperties> properties = std::make_shared<StoreProperties>();
+
+    // read properties
+    properties->insert(std::make_pair(StoreManager::STORE_PROPERTY_PATH, FLAGS_store_file_path));
+    
+     std::shared_ptr<StoreInfo> store_info(
+      new StoreInfo(StoreManager::STORE_ID_FILE, Store::StoreType::FILE, capacity, properties));
+    stores_.insert(std::make_pair(StoreManager::STORE_ID_FILE, store_info));
   }
   
   return Status::OK();

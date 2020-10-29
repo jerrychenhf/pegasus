@@ -22,17 +22,17 @@ set(LIBRARY_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/catalog")
 # where to put generated binaries
 set(EXECUTABLE_OUTPUT_PATH "${BUILD_OUTPUT_ROOT_DIRECTORY}/catalog")
 
-add_library(Catalog
+add_library(catalog
   spark_catalog.cc
   pegasus_catalog.cc
   catalog_manager.cc
 )
-add_dependencies(Catalog gen-deps)
+add_dependencies(catalog gen-deps)
 
 set(PEGASUS_CATALOG_TEST_LINK_LIBS
-    Common
-    Util
-    Catalog)
+    common
+    util
+    catalog)
 
 if(PEGASUS_TEST_LINKAGE STREQUAL "static")
   list(APPEND PEGASUS_CATALOG_TEST_LINK_LIBS

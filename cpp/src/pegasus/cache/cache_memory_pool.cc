@@ -96,7 +96,6 @@ arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, ui
   }
 
   uint8_t* previous_ptr = *ptr;
-
   if (previous_ptr == zero_size_area) {
     DCHECK_EQ(old_size, 0);
     return Allocate(new_size, ptr);
@@ -114,9 +113,7 @@ arrow::Status CacheMemoryPool::Reallocate(int64_t old_size, int64_t new_size, ui
 
   StoreRegion store_region;
   store_region.reset_address(*ptr, old_size, old_size);
-
   Status status = cache_store_->Reallocate(old_size, new_size, &store_region);
-
   if(!status.ok()) {
     *ptr = previous_ptr;
     return arrow::Status::OutOfMemory("Failed to reallocate memory in cache memory pool");

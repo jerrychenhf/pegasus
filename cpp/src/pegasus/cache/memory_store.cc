@@ -78,7 +78,7 @@ Status MemoryStore::Reallocate(int64_t old_size, int64_t new_size, StoreRegion* 
     return Status::Invalid("Request memory size" , (new_size - old_size), "is larger than available size.");
   }
 
-  uint8_t* out;
+  uint8_t* out = nullptr;
   const int result = posix_memalign(reinterpret_cast<void**>(&out), 64,
                                       static_cast<size_t>(new_size));
   if (result == ENOMEM) {

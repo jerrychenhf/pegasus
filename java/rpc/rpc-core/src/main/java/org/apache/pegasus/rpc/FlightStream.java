@@ -51,26 +51,26 @@ import io.netty.buffer.ArrowBuf;
 public class FlightStream implements AutoCloseable {
 
   // Use AutoCloseable sentinel objects to simplify logic in #close
-  private final AutoCloseable DONE = () -> {
+  protected final AutoCloseable DONE = () -> {
   };
-  private final AutoCloseable DONE_EX = () -> {
+  protected final AutoCloseable DONE_EX = () -> {
   };
 
-  private final BufferAllocator allocator;
-  private final Cancellable cancellable;
-  private final LinkedBlockingQueue<AutoCloseable> queue = new LinkedBlockingQueue<>();
-  private final SettableFuture<VectorSchemaRoot> root = SettableFuture.create();
-  private final int pendingTarget;
-  private final Requestor requestor;
+  protected final BufferAllocator allocator;
+  protected final Cancellable cancellable;
+  protected final LinkedBlockingQueue<AutoCloseable> queue = new LinkedBlockingQueue<>();
+  protected final SettableFuture<VectorSchemaRoot> root = SettableFuture.create();
+  protected final int pendingTarget;
+  protected final Requestor requestor;
 
-  private volatile int pending = 1;
-  private boolean completed = false;
-  private volatile VectorSchemaRoot fulfilledRoot;
-  private DictionaryProvider.MapDictionaryProvider dictionaries;
-  private volatile VectorLoader loader;
-  private volatile Throwable ex;
-  private volatile FlightDescriptor descriptor;
-  private volatile ArrowBuf applicationMetadata = null;
+  protected volatile int pending = 1;
+  protected boolean completed = false;
+  protected volatile VectorSchemaRoot fulfilledRoot;
+  protected DictionaryProvider.MapDictionaryProvider dictionaries;
+  protected volatile VectorLoader loader;
+  protected volatile Throwable ex;
+  protected volatile FlightDescriptor descriptor;
+  protected volatile ArrowBuf applicationMetadata = null;
 
   /**
    * Constructs a new instance.
@@ -265,7 +265,7 @@ public class FlightStream implements AutoCloseable {
     return applicationMetadata;
   }
 
-  private synchronized void requestOutstanding() {
+  protected synchronized void requestOutstanding() {
     if (pending < pendingTarget) {
       requestor.request(pendingTarget - pending);
       pending = pendingTarget;

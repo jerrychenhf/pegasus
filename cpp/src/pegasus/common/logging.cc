@@ -30,12 +30,10 @@
 #include <map>
 #include <sstream>
 #include <stdio.h>
-
 #include "common/logging.h"
+#include "common/names.h"
 #include "util/error-util.h"
 #include "util/test-info.h"
-
-#include "common/names.h"
 
 DECLARE_string(log_filename);
 DECLARE_bool(redirect_stdout_stderr);
